@@ -21,9 +21,9 @@ CSDK for ABCDEGF, 适用于所有基于ABCDEGF的合宙模组, 包括衍生型�
 
 ## 编译说明
 
-1. 安装xmake, **选取加入PATH**, 建议安装到C:\Program Files下，其他目录可能会出问题；
+1. 安装xmake, **选取加入PATH**；
    xmake下载地址：https://xmake.io/#/guide/installation
-   windows下可以直接访问：https://github.com/xmake-io/xmake/releases ,下载系统对应的xmake-2.8.2-win32.exe或者xmake-2.8.2-win64.exe即可. 比2.8.2更高的版本也是可以的.
+   windows下可以直接访问：https://github.com/xmake-io/xmake/releases ,下载系统对应的xmake-x.x.x-win32.exe或者xmake-x.x.x-win64.exe即可. 建议使用最新版.
 
    **注意：环境变量需重启电脑生效**
 
@@ -84,57 +84,7 @@ set PROJECT_DIR=
 build luatos
 ```
 
-## 在不联网环境下初次编译的补充说明
 
-在有网的环境下, xmake会自行下载gcc工具链. 但如果无法联网, 或者网络受限的情况, 通常会有这种提示:
-
-```
-error: fatal: not a git repository
-```
-
-或者git/http连接失败的提示. 故这里提供离线gcc工具链下载和编译的方法
-
-1. 下载gcc for arm工具链[windows版](http://cdndownload.openluat.com/xmake/toolchains/gcc-arm/gcc-arm-none-eabi-10.3-2021.10-win32.zip)/[linux版](http://cdndownload.openluat.com/xmake/toolchains/gcc-arm/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2)
-2. 解压, 不要选太深的目录, 不要包含中文字符和特殊符号, 建议解压到`D盘根目录`, 压缩包内自带一层目录`gcc-arm-none-eabi-10.3-2021.10`
-3. 假设解压后的路径是 `D:\gcc-arm-none-eabi-10.3-2021.10`, 检查 `D:\gcc-arm-none-eabi-10.3-2021.10\bin\arm-none-eabi-g++.exe` 是否存在, 如果不存在, 那肯定是多一层目录. **务必检查!!!**
-4. 用文本编辑器(例如vscode)打开 `本代码库` 的 `build.bat`, 修改内容如下
-
-```
-原本的内容:
-rem set GCC_PATH=E:\gcc_mcu
-修改成set开头的语句,注意是去掉rem并修改值.
-set GCC_PATH=D:\gcc-arm-none-eabi-10.3-2021.10
-```
-
-`重新打开`一个`命令行cmd`, 进入`本代码库`,执行 `build.bat` 即可正常编译.
-
-5. 测试ok后, 可以考虑将上述环境变量GCC_PATH放入系统的环境变量设置中, 然后还原`build.bat`
-
-## Linux下编译的额外的说明
-
-安装Xmake可以使用官方提供的一键脚本
-
-```shell
-curl -fsSL https://xmake.io/shget.text | bash #使用curl进行安装
-wget https://xmake.io/shget.text -O - | bash #使用wget进行安装
-```
-
-当前仅测试了 Ubuntu 16.04 和 Ubuntu 20.04 amd64版本
-
-需要安装额外的32位支持, 否则执行fcelf时报文件不存. 后续可能会有64bit fcelf提供
-
-```shell
-dpkg --add-architecture i386 && apt update
-apt-get install -y lib32z1 binutils:i386 libc6:i386 libgcc1:i386 libstdc++5:i386 libstdc++6:i386 p7zip-full
-```
-
-## 应用文档
-
-1. 添加自定义数据到指定区域并[合成binpkg](project/example_flash), 用于量产刷机
-2. [脱离本csdk编译无依赖的库文件](doc/build_lib_by_gcc.md)
-3. CSDK调试指南 https://doc.openluat.com/article/4984
-4. Linux/Mac刷机工具(测试版) https://github.com/openLuat/ectool2py
-5. CI状态 http://gitea.wendal.cn/openLuat/luatos-soc-2022/actions
 
 ## 授权协议
 
