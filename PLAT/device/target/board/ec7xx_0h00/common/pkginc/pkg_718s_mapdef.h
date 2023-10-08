@@ -1,0 +1,24 @@
+#ifndef __PKG_718S_MAPDEF_H__
+#define __PKG_718S_MAPDEF_H__
+
+#define AP_FLASH_BASE_LNA 0x800000
+
+#define AP_PKGIMG_LNA (0x00872000)
+
+//For 718S, CP image in AP Flash
+#define CP_PKGIMG_LNA (0x0081a000)
+
+#define BL_PKGIMG_LNA (0x00803000)
+
+#define BOOTLOADER_PKGIMG_LIMIT_SIZE (0x12000)
+
+#ifdef GCF_FEATURE_MODE
+#define AP_PKGIMG_LIMIT_SIZE (0x170000)
+#else
+#define AP_PKGIMG_LIMIT_SIZE (0x134000)
+#endif
+
+#define CP_PKGIMG_LIMIT_SIZE (0x58000)
+
+#endif
+
