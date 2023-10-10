@@ -43,8 +43,7 @@
 
 
 typedef enum
-{
-
+{
     QSPI_OP_ERASE = 0,
     QSPI_OP_WRITE,
 }FlhOpType_e;

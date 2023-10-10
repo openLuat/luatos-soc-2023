@@ -62,6 +62,7 @@ flash xip address(from both ap/cp view): 0x00800000---0x00c00000
 #define AP_FLASH_LOAD_ADDR              (0x0087e000)
 
 #ifdef __USER_CODE__
+#define AP_FLASH_LOAD_SIZE_FULL_OTA		(0x1b3000)
 #define AP_FLASH_LOAD_SIZE              (0x2b3000)//2756KB
 #define AP_FLASH_LOAD_UNZIP_SIZE        (0x2c1000)//2820KB ,for ld
 

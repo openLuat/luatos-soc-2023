@@ -8,22 +8,11 @@
 #include "bsp_common.h"
 #include "platform_define.h"
 #include "mem_map.h"
-#ifdef OPEN_CPU_MODE
-#define PS_DIAL_PS_UP_MEM_SIZE      (UP_BUF_MAX_SIZE)
-#else   //Full speed version
-#define PS_DIAL_PS_UP_MEM_SIZE      (UP_BUF_MAX_SIZE)
-#endif
 
-enum
-{
-	I2S_MODE_I2S,
-	I2S_MODE_LSB,
-	I2S_MODE_MSB,
-	I2S_FRAME_SIZE_16_16,
-	I2S_FRAME_SIZE_16_32,
-	I2S_FRAME_SIZE_24_32,
-	I2S_FRAME_SIZE_32_32,
-};
+#define PS_DIAL_PS_UP_MEM_SIZE      (UP_BUF_MAX_SIZE)
+
+
+
 
 typedef void (* usb_serial_in)(uint8_t channel, uint8_t *input, uint32_t len);
 typedef void (*pad_wakeup_fun_t)(uint32_t pad_num);

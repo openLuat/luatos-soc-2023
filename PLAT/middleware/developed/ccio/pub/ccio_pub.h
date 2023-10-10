@@ -33,10 +33,14 @@ extern "C" {
 /*----------------------------------------------------------------------------*
  *                    MACROS                                                  *
  *----------------------------------------------------------------------------*/
+#ifdef __USER_CODE__
+#define CCIO_NET_PERFORMACE_ENABLE  1
+#else
 #if (defined OPEN_CPU_MODE)
 #define CCIO_NET_PERFORMACE_ENABLE  0
 #else
 #define CCIO_NET_PERFORMACE_ENABLE  1
+#endif
 #endif
 
 #if (CCIO_NET_PERFORMACE_ENABLE == 1)

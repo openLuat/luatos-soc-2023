@@ -133,13 +133,15 @@
 #define ALIGNED_128KB CAT_UP_DATA          //__ALIGNED(0x20000)
 #endif
 #endif
-
+#ifdef __USER_CODE__
+#define NETFAST_FM_RAMCODE  PS_FM_RAMCODE
+#else
 #if (defined OPEN_CPU_MODE)
 #define NETFAST_FM_RAMCODE
 #else
 #define NETFAST_FM_RAMCODE  PS_FM_RAMCODE
 #endif
-
+#endif
 /*
  * Code in RAM
 */

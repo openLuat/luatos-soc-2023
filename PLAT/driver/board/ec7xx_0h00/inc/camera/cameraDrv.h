@@ -8,15 +8,6 @@
 #include "gc032A.h"
 #include "bf30a2.h"
 #include "gc6153.h"
-
-#ifdef __USER_CODE__
-#ifndef CAM_CHAIN_COUNT
-#define CAMERA_ENABLE_BF30A2 1
-#define BF30A2_1SDR 1
-#define CAM_CHAIN_COUNT CAM_8W
-#endif
-#endif
-
 /**
   \addtogroup cam_interface_gr
   \{

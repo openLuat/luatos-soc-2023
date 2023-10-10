@@ -499,7 +499,7 @@
  */
 #if !defined MEMP_NUM_PBUF || defined __DOXYGEN__
 #ifdef __USER_CODE__
-#define MEMP_NUM_PBUF         			 48
+#define MEMP_NUM_PBUF         			48
 #else
 #define MEMP_NUM_PBUF                   12
 #endif
@@ -623,11 +623,7 @@
  * (only needed if you use the sequential API, like api_lib.c)
  */
 #if !defined MEMP_NUM_NETCONN || defined __DOXYGEN__
-#ifdef __USER_CODE__
-#define MEMP_NUM_NETCONN                14
-#else
 #define MEMP_NUM_NETCONN                22
-#endif
 #endif
 
 /**
@@ -1383,7 +1379,7 @@
  */
 #if !defined TCP_WND || defined __DOXYGEN__
 #ifdef __USER_CODE__
-#define TCP_WND                         (32 * TCP_MSS)//6*TCP_MSS
+#define TCP_WND                         (soc_tcpip_rx_cache())//6*TCP_MSS
 #else
 #define TCP_WND                         (6 * 1024) //6*TCP_MSS
 #endif
@@ -1496,7 +1492,11 @@
  * To achieve good performance, this should be at least 2 * TCP_MSS.
  */
 #if !defined TCP_SND_BUF || defined __DOXYGEN__
+#ifdef __USER_CODE__
+#define TCP_SND_BUF                     (20 * TCP_MSS)
+#else
 #define TCP_SND_BUF                     (6 * TCP_MSS)
+#endif
 #endif
 
 /**
@@ -3139,7 +3139,7 @@
 #endif
 
 /**
- * TCP_WND_DEBUG: Enable debugging in tcp_in.c for window updating.
+ * _DEBUG: Enable debugging in tcp_in.c for window updating.
  */
 #if !defined TCP_WND_DEBUG || defined __DOXYGEN__
 #define TCP_WND_DEBUG                   LWIP_DBG_ON

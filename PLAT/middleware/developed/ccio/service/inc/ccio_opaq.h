@@ -40,8 +40,8 @@ typedef enum
     OPAQ_CHAN_2,
     OPAQ_CHAN_CUST2 = OPAQ_CHAN_2,   /* rename OPAQ_CHAN_2 to whatever customer wants */
 #ifdef __USER_CODE__
-	OPAQ_CHAN_3,
-	OPAQ_CHAN_CUST3 = OPAQ_CHAN_3,
+    OPAQ_CHAN_3,
+    OPAQ_CHAN_CUST3 = OPAQ_CHAN_3,   /* rename OPAQ_CHAN_2 to whatever customer wants */
 #endif
     OPAQ_CHAN_MAXNUM
 }OpaqChanId_e;

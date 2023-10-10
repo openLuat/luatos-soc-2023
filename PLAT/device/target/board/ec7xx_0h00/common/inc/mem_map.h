@@ -12,8 +12,9 @@
 
 /* invalid base addr */
 #define FLASH_FOTA_ADDR_UNDEF    0xF07ADEAD
-
-
+#ifndef __USER_CODE__
+#define __USER_CODE__
+#endif
 #if defined TYPE_EC718S
     #include "mem_map_718s.h"
 #elif defined TYPE_EC718H

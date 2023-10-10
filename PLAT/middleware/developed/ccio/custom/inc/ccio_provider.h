@@ -39,7 +39,15 @@ extern "C" {
  * into two blocks and not cycled in the ring.
 */
 #define CCIO_RBUF_REAL_SIZE(sz)  ((sz) + CCIO_RBUF_XTRA_SIZE)
-
+#ifdef __USER_CODE__
+#define DIAG_RBUF_REAL_SIZE       CCIO_RBUF_REAL_SIZE(CCIO_BUF_SIZE_512)
+#define ATOSN_RBUF_REAL_SIZE      CCIO_RBUF_REAL_SIZE(CCIO_BUF_SIZE_8)  /* Normal atos */
+#define ATOSC_RBUF_REAL_SIZE      CCIO_RBUF_REAL_SIZE(CCIO_BUF_SIZE_8)  /* atos for rf calibration */
+#define PPPOS_RBUF_REAL_SIZE      CCIO_RBUF_REAL_SIZE(CCIO_BUF_SIZE_8)
+#define OPAQOS_RBUF_REAL_SIZE     CCIO_RBUF_REAL_SIZE(CCIO_BUF_SIZE_2K)  /* opaque or raw data */
+#define CCID_RBUF_REAL_SIZE       CCIO_RBUF_REAL_SIZE(CCIO_BUF_SIZE_8)  /* ccid data */
+#define ETHER_RBUF_REAL_SIZE      CCIO_RBUF_REAL_SIZE(CCIO_BUF_SIZE_16K)
+#else
 #define DIAG_RBUF_REAL_SIZE       CCIO_RBUF_REAL_SIZE(CCIO_BUF_SIZE_512)
 #define ATOSN_RBUF_REAL_SIZE      CCIO_RBUF_REAL_SIZE(CCIO_BUF_SIZE_4K)  /* Normal atos */
 #define ATOSC_RBUF_REAL_SIZE      CCIO_RBUF_REAL_SIZE(CCIO_BUF_SIZE_8K)  /* atos for rf calibration */
@@ -49,6 +57,7 @@ extern "C" {
 #define CCID_RBUF_REAL_SIZE       CCIO_RBUF_REAL_SIZE(CCIO_BUF_SIZE_4K)  /* ccid data */
 
 #define ETHER_RBUF_REAL_SIZE      CCIO_RBUF_REAL_SIZE(CCIO_BUF_SIZE_16K)
+#endif
 #define RNDIS_RBUF_REAL_SIZE      ETHER_RBUF_REAL_SIZE
 #define ECM_RBUF_REAL_SIZE        ETHER_RBUF_REAL_SIZE
 

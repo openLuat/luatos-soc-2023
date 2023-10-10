@@ -579,7 +579,9 @@ err_t tcp_set_init_retry_time(struct tcp_pcb *pcb, u16_t time);
 #ifdef __cplusplus
 }
 #endif
-
+#ifdef __USER_CODE__
+u32_t soc_tcpip_rx_cache(void);
+#endif
 #endif /* LWIP_TCP */
 
 #endif /* LWIP_HDR_TCP_H */

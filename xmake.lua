@@ -183,7 +183,6 @@ add_ldflags(" -Wl,--wrap=clock ",{force = true})
 add_ldflags(" -Wl,--wrap=localtime ",{force = true})
 add_ldflags(" -Wl,--wrap=gmtime ",{force = true})
 add_ldflags(" -Wl,--wrap=time ",{force = true})
-add_ldflags(" -Wl,--wrap=SetUnilogUart", {force=true})
 
 add_ldflags("--specs=nano.specs", {force=true})
 add_asflags("-Wl,--cref -Wl,--check-sections -Wl,--gc-sections -lm -Wl,--print-memory-usage -Wl,--wrap=_malloc_r -Wl,--wrap=_free_r -Wl,--wrap=_realloc_r  -mcpu=cortex-m3 -mthumb -DTRACE_LEVEL=5 -DSOFTPACK_VERSION=\"\" -DHAVE_STRUCT_TIMESPEC")
