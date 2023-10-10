@@ -255,7 +255,6 @@ add_includedirs(
                 SDK_TOP .. "/PLAT/middleware/developed/ecapi/psapi/inc",
                 SDK_TOP .. "/PLAT/middleware/developed/simbip/inc",
                 SDK_TOP .. "/PLAT/middleware/developed/common/inc",
--- (""F:\gcc_ec718"/bin/arm-none-eabi-/../../PACK/ARM/CMSIS/5.0.1/CMSIS/include",
                 SDK_TOP .. "/PLAT/middleware/developed/psnv/inc",
                 SDK_TOP .. "/PLAT/os/freertos/portable/gcc",
                 SDK_TOP .. "/PLAT/middleware/developed/tcpipmgr/app/inc",
@@ -287,9 +286,6 @@ add_includedirs(
                 SDK_TOP .. "/PLAT/middleware/developed/at/atref/inc",
                 SDK_TOP .. "/PLAT/middleware/developed/at/atref/inc/cnfind",
 
-                SDK_TOP .. "/thirdparty/littlefs",
-                SDK_TOP .. "/thirdparty/littlefs/port",
-
                 SDK_TOP .. "/PLAT/core/driver/include",
                 SDK_TOP .. "/PLAT/core/common/include",
                 SDK_TOP .. "/PLAT/core/multimedia/include",
@@ -298,6 +294,9 @@ add_includedirs(
                 SDK_TOP .. "/PLAT/prebuild/PLAT/inc",
                 
                 SDK_TOP .. "/thirdparty/printf",
+                SDK_TOP .. "/thirdparty/littlefs",
+                SDK_TOP .. "/thirdparty/littlefs/port",
+
 {public = true})
 
 -- CSDK相关头文件引用
