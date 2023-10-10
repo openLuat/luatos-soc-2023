@@ -8,7 +8,7 @@
 #ifndef CORE_INCLUDE_SOC_SERVICE_H_
 #define CORE_INCLUDE_SOC_SERVICE_H_
 #include "common_api.h"
-
+#define RNDIS_CID	5
 typedef enum SOC_MISC_EVENT
 {
 	SOC_MISC_VBUS_OFF,
@@ -129,6 +129,9 @@ int soc_get_muid(char *muid, uint32_t size);
 
 void soc_mobile_event_register_handler(void *handle);
 void soc_misc_event_register_handler(void *handle);
+
+
+
 #if 0
 void soc_mobile_get_iccid(uint8_t sim_id, uint8_t *buf);
 void soc_mobile_get_imsi(uint8_t sim_id, uint8_t *buf);
@@ -165,4 +168,6 @@ int soc_mobile_start_get_cell_list(uint8_t sim_id, uint8_t is_sync);
 void soc_mobile_print_cell_info(uint8_t sim_id);
 #endif
 
+uint8_t soc_rndis_is_enable(void);
+uint32_t soc_rndis_host_ip(void);
 #endif /* CORE_INCLUDE_SOC_SERVICE_H_ */
