@@ -47,16 +47,8 @@ if os.getenv("PROJECT_NAME") then
 	USER_PROJECT_NAME = os.getenv("PROJECT_NAME")
 end
 
--- 是否为rndis csdk
--- if os.getenv("EC7XX_RNDIS") == "enable" then
-    is_rndis = true
-    add_defines("LUAT_EC7XX_RNDIS_ENABLED=1")
--- else
---     is_rndis = false
--- -- end
-
 -- 是否启用低速模式, 内存更大, 但与rndis不兼容
-if is_rndis == false and os.getenv("LSPD_MODE") == "enable" then
+if os.getenv("LSPD_MODE") == "enable" then
     is_lspd = true
 else
     is_lspd = false
@@ -64,7 +56,7 @@ end
 
 -- 若启用is_lspd, 加上额外的宏
 if is_lspd == true then
-    add_defines("LOW_SPEED_SERVICE_ONLY")
+    add_defines("OPEN_CPU_MODE")
 end
 
 if os.getenv("ROOT_PATH") then
@@ -150,12 +142,6 @@ add_defines("__EC718",
             "LUAT_EC7XX_CSDK",
             "LUAT_USE_STD_STRING"
 )
-
-if is_rndis then
-    
-else
-    add_defines("LITE_FEATURE_MODE")
-end
 
 
 set_optimize("smallest")
@@ -292,7 +278,7 @@ add_includedirs(
                 SDK_TOP .. "/PLAT/core/tts/include",
                 SDK_TOP .. "/PLAT/prebuild/PS/inc",
                 SDK_TOP .. "/PLAT/prebuild/PLAT/inc",
-                
+				
                 SDK_TOP .. "/thirdparty/printf",
                 SDK_TOP .. "/thirdparty/littlefs",
                 SDK_TOP .. "/thirdparty/littlefs/port",
@@ -309,6 +295,7 @@ add_includedirs(LUATOS_ROOT .. "/luat/include",
                 LUATOS_ROOT .. "components/mbedtls/include/mbedtls",
                 LUATOS_ROOT .. "components/mbedtls/include/psa",
                 LUATOS_ROOT .. "components/network/adapter",
+				SDK_TOP .. "/interface/include",
                 SDK_TOP .. "luatos_lwip_socket/include",
                 {public = true})
 
@@ -325,6 +312,8 @@ if USER_PROJECT_NAME == 'luatos' then
         add_defines("LUAT_USE_TTS_ONCHIP")
     end
     add_defines("__LUATOS__","LWIP_NUM_SOCKETS=8")
+	add_defines("OPEN_CPU_MODE")
+	is_lspd = true
 end
 
 --linkflags
@@ -351,12 +340,12 @@ if os.getenv("LUAT_FAST_ADD_USER_LIB") == "1" then
     LIB_BASE = LIB_BASE .. SDK_TOP .. os.getenv("USER_LIB") .. " "
 end
 
-if is_rndis then
+if is_lspd then
+    LIB_PS_PRE = SDK_TOP .. "/PLAT/prebuild/PS/lib/gcc/ec718p/oc"
+    LIB_PLAT_PRE = SDK_TOP .. "/PLAT/prebuild/PLAT/lib/gcc/ec718p/oc"
+else
     LIB_PS_PRE = SDK_TOP .. "/PLAT/prebuild/PS/lib/gcc/ec718p"
     LIB_PLAT_PRE = SDK_TOP .. "/PLAT/prebuild/PLAT/lib/gcc/ec718p"
-else
-    LIB_PS_PRE = SDK_TOP .. "/PLAT/prebuild/PS/lib/gcc/ec718p/lite"
-    LIB_PLAT_PRE = SDK_TOP .. "/PLAT/prebuild/PLAT/lib/gcc/ec718p/lite"
 end
 LIB_BASE = LIB_BASE .. LIB_PS_PRE .. "/libps.a "
 LIB_BASE = LIB_BASE .. LIB_PS_PRE .. "/libpsl1.a "
