@@ -18,49 +18,6 @@
 #define CODEC_PWR_PIN_ALT_FUN	4
 #define PA_PWR_PIN HAL_GPIO_25
 #define PA_PWR_PIN_ALT_FUN	0
-#define LED2_PIN	HAL_GPIO_24
-#define LED2_PIN_ALT_FUN	0
-#define LED3_PIN	HAL_GPIO_23
-#define LED3_PIN_ALT_FUN	0
-#define LED4_PIN	HAL_GPIO_27
-#define LED4_PIN_ALT_FUN	0
-#define CHARGE_EN_PIN	HAL_GPIO_2
-#define CHARGE_EN_PIN_ALT_FUN	0
-
-//AIR600EAC开发板配置
-//#define CODEC_PWR_PIN HAL_GPIO_12
-//#define CODEC_PWR_PIN_ALT_FUN	4
-//#define PA_PWR_PIN HAL_GPIO_10
-//#define PA_PWR_PIN_ALT_FUN	0
-//#define CODEC_PWR_PIN HAL_GPIO_12
-//#define CODEC_PWR_PIN_ALT_FUN	4
-//#define PA_PWR_PIN HAL_GPIO_10
-//#define PA_PWR_PIN_ALT_FUN	0
-//#define LED2_PIN	HAL_GPIO_26
-//#define LED2_PIN_ALT_FUN	0
-//#define LED3_PIN	HAL_GPIO_27
-//#define LED3_PIN_ALT_FUN	0
-//#define LED4_PIN	HAL_GPIO_20
-//#define LED4_PIN_ALT_FUN	0
-//#define CHARGE_EN_PIN	HAL_GPIO_NONE
-//#define CHARGE_EN_PIN_ALT_FUN	0
-
-//#include "luat_transz.h"
-//const luat_transz_data_t ivtts_8k_tz = {
-//    .total_size = 641776,
-//    .block_size = 4096,
-//    .compress_mode = TZ_COMPRESS_GZ,
-//    .fragments = ivtts_8k_tz_frags,
-//    .datas = ivtts_8k_tz_data,
-//};
-//
-//const luat_transz_data_t ivtts_16k_tz = {
-//    .total_size = 719278,
-//    .block_size = 4096,
-//    .compress_mode = TZ_COMPRESS_GZ,
-//    .fragments = ivtts_16k_tz_frags,
-//    .datas = ivtts_16k_tz_data,
-//};
 
 
 
@@ -114,16 +71,7 @@ void audio_data_cb(uint8_t *data, uint32_t len, uint8_t bits, uint8_t channels)
 	//LUAT_DEBUG_PRINT("%x,%d,%d,%d", data, len, bits, channels);
 }
 
-//ivBool tts_read_data(
-//								  ivPointer		pParameter,			/* [in] user callback parameter */
-//								  ivPointer		pBuffer,			/* [out] read resource buffer */
-//								  ivResAddress	iPos,				/* [in] read start position */
-//	ivResSize		nSize )			/* [in] read size */
-//{
-//	LUAT_DEBUG_PRINT("%x,%d,%d", pParameter, iPos, nSize);
-//    memcpy((uint8_t *)pBuffer, (uint8_t *)pParameter + iPos, nSize);
-//    return ivTrue;
-//}
+
 
 static void demo_task(void *arg)
 {
@@ -217,14 +165,6 @@ static void test_audio_demo_init(void)
 	luat_gpio_set_default_cfg(&gpio_cfg);
 	luat_rtos_task_handle task_handle;
 
-	gpio_cfg.pin = LED2_PIN;
-	gpio_cfg.pull = LUAT_GPIO_DEFAULT;
-	luat_gpio_open(&gpio_cfg);
-	gpio_cfg.pin = LED3_PIN;
-	luat_gpio_open(&gpio_cfg);
-	gpio_cfg.pin = LED4_PIN;
-	luat_gpio_open(&gpio_cfg);
-	gpio_cfg.pin = CHARGE_EN_PIN;
 	luat_gpio_open(&gpio_cfg);
 	gpio_cfg.pin = PA_PWR_PIN;
 	luat_gpio_open(&gpio_cfg);
