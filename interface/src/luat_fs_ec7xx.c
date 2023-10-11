@@ -28,10 +28,11 @@
 #include "luat_rtos.h"
 #include "luat_debug.h"
 
-#ifdef __LUATOS__
-#include "luat_malloc.h"
 #define LUAT_LOG_TAG "fs"
 #include "luat_log.h"
+
+#ifdef __LUATOS__
+#include "luat_malloc.h"
 #include "mem_map.h"
 #else
 #include "luat_mem.h"
