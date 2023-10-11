@@ -53,11 +53,11 @@ int luat_i2s_start(uint8_t bus_id, uint8_t is_play, uint32_t sample, uint8_t cha
 	return I2S_Start(bus_id, is_play, sample, channel_num);
 }
 
-void luat_i2s_no_block_tx(uint8_t bus_id, uint8_t* address, uint32_t byte_len, CBFuncEx_t cb, void *param)
+void luat_i2s_no_block_tx(uint8_t bus_id, uint8_t* address, uint32_t byte_len, void* cb, void *param)
 {
 	I2S_Tx(bus_id, address, byte_len, cb, param);
 }
-void luat_i2s_no_block_rx(uint8_t bus_id, uint32_t byte_len, CBFuncEx_t cb, void *param)
+void luat_i2s_no_block_rx(uint8_t bus_id, uint32_t byte_len, void* cb, void *param)
 {
 	I2S_Rx(bus_id,byte_len, cb, param);
 }
