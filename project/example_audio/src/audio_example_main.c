@@ -2,8 +2,8 @@
 #include "common_api.h"
 
 #include "luat_rtos.h"
-#include "luat_audio_play_ec618.h"
-#include "luat_i2s_ec618.h"
+#include "luat_audio_play.h"
+#include "luat_i2s.h"
 #include "ivTTSSDKID_all.h"
 #include "ivTTS.h"
 #include "amr_alipay_data.h"
