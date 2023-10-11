@@ -419,7 +419,7 @@ target(USER_PROJECT_NAME..".elf")
     -- printf
     add_files(LUATOS_ROOT.."components/printf/*.c")
     -- weak
-    add_files(LUATOS_ROOT.."luat/weak/luat_log_weak.c")
+    -- add_files(LUATOS_ROOT.."luat/weak/luat_log_weak.c")
     -- littlefs
     add_files(SDK_TOP.."thirdparty/littlefs/**.c")
     -- vfs
