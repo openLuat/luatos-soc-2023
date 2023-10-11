@@ -296,7 +296,6 @@ add_includedirs(LUATOS_ROOT .. "/luat/include",
                 LUATOS_ROOT .. "components/mbedtls/include/psa",
                 LUATOS_ROOT .. "components/network/adapter",
 				SDK_TOP .. "/interface/private_include",
-                SDK_TOP .. "luatos_lwip_socket/include",
                 {public = true})
 
 add_defines("MBEDTLS_CONFIG_FILE=\"mbedtls_ec7xx_config.h\"","LUAT_USE_FS_VFS")
