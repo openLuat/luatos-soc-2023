@@ -8,12 +8,6 @@
 #include "libemqtt.h"
 #include "luat_mqtt.h"
 
-uint8_t soc_rndis_is_enable(void)
-{
-	return 1;
-}
-
-
 #define MQTT_DEMO_SSL 			1
 #define MQTT_DEMO_AUTOCON 		1
 
@@ -24,10 +18,8 @@ uint8_t soc_rndis_is_enable(void)
 #define USERNAME    	"user"                 
 #define PASSWORD    	"password"   
 #else
-#define MQTT_HOST    	"www.dozingfiretruck.com.cn"   				// MQTT服务器的地址和端口号
-#define MQTT_PORT		1883
-// #define MQTT_HOST    	"lbsmqtt.airm2m.com"   				// MQTT服务器的地址和端口号
-// #define MQTT_PORT		1884
+#define MQTT_HOST    	"lbsmqtt.airm2m.com"   				// MQTT服务器的地址和端口号
+#define MQTT_PORT		1884
 #define CLIENT_ID    	"123456789"         //替换自己的CLIENT_ID ,请看一下本.c代码的 183~190行,本demo 的CLIENT_ID 使用的是设备的imei号
 #define USERNAME    	"username"                 
 #define PASSWORD    	"password"   
@@ -275,8 +267,7 @@ static void luat_libemqtt_init(void)
 	net_lwip_init();
 	net_lwip_register_adapter(NW_ADAPTER_INDEX_LWIP_GPRS);
 	network_register_set_default(NW_ADAPTER_INDEX_LWIP_GPRS);
-	// luat_mobile_set_check_network_period(60000);
-	luat_mobile_set_period_work(0, 60000, 8);
+
 	luat_rtos_task_create(&mqtt_task_handle, 2 * 1024, 10, "libemqtt", luat_mqtt_task, NULL, 16);
 }
 
