@@ -8,6 +8,11 @@
 #include "libemqtt.h"
 #include "luat_mqtt.h"
 
+uint8_t soc_rndis_is_enable(void)
+{
+	return 1;
+}
+
 
 #define MQTT_DEMO_SSL 			1
 #define MQTT_DEMO_AUTOCON 		1

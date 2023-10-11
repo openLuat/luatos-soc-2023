@@ -584,8 +584,8 @@ target(USER_PROJECT_NAME..".elf")
             os.cp(out_path.."/"..USER_PROJECT_NAME..".elf", out_path.."/pack")
             os.cp("./PLAT/comdb.txt", out_path.."/pack")
             os.cp(out_path.."/".."mem_map.txt", out_path.."/pack")
-            archive.archive(out_path.."/".."LuatOS-SoC_CSDK".."_EC7XX.7z", out_path.."/pack/*",options)
-            os.mv(out_path.."/LuatOS-SoC_CSDK".."_EC7XX"..".7z", out_path.."/LuatOS-SoC_CSDK".."_EC7XX"..".soc")
+            archive.archive(out_path.."/"..USER_PROJECT_NAME..".7z", out_path.."/pack/*",options)
+            os.mv(out_path.."/"..USER_PROJECT_NAME..".7z", out_path.."/"..USER_PROJECT_NAME..".soc")
             os.rm(out_path.."/pack")
         end
 
