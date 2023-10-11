@@ -13,8 +13,8 @@
 #include "power_audio.h"
 #include "luat_gpio.h"
 #include "luat_debug.h"
-//AIR780E+TM8211开发板配置
-#define CODEC_PWR_PIN HAL_GPIO_12
+//AIR780P+TM8211开发板配置
+#define CODEC_PWR_PIN HAL_GPIO_16
 #define CODEC_PWR_PIN_ALT_FUN	4
 #define PA_PWR_PIN HAL_GPIO_25
 #define PA_PWR_PIN_ALT_FUN	0

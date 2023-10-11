@@ -6,8 +6,8 @@
  */
 #include "common_api.h"
 #include "luat_rtos.h"
-#include "luat_audio_play_ec618.h"
-#include "luat_i2s_ec618.h"
+#include "luat_audio_play.h"
+#include "luat_i2s.h"
 #include "luat_gpio.h"
 #include "luat_debug.h"
 #include "luat_mobile.h"

@@ -29,22 +29,21 @@ void luat_i2s_init(void)
 
 void luat_i2s_base_setup(uint8_t bus_id, uint8_t mode,  uint8_t frame_size)
 {
+	int pad;
 	I2S_BaseConfig(bus_id, mode, frame_size);
 	switch(bus_id)
 	{
 	case I2S_ID0:
-		GPIO_IomuxEC618(39, 1, 1, 0);
-		GPIO_IomuxEC618(35, 1, 1, 0);
-		GPIO_IomuxEC618(36, 1, 1, 0);
-		GPIO_IomuxEC618(37, 1, 1, 0);
-		GPIO_IomuxEC618(38, 1, 1, 0);
+		for(pad = 35; pad <= 39; pad++)
+		{
+			GPIO_IomuxEC718(pad, 1, 1, 0);
+		}
 		break;
 	case I2S_ID1:
-		GPIO_IomuxEC618(18, 1, 1, 0);
-		GPIO_IomuxEC618(19, 1, 1, 0);
-		GPIO_IomuxEC618(20, 1, 1, 0);
-		GPIO_IomuxEC618(21, 1, 1, 0);
-		GPIO_IomuxEC618(22, 1, 1, 0);
+		for(pad = 18; pad <= 22; pad++)
+		{
+			GPIO_IomuxEC718(pad, 1, 1, 0);
+		}
 		break;
 	}
 }
