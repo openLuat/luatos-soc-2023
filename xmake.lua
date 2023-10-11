@@ -295,7 +295,7 @@ add_includedirs(LUATOS_ROOT .. "/luat/include",
                 LUATOS_ROOT .. "components/mbedtls/include/mbedtls",
                 LUATOS_ROOT .. "components/mbedtls/include/psa",
                 LUATOS_ROOT .. "components/network/adapter",
-				SDK_TOP .. "/interface/include",
+				SDK_TOP .. "/interface/private_include",
                 SDK_TOP .. "luatos_lwip_socket/include",
                 {public = true})
 
@@ -411,6 +411,7 @@ target(USER_PROJECT_NAME..".elf")
     add_files(LUATOS_ROOT .."components/mbedtls/library/*.c")
     -- network
     add_files(SDK_TOP .. "/interface/src/*.c",
+            SDK_TOP .. "/interface/private_src/*.c",
             LUATOS_ROOT .."components/network/adapter/luat_network_adapter.c",
             LUATOS_ROOT .."components/ethernet/common/dns_client.c",
             SDK_TOP .."luatos_lwip_socket/src/*.c"
