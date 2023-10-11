@@ -460,6 +460,26 @@ int luat_audio_play_tts_set_param(uint32_t multimedia_id, uint32_t param_id, uin
 
 #else
 #include "luat_audio_play.h"
+HANDLE soc_audio_fopen(const char *fname, const char *mode)
+{
+	return luat_fs_fopen(fname, mode);
+}
+
+int soc_audio_fread(void *buffer, uint32_t size, uint32_t num, void *fp)
+{
+	return luat_fs_fread(buffer, size, num, fp);
+}
+
+int soc_audio_fseek(void *fp, long offset, int origin)
+{
+	return luat_fs_fseek(fp, offset, origin);
+}
+
+int soc_audio_fclose(void *fp)
+{
+	return luat_fs_fclose(fp);
+}
+
 extern void audio_play_file_default_fun(void *param);
 extern void audio_play_tts_default_fun(void *param);
 extern void audio_play_tts_set_resource_ex(void *address, void *sdk_id, void *read_resource_fun);

@@ -76,6 +76,7 @@ void audio_data_cb(uint8_t *data, uint32_t len, uint8_t bits, uint8_t channels)
 static void demo_task(void *arg)
 {
 	size_t total = 0, used = 0, max_used = 0;
+	luat_debug_set_fault_mode(LUAT_DEBUG_FAULT_HANG);
 //	luat_rtos_task_sleep(3000);
 	ivCStrA sdk_id = AISOUND_SDK_USERID_16K;
 	//8K用下面的
@@ -161,6 +162,7 @@ static void demo_task(void *arg)
 
 static void test_audio_demo_init(void)
 {
+	luat_fs_init();
 	luat_gpio_cfg_t gpio_cfg;
 	luat_gpio_set_default_cfg(&gpio_cfg);
 	luat_rtos_task_handle task_handle;

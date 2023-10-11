@@ -342,10 +342,9 @@ int luat_vfs_ec718_info(__attribute__((unused))void* userdata, __attribute__((un
 }
 
 #ifdef LUAT_USE_FS_VFS
-
 #define T(name) .name = luat_vfs_ec718_##name
-const struct luat_vfs_filesystem vfs_fs_ec718 = {
-    .name = "ec718p",
+const struct luat_vfs_filesystem vfs_fs_ec7xx = {
+    .name = "ec7xx",
     .opts = {
         T(mkfs),
         T(mount),
@@ -389,7 +388,7 @@ int luat_fs_init(void) {
         return 0;
     fs_inited = 1;
     luat_vfs_init(NULL);
-    luat_vfs_reg(&vfs_fs_ec718);
+    luat_vfs_reg(&vfs_fs_ec7xx);
     luat_vfs_reg(&vfs_fs_lfs2);
 #ifdef __LUATOS__
 	luat_vfs_reg(&vfs_fs_luadb);
@@ -398,8 +397,8 @@ int luat_fs_init(void) {
 
 	luat_fs_conf_t conf = {
 		.busname = "",
-		.type = "ec718",
-		.filesystem = "ec718",
+		.type = "ec7xx",
+		.filesystem = "ec7xx",
 		.mount_point = ""
 	};
 	luat_fs_mount(&conf);
