@@ -295,7 +295,7 @@ add_includedirs(LUATOS_ROOT .. "/luat/include",
                 LUATOS_ROOT .. "components/mbedtls/include/mbedtls",
                 LUATOS_ROOT .. "components/mbedtls/include/psa",
                 LUATOS_ROOT .. "components/network/adapter",
-				SDK_TOP .. "/interface/private_include",
+				SDK_TOP .. "/interface/include",
                 {public = true})
 
 add_defines("MBEDTLS_CONFIG_FILE=\"mbedtls_ec7xx_config.h\"","LUAT_USE_FS_VFS")
@@ -410,7 +410,6 @@ target(USER_PROJECT_NAME..".elf")
     add_files(LUATOS_ROOT .."components/mbedtls/library/*.c")
     -- network
     add_files(SDK_TOP .. "/interface/src/*.c",
-            SDK_TOP .. "/interface/private_src/*.c",
             LUATOS_ROOT .."components/network/adapter/luat_network_adapter.c",
             LUATOS_ROOT .."components/ethernet/common/dns_client.c",
             SDK_TOP .."luatos_lwip_socket/src/*.c"
@@ -426,13 +425,13 @@ target(USER_PROJECT_NAME..".elf")
     add_files(LUATOS_ROOT.."luat/vfs/luat_fs_lfs2.c",
             LUATOS_ROOT.."luat/vfs/luat_vfs.c")
     
-    if USER_PROJECT_NAME ~= 'luatos' then
-        -- remove_files(
-        -- )
-        -- add_files(SDK_TOP.."/thirdparty/flashdb/src/*.c",{public = true})
-    else
-        remove_files(SDK_TOP .. "/interface/src/luat_kv_ec7xx.c")
-    end
+    -- if USER_PROJECT_NAME ~= 'luatos' then
+    --     -- remove_files(
+    --     -- )
+    --     -- add_files(SDK_TOP.."/thirdparty/flashdb/src/*.c",{public = true})
+    -- else
+    --     -- remove_files(SDK_TOP .. "/interface/src/luat_kv_ec7xx.c")
+    -- end
 
     local toolchains = nil
     local out_path = nil
