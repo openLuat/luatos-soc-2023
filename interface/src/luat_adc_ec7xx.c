@@ -292,7 +292,11 @@ int luat_adc_read(int id, int* val, int* val2) {
     case LUAT_ADC_CH_CPU:
     case ADC_CH_CPU_OLD:
         *val = thermalChannelResult;
+#ifdef __LUATOS__
+        *val2 = (int)HAL_ADC_ConvertThermalRawCodeToTemperature(thermalChannelResult) * 1000;
+#else
         *val2 = (int)HAL_ADC_ConvertThermalRawCodeToTemperature(thermalChannelResult);
+#endif
         break;
     default:
         return -1;
