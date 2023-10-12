@@ -21,23 +21,11 @@ if not "%2"=="" (
 	)
 )
 
-
-rem check csdk rndis
-set RNDIS_MARK="csdk_rndis"
-if exist %RNDIS_MARK% (
-	@echo This is CSDK with RNDIS
-	set EC618_RNDIS=enable
-	set LSPD_MODE=disable
-) else (
-	set EC618_RNDIS=disable
-)
-
 @echo "=============================="
 @echo "AirM2M https://openluat.com"
 @echo "=============================="
 @echo PROJECT   : %PROJECT_NAME%  
 @echo LSPD_MODE : %LSPD_MODE%  
-@echo RNDIS     : %EC618_RNDIS%
 @echo "=============================="
 
 if not exist xmake.lua (
