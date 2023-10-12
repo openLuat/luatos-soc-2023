@@ -206,20 +206,9 @@ add_includedirs(
                 SDK_TOP .. "/PLAT/driver/hal/common/inc",
                 SDK_TOP .. "/PLAT/driver/hal/ec7xx/ap/inc",
                 SDK_TOP .. "/PLAT/driver/hal/ec7xx/ap/inc/ec718",
-                SDK_TOP .. "/PLAT/driver/hal/ec7xx/common/inc",
                 SDK_TOP .. "/PLAT/driver/chip/ec7xx/ap/inc",
-                SDK_TOP .. "/PLAT/driver/chip/ec7xx/ap/inc/pmu",
-                SDK_TOP .. "/PLAT/driver/chip/ec7xx/ap/inc/usb",
-                SDK_TOP .. "/PLAT/driver/chip/ec7xx/ap/inc_cmsis",
-                SDK_TOP .. "/PLAT/driver/chip/ec7xx/ap/inc/usb/usb_device",
-                SDK_TOP .. "/PLAT/driver/chip/ec7xx/ap/inc/usb/usbcore_drv",
-                SDK_TOP .. "/PLAT/driver/chip/ec7xx/ap/inc/usb/usbpcd_drv",
-                SDK_TOP .. "/PLAT/driver/chip/ec7xx/ap/inc/usb/usb_misc",
-                SDK_TOP .. "/PLAT/driver/chip/ec7xx/ap/inc/usb/usblpw", 
                 SDK_TOP .. "/PLAT/driver/chip/ec7xx/ap/inc/ec718",
-                SDK_TOP .. "/PLAT/driver/chip/ec7xx/common/inc",
-                SDK_TOP .. "/PLAT/driver/chip/ec7xx/common/inc/xxdigRegs",
-                SDK_TOP .. "/PLAT/driver/chip/ec7xx/common/inc/VPU",
+                SDK_TOP .. "/PLAT/driver/chip/ec7xx/ap/inc_cmsis",
                 SDK_TOP .. "/PLAT/os/freertos/inc",
                 SDK_TOP .. "/PLAT/os/freertos/CMSIS/common/inc",
                 SDK_TOP .. "/PLAT/os/freertos/CMSIS/ap/inc",
@@ -231,31 +220,24 @@ add_includedirs(
                 SDK_TOP .. "/PLAT/middleware/developed/cms/psdial/inc",
                 SDK_TOP .. "/PLAT/middleware/developed/cms/cms/inc",
                 SDK_TOP .. "/PLAT/middleware/developed/cms/psil/inc",
-                SDK_TOP .. "/PLAT/middleware/developed/cms/pslpp/inc",
-                SDK_TOP .. "/PLAT/middleware/developed/cms/pslpp/nbasn1/inc",
                 SDK_TOP .. "/PLAT/middleware/developed/cms/psstk/inc",
                 SDK_TOP .. "/PLAT/middleware/developed/cms/sockmgr/inc",
                 SDK_TOP .. "/PLAT/middleware/developed/cms/cmsnetlight/inc",
                 SDK_TOP .. "/PLAT/middleware/developed/ecapi/aal/inc",
                 SDK_TOP .. "/PLAT/middleware/developed/ecapi/appmwapi/inc",
                 SDK_TOP .. "/PLAT/middleware/developed/ecapi/psapi/inc",
-                SDK_TOP .. "/PLAT/middleware/developed/simbip/inc",
                 SDK_TOP .. "/PLAT/middleware/developed/common/inc",
                 SDK_TOP .. "/PLAT/middleware/developed/psnv/inc",
                 SDK_TOP .. "/PLAT/os/freertos/portable/gcc",
                 SDK_TOP .. "/PLAT/middleware/developed/tcpipmgr/app/inc",
                 SDK_TOP .. "/PLAT/middleware/developed/tcpipmgr/common/inc",
-                SDK_TOP .. "/PLAT/os/osa/inc",
                 SDK_TOP .. "/PLAT/os/freertos/inc",
-                SDK_TOP .. "/PLAT/os/freertos/CMSIS/inc",
                 SDK_TOP .. "/PLAT/middleware/developed/yrcompress",
                 SDK_TOP .. "/PLAT/prebuild/PS/inc",
                 SDK_TOP .. "/PLAT/middleware/thirdparty/lwip/src/include",
                 SDK_TOP .. "/PLAT/middleware/thirdparty/lwip/src/include/lwip",
                 SDK_TOP .. "/PLAT/middleware/developed/ccio/pub",
                 SDK_TOP .. "/PLAT/middleware/developed/ccio/device/inc",
-                SDK_TOP .. "/PLAT/middleware/developed/ccio/entity/inc",
-                SDK_TOP .. "/PLAT/middleware/developed/ccio/core/inc",
                 SDK_TOP .. "/PLAT/middleware/developed/ccio/service/inc",
                 SDK_TOP .. "/PLAT/middleware/developed/ccio/custom/inc",
                 SDK_TOP .. "/PLAT/middleware/developed/fota/pub",
@@ -279,7 +261,6 @@ add_includedirs(
                 SDK_TOP .. "/PLAT/prebuild/PS/inc",
                 SDK_TOP .. "/PLAT/prebuild/PLAT/inc",
 				
-                SDK_TOP .. "/thirdparty/printf",
                 SDK_TOP .. "/thirdparty/littlefs",
                 SDK_TOP .. "/thirdparty/littlefs/port",
 
@@ -411,9 +392,8 @@ target(USER_PROJECT_NAME..".elf")
     -- network
     add_files(SDK_TOP .. "/interface/src/*.c",
             LUATOS_ROOT .."components/network/adapter/luat_network_adapter.c",
-            LUATOS_ROOT .."components/ethernet/common/dns_client.c",
-            SDK_TOP .."luatos_lwip_socket/src/*.c"
-    )
+            LUATOS_ROOT .."components/ethernet/common/dns_client.c"
+            )
 
     -- printf
     add_files(LUATOS_ROOT.."components/printf/*.c")
