@@ -65,7 +65,7 @@ void GPIO_ExtiConfig(uint32_t Pin, uint8_t IsLevel, uint8_t IsRiseHigh, uint8_t 
  * @param Pad Pad序号，注意这个不是Pin序号
  * @param Function 复用功能，这个需要根据芯片实际情况决定，当前是0~7
  * @param AutoPull 上下拉是否启动外设功能的默认配置，1启动，0关闭，调用GPIO_PullConfig时会自动关闭，如果配置成外设功能，建议开启
- * @param IsInputBuffer 输入是否启用缓冲功能，1开启，0关闭，如果是中断，建议开启
+ * @param driveStrength 驱动力调节，目前无用，强制为正常
  *
  */
 void GPIO_IomuxEC718(uint32_t Pad, uint32_t Function, uint8_t AltFunctionPull, uint8_t driveStrength);
