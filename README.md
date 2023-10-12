@@ -4,6 +4,7 @@
 
 1. **强烈推荐使用git来下载本代码库**, 不会命令行操作git可以用 [tortoiseGit](https://tortoisegit.org/download/)
 2. 本CSDK底层是没有AT指令的,不存在"调用某某AT指令"的情况
+3. **由于依赖luatos主库，所以要在 luatos-soc-2023 所在同级目录 clone [LuatOS](https://gitee.com/openLuat/LuatOS) 仓库，否则编译报错**
 
 ## 文档中心
 [CSDK软件开发资料](https://doc.openluat.com/wiki/37?wiki_page_id=4544)
