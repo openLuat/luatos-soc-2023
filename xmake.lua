@@ -314,7 +314,6 @@ LIB_BASE = LIB_BASE .. SDK_TOP .. "/PLAT/libs/libyrcompress.a "
 LIB_BASE = LIB_BASE .. SDK_TOP .. "/PLAT/libs/libmiddleware_ec.a "
 LIB_BASE = LIB_BASE .. SDK_TOP .. "/PLAT/libs/liblwip.a "
 
-LIB_BASE = LIB_BASE .. SDK_TOP .. "/PLAT/libs/libdriver.a "
 LIB_BASE = LIB_BASE .. SDK_TOP .. "/PLAT/libs/liblzma.a "
 if os.getenv("LUAT_FAST_ADD_USER_LIB") == "1" then
     LIB_BASE = LIB_BASE .. SDK_TOP .. os.getenv("USER_LIB") .. " "
@@ -362,22 +361,22 @@ add_includedirs(USER_PROJECT_DIR .. "/include",
 target("driver")
     set_kind("static")
     add_deps(USER_PROJECT_NAME)
-	--driver
-	add_files(       
-                SDK_TOP .. "/PLAT/core/speed/*.c"
-    )
-	
-	remove_files(SDK_TOP .. "/PLAT/driver/board/ec7xx_0h00/src/camera/camAT.c",
-                SDK_TOP .. "/PLAT/driver/board/ec7xx_0h00/src/exstorage/*.c",
-				SDK_TOP .. "/PLAT/driver/chip/ec7xx/ap/src/usb_bl/usb_device/usb_bl_test.c",
-				SDK_TOP .. "/PLAT/driver/chip/ec7xx/ap/src_cmsis/bsp_lpusart_stub.c",
-				SDK_TOP .. "/PLAT/driver/chip/ec7xx/ap/src/tls.c",
-                SDK_TOP .. "/PLAT/driver/chip/ec7xx/ap/src_cmsis/bsp_spi.c",
-                SDK_TOP .. "/PLAT/driver/hal/**.c",
-                SDK_TOP .. "/PLAT/driver/chip/ec7xx/ap/**.c",
-                SDK_TOP .. "/PLAT/driver/chip/ec7xx/common/gcc/memcpy-armv7m.S",
-                SDK_TOP .. "/PLAT/driver/board/ec7xx_0h00/src/**.c"
-	)
+
+    --driver
+	add_files(SDK_TOP .. "/PLAT/core/speed/*.c",
+            SDK_TOP .. "/PLAT/driver/board/ec7xx_0h00/src/*c",
+            SDK_TOP .. "/PLAT/driver/hal/**.c",
+            SDK_TOP .. "/PLAT/driver/chip/ec7xx/ap/src/ec718/adc.c",
+            SDK_TOP .. "/PLAT/driver/chip/ec7xx/ap/src/*.c",
+            SDK_TOP .. "/PLAT/driver/chip/ec7xx/ap/src/usb/open/*.c",
+            SDK_TOP .. "/PLAT/driver/chip/ec7xx/common/gcc/memcpy-armv7m.S",
+            {public = true})
+
+	remove_files(
+                SDK_TOP .. "/PLAT/driver/chip/ec7xx/ap/src/cspi.c",
+                SDK_TOP .. "/PLAT/driver/chip/ec7xx/ap/src/swdio.c"
+                )
+
     set_targetdir("$(buildir)/libdriver_" .. USER_PROJECT_NAME)
 target_end()
 
