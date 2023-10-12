@@ -69,13 +69,13 @@ static void task_test_adc(void *param)
     {
         luat_rtos_task_sleep(1000);
         luat_adc_read(0 , &val, &val2);
-        LUAT_DEBUG_PRINT("adc0: adc value %d, voltage %d mv",val, val2);
+        LUAT_DEBUG_PRINT("adc0: adc 原始值 %d, 电压 %d 微伏",val, val2);
         luat_adc_read(1 , &val, &val2);
-        LUAT_DEBUG_PRINT("adc1: adc value %d, voltage %d mv",val, val2);
+        LUAT_DEBUG_PRINT("adc1: adc 原始值 %d, 电压 %d 微伏",val, val2);
         luat_adc_read(LUAT_ADC_CH_CPU, &val, &val2);
-        LUAT_DEBUG_PRINT("temp: adc value %d, %d",val, val2);
+        LUAT_DEBUG_PRINT("temp: adc 原始值 %d, %d 摄氏度",val, val2);
         luat_adc_read(LUAT_ADC_CH_VBAT, &val, &val2);
-        LUAT_DEBUG_PRINT("vbat: adc value %d, voltage %d mv",val, val2);
+        LUAT_DEBUG_PRINT("vbat: adc 原始值 %d, 电压 %d 毫伏",val, val2);
     }
     
 }
