@@ -26,6 +26,8 @@
 #include "luat_debug.h"
 #include "luat_mobile.h"
 
+
+/* 加入下面写个函数即可开启rndis,其中return 1为开启的意思 */
 uint8_t soc_rndis_is_enable(void)
 {
 	return 1;
