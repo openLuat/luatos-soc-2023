@@ -354,10 +354,10 @@ after_load(function (target)
 end)
 
 includes(USER_PROJECT_DIR)
--- add_includedirs(USER_PROJECT_DIR .. "/inc", 
---                 {public = true})
--- add_includedirs(USER_PROJECT_DIR .. "/include", 
---                 {public = true})
+add_includedirs(USER_PROJECT_DIR .. "/inc", 
+                {public = true})
+add_includedirs(USER_PROJECT_DIR .. "/include", 
+                {public = true})
 
 target("driver")
     set_kind("static")

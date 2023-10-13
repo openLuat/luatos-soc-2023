@@ -24,7 +24,7 @@ target(TARGET_NAME)
 
     --可以继续增加add_includedirs和add_files
     --自动链接
-    -- LIB_USER = LIB_USER .. SDK_TOP .. LIB_DIR .. LIB_NAME .. " "
+    LIB_USER = LIB_USER .. SDK_TOP .. LIB_DIR .. LIB_NAME .. " "
     LIB_USER = LIB_USER .. SDK_TOP .. "/PLAT/core/lib/libaisound50_16K.a "
     --8K版本用下面的库，注释掉16K的库
     -- LIB_USER = LIB_USER .. SDK_TOP .. "/PLAT/core/lib/libaisound50_8K.a "
@@ -34,5 +34,5 @@ target(TARGET_NAME)
     -- LIB_USER = LIB_USER .. SDK_TOP .. "/PLAT/core/lib/libaisound50_16K_eng.a "
     --加入MP3解码库
 	LIB_USER = LIB_USER .. SDK_TOP .. "/lib/libmp3.a "
-	add_linkgroups(TARGET_NAME, {group = true, whole = true})
+	-- add_linkgroups(TARGET_NAME, {group = true, whole = true})
 target_end()
