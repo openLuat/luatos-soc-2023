@@ -19,8 +19,8 @@ extern void soc_debug_out(char *string, uint32_t size);
 static uint32_t luat_log_uart_port = 0;
 static uint32_t luat_log_level_cur = LUAT_LOG_DEBUG;
 
-#define LOGLOG_SIZE 1024
-static char log_printf_buff[LOGLOG_SIZE] __attribute__((aligned (16)));
+//#define LOGLOG_SIZE 1024
+//static char log_printf_buff[LOGLOG_SIZE] __attribute__((aligned (16)));
 
 void luat_log_set_uart_port(int port) {
     luat_log_uart_port = port;
@@ -57,6 +57,7 @@ int luat_log_get_level() {
 }
 
 void luat_log_log(int level, const char* tag, const char* _fmt, ...) {
+#if 0
     if (luat_log_level_cur > level) return;
     char *tmp = (char *)log_printf_buff;
     switch (level)
@@ -92,9 +93,16 @@ void luat_log_log(int level, const char* tag, const char* _fmt, ...) {
         log_printf_buff[len] = 0;
         luat_log_write(log_printf_buff, len+1);
     }
+#endif
+    if (luat_log_level_cur > level) return;
+    va_list args;
+    va_start(args, _fmt);
+    soc_vsprintf(0, _fmt, args);
+    va_end(args);
 }
 
 void luat_log_printf(int level, const char* _fmt, ...) {
+#if 0
     size_t len;
     va_list args;
     if (luat_log_level_cur > level) return;
@@ -104,4 +112,10 @@ void luat_log_printf(int level, const char* _fmt, ...) {
     if (len > 0) {
         luat_log_write(log_printf_buff, len);
     }
+#endif
+    if (luat_log_level_cur > level) return;
+    va_list args;
+    va_start(args, _fmt);
+    soc_vsprintf(0, _fmt, args);
+    va_end(args);
 }

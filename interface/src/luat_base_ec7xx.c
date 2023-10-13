@@ -102,8 +102,10 @@ int luat_timer_mdelay(size_t ms) {
     return 0;
 }
 
+#if 0
 void luat_socket_check_ready(uint32_t param, uint8_t *is_ipv6)
 {
+
 	ip_addr_t dns_ip[2];
 	uint8_t type, dns_num, ipv6;
 	dns_num = 2;
@@ -138,4 +140,6 @@ void luat_socket_check_ready(uint32_t param, uint8_t *is_ipv6)
 		}
 	}
 	net_lwip_set_link_state(NW_ADAPTER_INDEX_LWIP_GPRS, 1);
+
 }
+#endif

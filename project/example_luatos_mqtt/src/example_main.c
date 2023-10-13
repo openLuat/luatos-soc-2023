@@ -225,8 +225,7 @@ if (MQTT_DEMO_AUTOCON == 1)
 	// luat_mqtt_set_will(luat_mqtt_ctrl, mqtt_will_topic, mqtt_will_payload, strlen(mqtt_will_payload), 0, 0); // 测试遗嘱
 	
 	luat_mqtt_set_cb(luat_mqtt_ctrl,luat_mqtt_cb);
-
-	luat_rtos_task_sleep(3000);
+	luat_mqtt_ctrl->netc->is_debug = 1;
 	LUAT_DEBUG_PRINT("mqtt_connect");
 	ret = luat_mqtt_connect(luat_mqtt_ctrl);
 	if (ret) {
@@ -252,7 +251,7 @@ static void luatos_mobile_event_callback(LUAT_MOBILE_EVENT_E event, uint8_t inde
 		if (LUAT_MOBILE_NETIF_LINK_ON == status)
 		{
 			LUAT_DEBUG_PRINT("luatos_mobile_event_callback  link ...");
-			luat_socket_check_ready(index, NULL);
+			//luat_socket_check_ready(index, NULL);
 		}
         else if(LUAT_MOBILE_NETIF_LINK_OFF == status || LUAT_MOBILE_NETIF_LINK_OOS == status)
         {
@@ -265,9 +264,9 @@ static void luat_libemqtt_init(void)
 {
 	luat_mobile_set_sim_detect_sim0_first();
 	luat_mobile_event_register_handler(luatos_mobile_event_callback);
-	net_lwip_init();
-	net_lwip_register_adapter(NW_ADAPTER_INDEX_LWIP_GPRS);
-	network_register_set_default(NW_ADAPTER_INDEX_LWIP_GPRS);
+//	net_lwip_init();
+//	net_lwip_register_adapter(NW_ADAPTER_INDEX_LWIP_GPRS);
+//	network_register_set_default(NW_ADAPTER_INDEX_LWIP_GPRS);
 
 	luat_rtos_task_create(&mqtt_task_handle, 2 * 1024, 10, "libemqtt", luat_mqtt_task, NULL, 16);
 }

@@ -846,17 +846,20 @@ uint32_t net_lwip_rand()
 
 void net_lwip_init(void)
 {
-
-	uint8_t i;
-	for(i = 0; i < MAX_SOCK_NUM; i++)
+	//只初始化一次
+	if (!prvlwip.dns_timer)
 	{
-		INIT_LLIST_HEAD(&prvlwip.socket[i].wait_ack_head);
-		INIT_LLIST_HEAD(&prvlwip.socket[i].tx_head);
-		INIT_LLIST_HEAD(&prvlwip.socket[i].rx_head);
-		prvlwip.socket[i].mutex = platform_create_mutex();
+		uint8_t i;
+		for(i = 0; i < MAX_SOCK_NUM; i++)
+		{
+			INIT_LLIST_HEAD(&prvlwip.socket[i].wait_ack_head);
+			INIT_LLIST_HEAD(&prvlwip.socket[i].tx_head);
+			INIT_LLIST_HEAD(&prvlwip.socket[i].rx_head);
+			prvlwip.socket[i].mutex = platform_create_mutex();
+		}
+		mbedtls_debug_set_threshold(0);
+		prvlwip.dns_timer = platform_create_timer(net_lwip_timer_cb, (void *)EV_LWIP_COMMON_TIMER, 0);
 	}
-	mbedtls_debug_set_threshold(0);
-	prvlwip.dns_timer = platform_create_timer(net_lwip_timer_cb, (void *)EV_LWIP_COMMON_TIMER, 0);
 }
 
 void net_lwip_set_local_ip6(ip6_addr_t *ip)
@@ -2109,4 +2112,12 @@ void net_lwip_set_tcp_rx_cache(uint8_t adapter_index, uint16_t tcp_mss_num)
 __ISR_IN_RAM__ u32_t soc_tcpip_rx_cache(void)
 {
 	return prvlwip.user_tcp_rx_cache?prvlwip.user_tcp_rx_cache:(6 * TCP_MSS);
+}
+
+void luat_socket_check_ready(uint32_t param, uint8_t *is_ipv6)
+{
+	if (is_ipv6)
+	{
+		*is_ipv6 = (prvlwip.ec618_ipv6.type == IPADDR_TYPE_V6);
+	}
 }

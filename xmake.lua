@@ -140,7 +140,8 @@ add_defines("__EC718",
             "REL_COMPRESS_EN",
             "__ASSEMBLY__",
             "LUAT_EC7XX_CSDK",
-            "LUAT_USE_STD_STRING"
+            "LUAT_USE_STD_STRING",
+			"LUAT_LOG_NO_NEWLINE"
 )
 
 
