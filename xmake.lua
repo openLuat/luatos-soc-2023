@@ -354,10 +354,11 @@ after_load(function (target)
 end)
 
 includes(USER_PROJECT_DIR)
-add_includedirs(USER_PROJECT_DIR .. "/inc", 
-                {public = true})
-add_includedirs(USER_PROJECT_DIR .. "/include", 
-                {public = true})
+-- add_includedirs(USER_PROJECT_DIR .. "/inc", 
+--                 {public = true})
+-- add_includedirs(USER_PROJECT_DIR .. "/include", 
+--                 {public = true})
+
 target("driver")
     set_kind("static")
     add_deps(USER_PROJECT_NAME)
@@ -382,8 +383,8 @@ target_end()
 
 target(USER_PROJECT_NAME..".elf")
 	set_kind("binary")
-    add_deps(USER_PROJECT_NAME,{inherit = false})
     set_targetdir("$(buildir)/"..USER_PROJECT_NAME)
+
     add_deps("driver")
 
     -- mbedtls

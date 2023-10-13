@@ -16,6 +16,7 @@ target(TARGET_NAME)
 
     --可以继续增加add_includedirs和add_files
     --自动链接
-    LIB_USER = LIB_USER .. SDK_TOP ..  "/".. LIB_DIR .. LIB_NAME .. " "
+    -- LIB_USER = LIB_USER .. SDK_TOP ..  "/".. LIB_DIR .. LIB_NAME .. " "
     --甚至可以加入自己的库
+    add_linkgroups(TARGET_NAME, {group = true, whole = true})
 target_end()
