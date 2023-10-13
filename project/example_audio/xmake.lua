@@ -34,5 +34,5 @@ target(TARGET_NAME)
     -- LIB_USER = LIB_USER .. SDK_TOP .. "/PLAT/core/lib/libaisound50_16K_eng.a "
     --加入MP3解码库
 	LIB_USER = LIB_USER .. SDK_TOP .. "/lib/libmp3.a "
-	
+	-- add_linkgroups(TARGET_NAME, {group = true, whole = true})
 target_end()
