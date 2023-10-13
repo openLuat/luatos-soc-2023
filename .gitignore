@@ -25,3 +25,9 @@ out/
 
 /PLAT/core/ld/ec718p_0h00_flash.ld
 
+/PLAT/prebuild/FW/lib/gcc/ec718s
+/PLAT/prebuild/FW/lib/gcc/ec716s
+/PLAT/prebuild/PLAT/lib/gcc/ec718s
+/PLAT/prebuild/PLAT/lib/gcc/ec716s
+/PLAT/prebuild/PS/lib/gcc/ec718s
+/PLAT/prebuild/PS/lib/gcc/ec716s
