@@ -317,22 +317,22 @@ add_defines("MBEDTLS_CONFIG_FILE=\"mbedtls_ec7xx_config.h\"","LUAT_USE_FS_VFS")
 --linkflags
 local LD_BASE_FLAGS = "-Wl,--cref -Wl,--check-sections -Wl,--gc-sections -lm -Wl,--print-memory-usage"
 LD_BASE_FLAGS = LD_BASE_FLAGS .. " -L" .. SDK_TOP .. "/PLAT/device/target/board/ec7xx_0h00/ap/gcc/"
-LD_BASE_FLAGS = LD_BASE_FLAGS .. " -T" .. SDK_TOP .. "/PLAT/core/ld/ec718p_0h00_flash.ld -Wl,-Map,$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME.."_$(mode).map "
+LD_BASE_FLAGS = LD_BASE_FLAGS .. " -T" .. SDK_TOP .. "/PLAT/core/ld/ec7xx_0h00_flash.ld -Wl,-Map,$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME.."_$(mode).map "
 LD_BASE_FLAGS = LD_BASE_FLAGS .. " -Wl,--wrap=_malloc_r -Wl,--wrap=_free_r -Wl,--wrap=_realloc_r  -mcpu=cortex-m3 -mthumb -DTRACE_LEVEL=5 -DSOFTPACK_VERSION=\"\" -DHAVE_STRUCT_TIMESPEC"
 
 -- add_linkdirs("$(projectdir)/PLAT/libs")
 -- add_links("core_airm2m")
 
-local LIB_BASE = SDK_TOP .. "/PLAT/libs/libstartup.a "
-LIB_BASE = LIB_BASE .. SDK_TOP .. "/PLAT/libs/libcore_airm2m.a "
-LIB_BASE = LIB_BASE .. SDK_TOP .. "/PLAT/libs/libfreertos.a "
-LIB_BASE = LIB_BASE .. SDK_TOP .. "/PLAT/libs/libpsnv.a "
-LIB_BASE = LIB_BASE .. SDK_TOP .. "/PLAT/libs/libtcpipmgr.a "
-LIB_BASE = LIB_BASE .. SDK_TOP .. "/PLAT/libs/libyrcompress.a "
-LIB_BASE = LIB_BASE .. SDK_TOP .. "/PLAT/libs/libmiddleware_ec.a "
-LIB_BASE = LIB_BASE .. SDK_TOP .. "/PLAT/libs/liblwip.a "
+local LIB_BASE = SDK_TOP .. "/PLAT/libs/"..CHIP_TARGET.."/libstartup.a "
+LIB_BASE = LIB_BASE .. SDK_TOP .. "/PLAT/libs/"..CHIP_TARGET.."/libcore_airm2m.a "
+LIB_BASE = LIB_BASE .. SDK_TOP .. "/PLAT/libs/"..CHIP_TARGET.."/libfreertos.a "
+LIB_BASE = LIB_BASE .. SDK_TOP .. "/PLAT/libs/"..CHIP_TARGET.."/libpsnv.a "
+LIB_BASE = LIB_BASE .. SDK_TOP .. "/PLAT/libs/"..CHIP_TARGET.."/libtcpipmgr.a "
+LIB_BASE = LIB_BASE .. SDK_TOP .. "/PLAT/libs/"..CHIP_TARGET.."/libyrcompress.a "
+LIB_BASE = LIB_BASE .. SDK_TOP .. "/PLAT/libs/"..CHIP_TARGET.."/libmiddleware_ec.a "
+LIB_BASE = LIB_BASE .. SDK_TOP .. "/PLAT/libs/"..CHIP_TARGET.."/liblwip.a "
 
-LIB_BASE = LIB_BASE .. SDK_TOP .. "/PLAT/libs/liblzma.a "
+LIB_BASE = LIB_BASE .. SDK_TOP .. "/PLAT/libs/"..CHIP_TARGET.."/liblzma.a "
 if os.getenv("LUAT_FAST_ADD_USER_LIB") == "1" then
     LIB_BASE = LIB_BASE .. SDK_TOP .. os.getenv("USER_LIB") .. " "
 end
@@ -487,7 +487,7 @@ target(USER_PROJECT_NAME..".elf")
             table.insert(ld_parameter,"-D" .. define_flasg)
         end
 
-        os.execv(toolchains .. "/arm-none-eabi-gcc",table.join(ld_parameter, {"-I",SDK_PATH .. "/PLAT/device/target/board/ec7xx_0h00/common/pkginc"},{"-I",SDK_PATH .. "/PLAT/device/target/board/ec7xx_0h00/common/inc"}, {"-o",SDK_PATH .. "/PLAT/core/ld/ec718p_0h00_flash.ld","-"}),{stdin = SDK_PATH .. "/PLAT/core/ld/ec718p_0h00_flash.c"})
+        os.execv(toolchains .. "/arm-none-eabi-gcc",table.join(ld_parameter, {"-I",SDK_PATH .. "/PLAT/device/target/board/ec7xx_0h00/common/pkginc"},{"-I",SDK_PATH .. "/PLAT/device/target/board/ec7xx_0h00/common/inc"}, {"-o",SDK_PATH .. "/PLAT/core/ld/ec7xx_0h00_flash.ld","-"}),{stdin = SDK_PATH .. "/PLAT/core/ld/ec7xx_0h00_flash.c"})
         
         mem_parameter = {}
         for _, cx_flasg in pairs(target:get("cxflags")) do
@@ -509,16 +509,16 @@ target(USER_PROJECT_NAME..".elf")
 		os.exec(toolchains .."/arm-none-eabi-size $(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".elf")
         os.cp("$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".bin", "$(buildir)/"..USER_PROJECT_NAME.."/ap_unZip.bin")
         os.cp("$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".elf", "$(buildir)/"..USER_PROJECT_NAME.."/ap.elf")
-        os.exec("./PLAT/tools/fcelf.exe -C -bin ".."$(buildir)/"..USER_PROJECT_NAME.."/ap_unZip.bin".. " -cfg ".. SDK_PATH .. "/PLAT/device/target/board/ec7xx_0h00/ap/gcc/sectionInfo_ec718p.json".. " -map ".."$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME.. "_debug.map".." -out ".."$(buildir)/"..USER_PROJECT_NAME.."/ap.bin")
+        os.exec("./PLAT/tools/fcelf.exe -C -bin ".."$(buildir)/"..USER_PROJECT_NAME.."/ap_unZip.bin".. " -cfg ".. SDK_PATH .. "/PLAT/device/target/board/ec7xx_0h00/ap/gcc/sectionInfo_"..CHIP_TARGET..".json".. " -map ".."$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME.. "_debug.map".." -out ".."$(buildir)/"..USER_PROJECT_NAME.."/ap.bin")
 
         os.cp("$(buildir)/"..USER_PROJECT_NAME.."/*.bin", out_path)
 		os.cp("$(buildir)/"..USER_PROJECT_NAME.."/*.map", out_path)
 		os.cp("$(buildir)/"..USER_PROJECT_NAME.."/*.elf", out_path)
-		os.cp("./PLAT/comdb.txt", out_path)
+		os.cp("./PLAT/tools/"..CHIP_TARGET.."/comdb.txt", out_path)
         
         ---------------------------------------------------------
         -------------- 这部分尚不能跨平台 -------------------------
-        local binpkg = (is_plat("windows") and "./PLAT/tools/fcelf.exe " or "./fcelf ").."-M -input ./PLAT/tools/ap_bootloader.bin -addrname BL_PKGIMG_LNA -flashsize BOOTLOADER_PKGIMG_LIMIT_SIZE \
+        local binpkg = (is_plat("windows") and "./PLAT/tools/fcelf.exe " or "./fcelf ").."-M -input ./PLAT/tools/"..CHIP_TARGET.."/bootloader/ap_bootloader.bin -addrname BL_PKGIMG_LNA -flashsize BOOTLOADER_PKGIMG_LIMIT_SIZE \
                         -input $(buildir)/"..USER_PROJECT_NAME.."/ap.bin -addrname  AP_PKGIMG_LNA -flashsize AP_PKGIMG_LIMIT_SIZE \
                         -input ./PLAT/prebuild/FW/lib/gcc/"..CHIP_TARGET.."/cp-demo-flash.bin -addrname CP_PKGIMG_LNA -flashsize CP_PKGIMG_LIMIT_SIZE \
                         -pkgmode 1 \
@@ -583,7 +583,7 @@ target(USER_PROJECT_NAME..".elf")
             json.savefile(out_path.."/pack/info.json", info_table)
             os.cp(out_path.."/"..USER_PROJECT_NAME..".binpkg", out_path.."/pack")
             os.cp(out_path.."/"..USER_PROJECT_NAME..".elf", out_path.."/pack")
-            os.cp("./PLAT/comdb.txt", out_path.."/pack")
+            os.cp("./PLAT/tools/"..CHIP_TARGET.."/comdb.txt", out_path.."/pack")
             os.cp(out_path.."/".."mem_map.txt", out_path.."/pack")
             archive.archive(out_path.."/"..USER_PROJECT_NAME..".7z", out_path.."/pack/*",options)
             os.mv(out_path.."/"..USER_PROJECT_NAME..".7z", out_path.."/"..USER_PROJECT_NAME..".soc")
