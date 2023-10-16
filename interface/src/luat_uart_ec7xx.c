@@ -88,53 +88,53 @@ int luat_uart_setup(luat_uart_t* uart) {
     {
 	// case UART_ID0:
     //     if (g_s_serials[UART_ID0].alt_type) {
-	//         GPIO_IomuxEC718(GPIO_ToPadEC718(HAL_GPIO_16, 0), 3, 0, 0);
-	//         GPIO_IomuxEC718(GPIO_ToPadEC718(HAL_GPIO_17, 0), 3, 0, 0);
-	//         GPIO_PullConfig(GPIO_ToPadEC718(HAL_GPIO_16, 0), 1, 1);
+	//         GPIO_IomuxEC7XX(GPIO_ToPadEC7XX(HAL_GPIO_16, 0), 3, 0, 0);
+	//         GPIO_IomuxEC7XX(GPIO_ToPadEC7XX(HAL_GPIO_17, 0), 3, 0, 0);
+	//         GPIO_PullConfig(GPIO_ToPadEC7XX(HAL_GPIO_16, 0), 1, 1);
     //     }
     //     else {
-	//         GPIO_IomuxEC718(GPIO_ToPadEC718(HAL_GPIO_14, 0), 3, 0, 0);
-	//         GPIO_IomuxEC718(GPIO_ToPadEC718(HAL_GPIO_15, 0), 3, 0, 0);
-	//         GPIO_PullConfig(GPIO_ToPadEC718(HAL_GPIO_14, 0), 1, 1);
+	//         GPIO_IomuxEC7XX(GPIO_ToPadEC7XX(HAL_GPIO_14, 0), 3, 0, 0);
+	//         GPIO_IomuxEC7XX(GPIO_ToPadEC7XX(HAL_GPIO_15, 0), 3, 0, 0);
+	//         GPIO_PullConfig(GPIO_ToPadEC7XX(HAL_GPIO_14, 0), 1, 1);
     //     }
 	// 	break;
 	case UART_ID1:
-	    GPIO_IomuxEC718(GPIO_ToPadEC718(HAL_GPIO_18, 0), 1, 0, 0);
-	    GPIO_IomuxEC718(GPIO_ToPadEC718(HAL_GPIO_19, 0), 1, 0, 0);
-	    GPIO_PullConfig(GPIO_ToPadEC718(HAL_GPIO_18, 0), 1, 1);
+	    GPIO_IomuxEC7XX(GPIO_ToPadEC7XX(HAL_GPIO_18, 0), 1, 0, 0);
+	    GPIO_IomuxEC7XX(GPIO_ToPadEC7XX(HAL_GPIO_19, 0), 1, 0, 0);
+	    GPIO_PullConfig(GPIO_ToPadEC7XX(HAL_GPIO_18, 0), 1, 1);
 	    break;
 	case UART_ID2:
 		if ((1 == g_s_serials[UART_ID2].alt_type))
 		{
-		    GPIO_IomuxEC718(GPIO_ToPadEC718(HAL_GPIO_6, 0), 2, 0, 0);
-		    GPIO_IomuxEC718(GPIO_ToPadEC718(HAL_GPIO_7, 0), 2, 0, 0);
-		    GPIO_PullConfig(GPIO_ToPadEC718(HAL_GPIO_6, 0), 1, 1);
+		    GPIO_IomuxEC7XX(GPIO_ToPadEC7XX(HAL_GPIO_6, 0), 2, 0, 0);
+		    GPIO_IomuxEC7XX(GPIO_ToPadEC7XX(HAL_GPIO_7, 0), 2, 0, 0);
+		    GPIO_PullConfig(GPIO_ToPadEC7XX(HAL_GPIO_6, 0), 1, 1);
 		}
 		else if (2 == g_s_serials[UART_ID2].alt_type)
 		{
-		    GPIO_IomuxEC718(GPIO_ToPadEC718(HAL_GPIO_10, 0), 3, 0, 0);
-		    GPIO_IomuxEC718(GPIO_ToPadEC718(HAL_GPIO_11, 0), 3, 0, 0);
-		    GPIO_PullConfig(GPIO_ToPadEC718(HAL_GPIO_10, 0), 1, 1);
+		    GPIO_IomuxEC7XX(GPIO_ToPadEC7XX(HAL_GPIO_10, 0), 3, 0, 0);
+		    GPIO_IomuxEC7XX(GPIO_ToPadEC7XX(HAL_GPIO_11, 0), 3, 0, 0);
+		    GPIO_PullConfig(GPIO_ToPadEC7XX(HAL_GPIO_10, 0), 1, 1);
 		}
 		else
 		{
-		    GPIO_IomuxEC718(GPIO_ToPadEC718(HAL_GPIO_12, 0), 3, 0, 0);
-		    GPIO_IomuxEC718(GPIO_ToPadEC718(HAL_GPIO_13, 0), 3, 0, 0);
-		    GPIO_PullConfig(GPIO_ToPadEC718(HAL_GPIO_12, 0), 1, 1);
+		    GPIO_IomuxEC7XX(GPIO_ToPadEC7XX(HAL_GPIO_12, 0), 3, 0, 0);
+		    GPIO_IomuxEC7XX(GPIO_ToPadEC7XX(HAL_GPIO_13, 0), 3, 0, 0);
+		    GPIO_PullConfig(GPIO_ToPadEC7XX(HAL_GPIO_12, 0), 1, 1);
 		}
 		break;
     case UART_ID3:
         if ((1 == g_s_serials[UART_ID3].alt_type))
         {
-            GPIO_IomuxEC718(GPIO_ToPadEC718(HAL_GPIO_14, 0), 3, 0, 0);
-		    GPIO_IomuxEC718(GPIO_ToPadEC718(HAL_GPIO_15, 0), 3, 0, 0);
-		    GPIO_PullConfig(GPIO_ToPadEC718(HAL_GPIO_14, 0), 1, 1);
+            GPIO_IomuxEC7XX(GPIO_ToPadEC7XX(HAL_GPIO_14, 0), 3, 0, 0);
+		    GPIO_IomuxEC7XX(GPIO_ToPadEC7XX(HAL_GPIO_15, 0), 3, 0, 0);
+		    GPIO_PullConfig(GPIO_ToPadEC7XX(HAL_GPIO_14, 0), 1, 1);
         }
         else
         {
-            GPIO_IomuxEC718(GPIO_ToPadEC718(HAL_GPIO_34, 0), 3, 0, 0);
-		    GPIO_IomuxEC718(GPIO_ToPadEC718(HAL_GPIO_35, 0), 3, 0, 0);
-		    GPIO_PullConfig(GPIO_ToPadEC718(HAL_GPIO_34, 0), 1, 1);
+            GPIO_IomuxEC7XX(GPIO_ToPadEC7XX(HAL_GPIO_34, 0), 3, 0, 0);
+		    GPIO_IomuxEC7XX(GPIO_ToPadEC7XX(HAL_GPIO_35, 0), 3, 0, 0);
+		    GPIO_PullConfig(GPIO_ToPadEC7XX(HAL_GPIO_34, 0), 1, 1);
         }
         break;
 	default:
@@ -169,7 +169,7 @@ int luat_uart_setup(luat_uart_t* uart) {
 //          	if (!g_s_serials[uart->id].rs485_timer) {
 //          		g_s_serials[uart->id].rs485_timer = luat_create_rtos_timer(luat_uart_wait_timer_cb, uart->id, NULL);
 //          	}
-//          	GPIO_IomuxEC718(GPIO_ToPadEC718(g_s_serials[uart->id].rs485_pin, 0), 0, 0, 0);
+//          	GPIO_IomuxEC7XX(GPIO_ToPadEC7XX(g_s_serials[uart->id].rs485_pin, 0), 0, 0, 0);
 //          	GPIO_Config(g_s_serials[uart->id].rs485_pin, 0, g_s_serials[uart->id].rs485_param_bit.rx_level);
 // 		 }
     }

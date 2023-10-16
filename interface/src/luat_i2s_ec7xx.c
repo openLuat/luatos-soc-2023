@@ -36,13 +36,13 @@ void luat_i2s_base_setup(uint8_t bus_id, uint8_t mode,  uint8_t frame_size)
 	case I2S_ID0:
 		for(pad = 35; pad <= 39; pad++)
 		{
-			GPIO_IomuxEC718(pad, 1, 1, 0);
+			GPIO_IomuxEC7XX(pad, 1, 1, 0);
 		}
 		break;
 	case I2S_ID1:
 		for(pad = 18; pad <= 22; pad++)
 		{
-			GPIO_IomuxEC718(pad, 1, 1, 0);
+			GPIO_IomuxEC7XX(pad, 1, 1, 0);
 		}
 		break;
 	}

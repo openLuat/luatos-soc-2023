@@ -147,7 +147,7 @@ int luat_gpio_open(luat_gpio_cfg_t* gpio)
 		break;
     }
     GPIO_Config(gpio->pin, is_input, gpio->output_level);
-    GPIO_PullConfig(GPIO_ToPadEC718(gpio->pin, gpio->alt_fun), is_pull, is_pullup);
+    GPIO_PullConfig(GPIO_ToPadEC7XX(gpio->pin, gpio->alt_fun), is_pull, is_pullup);
 
     if (LUAT_GPIO_IRQ == gpio->mode)
     {
@@ -187,7 +187,7 @@ int luat_gpio_open(luat_gpio_cfg_t* gpio)
     	GPIO_ExtiSetCB(gpio->pin, NULL, NULL);
     }
 
-    GPIO_IomuxEC718(GPIO_ToPadEC718(gpio->pin, gpio->alt_fun), gpio->alt_fun, 0, 0);
+    GPIO_IomuxEC7XX(GPIO_ToPadEC7XX(gpio->pin, gpio->alt_fun), gpio->alt_fun, 0, 0);
     return 0;
 }
 
