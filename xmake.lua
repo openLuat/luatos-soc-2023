@@ -7,6 +7,7 @@ set_defaultmode("debug")
 local VM_64BIT = nil
 SDK_TOP = "$(projectdir)"
 LUATOS_ROOT = SDK_TOP .. "/../LuatOS/"
+USER_AP_SIZE = nil
 local SDK_PATH
 local USER_PROJECT_NAME = "example"
 local USER_PROJECT_NAME_VERSION
@@ -363,7 +364,10 @@ add_includedirs(USER_PROJECT_DIR .. "/include",
 target("driver")
     set_kind("static")
     add_deps(USER_PROJECT_NAME)
-
+	if USER_AP_SIZE then
+		add_defines("AP_FLASH_LOAD_SIZE="..USER_AP_SIZE)
+		add_defines("AP_PKGIMG_LIMIT_SIZE="..USER_AP_SIZE)
+	end
     --driver
 	add_files(SDK_TOP .. "/PLAT/core/speed/*.c",
             SDK_TOP .. "/PLAT/driver/board/ec7xx_0h00/src/*c",
@@ -385,7 +389,10 @@ target_end()
 target(USER_PROJECT_NAME..".elf")
 	set_kind("binary")
     set_targetdir("$(buildir)/"..USER_PROJECT_NAME)
-
+	if USER_AP_SIZE then
+		add_defines("AP_FLASH_LOAD_SIZE="..USER_AP_SIZE)
+		add_defines("AP_PKGIMG_LIMIT_SIZE="..USER_AP_SIZE)
+	end
     add_deps("driver")
 
     -- mbedtls
@@ -417,7 +424,6 @@ target(USER_PROJECT_NAME..".elf")
     local toolchains = nil
     local out_path = nil
     local ld_parameter = nil 
-
 	add_ldflags(LD_BASE_FLAGS .. " -Wl,--whole-archive -Wl,--start-group " .. LIB_BASE .. LIB_USER .. " -Wl,--end-group -Wl,--no-whole-archive -Wl,--no-undefined -Wl,--no-print-map-discarded ", {force=true})
 	
     on_load(function (target)

@@ -16,7 +16,7 @@ flash xip address(from both ap/cp view): 0x00800000---0x00c00000
 0x00002000          |---------------------------------|
                     |      fuse mirror 4KB            |
 0x00003000          |---------------------------------|
-                    |      bl 72KB                    |
+                    |      bl 68KB                    |
 0x00015000          |---------------------------------|
                     |      rel data(factory)20KB      |
 0x0001a000          |---------------------------------|
@@ -24,7 +24,7 @@ flash xip address(from both ap/cp view): 0x00800000---0x00c00000
 0x0007e000          |---------------------------------|
                     |      app img 2756KB             |
 0x00331000          |---------------------------------|
-                    |      fota 400KB            |
+                    |      fota 400KB                 |
 0x00395000          |---------------------------------|
                     |      lfs  208KB                 |
 0x003c9000          |---------------------------------|
@@ -57,14 +57,16 @@ flash xip address(from both ap/cp view): 0x00800000---0x00c00000
 
 //bl addr and size
 #define BOOTLOADER_FLASH_LOAD_ADDR              (0x00803000)
-#define BOOTLOADER_FLASH_LOAD_SIZE              (0x12000)//72kB, real region size, tool will check when zip TODO:ZIP
+#define BOOTLOADER_FLASH_LOAD_SIZE              (0x11000)//68kB, real region size, tool will check when zip TODO:ZIP
 #define BOOTLOADER_FLASH_LOAD_UNZIP_SIZE        (0x18000)//96KB ,for ld
 
 //ap image addr and size
 #define AP_FLASH_LOAD_ADDR              (0x0087e000)
 
 #ifdef __USER_CODE__
+#ifndef AP_FLASH_LOAD_SIZE
 #define AP_FLASH_LOAD_SIZE              (0x2b3000)//2756KB
+#endif
 #define AP_FLASH_LOAD_UNZIP_SIZE        (0x2c1000)//2820KB ,for ld
 
 #ifdef FEATURE_FOTAPAR_ENABLE

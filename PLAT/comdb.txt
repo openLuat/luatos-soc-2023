@@ -1,8 +1,8 @@
 DbVersion
-705912735,100
+1815110993,100
 <end>
 BuildInfo
-The current data file was built by the Application Ver. 2.2.77.207, Fri Oct 13 09:51:19 2023
+The current data file was built by the Application Ver. 2.2.77.207, Mon Oct 16 09:03:07 2023
 <end>
 EnumVals
 0,2048,0,0,PHY_ONLINE,PHY_ICS_MODULE,PhyIcsMeasMainEntrance_0,P_INFO,swLogPrintf("ICS MEAS of euArfcn %d will be started ");
@@ -4567,30 +4567,30 @@ EnumVals
 325632,666986752,0,0,PLAT_AP,FOTA,FOTA_CHK_IMAGE_1,P_SIG,swLogPrintf("image : not a * .par! pmagic ( %x%x ) \n ");
 325632,666988800,0,0,PLAT_AP,FOTA,FOTA_CHK_IMAGE_2,P_SIG,swLogPrintf("image : * .par len ( %d ) err , maxsize ( %d ) \n ");
 325632,666990592,0,0,PLAT_AP,FOTA,FOTA_CHK_IMAGE_3,P_INFO,swLogPrintf("image : * .par pcap ( %d ) \n ");
-325632,666994687,0,0,PLAT_AP,FOTA,FOTA_NVM_GET_ZID_1,P_ERROR,swLogPrintf("get zid : null size ptr! \n ");
-325632,666994944,0,0,PLAT_AP,FOTA,FOTA_NVM_GET_ZID_2,P_SIG,swLogPrintf("get zid : set default zone ( %d : %d ) ! \n ");
-325632,666996736,0,0,PLAT_AP,FOTA,FOTA_NVM_GET_ZID_3,P_WARNING,swLogPrintf("get zid : unknown starting addr ( 0x%x ) ! \n ");
-325632,666999040,0,0,PLAT_AP,FOTA,FOTA_NVM_GET_ZID_4,P_WARNING,swLogPrintf("get zid : in_size ( %d ) ! = zone_size ( %d ) ! \n ");
-325632,667001088,0,0,PLAT_AP,FOTA,FOTA_NVM_GET_SZ_1,P_WARNING,swLogPrintf("get size : invalid zoneId ( %d ) ! max ( %d ) \n ");
-325632,667003136,0,0,PLAT_AP,FOTA,FOTA_NVM_GET_SZ_2,P_WARNING,swLogPrintf("get size : no fota zone ( %d ) ! bmZoneId ( 0x%x ) \n ");
-325632,667005184,0,0,PLAT_AP,FOTA,FOTA_NVM_GET_HNDL_1,P_WARNING,swLogPrintf("get handle : invalid zoneId ( %d ) ! max ( %d ) \n ");
-325632,667007232,0,0,PLAT_AP,FOTA,FOTA_NVM_GET_HNDL_2,P_WARNING,swLogPrintf("get handle : no fota zone ( %d ) ! bmZoneId ( 0x%x ) \n ");
-325632,667009280,0,0,PLAT_AP,FOTA,FOTA_NVM_GET_XTRAS_1,P_WARNING,swLogPrintf("get xtras : invalid zoneId ( %d ) ! max ( %d ) \n ");
-325632,667011328,0,0,PLAT_AP,FOTA,FOTA_NVM_GET_XTRAS_2,P_WARNING,swLogPrintf("get xtras : no fota zone ( %d ) ! bmZoneId ( 0x%x ) \n ");
-325632,667013120,0,0,PLAT_AP,FOTA,VERIFY_DELTA_1,P_ERROR,swLogPrintf("validate delta err! errno ( %d ) ");
-325632,667017215,0,0,PLAT_AP,FOTA,VERIFY_DELTA_2,P_SIG,swLogPrintf("validate delta ok! ");
-325632,667019263,0,0,PLAT_AP,FOTA,VERIFY_DELTA_3,P_WARNING,swLogPrintf("however , base fw is unmatched! ");
-325632,667019264,0,0,PLAT_AP,FOTA,FOTA_CONVTO_ZONEID,P_WARNING,swLogPrintf("undef fwAttr ( %d ) ! \n ");
-325632,667021312,0,0,PLAT_AP,FOTA,FOTA_CONVTO_FWATTR,P_WARNING,swLogPrintf("invalid zoneId ( %d ) ! \n ");
-325632,667023360,0,0,PLAT_AP,FOTA,FOTA_CHKSUM_FLASH_1,P_WARNING,swLogPrintf("err! not aligned by %d bytes @non-last data! \n ");
-325632,667025408,0,0,PLAT_AP,FOTA,FOTA_CHKSUM_FLASH_2,P_ERROR,swLogPrintf("sha256sum : alloc buffer ( %d ) failure! \n ");
-325632,667027456,0,0,PLAT_AP,FOTA,FOTA_CHKSUM_FLASH_3,P_WARNING,swLogPrintf("zid ( %d ) flash read failure! \n ");
-325632,667029504,0,0,PLAT_AP,FOTA,FOTA_CHKSUM_FLASH_4,P_ERROR,swLogPrintf("zid ( %d ) flash cs-calc fail! \n ");
-325632,667031552,0,0,PLAT_AP,FOTA,FOTA_CHKSUM_BUF_1,P_WARNING,swLogPrintf("err! not aligned by %d bytes @non-last data! \n ");
-325632,667033856,0,0,PLAT_AP,FOTA,FOTA_CHKSUM_BUF_2,P_ERROR,swLogPrintf("buf ( 0x%x / %d ) chksum fail! \n ");
-325632,667035648,0,0,PLAT_AP,FOTA,FOTA_DUMP_OCTETS_1,P_INFO,swLogPrintf("total length ( %d ) : \n ");
-325632,667038212,0,0,PLAT_AP,FOTA,FOTA_DUMP_OCTETS_2,P_INFO,swLogPrintf("[ %d / %d ] %s \n ");
-325632,667040260,0,0,PLAT_AP,FOTA,FOTA_DUMP_OCTETS_3,P_INFO,swLogPrintf("[ %d / %d ] %s \n ");
+325632,666992896,0,0,PLAT_AP,FOTA,FOTA_NVM_GET_SZ_1,P_WARNING,swLogPrintf("get size : invalid zoneId ( %d ) ! max ( %d ) \n ");
+325632,666994944,0,0,PLAT_AP,FOTA,FOTA_NVM_GET_SZ_2,P_WARNING,swLogPrintf("get size : no fota zone ( %d ) ! bmZoneId ( 0x%x ) \n ");
+325632,666996992,0,0,PLAT_AP,FOTA,FOTA_NVM_GET_HNDL_1,P_WARNING,swLogPrintf("get handle : invalid zoneId ( %d ) ! max ( %d ) \n ");
+325632,666999040,0,0,PLAT_AP,FOTA,FOTA_NVM_GET_HNDL_2,P_WARNING,swLogPrintf("get handle : no fota zone ( %d ) ! bmZoneId ( 0x%x ) \n ");
+325632,667001088,0,0,PLAT_AP,FOTA,FOTA_NVM_GET_XTRAS_1,P_WARNING,swLogPrintf("get xtras : invalid zoneId ( %d ) ! max ( %d ) \n ");
+325632,667003136,0,0,PLAT_AP,FOTA,FOTA_NVM_GET_XTRAS_2,P_WARNING,swLogPrintf("get xtras : no fota zone ( %d ) ! bmZoneId ( 0x%x ) \n ");
+325632,667004928,0,0,PLAT_AP,FOTA,VERIFY_DELTA_1,P_ERROR,swLogPrintf("validate delta err! errno ( %d ) ");
+325632,667009023,0,0,PLAT_AP,FOTA,VERIFY_DELTA_2,P_SIG,swLogPrintf("validate delta ok! ");
+325632,667011071,0,0,PLAT_AP,FOTA,VERIFY_DELTA_3,P_WARNING,swLogPrintf("however , base fw is unmatched! ");
+325632,667011072,0,0,PLAT_AP,FOTA,FOTA_CONVTO_ZONEID,P_WARNING,swLogPrintf("undef fwAttr ( %d ) ! \n ");
+325632,667013120,0,0,PLAT_AP,FOTA,FOTA_CONVTO_FWATTR,P_WARNING,swLogPrintf("invalid zoneId ( %d ) ! \n ");
+325632,667015168,0,0,PLAT_AP,FOTA,FOTA_CHKSUM_FLASH_1,P_WARNING,swLogPrintf("err! not aligned by %d bytes @non-last data! \n ");
+325632,667017216,0,0,PLAT_AP,FOTA,FOTA_CHKSUM_FLASH_2,P_ERROR,swLogPrintf("sha256sum : alloc buffer ( %d ) failure! \n ");
+325632,667019264,0,0,PLAT_AP,FOTA,FOTA_CHKSUM_FLASH_3,P_WARNING,swLogPrintf("zid ( %d ) flash read failure! \n ");
+325632,667021312,0,0,PLAT_AP,FOTA,FOTA_CHKSUM_FLASH_4,P_ERROR,swLogPrintf("zid ( %d ) flash cs-calc fail! \n ");
+325632,667023360,0,0,PLAT_AP,FOTA,FOTA_CHKSUM_BUF_1,P_WARNING,swLogPrintf("err! not aligned by %d bytes @non-last data! \n ");
+325632,667025664,0,0,PLAT_AP,FOTA,FOTA_CHKSUM_BUF_2,P_ERROR,swLogPrintf("buf ( 0x%x / %d ) chksum fail! \n ");
+325632,667027456,0,0,PLAT_AP,FOTA,FOTA_DUMP_OCTETS_1,P_INFO,swLogPrintf("total length ( %d ) : \n ");
+325632,667030020,0,0,PLAT_AP,FOTA,FOTA_DUMP_OCTETS_2,P_INFO,swLogPrintf("[ %d / %d ] %s \n ");
+325632,667032068,0,0,PLAT_AP,FOTA,FOTA_DUMP_OCTETS_3,P_INFO,swLogPrintf("[ %d / %d ] %s \n ");
+325632,667035647,0,0,PLAT_AP,FOTA,FOTA_NVM_GET_ZID_1,P_ERROR,swLogPrintf("get zid : null size ptr! \n ");
+325632,667035904,0,0,PLAT_AP,FOTA,FOTA_NVM_GET_ZID_2,P_SIG,swLogPrintf("get zid : set default zone ( %d : %d ) ! \n ");
+325632,667037696,0,0,PLAT_AP,FOTA,FOTA_NVM_GET_ZID_3,P_WARNING,swLogPrintf("get zid : unknown starting addr ( 0x%x ) ! \n ");
+325632,667040000,0,0,PLAT_AP,FOTA,FOTA_NVM_GET_ZID_4,P_WARNING,swLogPrintf("get zid : in_size ( %d ) ! = zone_size ( %d ) ! \n ");
 332800,681577216,0,0,PLAT_AP,NVRAM,restoreFactoryCprs_0,P_INFO,swLogPrintf("outStream = 0x%x , outStreamLen = %d..inStream = 0x%x , inStreamLen = %d.. ");
 332800,681578496,0,0,PLAT_AP,NVRAM,restoreFactoryCprs_1,P_ERROR,swLogPrintf("restoreFactoryCprs len error!! len = %d ");
 332800,681580800,0,0,PLAT_AP,NVRAM,restoreFactoryCprs_2,P_ERROR,swLogPrintf("fac nv %d is invalid , bitmap 0x%x!! ");
@@ -9120,5 +9120,5 @@ MW_INFO_PHY_EDRX_PARAM,midWareNvmInfoPhyEdrxParam
 plat_config,plat_config_fs_t
 <end>
 OptionalSegment
-optional_sk_01,5646A4B7ED932B3B7EAED30B040C9DA65B79954E556550E50919A3B71F0F27BC
+optional_sk_01,48C10278006B20BB1595ADB5F2923FE8A2478462C4EA1AA8988596701E90B206
 <end>

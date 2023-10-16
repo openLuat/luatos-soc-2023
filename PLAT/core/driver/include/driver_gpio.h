@@ -37,7 +37,7 @@ void GPIO_Config(uint32_t Pin, uint8_t IsInput, uint8_t InitValue);
  * @param InitValue 初始电平，1高并且上拉，0低并且下拉
  * @param AltFun 复用功能，大部分Pad和GPIO是一一对应的，如果出现多个Pad对应1个GPIO，如果AltFun不能匹配则默认用Alt0的PAD
  */
-void GPIO_ConfigWithPullEC718(uint32_t Pin, uint8_t IsInput, uint8_t InitValue, uint8_t AltFun);
+void GPIO_ConfigWithPullEC7XX(uint32_t Pin, uint8_t IsInput, uint8_t InitValue, uint8_t AltFun);
 
 /**
  * @brief GPIO上下拉控制
@@ -68,7 +68,7 @@ void GPIO_ExtiConfig(uint32_t Pin, uint8_t IsLevel, uint8_t IsRiseHigh, uint8_t 
  * @param driveStrength 驱动力调节，目前无用，强制为正常
  *
  */
-void GPIO_IomuxEC718(uint32_t Pad, uint32_t Function, uint8_t AltFunctionPull, uint8_t driveStrength);
+void GPIO_IomuxEC7XX(uint32_t Pad, uint32_t Function, uint8_t AltFunctionPull, uint8_t driveStrength);
 /**
  * @brief GPIO输出电平
  *
@@ -84,7 +84,7 @@ void GPIO_FastOutput(uint32_t Pin, uint8_t Level);
  * @param Level 1高电平，0低电平
  * @param AltFun 复用功能，大部分Pad和GPIO是一一对应的，如果出现多个Pad对应1个GPIO，如果AltFun不能匹配则默认用Alt0的PAD
  */
-void GPIO_OutputWithPullEC718(uint32_t Pin, uint8_t Level, uint8_t AltFun);
+void GPIO_OutputWithPullEC7XX(uint32_t Pin, uint8_t Level, uint8_t AltFun);
 
 /**
  * @brief 读取GPIO输入电平
@@ -160,7 +160,7 @@ void GPIO_ODConfig(uint32_t Pin, uint8_t InitValue);
  * @param AltFun 复用功能，大部分Pad和GPIO是一一对应的，如果出现多个Pad对应1个GPIO，如果AltFun不能匹配则默认用Alt0的PAD
  * @return Pad序号
  */
-uint32_t GPIO_ToPadEC718(uint32_t Pin, uint8_t AltFun);
+uint32_t GPIO_ToPadEC7XX(uint32_t Pin, uint8_t AltFun);
 
 /**
  * @brief 设置WAKEUPPAD0,1,2
