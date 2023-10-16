@@ -310,7 +310,7 @@ PLATCONFIG_BSS_SECTION plat_config_raw_flash_t g_rawFlashPlatConfig;
 PLAT_BL_AIRAM_FLASH_TEXT static void BSP_SetDefaultRawFlashPlatConfig(void)
 {
 #ifdef __USER_CODE__
-    g_rawFlashPlatConfig.faultAction = EXCEP_OPTION_DUMP_FLASH_EPAT_LOOP;//silent anable
+    g_rawFlashPlatConfig.faultAction = EXCEP_OPTION_DUMP_FLASH_EPAT_RESET;//silent anable
     g_rawFlashPlatConfig.startWDT = 1;//start wdt
     g_rawFlashPlatConfig.uartDumpPort = 0xff; // default at port
     g_rawFlashPlatConfig.logControl = 0x2;

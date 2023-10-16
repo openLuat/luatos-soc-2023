@@ -14,7 +14,7 @@
 #include "luat_log.h"
 
 static uint8_t lastRequestMode = SLP_IDLE_STATE; // 在APP启动时设置
-static uint8_t wakeupSrc = 0;
+static uint8_t wakeupSrc = 0xff;
 static uint8_t firstSlpstate;
 static uint8_t wakeup_deeptimer_id = 0xFF;
 
@@ -142,13 +142,14 @@ void luat_pm_preinit(void)
 }
 
 void luat_pm_init(void) {
-    #if __LUATOS__
+#ifdef __LUATOS__
 	//LLOGI("pm mode %d", apmuGetDeepestSleepMode());
     if (BSP_GetPlatConfigItemValue(PLAT_CONFIG_ITEM_PWRKEY_MODE) != 0) {
         LLOGD("PowerKey-Debounce is enabled");
         // 开机键防抖处于开启状态, 如需禁用可以调用 pm.power(pm.PWR_MODE, false)
     }
-    soc_set_usb_sleep(0);
+#endif
+    if (wakeupSrc != 0xff) return;
     slpManSlpState_t slpstate = slpManGetLastSlpState();
     slpManWakeSrc_e src = slpManGetWakeupSrc();
     wakeupSrc = (uint8_t)src;
@@ -168,10 +169,12 @@ void luat_pm_init(void) {
         firstSlpstate = LUAT_PM_SLEEP_MODE_NONE;
         LLOGI("poweron: Power/Reset");
     }
-    #endif
     apmuSetDeepestSleepMode(AP_STATE_HIBERNATE);
     slpManRegisterUsrSlpDepthCb(luat_user_slp_state);
-    #if __LUATOS__
+
+}
+#ifdef __LUATOS__
+void luat_pm_check_deep_sleep_wakeup_id(void) {
     if (wakeup_deeptimer_id != 0xff)
     {
         rtos_msg_t msg = {0};
@@ -179,8 +182,8 @@ void luat_pm_init(void) {
         msg.arg1 = wakeup_deeptimer_id;
         luat_msgbus_put(&msg, 0);
     }
-    #endif
 }
+#endif
 // #endif
 int luat_pm_get_poweron_reason(void)
 {
