@@ -13,7 +13,7 @@
 #define UNILOG_MODE             0x4
 
 #define RTE_UART0_TX_IO_MODE    UNILOG_MODE
-#define RTE_UART0_RX_IO_MODE    DMA_MODE
+#define RTE_UART0_RX_IO_MODE    IRQ_MODE
 #define USART0_RX_TRIG_LVL      (30)
 
 #define RTE_UART1_TX_IO_MODE    DMA_MODE
@@ -22,8 +22,9 @@
 #define RTE_UART2_TX_IO_MODE    POLLING_MODE
 #define RTE_UART2_RX_IO_MODE    DMA_MODE
 
-#define RTE_SPI0_IO_MODE        DMA_MODE
-#define RTE_SPI1_IO_MODE        DMA_MODE
+#define RTE_SPI0_IO_MODE        POLLING_MODE
+
+#define RTE_SPI1_IO_MODE        POLLING_MODE
 
 #define RTE_I2C0_IO_MODE        POLLING_MODE
 #define RTE_I2C1_IO_MODE        POLLING_MODE
@@ -33,17 +34,27 @@
 // Configuration settings for Driver_I2C0 in component ::Drivers:I2C
 #define RTE_I2C0                        1
 
-// { PAD_PIN30},  // 0 : gpio15  / 2: I2C0_SCL
-// { PAD_PIN29},  // 0 : gpio14  / 2: I2C0_SDA
-#define RTE_I2C0_SCL_BIT                30
+// { PAD_PIN28},  // 0 : gpio13 / 2 : I2C0 SCL
+// { PAD_PIN27},  // 0 : gpio12 / 2 : I2C0 SDA
+#define RTE_I2C0_SCL_BIT                28			// AUDIO use 28
 #define RTE_I2C0_SCL_FUNC               PAD_MUX_ALT2
 
-#define RTE_I2C0_SDA_BIT                29
+#define RTE_I2C0_SDA_BIT                27			// AUDIO use 27
 #define RTE_I2C0_SDA_FUNC               PAD_MUX_ALT2
+
+// DMA
+//   Tx
+//     Channel     <0=>0 <1=>1 <2=>2 <3=>3 <4=>4 <5=>5 <6=>6 <7=>7
+#define RTE_I2C0_DMA_TX_EN              0
+#define RTE_I2C0_DMA_TX_REQID           DMA_REQUEST_I2C0_TX
+//   Rx
+//     Channel     <0=>0 <1=>1 <2=>2 <3=>3 <4=>4 <5=>5 <6=>6 <7=>7
+#define RTE_I2C0_DMA_RX_EN              0
+#define RTE_I2C0_DMA_RX_REQID           DMA_REQUEST_I2C0_RX
 
 // I2C1 (Inter-integrated Circuit Interface) [Driver_I2C1]
 // Configuration settings for Driver_I2C1 in component ::Drivers:I2C
-#define RTE_I2C1                        0
+#define RTE_I2C1                        1
 
 // { PAD_PIN20},  // 0 : gpio5  / 2 : I2C1 SCL
 // { PAD_PIN19},  // 0 : gpio4  / 2 : I2C1 SDA
@@ -53,27 +64,37 @@
 #define RTE_I2C1_SDA_BIT                19
 #define RTE_I2C1_SDA_FUNC               PAD_MUX_ALT2
 
+// DMA
+//   Tx
+//     Channel     <0=>0 <1=>1 <2=>2 <3=>3 <4=>4 <5=>5 <6=>6 <7=>7
+#define RTE_I2C1_DMA_TX_EN              1
+#define RTE_I2C1_DMA_TX_REQID           DMA_REQUEST_I2C1_TX
+//   Rx
+//     Channel     <0=>0 <1=>1 <2=>2 <3=>3 <4=>4 <5=>5 <6=>6 <7=>7
+#define RTE_I2C1_DMA_RX_EN              1
+#define RTE_I2C1_DMA_RX_REQID           DMA_REQUEST_I2C1_RX
+
+
 // UART0 (Universal asynchronous receiver transmitter) [Driver_USART0]
 // Configuration settings for Driver_USART0 in component ::Drivers:USART
-#define RTE_UART0                       1
 #define RTE_UART0_CTS_PIN_EN            0
 #define RTE_UART0_RTS_PIN_EN            0
 
-// { PAD_PIN42},  // 0 : gpio36 / 3 : UART0 RTSn
-// { PAD_PIN43},  // 0 : gpio37 / 3 : UART0 CTSn
-// { PAD_PIN31},  // 0 : gpio16 / 1 : UART0 RXD
-// { PAD_PIN32},  // 0 : gpio17 / 1 : UART0 TXD
-#define RTE_UART0_RTS_BIT               42
+// { PAD_PIN27},  // 0 : gpio12 / 3 : UART0 RTSn
+// { PAD_PIN28},  // 0 : gpio13 / 3 : UART0 CTSn
+// { PAD_PIN29},  // 0 : gpio14 / 3 : UART0 RXD
+// { PAD_PIN30},  // 0 : gpio15 / 3 : UART0 TXD
+#define RTE_UART0_RTS_BIT               27
 #define RTE_UART0_RTS_FUNC              PAD_MUX_ALT3
 
-#define RTE_UART0_CTS_BIT               43
+#define RTE_UART0_CTS_BIT               28
 #define RTE_UART0_CTS_FUNC              PAD_MUX_ALT3
 
-#define RTE_UART0_RX_BIT                31
-#define RTE_UART0_RX_FUNC               PAD_MUX_ALT1
+#define RTE_UART0_RX_BIT                29
+#define RTE_UART0_RX_FUNC               PAD_MUX_ALT3
 
-#define RTE_UART0_TX_BIT                32
-#define RTE_UART0_TX_FUNC               PAD_MUX_ALT1
+#define RTE_UART0_TX_BIT                30
+#define RTE_UART0_TX_FUNC               PAD_MUX_ALT3
 
 // DMA
 //  Tx
@@ -85,19 +106,18 @@
 
 // UART1 (Universal asynchronous receiver transmitter) [Driver_USART1]
 // Configuration settings for Driver_USART1 in component ::Drivers:USART
-#define RTE_UART1                       1
-#define RTE_UART1_CTS_PIN_EN            0
-#define RTE_UART1_RTS_PIN_EN            0
+#define RTE_UART1_CTS_PIN_EN            1
+#define RTE_UART1_RTS_PIN_EN            1
 
-// { PAD_PIN27},  // 0 : gpio12  / 2 : UART1 RTS
-// { PAD_PIN28},  // 0 : gpio13  / 2 : UART1 CTS
+// { PAD_PIN31},  // 0 : gpio16  / 1 : UART1 RTS
+// { PAD_PIN32},  // 0 : gpio17  / 1 : UART1 CTS
 // { PAD_PIN33},  // 0 : gpio18  / 1 : UART1 RXD
 // { PAD_PIN34},  // 0 : gpio19  / 1 : UART1 TXD
-#define RTE_UART1_RTS_BIT               27
-#define RTE_UART1_RTS_FUNC              PAD_MUX_ALT2
+#define RTE_UART1_RTS_BIT               31
+#define RTE_UART1_RTS_FUNC              PAD_MUX_ALT1
 
-#define RTE_UART1_CTS_BIT               28
-#define RTE_UART1_CTS_FUNC              PAD_MUX_ALT2
+#define RTE_UART1_CTS_BIT               32
+#define RTE_UART1_CTS_FUNC              PAD_MUX_ALT1
 
 #define RTE_UART1_RX_BIT                33
 #define RTE_UART1_RX_FUNC               PAD_MUX_ALT1
@@ -115,10 +135,11 @@
 
 // UART2 (Universal asynchronous receiver transmitter) [Driver_USART2]
 // Configuration settings for Driver_USART2 in component ::Drivers:USART
-#define RTE_UART2                       0
+#define RTE_UART2_CTS_PIN_EN            0
+#define RTE_UART2_RTS_PIN_EN            0
 
-// { PAD_PIN25},  // 0 : gpio10  / 3 : UART2 RXD
-// { PAD_PIN26},  // 0 : gpio11  / 3 : UART2 TXD
+// { PAD_PIN25},  // 0 : gpio10 / 3 : UART2 RXD
+// { PAD_PIN26},  // 0 : gpio11 / 3 : UART2 TXD
 #define RTE_UART2_RX_BIT                25
 #define RTE_UART2_RX_FUNC               PAD_MUX_ALT3
 
@@ -138,24 +159,24 @@
 // Configuration settings for Driver_SPI0 in component ::Drivers:SPI
 #define RTE_SPI0                        1
 
-// { PAD_PIN23},  // 0 : gpio8  / 1 : SPI0 SSn
-// { PAD_PIN24},  // 0 : gpio9  / 1 : SPI0 MOSI
-// { PAD_PIN25},  // 0 : gpio10 / 1 : SPI0 MISO
-// { PAD_PIN26},  // 0 : gpio11 / 1 : SPI0 SCLK
-#define RTE_SPI0_SSN_BIT                23
-#define RTE_SPI0_SSN_FUNC               PAD_MUX_ALT1
+// { PAD_PIN21},  // 0 : gpio16 / 1 : UART1 RTS / 2 : SPI0 SSn
+// { PAD_PIN22},  // 0 : gpio11 / 1 : UART1 CTS / 2 : SPI0 MOSI
+// { PAD_PIN23},  // 0 : gpio14 / 1 : UART1 RXD / 2 : SPI0 MISO
+// { PAD_PIN24},  // 0 : gpio15 / 1 : UART1 TXD / 2 : SPI0 SCLK
+#define RTE_SPI0_SSN_BIT                21
+#define RTE_SPI0_SSN_FUNC               PAD_MUX_ALT2
 
-#define RTE_SPI0_MOSI_BIT               24
-#define RTE_SPI0_MOSI_FUNC              PAD_MUX_ALT1
+#define RTE_SPI0_MOSI_BIT               22
+#define RTE_SPI0_MOSI_FUNC              PAD_MUX_ALT2
 
-#define RTE_SPI0_MISO_BIT               25
-#define RTE_SPI0_MISO_FUNC              PAD_MUX_ALT1
+#define RTE_SPI0_MISO_BIT               23
+#define RTE_SPI0_MISO_FUNC              PAD_MUX_ALT2
 
-#define RTE_SPI0_SCLK_BIT               26
-#define RTE_SPI0_SCLK_FUNC              PAD_MUX_ALT1
+#define RTE_SPI0_SCLK_BIT               24
+#define RTE_SPI0_SCLK_FUNC              PAD_MUX_ALT2
 
-#define RTE_SPI0_SSN_GPIO_INSTANCE      0
-#define RTE_SPI0_SSN_GPIO_INDEX         8
+#define RTE_SPI0_SSN_GPIO_INSTANCE      1
+#define RTE_SPI0_SSN_GPIO_INDEX         0
 
 // DMA
 //   Tx
@@ -168,30 +189,26 @@
 
 // SPI1 (Serial Peripheral Interface) [Driver_SPI1]
 // Configuration settings for Driver_SPI1 in component ::Drivers:SPI
-#define RTE_SPI1                        0
+#define RTE_SPI1                        1
 
-// { PAD_PIN27},  // 0 : gpio12  / 1 : SPI1 SSn
-// { PAD_PIN28},  // 0 : gpio13  / 1 : SPI1 MOSI
-// { PAD_PIN29},  // 0 : gpio14  / 1 : SPI1 MISO
-// { PAD_PIN30},  // 0 : gpio15  / 1 : SPI1 SCLK
-// { PAD_PIN26},  // 0 : gpio11  / 2 : SPI1 SSn1
-#define RTE_SPI1_SSN_BIT                27
-#define RTE_SPI1_SSN_FUNC               PAD_MUX_ALT1
+// { PAD_PIN13},  // 0 : gpio2 / 1 : UART0 RTSn / 3 : SPI1 SSn
+// { PAD_PIN14},  // 0 : gpio3 / 1 : UART0 CTSn / 3 : SPI1 MOSI
+// { PAD_PIN15},  // 0 : gpio4 / 1 : UART0 RXD  / 3 : SPI1 MISO
+// { PAD_PIN16},  // 0 : gpio5 / 1 : UART0 TXD  / 3 : SPI1 SCLK
+#define RTE_SPI1_SSN_BIT                13
+#define RTE_SPI1_SSN_FUNC               PAD_MUX_ALT3
 
-#define RTE_SPI1_MOSI_BIT               28
-#define RTE_SPI1_MOSI_FUNC              PAD_MUX_ALT1
+#define RTE_SPI1_MOSI_BIT               14
+#define RTE_SPI1_MOSI_FUNC              PAD_MUX_ALT3
 
-#define RTE_SPI1_MISO_BIT               29
-#define RTE_SPI1_MISO_FUNC              PAD_MUX_ALT1
+#define RTE_SPI1_MISO_BIT               15
+#define RTE_SPI1_MISO_FUNC              PAD_MUX_ALT3
 
-#define RTE_SPI1_SCLK_BIT               30
-#define RTE_SPI1_SCLK_FUNC              PAD_MUX_ALT1
+#define RTE_SPI1_SCLK_BIT               16
+#define RTE_SPI1_SCLK_FUNC              PAD_MUX_ALT3
 
 #define RTE_SPI1_SSN_GPIO_INSTANCE      0
-#define RTE_SPI1_SSN_GPIO_INDEX         12
-
-#define RTE_SPI1_SSN1_BIT               26
-#define RTE_SPI1_SSN1_FUNC              PAD_MUX_ALT2
+#define RTE_SPI1_SSN_GPIO_INDEX         2
 
 // DMA
 //   Tx
@@ -215,34 +232,13 @@
 
 
 
-/*
-static configuration for USB/UART relatded feature
-    RTE_USB_EN:      whether init USB stack
-    RTE_ONE_UART_AT: enable one UART AT
-    RTE_ONE_UART_AT: enable two UART AT
-    RTE_ETHER_EN   : whehter RNDIS/ECM feature is enabled
-    RTE_PPP_EN     : whehter PPPOS feature is enabled
-    RTE_OPAQ_EN    : whehter OPAQOS feature is enabled
-*/
 
-/* to be compatible with old style */
-
-
-
-#if (RTE_ONE_UART_AT == 1)
-#define RTE_UART0                       1
-#define RTE_UART1                       1
-#define RTE_UART2                       0
-#elif (RTE_TWO_UART_AT == 1)
 #define RTE_UART0                       1
 #define RTE_UART1                       1
 #define RTE_UART2                       1
-#endif
-
 /* to enable external thermal */
 #define EXTERNAL_NTC_EXIST              0
 
-#define RTE_LPUART_EN                   1
 
 #if (RTE_UART1 == 1)
 #define UART1_DTR_PAD_INDEX             26     // GPIO11
@@ -279,7 +275,7 @@ static configuration for USB/UART relatded feature
 #endif
 
 
-#define NETLIGHT_PAD_INDEX              51     // AONIO 6 = GPIO26
+#define NETLIGHT_PAD_INDEX              46     // AONIO 6 = GPIO26
 #define NETLIGHT_PAD_ALT_FUNC           PAD_MUX_ALT5
 #define NETLIGHT_PWM_INSTANCE           3
 
@@ -310,20 +306,45 @@ static configuration for USB/UART relatded feature
 #define AONIO_6_GPIO_INSTANCE    1
 #define AONIO_6_GPIO_PIN         10
 
-#ifdef SIM_HOT_SWAP_FEATURE
-#define TIMER_INSTANCE_4           4
-#endif
+#define RTE_CSPI0                       0
 
+#define RTE_CSPI0_MCLK_PAD_ADDR         39
+#define RTE_CSPI0_MCLK_FUNC             PAD_MUX_ALT1
 
-// LCD rst pin definition used in LSPI
-#define LSPI_RST_GPIO_INSTANCE          (0)//(0)    0
-#define LSPI_RST_GPIO_PIN               (13)//(2)   13
-#define LSPI_RST_GPIO_ADDR              (28)//(17)  28
-#define LSPI_RST_PAD_ALT_FUNC           (PAD_MUX_ALT0)
+#define RTE_CSPI0_PCLK_PAD_ADDR         35
+#define RTE_CSPI0_PCLK_FUNC             PAD_MUX_ALT1
 
-#define HEIGHT_7789                     (320)
-#define WIDTH_7789                      (240)
+#define RTE_CSPI0_CS_PAD_ADDR           36
+#define RTE_CSPI0_CS_FUNC               PAD_MUX_ALT1
 
+#define RTE_CSPI0_SDO0_PAD_ADDR         37
+#define RTE_CSPI0_SDO0_FUNC             PAD_MUX_ALT1
 
+#define RTE_CSPI0_SDO1_PAD_ADDR         38
+#define RTE_CSPI0_SDO1_FUNC             PAD_MUX_ALT1
+
+// DMA CSPI0 Request ID
+#define RTE_CSPI0_DMA_RX_REQID          DMA_REQUEST_I2S0_RX
+
+// CSPI1 Configuration
+#define RTE_CSPI1                       1
+
+#define RTE_CSPI1_MCLK_PAD_ADDR         18
+#define RTE_CSPI1_MCLK_FUNC             PAD_MUX_ALT1
+
+#define RTE_CSPI1_PCLK_PAD_ADDR         19
+#define RTE_CSPI1_PCLK_FUNC             PAD_MUX_ALT1
+
+#define RTE_CSPI1_CS_PAD_ADDR           20
+#define RTE_CSPI1_CS_FUNC               PAD_MUX_ALT1
+
+#define RTE_CSPI1_SDO0_PAD_ADDR         21
+#define RTE_CSPI1_SDO0_FUNC             PAD_MUX_ALT1
+
+#define RTE_CSPI1_SDO1_PAD_ADDR         22
+#define RTE_CSPI1_SDO1_FUNC             PAD_MUX_ALT1
+
+// DMA CSPI1 Request ID
+#define RTE_CSPI1_DMA_RX_REQID          DMA_REQUEST_I2S1_RX
 
 #endif  /* __RTE_DEVICE_H */
