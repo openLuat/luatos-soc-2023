@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 OpenLuat & AirM2M
+ * Copyright (c) 2022                                                                                                   Luat & AirM2M
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -26,7 +26,7 @@
 #include "FreeRTOS.h"
 #include "pwrkey.h"
 
-#define GPIO_ALT_MAX (5)
+#define GPIO_ALT_MAX (4)
 
 typedef void(* pwrKeyIsrCb)(void);
 extern pwrKeyIsrCb pwrKeyIsrCallback;
@@ -198,9 +198,8 @@ typedef struct
 }luat_gpio_alt_table_t;
 
 static luat_gpio_alt_table_t gpio_alt[GPIO_ALT_MAX] = {
-	{HAL_GPIO_12, 0},
-	{HAL_GPIO_14, 4},		//兼容老的GPIO14/15
-	{HAL_GPIO_15, 4},		//兼容老的GPIO14/15
+	{HAL_GPIO_16, 4},
+	{HAL_GPIO_17, 4},
 	{HAL_GPIO_18, 0},
 	{HAL_GPIO_19, 0},
 };
