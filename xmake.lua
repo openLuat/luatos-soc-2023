@@ -260,6 +260,7 @@ add_includedirs(
                 SDK_TOP .. "/PLAT/core/common/include",
                 SDK_TOP .. "/PLAT/core/multimedia/include",
                 SDK_TOP .. "/PLAT/core/tts/include",
+				SDK_TOP .. "/PLAT/core/include",
                 SDK_TOP .. "/PLAT/prebuild/PS/inc",
                 SDK_TOP .. "/PLAT/prebuild/PLAT/inc",
 				

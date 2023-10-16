@@ -80,6 +80,7 @@ uint8_t sysROSpaceCheck(uint32_t addr, uint32_t size)
     return 0;
 }
 
+
 /*----------------------------------------------------------------------------*
  *                    MACROS                                                  *
  *----------------------------------------------------------------------------*/
@@ -145,6 +146,7 @@ uint8_t sysROSpaceCheck(uint32_t addr, uint32_t size)
 
 #define FOTA_NVM_SYSH_LOAD_ADDR        (SYS_SEC_HAED_ADDR)
 #define FOTA_NVM_SYSH_LOAD_SIZE        (SYS_FLASH_LOAD_SIZE)
+
 
 int32_t soc_fota_nvm_init(void)
 {
@@ -299,4 +301,54 @@ GET_ZID_END:
     if(offset) *offset = 0;
 
     return zid;
+}
+
+#include "7zAlloc.h"
+#include "7zFile.h"
+#include "LzFind.h"
+#include "LzmaEnc.h"
+#include "LzmaDec.h"
+#include "LzmaEc.h"
+#include "mem_map.h"
+extern LZMA_BSS_SECTION ecCompBinHeader compBinHeader;
+extern LZMA_BSS_SECTION ecCompBinSectionInfo *pCompBinSectionInfoAddr;
+extern LZMA_BSS_SECTION unsigned int hashBuffStartAddr;
+extern LZMA_BSS_SECTION unsigned int decompBuffStartAddr;
+extern LZMA_BSS_SECTION unsigned int decompBuffEndAddr;
+PLAT_BL_UNCOMP_FLASH_TEXT void decompressRamCodeGetAddrInfo(void)
+{
+    unsigned int pFlashXIPAddr = 0;
+
+    #ifdef CORE_IS_AP
+    pFlashXIPAddr = *(int *)((AP_FLASH_LOAD_SIZE-8)+AP_FLASH_LOAD_ADDR)+AP_FLASH_LOAD_ADDR;
+    #endif
+    #ifdef CORE_IS_CP
+    pFlashXIPAddr = *(int *)((CP_FLASH_LOAD_SIZE-8)+CP_FLASH_LOAD_ADDR)+CP_FLASH_LOAD_ADDR;
+    #endif
+    #ifdef FEATURE_BOOTLOADER_PROJECT_ENABLE
+    pFlashXIPAddr = *(int *)((BOOTLOADER_FLASH_LOAD_SIZE-8)+BOOTLOADER_FLASH_LOAD_ADDR)+BOOTLOADER_FLASH_LOAD_ADDR;
+    #endif
+
+    compBinHeader.magicHdr = *(unsigned int *)pFlashXIPAddr;
+    compBinHeader.numOfSec = *(unsigned int *)(pFlashXIPAddr+4);
+    pCompBinSectionInfoAddr = (ecCompBinSectionInfo *)(pFlashXIPAddr+8);
+
+    #ifdef CORE_IS_AP
+    decompBuffStartAddr  = up_buf_start;
+    decompBuffEndAddr    = decompBuffStartAddr + AP_DECOMP_MEM_RF_CALIB_MAX_LEN;
+    hashBuffStartAddr    = decompBuffStartAddr + AP_HASH_MEM_OFFSET;
+    #endif
+
+    #ifdef CORE_IS_CP
+    decompBuffStartAddr = ShareInfoCPGetCpdprsBufAddr();
+    decompBuffEndAddr   = decompBuffStartAddr + CP_DECOMP_MEM_RF_CALIB_MAX_LEN;
+    hashBuffStartAddr   = decompBuffStartAddr + CP_HASH_MEM_OFFSET;
+    #endif
+
+    #ifdef FEATURE_BOOTLOADER_PROJECT_ENABLE
+    decompBuffStartAddr  = (unsigned int)&_decompress_buf_start;
+    decompBuffEndAddr    = decompBuffStartAddr + AP_DECOMP_MEM_RF_CALIB_MAX_LEN;
+    hashBuffStartAddr    = decompBuffStartAddr + AP_HASH_MEM_OFFSET;
+
+    #endif
 }

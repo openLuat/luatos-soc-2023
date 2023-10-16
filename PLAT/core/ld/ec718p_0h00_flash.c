@@ -42,6 +42,7 @@ SECTIONS
     *(.*rodata*)        /* .rodata* sections (constants, strings, etc.) */
     *(EXCLUDE_FILE(*libc*.a:*memset.o) .text*)
   } >FLASH_AREA
+
   .preinit_fun_array :
   {
       . = ALIGN(4);
@@ -69,6 +70,7 @@ SECTIONS
       __task_fun_array_end = .;
       . = ALIGN(4);
   } > FLASH_AREA
+
   .load_ap_piram_uncomp_msmb : ALIGN(4)
   {
     . = ALIGN(4);
