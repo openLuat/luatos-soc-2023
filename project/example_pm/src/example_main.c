@@ -37,6 +37,10 @@ static void task1(void *args)
         luat_rtos_task_sleep(10000);
         luat_pm_request(LUAT_PM_SLEEP_MODE_LIGHT);
         luat_rtos_task_sleep(10000);
+        luat_mobile_set_flymode(0, 1);
+        luat_pm_dtimer_start(0, 10000);
+        luat_pm_request(LUAT_PM_SLEEP_MODE_STANDBY);
+        luat_rtos_task_sleep(10000);
     }
 }
 
