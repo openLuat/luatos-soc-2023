@@ -46,14 +46,14 @@ void gpio_fun_task_init(void)
 {
     luat_gpio_cfg_t gpio_fun_struct;
     luat_gpio_set_default_cfg(&gpio_fun_struct);
-    gpio_fun_struct.pin=HAL_GPIO_18;
-    gpio_fun_struct.pull=Luat_GPIO_PULLDOWN;
+    gpio_fun_struct.pin=HAL_GPIO_16;
+    // gpio_fun_struct.pull=Luat_GPIO_PULLDOWN;
     gpio_fun_struct.mode=Luat_GPIO_OUTPUT;
     gpio_fun_struct.alt_fun=PAD_MUX_ALT4;
     gpio_fun_struct.output_level=Luat_GPIO_LOW;
     luat_gpio_open(&gpio_fun_struct);
-    gpio_fun_struct.pin=HAL_GPIO_19;
-    gpio_fun_struct.pull=Luat_GPIO_PULLDOWN;
+    gpio_fun_struct.pin=HAL_GPIO_17;
+    // gpio_fun_struct.pull=Luat_GPIO_PULLDOWN;
     gpio_fun_struct.mode=Luat_GPIO_OUTPUT;
     gpio_fun_struct.alt_fun=PAD_MUX_ALT4;
     gpio_fun_struct.output_level=Luat_GPIO_LOW;
@@ -65,11 +65,11 @@ static void gpio_fun_task(void *param)
     gpio_fun_task_init();
     while (1)
     {
-        luat_gpio_set(HAL_GPIO_18,0);
-        luat_gpio_set(HAL_GPIO_19,1);
+        luat_gpio_set(HAL_GPIO_16,0);
+        luat_gpio_set(HAL_GPIO_17,1);
         luat_rtos_task_sleep(500);
-        luat_gpio_set(HAL_GPIO_19,0);
-        luat_gpio_set(HAL_GPIO_18,1);
+        luat_gpio_set(HAL_GPIO_16,0);
+        luat_gpio_set(HAL_GPIO_17,1);
         luat_rtos_task_sleep(500);
     }
     

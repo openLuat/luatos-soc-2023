@@ -34,63 +34,145 @@
         b)收到fifo接收超时中断（此时串口数据应该是没有继续收了）
     5.触发收到数据中断时，返回的数据应是缓冲区的数据
     6.关闭串口时，释放缓冲区资源
- 二.uart0使用情况
-    因为uart0被sdk内部占用为底层日志口，用来输出bootloader运行过程中的日志，此功能无法关闭；
-    除此之外，还可以用来作为系统的日志口，usb抓取日志受限于usb枚举时间，会丢失一部分日志，而uart0则不会丢失这部分日志
-    如果uart0被配置成应用使用，在开机过程中出现的异常，会因为无法抓取底层日志而无法分析定位问题
- 三.串口复用问题
-    1.UART的复用，最新的合宙标准CSDK已经不需要通过RTE_Device.h来控制了，原厂驱动还需要
-    2.串口复用，可以通过luat_uart_pre_setup(int uart_id, uint8_t use_alt_type)函数来实现，如果为1，UART0，复用到GPIO16,GPIO17;UART2复用到GPIO12 GPIO13
 */
-#define UART_ID 1
 
-static luat_rtos_task_handle uart_task_handle;
-
-void luat_uart_recv_cb(int uart_id, uint32_t data_len){
-    char* data_buff = malloc(data_len+1);
-    memset(data_buff,0,data_len+1);
-    luat_uart_read(uart_id, data_buff, data_len);
-    LUAT_DEBUG_PRINT("uart_id:%d data:%s data_len:%d",uart_id,data_buff,data_len);
-    free(data_buff);
+uint16_t crc16ccitt(uint16_t crc, uint8_t *bytes, int start, int len)
+{
+    for (; start < len; start++) {
+        crc = ((crc >> 8) | (crc << 8)) & 0xffff;
+        crc ^= (bytes[start] & 0xff);
+        crc ^= ((crc & 0xff) >> 4);
+        crc ^= (crc << 12) & 0xffff;
+        crc ^= ((crc & 0xFF) << 5) & 0xffff;
+    }
+    crc &= 0xffff;
+    return crc;
 }
 
-static void task_test_uart(void *param)
+static luat_rtos_task_handle uart1_task_handle;
+static luat_rtos_task_handle uart1_recv_task_handle;
+static luat_rtos_semaphore_t uart_send_semaphore_handle;
+void luat_uart1_recv_cb(int uart_id, uint32_t data_len){
+    char* data_buff = malloc(data_len + 1);
+    memset(data_buff,0,data_len + 1);
+    luat_uart_read(uart_id, data_buff, data_len);
+    LUAT_DEBUG_PRINT("uart_id:%d data_len:%d",uart_id,data_len);
+    luat_rtos_event_send(uart1_recv_task_handle, 2, data_buff, data_len, 0, 0);
+}
+
+
+void luat_uart1_send_cb(int uart_id, void *param)
 {
-    // 除非你已经非常清楚uart0作为普通串口给用户使用所带来的的后果，否则不要打开以下注释掉的代码
-    // BSP_SetPlatConfigItemValue(PLAT_CONFIG_ITEM_LOG_PORT_SEL,PLAT_CFG_ULG_PORT_USB);
+    luat_rtos_semaphore_release(uart_send_semaphore_handle);
+}
+
+static void task_test_uart1(void *param)
+{
     luat_rtos_task_sleep(2000);
-    char send_buff[] = "hello LUAT!!!\n";
+    luat_event_t event;
+    luat_rtos_semaphore_create(&uart_send_semaphore_handle, 1);
+    char send_buff[] = " !!!\n";
     luat_uart_t uart = {
-        .id = UART_ID,
+        .id = UART_ID1,
         .baud_rate = 115200,
         .data_bits = 8,
         .stop_bits = 1,
         .parity    = 0
     };
-    LUAT_DEBUG_PRINT("setup result %d", luat_uart_setup(&uart));
-    LUAT_DEBUG_PRINT("ctrl result %d", luat_uart_ctrl(UART_ID, LUAT_UART_SET_RECV_CALLBACK, luat_uart_recv_cb));
+    luat_uart_setup(&uart);
+    luat_uart_ctrl(UART_ID1, LUAT_UART_SET_RECV_CALLBACK, luat_uart1_recv_cb);
+    luat_uart_ctrl(UART_ID1, LUAT_UART_SET_SENT_CALLBACK, luat_uart1_send_cb);
+    while(1)
+    {
+        for (int i = 1; i < 65; i ++)
+        {
+            char *data = malloc(i * 1024);
+            memset(data, 0x00, i * 1024);
+            for(int j = 0; j < i * 1024; j++)
+	        {
+		        data[j] = j & 0xff;
+	        }
+            uint16_t crc = 0xFFFF;
+            crc = crc16ccitt(crc, data, 0, i * 1024);
+            luat_rtos_event_send(uart1_recv_task_handle, 1, i * 1024, crc, 0, 0);
+            LUAT_DEBUG_PRINT("send result %d", luat_uart_write(UART_ID1, data, i * 1024));
+            luat_rtos_semaphore_take(uart_send_semaphore_handle, LUAT_WAIT_FOREVER);
+            free(data);
+            luat_rtos_task_sleep(1000);
+        }
+        luat_rtos_task_sleep(600000);
+    }
 
     while (1)
     {
         luat_rtos_task_sleep(1000);
-        LUAT_DEBUG_PRINT("send result %d", luat_uart_write(UART_ID, send_buff, strlen(send_buff)));
+        LUAT_DEBUG_PRINT("send result %d", luat_uart_write(UART_ID1, send_buff, strlen(send_buff)));
     }
-    luat_rtos_task_delete(uart_task_handle);
+    luat_rtos_task_delete(uart1_task_handle);
 }
 
-static void task_demo_uart(void)
+
+static void task_test_recv(void *param)
 {
-    luat_rtos_task_create(&uart_task_handle, 2048, 20, "uart", task_test_uart, NULL, NULL);
+    luat_event_t event;
+    uint32_t total = 0;
+    uint32_t now = 0;
+    uint16_t crc1, crc2;
+    char *data = NULL;
+    char *waitCrcData = NULL;
+    uint32_t index = 0;
+    while(1)
+    {
+        luat_rtos_event_recv(uart1_recv_task_handle, 0, &event, NULL, LUAT_WAIT_FOREVER);
+        switch(event.id)
+		{
+		case 1:
+			total = event.param1;
+            crc1 = event.param2;
+            crc2 = 0xFFFF;
+            waitCrcData = malloc(total);
+            now = 0;
+            index = 0;
+			break;
+		case 2:
+            data = event.param1;
+            now += event.param2;
+            if (now == total)
+            {
+                memcpy(waitCrcData + index, data, event.param2);
+                crc2 = crc16ccitt(crc2, waitCrcData, 0, total);
+                free(waitCrcData);
+                if(crc1 == crc2)
+                {
+                    LUAT_DEBUG_PRINT("success %d, %d, %d, %d", now, total, crc1, crc2);
+                }
+            }
+            else
+            {
+                memcpy(waitCrcData + index, data, event.param2);
+            }
+            index += event.param2;
+            free(data);
+            data = NULL;
+			break;
+        default:
+            break;
+		}
+    }
 }
 
-// 除非你已经非常清楚uart0作为普通串口给用户使用所带来的的后果，否则不要打开以下注释掉的代码
-// static void uart0_init(void)
-// {
-//     soc_uart0_set_log_off(1);
-// }
-// INIT_TASK_EXPORT(uart0_init,"1");
 
-INIT_TASK_EXPORT(task_demo_uart,"1");
+
+static void uart_demo_task_init(void)
+{
+    // luat_rtos_task_create(&uart0_task_handle, 2048, 20, "uart0", task_test_uart0, NULL, NULL);
+    luat_rtos_task_create(&uart1_task_handle, 2048, 20, "uart1", task_test_uart1, NULL, NULL);
+    luat_rtos_task_create(&uart1_recv_task_handle, 2048, 20, "uart1 recv", task_test_recv, NULL, 64);
+    // luat_rtos_task_create(&uart2_task_handle, 2048, 20, "uart2", task_test_uart2, NULL, NULL);
+    // luat_rtos_task_create(&uart3_task_handle, 2048, 20, "uart3", task_test_uart3, NULL, NULL);
+}
+
+INIT_TASK_EXPORT(uart_demo_task_init,"1");
 
 
 
