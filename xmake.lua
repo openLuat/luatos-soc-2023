@@ -4,16 +4,18 @@ set_version("0.0.2", {build = "%Y%m%d%H%M"})
 add_rules("mode.debug", "mode.release")
 set_defaultmode("debug")
 
-local VM_64BIT = nil
 SDK_TOP = "$(projectdir)"
 LUATOS_ROOT = SDK_TOP .. "/../LuatOS/"
-USER_AP_SIZE = nil
 local SDK_PATH
 local USER_PROJECT_NAME = "example"
-local USER_PROJECT_NAME_VERSION
 USER_PROJECT_DIR  = ""
-local LUAT_SCRIPT_SIZE
-local LUAT_SCRIPT_OTA_SIZE
+local CHIP_TARGET = "718P"
+-- local USER_PROJECT_NAME_VERSION
+-- local VM_64BIT = nil
+-- local LUAT_SCRIPT_SIZE
+-- local LUAT_SCRIPT_OTA_SIZE
+
+USER_AP_SIZE = nil
 local script_addr = nil
 local full_addr = nil
 
@@ -24,7 +26,7 @@ package("gnu_rm")
 
 	if is_host("windows") then
 		set_urls("http://cdndownload.openluat.com/xmake/toolchains/gcc-arm/gcc-arm-none-eabi-10-2020-q4-major-win32.zip")
-		add_versions("ec718", "90057b8737b888c53ca5aee332f1f73c401d6d3873124d2c2906df4347ebef9e")
+		add_versions("ec7xx", "90057b8737b888c53ca5aee332f1f73c401d6d3873124d2c2906df4347ebef9e")
 	end
 	on_install("@windows", "@linux", function (package)
 		os.vcp("*", package:installdir())
@@ -38,10 +40,14 @@ if os.getenv("GCC_PATH") then
 	toolchain_end()
 	set_toolchains("arm_toolchain")
 else
-	add_requires("gnu_rm ec718")
+	add_requires("gnu_rm ec7xx")
 	set_toolchains("gnu-rm@gnu_rm")
 end
 
+-- 获取构建目标
+if os.getenv("CHIP_TARGET") then
+	CHIP_TARGET = os.getenv("CHIP_TARGET")
+end
 
 -- 获取项目名称
 if os.getenv("PROJECT_NAME") then
@@ -81,10 +87,19 @@ set_warnings("everything")
 
 -- ==============================
 -- === defines =====
-add_defines("TYPE_EC718P","__USER_CODE__")
 
-add_defines("__EC718",
-            "CHIP_EC718",
+local CHIP_TARGET = "ec718p"
+local CHIP = "ec718"
+if CHIP_TARGET == "ec718p" then
+    add_defines("CHIP_EC718","TYPE_EC718P")
+elseif CHIP_TARGET == "ec718s" then
+    add_defines("CHIP_EC718","TYPE_EC718S")
+elseif CHIP_TARGET == "ec716s" then
+    CHIP = "ec716"
+    add_defines("CHIP_EC716","TYPE_EC716S")
+end
+
+add_defines("__USER_CODE__",
             "CORE_IS_AP",
             "SDK_REL_BUILD",
             "__CURRENT_FILE_NAME__=system_ec7xx",
@@ -207,9 +222,9 @@ add_includedirs(
                 SDK_TOP .. "/PLAT/driver/board/ec7xx_0h00/inc/exstorage",
                 SDK_TOP .. "/PLAT/driver/hal/common/inc",
                 SDK_TOP .. "/PLAT/driver/hal/ec7xx/ap/inc",
-                SDK_TOP .. "/PLAT/driver/hal/ec7xx/ap/inc/ec718",
+                SDK_TOP .. "/PLAT/driver/hal/ec7xx/ap/inc/"..CHIP,
                 SDK_TOP .. "/PLAT/driver/chip/ec7xx/ap/inc",
-                SDK_TOP .. "/PLAT/driver/chip/ec7xx/ap/inc/ec718",
+                SDK_TOP .. "/PLAT/driver/chip/ec7xx/ap/inc/"..CHIP,
                 SDK_TOP .. "/PLAT/driver/chip/ec7xx/ap/inc_cmsis",
                 SDK_TOP .. "/PLAT/os/freertos/inc",
                 SDK_TOP .. "/PLAT/os/freertos/CMSIS/common/inc",
@@ -284,20 +299,20 @@ add_includedirs(LUATOS_ROOT .. "/luat/include",
 
 add_defines("MBEDTLS_CONFIG_FILE=\"mbedtls_ec7xx_config.h\"","LUAT_USE_FS_VFS")
 
-if USER_PROJECT_NAME == 'luatos' then
-    if os.getenv("LUAT_EC7XX_LITE_MODE") == "1" then
-        add_defines("LUAT_EC7XX_LITE_MODE", "LUAT_SCRIPT_SIZE=448", "LUAT_SCRIPT_OTA_SIZE=284")
-    end
-    if os.getenv("LUAT_USE_TTS") == "1" then
-        add_defines("LUAT_USE_TTS")
-    end
-    if os.getenv("LUAT_USE_TTS_ONCHIP") == "1" then
-        add_defines("LUAT_USE_TTS_ONCHIP")
-    end
-    add_defines("__LUATOS__","LWIP_NUM_SOCKETS=8")
-	add_defines("OPEN_CPU_MODE")
-	is_lspd = true
-end
+-- if USER_PROJECT_NAME == 'luatos' then
+--     if os.getenv("LUAT_EC7XX_LITE_MODE") == "1" then
+--         add_defines("LUAT_EC7XX_LITE_MODE", "LUAT_SCRIPT_SIZE=448", "LUAT_SCRIPT_OTA_SIZE=284")
+--     end
+--     if os.getenv("LUAT_USE_TTS") == "1" then
+--         add_defines("LUAT_USE_TTS")
+--     end
+--     if os.getenv("LUAT_USE_TTS_ONCHIP") == "1" then
+--         add_defines("LUAT_USE_TTS_ONCHIP")
+--     end
+--     add_defines("__LUATOS__","LWIP_NUM_SOCKETS=8")
+-- 	add_defines("OPEN_CPU_MODE")
+-- 	is_lspd = true
+-- end
 
 --linkflags
 local LD_BASE_FLAGS = "-Wl,--cref -Wl,--check-sections -Wl,--gc-sections -lm -Wl,--print-memory-usage"
@@ -323,11 +338,11 @@ if os.getenv("LUAT_FAST_ADD_USER_LIB") == "1" then
 end
 
 if is_lspd then
-    LIB_PS_PRE = SDK_TOP .. "/PLAT/prebuild/PS/lib/gcc/ec718p/oc"
-    LIB_PLAT_PRE = SDK_TOP .. "/PLAT/prebuild/PLAT/lib/gcc/ec718p/oc"
+    LIB_PS_PRE = SDK_TOP .. "/PLAT/prebuild/PS/lib/gcc/"..CHIP_TARGET.."/oc"
+    LIB_PLAT_PRE = SDK_TOP .. "/PLAT/prebuild/PLAT/lib/gcc/"..CHIP_TARGET.."/oc"
 else
-    LIB_PS_PRE = SDK_TOP .. "/PLAT/prebuild/PS/lib/gcc/ec718p"
-    LIB_PLAT_PRE = SDK_TOP .. "/PLAT/prebuild/PLAT/lib/gcc/ec718p"
+    LIB_PS_PRE = SDK_TOP .. "/PLAT/prebuild/PS/lib/gcc/"..CHIP_TARGET
+    LIB_PLAT_PRE = SDK_TOP .. "/PLAT/prebuild/PLAT/lib/gcc/"..CHIP_TARGET
 end
 LIB_BASE = LIB_BASE .. LIB_PS_PRE .. "/libps.a "
 LIB_BASE = LIB_BASE .. LIB_PS_PRE .. "/libpsl1.a "
@@ -373,7 +388,7 @@ target("driver")
 	add_files(SDK_TOP .. "/PLAT/core/speed/*.c",
             SDK_TOP .. "/PLAT/driver/board/ec7xx_0h00/src/*c",
             SDK_TOP .. "/PLAT/driver/hal/**.c",
-            SDK_TOP .. "/PLAT/driver/chip/ec7xx/ap/src/ec718/adc.c",
+            SDK_TOP .. "/PLAT/driver/chip/ec7xx/ap/src/"..CHIP.."/adc.c",
             SDK_TOP .. "/PLAT/driver/chip/ec7xx/ap/src/*.c",
             SDK_TOP .. "/PLAT/driver/chip/ec7xx/ap/src/usb/open/*.c",
             SDK_TOP .. "/PLAT/driver/chip/ec7xx/common/gcc/memcpy-armv7m.S",
@@ -432,32 +447,32 @@ target(USER_PROJECT_NAME..".elf")
 		if not os.exists(out_path) then
 			os.mkdir(out_path)
 		end
-        if USER_PROJECT_NAME == 'luatos' then
-            local conf_data = io.readfile("$(projectdir)/project/luatos/inc/luat_conf_bsp.h")
-            USER_PROJECT_NAME_VERSION = conf_data:match("#define LUAT_BSP_VERSION \"(%w+)\"")
-            VM_64BIT = conf_data:find("\r#define LUAT_CONF_VM_64bit") or conf_data:find("\n#define LUAT_CONF_VM_64bit")
-            local TTS_ONCHIP = conf_data:find("\r#define LUAT_USE_TTS_ONCHIP") or conf_data:find("\n#define LUAT_USE_TTS_ONCHIP")
+        -- if USER_PROJECT_NAME == 'luatos' then
+        --     local conf_data = io.readfile("$(projectdir)/project/luatos/inc/luat_conf_bsp.h")
+        --     USER_PROJECT_NAME_VERSION = conf_data:match("#define LUAT_BSP_VERSION \"(%w+)\"")
+        --     VM_64BIT = conf_data:find("\r#define LUAT_CONF_VM_64bit") or conf_data:find("\n#define LUAT_CONF_VM_64bit")
+        --     local TTS_ONCHIP = conf_data:find("\r#define LUAT_USE_TTS_ONCHIP") or conf_data:find("\n#define LUAT_USE_TTS_ONCHIP")
 
-            local mem_map_data = io.readfile("$(projectdir)/PLAT/device/target/board/ec7xx_0h00/common/inc/mem_map.h")
-            FLASH_FOTA_REGION_START = tonumber(mem_map_data:match("#define FLASH_FOTA_REGION_START%s+%((%g+)%)"))
-            if TTS_ONCHIP or os.getenv("LUAT_USE_TTS_ONCHIP") == "1" then
-                LUAT_SCRIPT_SIZE = 64
-                LUAT_SCRIPT_OTA_SIZE = 48
-            elseif os.getenv("LUAT_EC718_LITE_MODE") == "1" then
-                LUAT_SCRIPT_SIZE = 448
-                LUAT_SCRIPT_OTA_SIZE = 284
-            else
-                LUAT_SCRIPT_SIZE = tonumber(conf_data:match("\r#define LUAT_SCRIPT_SIZE (%d+)") or conf_data:match("\n#define LUAT_SCRIPT_SIZE (%d+)"))
-                LUAT_SCRIPT_OTA_SIZE = tonumber(conf_data:match("\r#define LUAT_SCRIPT_OTA_SIZE (%d+)") or conf_data:match("\n#define LUAT_SCRIPT_OTA_SIZE (%d+)"))
-            end
-            print(string.format("script zone %d ota %d", LUAT_SCRIPT_SIZE, LUAT_SCRIPT_OTA_SIZE))
-            LUA_SCRIPT_ADDR = FLASH_FOTA_REGION_START - (LUAT_SCRIPT_SIZE + LUAT_SCRIPT_OTA_SIZE) * 1024
-            LUA_SCRIPT_OTA_ADDR = FLASH_FOTA_REGION_START - LUAT_SCRIPT_OTA_SIZE * 1024
-            script_addr = string.format("%X", LUA_SCRIPT_ADDR)
-            full_addr = string.format("%X", LUA_SCRIPT_OTA_ADDR)
-            -- print(FLASH_FOTA_REGION_START,LUAT_SCRIPT_SIZE,LUAT_SCRIPT_OTA_SIZE)
-            -- print(script_addr,full_addr)
-        end
+        --     local mem_map_data = io.readfile("$(projectdir)/PLAT/device/target/board/ec7xx_0h00/common/inc/mem_map.h")
+        --     FLASH_FOTA_REGION_START = tonumber(mem_map_data:match("#define FLASH_FOTA_REGION_START%s+%((%g+)%)"))
+        --     if TTS_ONCHIP or os.getenv("LUAT_USE_TTS_ONCHIP") == "1" then
+        --         LUAT_SCRIPT_SIZE = 64
+        --         LUAT_SCRIPT_OTA_SIZE = 48
+        --     elseif os.getenv("LUAT_EC718_LITE_MODE") == "1" then
+        --         LUAT_SCRIPT_SIZE = 448
+        --         LUAT_SCRIPT_OTA_SIZE = 284
+        --     else
+        --         LUAT_SCRIPT_SIZE = tonumber(conf_data:match("\r#define LUAT_SCRIPT_SIZE (%d+)") or conf_data:match("\n#define LUAT_SCRIPT_SIZE (%d+)"))
+        --         LUAT_SCRIPT_OTA_SIZE = tonumber(conf_data:match("\r#define LUAT_SCRIPT_OTA_SIZE (%d+)") or conf_data:match("\n#define LUAT_SCRIPT_OTA_SIZE (%d+)"))
+        --     end
+        --     print(string.format("script zone %d ota %d", LUAT_SCRIPT_SIZE, LUAT_SCRIPT_OTA_SIZE))
+        --     LUA_SCRIPT_ADDR = FLASH_FOTA_REGION_START - (LUAT_SCRIPT_SIZE + LUAT_SCRIPT_OTA_SIZE) * 1024
+        --     LUA_SCRIPT_OTA_ADDR = FLASH_FOTA_REGION_START - LUAT_SCRIPT_OTA_SIZE * 1024
+        --     script_addr = string.format("%X", LUA_SCRIPT_ADDR)
+        --     full_addr = string.format("%X", LUA_SCRIPT_OTA_ADDR)
+        --     -- print(FLASH_FOTA_REGION_START,LUAT_SCRIPT_SIZE,LUAT_SCRIPT_OTA_SIZE)
+        --     -- print(script_addr,full_addr)
+        -- end
     end)
     before_link(function(target)
         toolchains = target:toolchains()[1]:bindir()
@@ -505,10 +520,9 @@ target(USER_PROJECT_NAME..".elf")
         -------------- 这部分尚不能跨平台 -------------------------
         local binpkg = (is_plat("windows") and "./PLAT/tools/fcelf.exe " or "./fcelf ").."-M -input ./PLAT/tools/ap_bootloader.bin -addrname BL_PKGIMG_LNA -flashsize BOOTLOADER_PKGIMG_LIMIT_SIZE \
                         -input $(buildir)/"..USER_PROJECT_NAME.."/ap.bin -addrname  AP_PKGIMG_LNA -flashsize AP_PKGIMG_LIMIT_SIZE \
-                        -input ./PLAT/prebuild/FW/lib/gcc/ec718p/cp-demo-flash.bin -addrname CP_PKGIMG_LNA -flashsize CP_PKGIMG_LIMIT_SIZE \
+                        -input ./PLAT/prebuild/FW/lib/gcc/"..CHIP_TARGET.."/cp-demo-flash.bin -addrname CP_PKGIMG_LNA -flashsize CP_PKGIMG_LIMIT_SIZE \
                         -pkgmode 1 \
                         -banoldtool 1 \
-                        -productname EC718P_PRD \
                         -def "..out_path .. "/mem_map.txt \
                         -outfile " .. "./out/" ..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".binpkg"
 
