@@ -232,7 +232,6 @@ add_includedirs(
                 SDK_TOP .. "/PLAT/os/freertos/portable/mem/tlsf",
                 SDK_TOP .. "/PLAT/os/freertos/portable/gcc",
                 SDK_TOP .. "/PLAT/middleware/developed/nvram/ec7xx/inc",
-                SDK_TOP .. "/PLAT/middleware/developed/debug/inc",
                 SDK_TOP .. "/PLAT/middleware/developed/nvram/inc",
                 SDK_TOP .. "/PLAT/middleware/developed/cms/psdial/inc",
                 SDK_TOP .. "/PLAT/middleware/developed/cms/cms/inc",
@@ -270,6 +269,8 @@ add_includedirs(
                 SDK_TOP .. "/PLAT/middleware/developed/at/atreply/inc",
                 SDK_TOP .. "/PLAT/middleware/developed/at/atref/inc",
                 SDK_TOP .. "/PLAT/middleware/developed/at/atref/inc/cnfind",
+
+                SDK_TOP .. "/PLAT/tools/"..CHIP_TARGET,
 
                 SDK_TOP .. "/PLAT/core/driver/include",
                 SDK_TOP .. "/PLAT/core/common/include",
