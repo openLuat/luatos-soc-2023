@@ -208,6 +208,7 @@ int luat_pm_get_poweron_reason(void)
 	switch(apRstState)
 	{
 	case LAST_RESET_CLEAR:
+	case LAST_RESET_PAD:
 		id = LUAT_PM_POWERON_REASON_NORMAL;
 		break;
 	case LAST_RESET_SWRESET:
