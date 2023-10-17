@@ -62,11 +62,6 @@ else
     is_lspd = false
 end
 
--- 若启用is_lspd, 加上额外的宏
-if is_lspd == true then
-    add_defines("OPEN_CPU_MODE")
-end
-
 if os.getenv("ROOT_PATH") then
 	SDK_TOP = os.getenv("ROOT_PATH")
 else
@@ -92,10 +87,17 @@ local CHIP = "ec718"
 if CHIP_TARGET == "ec718p" then
     add_defines("CHIP_EC718","TYPE_EC718P")
 elseif CHIP_TARGET == "ec718s" then
+    is_lspd = true
     add_defines("CHIP_EC718","TYPE_EC718S")
 elseif CHIP_TARGET == "ec716s" then
+    is_lspd = true
     CHIP = "ec716"
     add_defines("CHIP_EC716","TYPE_EC716S")
+end
+
+-- 若启用is_lspd, 加上额外的宏
+if is_lspd == true then
+    add_defines("OPEN_CPU_MODE")
 end
 
 add_defines("__USER_CODE__",
@@ -338,13 +340,8 @@ if is_lspd then
     LIB_PS_PRE = SDK_TOP .. "/PLAT/prebuild/PS/lib/gcc/"..CHIP_TARGET.."/oc"
     LIB_PLAT_PRE = SDK_TOP .. "/PLAT/prebuild/PLAT/lib/gcc/"..CHIP_TARGET.."/oc"
 else
-    if CHIP_TARGET == "ec718p" then
-        LIB_PS_PRE = SDK_TOP .. "/PLAT/prebuild/PS/lib/gcc/"..CHIP_TARGET
-        LIB_PLAT_PRE = SDK_TOP .. "/PLAT/prebuild/PLAT/lib/gcc/"..CHIP_TARGET
-    else 
-        LIB_PS_PRE = SDK_TOP .. "/PLAT/prebuild/PS/lib/gcc/"..CHIP_TARGET.."/gcf"
-        LIB_PLAT_PRE = SDK_TOP .. "/PLAT/prebuild/PLAT/lib/gcc/"..CHIP_TARGET.."/gcf"
-    end
+    LIB_PS_PRE = SDK_TOP .. "/PLAT/prebuild/PS/lib/gcc/"..CHIP_TARGET
+    LIB_PLAT_PRE = SDK_TOP .. "/PLAT/prebuild/PLAT/lib/gcc/"..CHIP_TARGET
 end
 LIB_BASE = LIB_BASE .. LIB_PS_PRE .. "/libps.a "
 LIB_BASE = LIB_BASE .. LIB_PS_PRE .. "/libpsl1.a "
