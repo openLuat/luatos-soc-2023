@@ -343,9 +343,11 @@ else
     LIB_PS_PRE = SDK_TOP .. "/PLAT/prebuild/PS/lib/gcc/"..CHIP_TARGET
     LIB_PLAT_PRE = SDK_TOP .. "/PLAT/prebuild/PLAT/lib/gcc/"..CHIP_TARGET
 end
+
 LIB_BASE = LIB_BASE .. LIB_PS_PRE .. "/libps.a "
 LIB_BASE = LIB_BASE .. LIB_PS_PRE .. "/libpsl1.a "
 LIB_BASE = LIB_BASE .. LIB_PS_PRE .. "/libpsif.a "
+
 LIB_BASE = LIB_BASE .. LIB_PLAT_PRE .. "/libosa.a "
 LIB_BASE = LIB_BASE .. LIB_PLAT_PRE .. "/libmiddleware_ec_private.a "
 LIB_BASE = LIB_BASE .. LIB_PLAT_PRE .. "/libccio.a "
