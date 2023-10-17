@@ -205,7 +205,7 @@ enum
 #define __FLASH_BLOCK_SIZE__ (0x00010000)
 #define __FLASH_SECTOR_SIZE__ (0x00001000)
 #define __FLASH_PAGE_SIZE__ (0x00000100)
-#define __APP_START_MAGIC__ (0xeaf18c16)
+#define __APP_START_MAGIC__ (0xeac37218)
 
 #define __AP_FLASH_SAVE_ADDR__             (0x00024000)
 #define __BL_FLASH_SAVE_ADDR__             (0x00004000)
