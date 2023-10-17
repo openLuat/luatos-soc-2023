@@ -523,7 +523,7 @@ target(USER_PROJECT_NAME..".elf")
                         -input ./PLAT/prebuild/FW/lib/gcc/"..CHIP_TARGET.."/cp-demo-flash.bin -addrname CP_PKGIMG_LNA -flashsize CP_PKGIMG_LIMIT_SIZE \
                         -pkgmode 1 \
                         -banoldtool 1 \
-                        -productname EC718P_PRD \
+                        -productname "..CHIP_TARGET:upper().."_PRD \
                         -def "..out_path .. "/mem_map.txt \
                         -outfile " .. "./out/" ..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".binpkg"
 
