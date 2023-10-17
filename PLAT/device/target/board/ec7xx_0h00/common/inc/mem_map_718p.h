@@ -24,13 +24,13 @@ flash xip address(from both ap/cp view): 0x00800000---0x00c00000
 0x0007e000          |---------------------------------|
                     |      app img 2756KB             |
 0x00331000          |---------------------------------|
-                    |      fota 400KB                 |
-0x00395000          |---------------------------------|
-                    |      lfs  208KB                 |
-0x003c9000          |---------------------------------|
-                    |      kv  64KB                   |
-0x003d9000          |---------------------------------|
-                    |       hib backup 96KB           |
+                    |      fota 352KB                 |
+0x00389000          |---------------------------------|
+                    |      hib backup 96KB            |
+0x003a1000          |---------------------------------|
+                    |      FS  256KB                  |
+0x003e1000          |---------------------------------|
+                    |       kv 64KB           		  |
 0x003f1000          |---------------------------------|
                     |      rel data 52KB              |
 0x003fe000          |---------------------------------|
@@ -69,12 +69,12 @@ flash xip address(from both ap/cp view): 0x00800000---0x00c00000
 #endif
 #define AP_FLASH_LOAD_UNZIP_SIZE        (0x2c1000)//2820KB ,for ld
 
-#ifdef FEATURE_FOTAPAR_ENABLE
+#if 0	//等到hib backup区域能随便用的时候再改
 //fota addr and size
 #define FLASH_FOTA_REGION_START         (0x331000)
 #define FLASH_FOTA_REGION_LEN           (0x64000)//400KB
 #define FLASH_FOTA_REGION_END           (0x395000)
-#endif
+
 
 //fs addr and size
 #define FLASH_FS_REGION_START           (0x395000)
@@ -92,6 +92,33 @@ flash xip address(from both ap/cp view): 0x00800000---0x00c00000
 #define FLASH_MEM_BACKUP_SIZE           (0x18000)//96KB
 #define FLASH_MEM_BLOCK_SIZE            (0x6000)
 #define FLASH_MEM_BLOCK_CNT             (0x4)
+
+#else
+
+//fota addr and size
+#define FLASH_FOTA_REGION_START         (0x331000)
+#define FLASH_FOTA_REGION_LEN           (0x64000)//352KB
+#define FLASH_FOTA_REGION_END           (0x389000)
+
+//hib bakcup addr and size
+#define FLASH_HIB_BACKUP_EXIST          (1)
+#define FLASH_MEM_BACKUP_ADDR           (AP_FLASH_XIP_ADDR+FLASH_MEM_BACKUP_NONXIP_ADDR)
+#define FLASH_MEM_BACKUP_NONXIP_ADDR    (0x389000)
+#define FLASH_MEM_BACKUP_SIZE           (0x18000)//96KB
+#define FLASH_MEM_BLOCK_SIZE            (0x6000)
+#define FLASH_MEM_BLOCK_CNT             (0x4)
+
+//fs addr and size
+#define FLASH_FS_REGION_START           (0x3A1000)
+#define FLASH_FS_REGION_END             (0x3e1000)
+#define FLASH_FS_REGION_SIZE            (FLASH_FS_REGION_END-FLASH_FS_REGION_START) //256KB
+
+//fskv addr and size
+#define FLASH_FDB_REGION_START			(0x3e1000)//64KB
+#define FLASH_FDB_REGION_END            (0x3F1000)
+
+
+#endif
 
 #else
 
