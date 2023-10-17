@@ -102,7 +102,7 @@ end
 add_defines("__USER_CODE__",
             "CORE_IS_AP",
             "SDK_REL_BUILD",
-            "__CURRENT_FILE_NAME__=system_ec7xx",
+            -- "__CURRENT_FILE_NAME__=system_ec7xx",
             "EC_ASSERT_FLAG",
             "DHCPD_ENABLE_DEFINE=1",
             "PM_FEATURE_ENABLE",
@@ -269,9 +269,7 @@ add_includedirs(
                 SDK_TOP .. "/PLAT/middleware/developed/at/atreply/inc",
                 SDK_TOP .. "/PLAT/middleware/developed/at/atref/inc",
                 SDK_TOP .. "/PLAT/middleware/developed/at/atref/inc/cnfind",
-
                 SDK_TOP .. "/PLAT/tools/"..CHIP_TARGET,
-
                 SDK_TOP .. "/PLAT/core/driver/include",
                 SDK_TOP .. "/PLAT/core/common/include",
                 SDK_TOP .. "/PLAT/core/multimedia/include",
@@ -279,7 +277,6 @@ add_includedirs(
 				SDK_TOP .. "/PLAT/core/include",
                 SDK_TOP .. "/PLAT/prebuild/PS/inc",
                 SDK_TOP .. "/PLAT/prebuild/PLAT/inc",
-				
                 SDK_TOP .. "/thirdparty/littlefs",
                 SDK_TOP .. "/thirdparty/littlefs/port",
 
@@ -509,7 +506,6 @@ target(USER_PROJECT_NAME..".elf")
 		os.exec(toolchains .. "/arm-none-eabi-objcopy -O binary $(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".elf $(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".bin")
 		os.exec(toolchains .."/arm-none-eabi-size $(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".elf")
         os.cp("$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".bin", "$(buildir)/"..USER_PROJECT_NAME.."/ap_unZip.bin")
-        os.cp("$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".elf", "$(buildir)/"..USER_PROJECT_NAME.."/ap.elf")
         os.exec("./PLAT/tools/fcelf.exe -C -bin ".."$(buildir)/"..USER_PROJECT_NAME.."/ap_unZip.bin".. " -cfg ".. SDK_PATH .. "/PLAT/device/target/board/ec7xx_0h00/ap/gcc/sectionInfo_"..CHIP_TARGET..".json".. " -map ".."$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME.. "_debug.map".." -out ".."$(buildir)/"..USER_PROJECT_NAME.."/ap.bin")
 
         os.cp("$(buildir)/"..USER_PROJECT_NAME.."/*.bin", out_path)
