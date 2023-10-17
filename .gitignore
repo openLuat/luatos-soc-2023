@@ -23,6 +23,6 @@ gccout/
 build/
 out/
 
-/PLAT/core/ld/ec718p_0h00_flash.ld
+/PLAT/core/ld/ec7xx_0h00_flash.ld
 
 
