@@ -48,13 +48,7 @@ void soc_set_usb_serial_input_callback(usb_serial_in cb_fun);
  */
 int soc_usb_serial_output(uint8_t channel, uint8_t *output, uint32_t len);
 #define usb_serial_output(x,y,z)	soc_usb_serial_output(x,y,z)
-/**
- * @brief 设置低功耗模式下,wakeuppad唤醒中断回调，注意这是在中断回调
- * 
- * @param cb_fun 
- */
-void soc_set_pad_wakeup_callback(pad_wakeup_fun_t cb_fun);
-#define set_pad_wakeup_callback(x)	soc_set_pad_wakeup_callback(x)
+
 /**
  * @brief 创建一个带event收发机制的task，event就是一个16byte的item
  * 
