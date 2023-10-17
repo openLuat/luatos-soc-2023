@@ -9,7 +9,8 @@ LUATOS_ROOT = SDK_TOP .. "/../LuatOS/"
 local SDK_PATH
 local USER_PROJECT_NAME = "example"
 USER_PROJECT_DIR  = ""
-local CHIP_TARGET = "718P"
+local CHIP_TARGET = "ec718p"
+
 -- local USER_PROJECT_NAME_VERSION
 -- local VM_64BIT = nil
 -- local LUAT_SCRIPT_SIZE
@@ -44,7 +45,6 @@ else
 	set_toolchains("gnu-rm@gnu_rm")
 end
 
-local CHIP_TARGET = "ec718p"
 -- 获取构建目标
 if os.getenv("CHIP_TARGET") then
 	CHIP_TARGET = os.getenv("CHIP_TARGET")
