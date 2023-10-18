@@ -80,7 +80,7 @@ int luat_gpio_open(luat_gpio_cfg_t* gpio)
 			IsFallLow = 1;
 			break;
 		case LUAT_GPIO_BOTH_IRQ:
-			IsFallLow = 1;
+			IsRiseHigh = 1;
 			IsFallLow = 1;
 			break;
 		default:
