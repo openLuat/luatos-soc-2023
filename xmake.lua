@@ -441,7 +441,7 @@ target(USER_PROJECT_NAME..".elf")
     local toolchains = nil
     local out_path = nil
     local ld_parameter = nil 
-	add_ldflags(LD_BASE_FLAGS .. " -Wl,--whole-archive -Wl,--start-group " .. LIB_BASE .. LIB_USER .. " -Wl,--end-group -Wl,--no-whole-archive -Wl,--no-undefined -Wl,--no-print-map-discarded ", {force=true})
+	add_ldflags(LD_BASE_FLAGS .. " -Wl,--whole-archive -Wl,--start-group " .. LIB_BASE .. LIB_USER .. " -Wl,--end-group -Wl,--no-whole-archive -Wl,--no-undefined -Wl,--no-print-map-discarded -ldriver ", {force=true})
 	
     on_load(function (target)
 		out_path = SDK_PATH .. "/out/" ..USER_PROJECT_NAME
