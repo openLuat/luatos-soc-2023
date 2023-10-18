@@ -163,15 +163,16 @@ void GPIO_ODConfig(uint32_t Pin, uint8_t InitValue);
 uint32_t GPIO_ToPadEC7XX(uint32_t Pin, uint8_t AltFun);
 
 /**
- * @brief 设置WAKEUPPAD0,1,2
+ * @brief 设置WAKEUPPAD0~5,charge和powerkey
  *
- * @param Pin Pin序号，HAL_WAKEUP_0~HAL_WAKEUP_2
- * @param IsRiseHigh 上升沿触发
- * @param IsFallLow 下降沿触发
- * @param Pullup 上拉
- * @param Pulldown 下拉
+ * @param Pin Pin序号，HAL_WAKEUP_0~HAL_WAKEUP_PWRKEY
+ * @param IsEnable 是否启用
+ * @param IsRiseHigh HAL_WAKEUP_0~HAL_WAKEUP_5上升沿触发，charge和powerkey允许开中断
+ * @param IsFallLow HAL_WAKEUP_0~HAL_WAKEUP_5下降沿触发，charge和powerkey允许开中断
+ * @param Pullup HAL_WAKEUP_0~HAL_WAKEUP_5，powerkey上拉
+ * @param Pulldown HAL_WAKEUP_0~HAL_WAKEUP_5下拉
  */
-void GPIO_WakeupPadConfig(uint32_t Pin, uint8_t IsRiseHigh, uint8_t IsFallLow, uint8_t Pullup, uint8_t Pulldown);
+void GPIO_WakeupPadConfig(uint32_t Pin, uint8_t IsEnable, uint8_t IsRiseHigh, uint8_t IsFallLow, uint8_t Pullup, uint8_t Pulldown);
 
 void GPIO_DriverWS2812B(uint32_t Pin, uint8_t *Data, uint32_t Len, uint8_t Bit0H, uint8_t Bit0L, uint8_t Bit1H, uint8_t Bit1L);
 #endif

@@ -1,8 +1,8 @@
 DbVersion
-16528478,100
+663048479,100
 <end>
 BuildInfo
-The current data file was built by the Application Ver. 2.2.77.207, Tue Oct 17 19:10:46 2023
+The current data file was built by the Application Ver. 2.2.77.207, Wed Oct 18 10:33:51 2023
 <end>
 EnumVals
 0,2048,0,0,PHY_ONLINE,PHY_ICS_MODULE,PhyIcsMeasMainEntrance_0,P_INFO,swLogPrintf("ICS MEAS of euArfcn %d will be started ");
@@ -1849,9 +1849,9 @@ EnumVals
 269312,552050944,0,0,PLAT_AP,PMU,usblpw_wkup_or_init_2,P_VALUE,swLogPrintf("othwk stg 0x%x , proc_stat 0x%x ");
 269312,552052736,0,0,PLAT_AP,PMU,chargeStatusCb_1,P_VALUE,swLogPrintf("Charge Status update = %d ");
 269312,552054784,0,0,PLAT_AP,PMU,apflashXIPSize,P_VALUE,swLogPrintf("AP Flash XIP Size = 0x%x ");
-269312,552058879,0,0,PLAT_AP,PMU,PwrKey_WakeupIntHandler_1,P_VALUE,swLogPrintf("Pwr key Wakeup ");
-269312,552058880,0,0,PLAT_AP,PMU,Pad0_WakeupIntHandler_1,P_VALUE,swLogPrintf("Pad%d Wakeup ");
-269312,552062975,0,0,PLAT_AP,PMU,ChrgPad_WakeupIntHandler_1,P_VALUE,swLogPrintf("charge Wakeup ");
+269312,552056832,0,0,PLAT_AP,PMU,Pad0_WakeupIntHandler_1,P_VALUE,swLogPrintf("Pad%d Wakeup ");
+269312,552060927,0,0,PLAT_AP,PMU,ChrgPad_WakeupIntHandler_1,P_VALUE,swLogPrintf("charge Wakeup ");
+269312,552062975,0,0,PLAT_AP,PMU,PwrKey_WakeupIntHandler_1,P_VALUE,swLogPrintf("Pwr key Wakeup ");
 269312,552062976,0,0,PLAT_AP,PMU,GPR_rmiErrDetectIsr_1,P_WARNING,swLogPrintf("Rmi Err Detect Address = 0x%x ");
 269312,552067071,0,0,PLAT_AP,PMU,apmu2PeriWFITimerExp_0,P_VALUE,swLogPrintf("apmu2PeriWFITimerExp Enter ");
 269312,552067584,0,0,PLAT_AP,PMU,apmuPeriStartWFITimer_0,P_ERROR,swLogPrintf("clkRet1 = %d , clkRet2 = %d , CLKFREQ = 0x%x ");
@@ -9120,5 +9120,5 @@ MW_INFO_PHY_EDRX_PARAM,midWareNvmInfoPhyEdrxParam
 plat_config,plat_config_fs_t
 <end>
 OptionalSegment
-optional_sk_01,B7E39CF2A895FEDDFFF9451F570FAC66CA16EC27157CD1F97F8D0B7A93EDBA9B
+optional_sk_01,E0A1485790298F2695577BBD49585D37F53731C08A8E96B2CA3E5256194D4192
 <end>
