@@ -86,6 +86,10 @@ set_warnings("everything")
 local CHIP = "ec718"
 if CHIP_TARGET == "ec718p" then
     add_defines("CHIP_EC718","TYPE_EC718P")
+	if USER_AP_SIZE then
+		add_defines("AP_FLASH_LOAD_SIZE="..USER_AP_SIZE)
+		add_defines("AP_PKGIMG_LIMIT_SIZE="..USER_AP_SIZE)
+	end
 elseif CHIP_TARGET == "ec718s" then
     is_lspd = true
     add_defines("CHIP_EC718","TYPE_EC718S")
@@ -381,10 +385,6 @@ add_includedirs(USER_PROJECT_DIR .. "/include",
 target("driver")
     set_kind("static")
     add_deps(USER_PROJECT_NAME)
-	if USER_AP_SIZE then
-		add_defines("AP_FLASH_LOAD_SIZE="..USER_AP_SIZE)
-		add_defines("AP_PKGIMG_LIMIT_SIZE="..USER_AP_SIZE)
-	end
     --driver
 	add_files(SDK_TOP .. "/PLAT/core/speed/*.c",
             SDK_TOP .. "/PLAT/driver/board/ec7xx_0h00/src/*c",
@@ -406,10 +406,7 @@ target_end()
 target(USER_PROJECT_NAME..".elf")
 	set_kind("binary")
     set_targetdir("$(buildir)/"..USER_PROJECT_NAME)
-	if USER_AP_SIZE then
-		add_defines("AP_FLASH_LOAD_SIZE="..USER_AP_SIZE)
-		add_defines("AP_PKGIMG_LIMIT_SIZE="..USER_AP_SIZE)
-	end
+
     add_deps("driver")
 
     -- mbedtls
@@ -503,8 +500,9 @@ target(USER_PROJECT_NAME..".elf")
     end)
 	after_build(function(target)
 		os.exec(toolchains .. "/arm-none-eabi-objcopy -O binary $(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".elf $(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".bin")
+        os.iorun(toolchains .. "/arm-none-eabi-size $(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".elf")
 		-- io.writefile("$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".list", os.iorun(toolchains .. "/arm-none-eabi-objdump -h -S $(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".elf"))
-		io.writefile("$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".size", os.iorun(toolchains .. "/arm-none-eabi-size $(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".elf"))
+        -- io.writefile("$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".size", os.iorun(toolchains .. "/arm-none-eabi-size $(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".elf"))
 		os.exec(toolchains .. "/arm-none-eabi-objcopy -O binary $(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".elf $(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".bin")
 		os.exec(toolchains .."/arm-none-eabi-size $(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".elf")
         os.cp("$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".bin", "$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME.."_unZip.bin")
@@ -518,13 +516,13 @@ target(USER_PROJECT_NAME..".elf")
         ---------------------------------------------------------
         -------------- 这部分尚不能跨平台 -------------------------
         local binpkg = (is_plat("windows") and "./PLAT/tools/fcelf.exe " or "./fcelf ").."-M -input ./PLAT/tools/"..CHIP_TARGET.."/bootloader/ap_bootloader.bin -addrname BL_PKGIMG_LNA -flashsize BOOTLOADER_PKGIMG_LIMIT_SIZE \
-                        -input $(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME ..".bin -addrname  AP_PKGIMG_LNA -flashsize AP_PKGIMG_LIMIT_SIZE \
+                        -input $(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME ..".bin -addrname AP_PKGIMG_LNA -flashsize AP_PKGIMG_LIMIT_SIZE \
                         -input ./PLAT/prebuild/FW/lib/gcc/"..CHIP_TARGET.."/cp-demo-flash.bin -addrname CP_PKGIMG_LNA -flashsize CP_PKGIMG_LIMIT_SIZE \
                         -pkgmode 1 \
                         -banoldtool 1 \
                         -productname "..CHIP_TARGET:upper().."_PRD \
                         -def "..out_path .. "/mem_map.txt \
-                        -outfile " .. "./out/" ..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".binpkg"
+                        -outfile " .. out_path.."/"..USER_PROJECT_NAME..".binpkg"
 
         -- 如果所在平台没有fcelf, 可注释掉下面的行, 没有binpkg生成. 
         -- 仍可使用其他工具继续刷机
@@ -543,6 +541,7 @@ target(USER_PROJECT_NAME..".elf")
         end
         os.cp("tools/pack/", out_path)
         local info_table = json.loadfile(out_path.."/pack/info.json")
+        info_table["chip"]["type"] = CHIP_TARGET
         info_table["rom"]["file"] = USER_PROJECT_NAME..".binpkg"
 
         if USER_PROJECT_NAME == 'luatos' then
