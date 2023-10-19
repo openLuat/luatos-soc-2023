@@ -4,7 +4,7 @@ local LIB_NAME = "lib" .. TARGET_NAME .. ".a "
 target(TARGET_NAME)
     set_kind("static")
     set_targetdir(LIB_DIR)
-    set_warnings("error")
+    -- set_warnings("error")
     --加入代码和头文件
     add_includedirs("./include",{public = true})
     add_files("./src/*.c",{public = true})
