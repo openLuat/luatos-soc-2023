@@ -36,6 +36,7 @@
 #include "luat_rtos.h"
 #include "luat_gpio.h"
 #include "driver_pcm.h"
+#include "luat_fs.h"
 
 typedef struct
 {
@@ -460,6 +461,7 @@ int luat_audio_play_tts_set_param(uint32_t multimedia_id, uint32_t param_id, uin
 
 #else
 #include "luat_audio_play.h"
+#include "luat_fs.h"
 HANDLE soc_audio_fopen(const char *fname, const char *mode)
 {
 	return luat_fs_fopen(fname, mode);
