@@ -102,3 +102,12 @@ int luat_flash_write_without_check(char* buff, size_t addr, size_t len) {
 }
 
 
+size_t luat_flash_get_fskv_addr(size_t *len)
+{
+#ifdef FLASH_FDB_REGION_START
+    *len = FLASH_FDB_REGION_END - FLASH_FDB_REGION_START;
+    return FLASH_FDB_REGION_START;
+#else
+    return 0;
+#endif
+}
