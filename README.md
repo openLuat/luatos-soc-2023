@@ -28,9 +28,9 @@ CSDK for ABCDEGF, 适用于所有基于ABCDEGF的合宙模组, 包括衍生型�
 
    **注意：环境变量需重启电脑生效**
 
-2. 如果编译example的话在本代码库的根目录执行`build.bat example`进行编译
+2. 如果编译example的话在本代码库的根目录执行`build.bat example`进行编译，**注意：默认编译ec718p，如需编译*ec718s*或 *ec716s*需要自行修改build.bat中的*CHIP_TARGET*变量**
 
-3. 生成的binpkg位于`out`目录, 日志数据库文件位于`PLAT`目录
+4. 生成的binpkg位于`out`目录, 日志数据库文件位于`PLAT`目录
 
 ## 加入入口函数
 
