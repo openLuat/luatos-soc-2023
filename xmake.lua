@@ -78,7 +78,7 @@ end
 
 set_plat("cross")
 set_arch("arm")
-set_languages("gnu99", "cxx11")
+set_languages("gnu11", "cxx11")
 set_warnings("everything")
 
 -- ==============================
