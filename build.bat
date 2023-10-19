@@ -3,6 +3,9 @@ set PROJECT_NAME=example
 set LSPD_MODE=disable
 rem you can set your gcc path
 rem set GCC_PATH=E:\gcc_mcu
+set CHIP_TARGET=ec718p
+@REM set CHIP_TARGET=ec718s
+@REM set CHIP_TARGET=ec716s
 set ROOT_PATH = %cd:\=/%
 if not "%1"=="" (
 	set PROJECT_NAME=%1
@@ -25,6 +28,7 @@ if not "%2"=="" (
 @echo "AirM2M https://openluat.com"
 @echo "=============================="
 @echo PROJECT   : %PROJECT_NAME%  
+@echo CHIP_TARGET : %CHIP_TARGET%  
 @echo LSPD_MODE : %LSPD_MODE%  
 @echo "=============================="
 
