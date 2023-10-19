@@ -264,7 +264,7 @@ typedef uint64_t LongInt;
 
 
 
-#define INIT_FUN_EXPORT(fn, location, level) const CommonFun_t __ex_init_##fn __attribute__((section(location level))) = fn
+#define INIT_FUN_EXPORT(fn, location, level) const volatile CommonFun_t __ex_init_##fn __attribute__((section(location level))) = fn
 #define INIT_HW_EXPORT(fn, level) INIT_FUN_EXPORT(fn, ".preinit_fun_array.", level)
 #define INIT_DRV_EXPORT(fn, level) INIT_FUN_EXPORT(fn, ".drv_init_fun_array.", level)
 #define INIT_TASK_EXPORT(fn, level) INIT_FUN_EXPORT(fn, ".task_fun_array.", level)

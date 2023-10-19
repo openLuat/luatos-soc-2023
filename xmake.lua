@@ -105,7 +105,7 @@ if is_lspd == true then
 end
 
 add_defines("__USER_CODE__",
-            -- "LTO_FEATURE_MODE",
+            "LTO_FEATURE_MODE",
             "CORE_IS_AP",
             "SDK_REL_BUILD",
             -- "__CURRENT_FILE_NAME__=system_ec7xx",
@@ -185,11 +185,11 @@ add_cxflags("-g3",
             "-mslow-flash-data",
             "-fstack-usage",
             "-Wstack-usage=4096",
-            
-            -- "-flto",
-            -- "-fuse-linker-plugin",
-            -- "-ffat-lto-objects",
-            -- "-Wno-lto-type-mismatch",
+
+            "-flto",
+            "-fuse-linker-plugin",
+            "-ffat-lto-objects",
+            "-Wno-lto-type-mismatch",
 {force=true})
 
 add_ldflags(" -Wl,--wrap=clock ",{force = true})
