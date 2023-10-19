@@ -192,13 +192,8 @@ add_cxflags("-g3",
             "-Wno-lto-type-mismatch",
 {force=true})
 
-add_ldflags(" -Wl,--wrap=clock ",{force = true})
-add_ldflags(" -Wl,--wrap=localtime ",{force = true})
-add_ldflags(" -Wl,--wrap=gmtime ",{force = true})
-add_ldflags(" -Wl,--wrap=time ",{force = true})
-
 add_ldflags("--specs=nano.specs", {force=true})
-add_asflags("-Wl,--cref -Wl,--check-sections -Wl,--gc-sections -lm -Wl,--print-memory-usage -Wl,--wrap=_malloc_r -Wl,--wrap=_free_r -Wl,--wrap=_realloc_r  -mcpu=cortex-m3 -mthumb -DTRACE_LEVEL=5 -DSOFTPACK_VERSION=\"\" -DHAVE_STRUCT_TIMESPEC")
+add_asflags("-Wl,--cref -Wl,--check-sections -Wl,--gc-sections -lm -Wl,--print-memory-usage -Wl,--wrap=clock -Wl,--wrap=localtime -Wl,--wrap=gmtime -Wl,--wrap=time -Wl,--wrap=_malloc_r -Wl,--wrap=_free_r -Wl,--wrap=_realloc_r -mcpu=cortex-m3 -mthumb -DTRACE_LEVEL=5 -DSOFTPACK_VERSION=\"\" -DHAVE_STRUCT_TIMESPEC")
 
 add_defines("sprintf=sprintf_")
 add_defines("snprintf=snprintf_")
@@ -326,7 +321,7 @@ add_defines("MBEDTLS_CONFIG_FILE=\"mbedtls_ec7xx_config.h\"","LUAT_USE_FS_VFS")
 local LD_BASE_FLAGS = "-Wl,--cref -Wl,--check-sections -Wl,--gc-sections -lm -Wl,--print-memory-usage"
 LD_BASE_FLAGS = LD_BASE_FLAGS .. " -L" .. SDK_TOP .. "/PLAT/device/target/board/ec7xx_0h00/ap/gcc/"
 LD_BASE_FLAGS = LD_BASE_FLAGS .. " -T" .. SDK_TOP .. "/PLAT/core/ld/ec7xx_0h00_flash.ld -Wl,-Map,$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME.."_$(mode).map "
-LD_BASE_FLAGS = LD_BASE_FLAGS .. " -Wl,--wrap=_malloc_r -Wl,--wrap=_free_r -Wl,--wrap=_realloc_r  -mcpu=cortex-m3 -mthumb -DTRACE_LEVEL=5 -DSOFTPACK_VERSION=\"\" -DHAVE_STRUCT_TIMESPEC"
+LD_BASE_FLAGS = LD_BASE_FLAGS .. " -Wl,--wrap=clock -Wl,--wrap=localtime -Wl,--wrap=gmtime -Wl,--wrap=time -Wl,--wrap=_malloc_r -Wl,--wrap=_free_r -Wl,--wrap=_realloc_r -mcpu=cortex-m3 -mthumb -DTRACE_LEVEL=5 -DSOFTPACK_VERSION=\"\" -DHAVE_STRUCT_TIMESPEC"
 
 -- add_linkdirs("$(projectdir)/PLAT/libs")
 -- add_links("core_airm2m")
@@ -446,11 +441,11 @@ target(USER_PROJECT_NAME..".elf")
     local ld_parameter = nil 
 	add_ldflags(LD_BASE_FLAGS .. " -Wl,--whole-archive -Wl,--start-group " .. LIB_BASE .. LIB_USER .. " -Wl,--end-group -Wl,--no-whole-archive -Wl,--no-undefined -Wl,--no-print-map-discarded -ldriver ", {force=true})
 	
-    on_load(function (target)
-		out_path = SDK_PATH .. "/out/" ..USER_PROJECT_NAME
-		if not os.exists(out_path) then
-			os.mkdir(out_path)
-		end
+    -- on_load(function (target)
+	-- 	out_path = SDK_PATH .. "/out/" ..USER_PROJECT_NAME
+	-- 	if not os.exists(out_path) then
+	-- 		os.mkdir(out_path)
+	-- 	end
         -- if USER_PROJECT_NAME == 'luatos' then
         --     local conf_data = io.readfile("$(projectdir)/project/luatos/inc/luat_conf_bsp.h")
         --     USER_PROJECT_NAME_VERSION = conf_data:match("#define LUAT_BSP_VERSION \"(%w+)\"")
@@ -477,8 +472,12 @@ target(USER_PROJECT_NAME..".elf")
         --     -- print(FLASH_FOTA_REGION_START,LUAT_SCRIPT_SIZE,LUAT_SCRIPT_OTA_SIZE)
         --     -- print(script_addr,full_addr)
         -- end
-    end)
+    -- end)
     before_link(function(target)
+        out_path = SDK_PATH .. "/out/" ..USER_PROJECT_NAME
+		if not os.exists(out_path) then
+			os.mkdir(out_path)
+		end
         toolchains = target:toolchains()[1]:bindir()
         for _, dep in ipairs(target:orderdeps()) do
             local linkdir = dep:targetdir()
