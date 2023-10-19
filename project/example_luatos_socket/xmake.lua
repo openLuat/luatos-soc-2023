@@ -6,8 +6,8 @@ local LIB_NAME = "lib" .. TARGET_NAME .. ".a "
 --includes(SDK_TOP.."/luatos_lwip_socket")
 target(TARGET_NAME)
     set_kind("static")
-    --add_deps("luatos_lwip_socket")
     set_targetdir(LIB_DIR)
+    set_warnings("error")
     --8K版本用下面的库，注释掉16K的库
     -- LIB_USER = LIB_USER .. SDK_TOP .. "/PLAT/core/lib/libaisound50_8K.a "
     --加入代码和头文件

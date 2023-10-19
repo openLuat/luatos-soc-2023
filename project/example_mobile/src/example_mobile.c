@@ -247,7 +247,7 @@ static void task_run(void *param)
 
 	}
 }
-
+int luat_mobile_sms_event_register_handler(luat_mobile_sms_event_callback_t callback_fun);
 void task_init(void)
 {
 	luat_mobile_event_register_handler(mobile_event_cb);

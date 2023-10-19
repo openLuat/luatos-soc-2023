@@ -416,9 +416,10 @@ target(USER_PROJECT_NAME..".elf")
 
     -- mbedtls
     add_files(LUATOS_ROOT .."components/mbedtls/library/*.c")
+    -- interface
+    add_files(SDK_TOP .. "/interface/src/*.c")
     -- network
-    add_files(SDK_TOP .. "/interface/src/*.c",
-            LUATOS_ROOT .."components/network/adapter/luat_network_adapter.c",
+    add_files(LUATOS_ROOT .."components/network/adapter/luat_network_adapter.c",
             LUATOS_ROOT .."components/ethernet/common/dns_client.c"
             )
 

@@ -24,7 +24,7 @@
 extern void download_file();
 static HANDLE g_s_delay_timer;
 
-void app_pa_on(uint32_t arg)
+LUAT_RT_RET_TYPE app_pa_on(LUAT_RT_CB_PARAM)
 {
 	luat_gpio_set(PA_PWR_PIN, 1);
 }
@@ -97,7 +97,7 @@ static void demo_task(void *arg)
     //如果用模拟DAC通道，打开下面
 //    luat_audio_play_set_bus_type(LUAT_AUDIO_BUS_SOFT_DAC);
     // 无压缩版本
-    luat_audio_play_tts_set_resource(ivtts_16k, sdk_id, NULL);
+    luat_audio_play_tts_set_resource((void*)ivtts_16k, (void*)sdk_id, NULL);
     //8K用下面的
 //	luat_audio_play_tts_set_resource(ivtts_8k, sdk_id, NULL);
     //8K英文用下面的
@@ -113,7 +113,7 @@ static void demo_task(void *arg)
 	info[1].path = "test2.mp3";
 	info[2].path = "test3.mp3";
 	info[3].path = "test4.mp3";
-	luat_audio_play_multi_files(0, info, 4);
+	luat_audio_play_multi_files(0, (audio_play_info_t*)info, 4);
 	luat_rtos_task_sleep(9000);
 //	require_lowpower_state(0);
     while(1)
@@ -135,7 +135,7 @@ static void demo_task(void *arg)
     	info[4].path = NULL;
     	info[4].address = (uint32_t)amr_yuan_data;
     	info[4].rom_data_len = sizeof(amr_yuan_data);
-    	luat_audio_play_multi_files(0, info, 5);
+    	luat_audio_play_multi_files(0, (audio_play_info_t*)info, 5);
     	luat_rtos_task_sleep(9000);
     	luat_meminfo_sys(&total, &used, &max_used);
     	LUAT_DEBUG_PRINT("meminfo total %d, used %d, max_used%d",total, used, max_used);

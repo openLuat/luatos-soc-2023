@@ -1,7 +1,7 @@
 #include "luat_network_adapter.h"
 #include "common_api.h"
 #include "luat_debug.h"
-
+#include "luat_mem.h"
 #include "luat_rtos.h"
 #include "luat_mobile.h"
 
@@ -26,8 +26,8 @@
 #endif 
 
 static char mqtt_sub_topic[] = "test_topic";
-static char mqtt_sub_topic1[] = "test_topic1";
-static char mqtt_sub_topic2[] = "test_topic2";
+// static char mqtt_sub_topic1[] = "test_topic1";
+// static char mqtt_sub_topic2[] = "test_topic2";
 static char mqtt_pub_topic[] = "test_topic";
 static char mqtt_send_payload[] = "hello mqtt_test!!!";
 
@@ -181,7 +181,7 @@ static void luat_mqtt_task(void *param)
 	ret = luat_mqtt_init(luat_mqtt_ctrl, NW_ADAPTER_INDEX_LWIP_GPRS);
 	if (ret) {
 		LUAT_DEBUG_PRINT("mqtt init FAID ret %d", ret);
-		return 0;
+		return;
 	}
 	luat_mqtt_ctrl->ip_addr.type = 0xff;
 	luat_mqtt_connopts_t opts = {0};
@@ -264,9 +264,6 @@ static void luat_libemqtt_init(void)
 {
 	luat_mobile_set_sim_detect_sim0_first();
 	luat_mobile_event_register_handler(luatos_mobile_event_callback);
-//	net_lwip_init();
-//	net_lwip_register_adapter(NW_ADAPTER_INDEX_LWIP_GPRS);
-//	network_register_set_default(NW_ADAPTER_INDEX_LWIP_GPRS);
 
 	luat_rtos_task_create(&mqtt_task_handle, 2 * 1024, 10, "libemqtt", luat_mqtt_task, NULL, 16);
 }

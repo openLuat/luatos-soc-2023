@@ -46,6 +46,7 @@ void test_json_1(char* json_data)
 	double framerate = 0;
 	if(cJSON_IsNumber(framerate_item)) {
 		framerate = framerate_item->valuedouble;
+		LUAT_DEBUG_PRINT("framerate %d \n",framerate);
 	}
 
 	LUAT_DEBUG_PRINT("######## Test START ########\n");

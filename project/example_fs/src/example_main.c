@@ -44,6 +44,7 @@ static int print_fs_info()
         fs_info.total_block, 
         fs_info.block_used, 
         fs_info.block_size);
+    return 0;
 }
 
 static int recur_fs(const char* dir_path)
@@ -124,7 +125,7 @@ void exmaple_fs_luat_file(void) {
     }
     for (size_t i = 0; i < 100; i++)
     {
-        luat_crypto_trng(buff + i*24, 24);
+        luat_crypto_trng((char *)buff + i*24, 24);
     }
 
     // 按块写入数据
@@ -226,7 +227,6 @@ void exmaple_fs_lfs_dir(void)
        LUAT_DEBUG_PRINT("mkdir succeed");
     }
     FILE* fp = NULL;
-    uint8_t *buff = NULL;
     const char* filepath = "luatos/luatos_test.txt";
     fp = luat_fs_fopen(filepath, "wb+");
     if (!fp)
@@ -235,6 +235,15 @@ void exmaple_fs_lfs_dir(void)
        return;
     }
     luat_fs_fclose(fp);
+}
+
+void exmaple_fs_luat_main(void) {
+    luat_fs_init(); // 必须先初始化    
+    print_fs_info();
+    exmaple_fs_lfs_dir();
+    exmaple_fs_luat_file();
+    recur_fs("/");
+    recur_fs("luatos");
 }
 
 static void fs_example(void *param)
@@ -246,15 +255,6 @@ static void fs_example(void *param)
 		luat_rtos_task_sleep(1000);
 		LUAT_DEBUG_PRINT("fs demo is done");
 	}
-}
-
-void exmaple_fs_luat_main(void) {
-    luat_fs_init(); // 必须先初始化    
-    print_fs_info();
-    exmaple_fs_lfs_dir();
-    exmaple_fs_luat_file();
-    recur_fs("/");
-    recur_fs("luatos");
 }
 
 static void task_demoE_init(void)

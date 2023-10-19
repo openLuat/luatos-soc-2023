@@ -40,7 +40,7 @@ static void luatos_mobile_event_callback(LUAT_MOBILE_EVENT_E event, uint8_t inde
 		if (LUAT_MOBILE_NETIF_LINK_ON == status)
 		{
 			LUAT_DEBUG_PRINT("luatos_mobile_event_callback  link ...");
-			luat_socket_check_ready(index, NULL);
+			// luat_socket_check_ready(index, NULL);
 		}
         else if(LUAT_MOBILE_NETIF_LINK_OFF == status || LUAT_MOBILE_NETIF_LINK_OOS == status)
         {
@@ -52,9 +52,6 @@ static void luatos_mobile_event_callback(LUAT_MOBILE_EVENT_E event, uint8_t inde
 static void luat_example_init(void)
 {
 	luat_mobile_event_register_handler(luatos_mobile_event_callback);
-	net_lwip_init();
-	net_lwip_register_adapter(NW_ADAPTER_INDEX_LWIP_GPRS);
-	network_register_set_default(NW_ADAPTER_INDEX_LWIP_GPRS);
 }
 
 INIT_TASK_EXPORT(luat_example_init, "1");

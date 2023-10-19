@@ -5,7 +5,7 @@ USER_AP_SIZE = 0x1b3000
 target(TARGET_NAME)
     set_kind("static")
     set_targetdir(LIB_DIR)
-    
+    set_warnings("error")
     --加入代码和头文件
     add_includedirs("./inc",{public = true})
     add_files("./src/*.c",{public = true})

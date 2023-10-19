@@ -24,6 +24,7 @@
 #include "luat_rtos.h"
 #include "luat_mem.h"
 #include "luat_debug.h"
+#include "luat_crypto.h"
 
 luat_rtos_task_handle task_handle;
 #include "mbedtls/md5.h"

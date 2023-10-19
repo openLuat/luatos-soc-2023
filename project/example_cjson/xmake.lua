@@ -5,7 +5,7 @@ local LIB_NAME = "lib" .. TARGET_NAME .. ".a "
 target(TARGET_NAME)
     set_kind("static")
     set_targetdir(LIB_DIR)
-    
+    set_warnings("error")
     -- cjson
     add_includedirs(LUATOS_ROOT.."components/cjson",{public = true})
     add_files(LUATOS_ROOT.."components/cjson/*.c")

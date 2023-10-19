@@ -5,11 +5,7 @@ USER_AP_SIZE = 0x1b3000	-- 程序区缩小到1b3000，剩余2b3000 - 1b3000 = 10
 target(TARGET_NAME)
     set_kind("static")
     set_targetdir(LIB_DIR)
-	-- 程序区缩小到1b3000，剩余2b3000 - 1b3000 = 100000 1MB空间为用户区
-    if USER_AP_SIZE then
-		add_defines("AP_FLASH_LOAD_SIZE="..USER_AP_SIZE)
-		add_defines("AP_PKGIMG_LIMIT_SIZE="..USER_AP_SIZE)
-	end
+    set_warnings("error")
     --加入代码和头文件
     add_includedirs("./inc",{public = true})
     add_files("./src/*.c",{public = true})

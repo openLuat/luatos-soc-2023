@@ -23,6 +23,7 @@
 #include "common_api.h"
 #include "luat_rtos.h"
 #include "luat_debug.h"
+#include "luat_mobile.h"
 #include "luat_pm.h"
 luat_rtos_task_handle task1_handle;
 

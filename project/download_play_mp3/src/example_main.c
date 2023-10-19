@@ -450,9 +450,7 @@ static void luat_test_init(void)
 	gpio_cfg.alt_fun = CODEC_PWR_PIN_ALT_FUN;
 	luat_gpio_open(&gpio_cfg);
 	luat_mobile_event_register_handler(luatos_mobile_event_callback);
-	net_lwip_init();
-	net_lwip_register_adapter(NW_ADAPTER_INDEX_LWIP_GPRS);
-	network_register_set_default(NW_ADAPTER_INDEX_LWIP_GPRS);
+	
 	luat_rtos_task_create(&g_s_task_handle, 4 * 1024, 50, "test", luat_test_task, NULL, 16);
 
 }
