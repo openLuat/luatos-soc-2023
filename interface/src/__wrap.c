@@ -9,7 +9,7 @@ void RTC_GetDateTime(Date_UserDataStruct *pDate, Time_UserDataStruct *pTime)
 
 static struct tm prvTM;
 extern const uint32_t DayTable[2][12];
-struct tm *__wrap_localtime (const time_t *_timer)
+__attribute__((used)) struct tm * __wrap_localtime (const time_t *_timer)
 {
 	Time_UserDataStruct Time;
 	Date_UserDataStruct Date;
@@ -36,7 +36,7 @@ struct tm *__wrap_localtime (const time_t *_timer)
 	return &prvTM;
 }
 
-struct tm *__wrap_gmtime (const time_t *_timer)
+__attribute__((used)) struct tm * __wrap_gmtime (const time_t *_timer)
 {
 	Time_UserDataStruct Time;
 	Date_UserDataStruct Date;
@@ -62,12 +62,12 @@ struct tm *__wrap_gmtime (const time_t *_timer)
 	return &prvTM;
 }
 
-clock_t	   __wrap_clock (void)
+__attribute__((used)) clock_t __wrap_clock (void)
 {
 	return GetSysTickMS()/1000;
 }
 
-time_t	   __wrap_time (time_t *_Time)
+__attribute__((used)) time_t __wrap_time (time_t *_Time)
 {
   utc_timer_value_t *timeUtc = OsaSystemTimeReadRamUtc();
   if (_Time != NULL) {
