@@ -169,8 +169,7 @@ add_defines("__USER_CODE__",
             "__ASSEMBLY__",
             "LUAT_EC7XX_CSDK",
             "LUAT_USE_STD_STRING",
-			"LUAT_LOG_NO_NEWLINE"
-)
+			"LUAT_LOG_NO_NEWLINE")
 
 add_cxflags("-g3",
             "-mcpu=cortex-m3",
@@ -192,6 +191,8 @@ add_cxflags("-g3",
             "-Wstack-usage=4096",
 
 {force=true})
+
+add_asflags("-mcpu=cortex-m3 -mthumb")
 
 if CHIP_TARGET == "ec716s" or CHIP_TARGET == "ec718s" then
     -- 开启 lto
@@ -218,9 +219,9 @@ add_ldflags("--specs=nano.specs",
             "-Wl,--wrap=localtime",
             "-Wl,--wrap=gmtime",
             "-Wl,--wrap=time",
+            "-mcpu=cortex-m3 -mthumb -T$(projectdir)/PLAT/core/ld/ec7xx_0h00_flash.ld",
+            "-Wl,-Map,$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME.."_$(mode).map",
             {force = true})
-
-add_asflags("-mcpu=cortex-m3 -mthumb")
 
 add_defines("sprintf=sprintf_")
 add_defines("snprintf=snprintf_")
@@ -314,6 +315,9 @@ add_includedirs(
 
 {public = true})
 
+-- CSDK 宏定义
+add_defines("MBEDTLS_CONFIG_FILE=\"mbedtls_ec7xx_config.h\"","LUAT_USE_FS_VFS")
+
 -- CSDK相关头文件引用
 add_includedirs(LUATOS_ROOT .. "/luat/include",
                 LUATOS_ROOT .. "/components/mobile",
@@ -327,8 +331,6 @@ add_includedirs(LUATOS_ROOT .. "/luat/include",
 				LUATOS_ROOT .. "/components/camera",
 				SDK_TOP .. "/interface/include",
                 {public = true})
-
-add_defines("MBEDTLS_CONFIG_FILE=\"mbedtls_ec7xx_config.h\"","LUAT_USE_FS_VFS")
 
 -- if USER_PROJECT_NAME == 'luatos' then
 --     if os.getenv("LUAT_EC7XX_LITE_MODE") == "1" then
@@ -461,8 +463,7 @@ target(USER_PROJECT_NAME..".elf")
     local ld_parameter = nil 
 
     --linkflags
-    local LD_BASE_FLAGS = "-mcpu=cortex-m3 -mthumb -T" .. SDK_TOP .. "/PLAT/core/ld/ec7xx_0h00_flash.ld -Wl,-Map,$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME.."_$(mode).map"
-	add_ldflags(LD_BASE_FLAGS .. " -Wl,--whole-archive -Wl,--start-group " .. LIB_BASE .. LIB_USER .. " -Wl,--end-group -Wl,--no-whole-archive -ldriver ", {force=true})
+    add_ldflags("-Wl,--whole-archive -Wl,--start-group " .. LIB_BASE .. LIB_USER .. " -Wl,--end-group -Wl,--no-whole-archive -ldriver ", {force=true})
 	
     -- on_load(function (target)
 	-- 	out_path = SDK_PATH .. "/out/" ..USER_PROJECT_NAME
@@ -505,16 +506,12 @@ target(USER_PROJECT_NAME..".elf")
         for _, dep in ipairs(target:orderdeps()) do
             local linkdir = dep:targetdir()
             target:add("ldflags","-L./"..linkdir, {force=true})
-            -- print("linkdir",linkdir)
         end  
-
         ld_parameter = {"-E","-P"}
         for _, define_flasg in pairs(target:get("defines")) do
             table.insert(ld_parameter,"-D" .. define_flasg)
         end
-
         os.execv(toolchains .. "/arm-none-eabi-gcc",table.join(ld_parameter, {"-I",SDK_PATH .. "/PLAT/device/target/board/ec7xx_0h00/common/pkginc"},{"-I",SDK_PATH .. "/PLAT/device/target/board/ec7xx_0h00/common/inc"}, {"-o",SDK_PATH .. "/PLAT/core/ld/ec7xx_0h00_flash.ld","-"}),{stdin = SDK_PATH .. "/PLAT/core/ld/ec7xx_0h00_flash.c"})
-        
         mem_parameter = {}
         for _, cx_flasg in pairs(target:get("cxflags")) do
             table.insert(mem_parameter,cx_flasg)
@@ -526,6 +523,7 @@ target(USER_PROJECT_NAME..".elf")
         os.execv(toolchains .. "/arm-none-eabi-gcc",table.join(mem_parameter, {"-o",out_path .. "/mem_map.txt","-"}),{stdin = SDK_PATH .. "/PLAT/device/target/board/ec7xx_0h00/common/inc/mem_map.h"})
         os.cp(out_path .. "/mem_map.txt", "$(buildir)/"..USER_PROJECT_NAME.."/mem_map.txt")
     end)
+
 	after_build(function(target)
 		os.exec(toolchains .. "/arm-none-eabi-objcopy -O binary $(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".elf $(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".bin")
         os.iorun(toolchains .. "/arm-none-eabi-size $(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".elf")
