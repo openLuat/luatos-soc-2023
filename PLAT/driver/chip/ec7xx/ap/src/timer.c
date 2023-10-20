@@ -256,7 +256,7 @@ void TIMER_setExternalClockInput(uint32_t instance, uint32_t gpioPort, uint32_t 
 
     ASSERT(instance < TIMER_INSTANCE_NUM);
 
-    GPR_setTimerInputPin(instance, (gpioPort << 16) + gpioPin, onOff);
+    GPR_setTimerInputPin(instance, (gpioPort << 4) + gpioPin, onOff);
 }
 
 

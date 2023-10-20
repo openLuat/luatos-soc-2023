@@ -519,8 +519,8 @@ typedef struct CmiSmsGetMoreMessageModeCnf_Tag
     UINT8                       smsMoreMsgMode;
 }CmiSmsGetMoreMessageModeCnf;
 
-#define CI_SMS_SIGNAL_NUM_MAX                   5
-#define CI_SMS_RANGE_LIST_MAX                   5
+#define CMI_SMS_SINGLE_NUM_MAX                   5
+#define CMI_SMS_RANGE_LIST_MAX                   5
 
 
 typedef struct CmiSmsNumberRange_Tag
@@ -531,12 +531,12 @@ typedef struct CmiSmsNumberRange_Tag
 
 typedef struct CmiSmsNumberList_Tag
 {
-    BOOL                            bSignalNum;
+    BOOL                            bSingleNum;
     BOOL                            bRangeNum;
     UINT8                           rangeLen;
-    UINT8                           signalNum;
-    UINT32                          signalNumList[CI_SMS_SIGNAL_NUM_MAX];
-    CmiSmsNumberRange               rangeList[CI_SMS_RANGE_LIST_MAX];
+    UINT8                           singleNum;
+    UINT32                          singleNumList[CMI_SMS_SINGLE_NUM_MAX];
+    CmiSmsNumberRange               rangeList[CMI_SMS_RANGE_LIST_MAX];
 }CmiSmsNumberList;
 
 typedef struct CmiSmsSetCscbSettingReq_Tag
@@ -560,6 +560,7 @@ typedef struct CmiSmsGetCscbSettingCnf_Tag
 {
     CmiSmsErrorCode                 errorCode;
     BOOL                            mode;
+    UINT8                           rsv0;
     CmiSmsNumberList                mids;
     CmiSmsNumberList                dcss;
 }CmiSmsGetCscbSettingCnf;

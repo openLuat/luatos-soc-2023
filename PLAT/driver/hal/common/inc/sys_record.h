@@ -1,7 +1,7 @@
 #ifndef _SYS_RECORD_H
 #define _SYS_RECORD_H
 
-#include "CommonTypedef.h"
+#include "commontypedef.h"
 
 #define EC_TRACE_SCHEDULE_RECORD  1
 

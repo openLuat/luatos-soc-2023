@@ -113,6 +113,7 @@ typedef enum PmuVoteDozeModule_enum
     PMU_DOZE_CPADC_MOD,     // do not enter doze, if ap does not finish adc proxy flow.
     PMU_DOZE_USB_MOD,     // do not enter doze, if ap does not finish USB suspend guard flow.
     PMU_DOZE_USP_MOD,
+    PMU_DOZE_GPIO_MOD,
     PMU_DOZE_NUM_OF_MOD
 }PmuVoteDozeModule;
 

@@ -10,7 +10,9 @@
 #include "gpio.h"
 #include "clock.h"
 #include "slpman.h"
-
+#ifdef PM_FEATURE_ENABLE
+#include "apmu_external.h"
+#endif
 #define EIGEN_GPIO(n)             ((GPIO_TypeDef *) (RMI_GPIO_BASE_ADDR + 0x1000*n))
 
 /**
@@ -82,11 +84,28 @@ void GPIO_driverDeInit(void)
     CLOCK_clockDisable(GPIO_RMI_HCLK);
 
 #ifdef PM_FEATURE_ENABLE
+    apmuVoteToDozeState(PMU_DOZE_GPIO_MOD, true);
+
     slpManUnregisterPredefinedBackupCb(SLP_CALLBACK_GPIO_MODULE);
     slpManUnregisterPredefinedRestoreCb(SLP_CALLBACK_GPIO_MODULE);
 #endif
 }
 
+#ifdef PM_FEATURE_ENABLE
+bool GPIO_hasPinWaitInterrupt(void)
+{
+    GPIO_TypeDef *base;
+    base = EIGEN_GPIO(0);
+    if(base->INTENSET != 0)
+        return true;
+
+    base = EIGEN_GPIO(1);
+    if(base->INTENSET != 0)
+        return true;
+    
+    return false;
+}
+#endif
 
 void GPIO_pinConfig(uint32_t port, uint16_t pin, const GpioPinConfig_t *config)
 {
@@ -172,6 +191,12 @@ void GPIO_interruptConfig(uint32_t port, uint16_t pin, GpioInterruptConfig_e con
         default :
             break;
     }
+    #ifdef PM_FEATURE_ENABLE
+    if(GPIO_hasPinWaitInterrupt())
+        apmuVoteToDozeState(PMU_DOZE_GPIO_MOD, false);
+    else
+        apmuVoteToDozeState(PMU_DOZE_GPIO_MOD, true);
+    #endif
 }
 
 void GPIO_pinWrite(uint32_t port, uint16_t pinMask, uint16_t output)

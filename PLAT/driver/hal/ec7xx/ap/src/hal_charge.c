@@ -21,7 +21,7 @@
  *----------------------------------------------------------------------------*/
 #include <string.h>
 #include "hal_charge.h"
-#include"EC7xx.h"
+#include"ec7xx.h"
 #include "cmsis_os2.h"
 #include DEBUG_LOG_HEADER_FILE
 #include "cmsis_os2.h"

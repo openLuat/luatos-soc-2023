@@ -17,7 +17,7 @@
 #ifndef __ATC_REPLY_ERR_MAP_H__
 #define __ATC_REPLY_ERR_MAP_H__
 
-#include "CommonTypedef.h"
+#include "commontypedef.h"
 
 /*
  * ERROR CODE ID -> ERROR STRING mapping

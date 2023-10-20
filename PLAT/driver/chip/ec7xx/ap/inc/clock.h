@@ -11,7 +11,7 @@
 #define _CLOCK_EC7XX_H
 
 #include "ec7xx.h"
-#include "Driver_common.h"
+#include "Driver_Common.h"
 
 
 /**

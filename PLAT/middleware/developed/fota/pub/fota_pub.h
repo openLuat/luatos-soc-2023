@@ -29,6 +29,19 @@
 /*----------------------------------------------------------------------------*
  *                    MACROS                                                  *
  *----------------------------------------------------------------------------*/
+#if defined CHIP_EC718 || defined CHIP_EC716
+#ifdef FEATURE_BOOTLOADER_PROJECT_ENABLE
+#define FOTA_PRESET_RAM_ENABLE   1
+#else
+#define FOTA_PRESET_RAM_ENABLE   0
+#endif
+
+#else
+#define FOTA_PRESET_RAM_ENABLE   0
+
+#endif
+
+
 #define FOTA_EOK          0
 #define FOTA_EUNDEF      -1   /* undefined error */
 #define FOTA_EARGS       -2   /* arguments invalid */
@@ -60,8 +73,21 @@
 #define FOTA_ALIGN_UP(x,sz)      (((x) + ((sz) - 1)) & (~((sz) - 1)))
 #define FOTA_ALIGN_DOWN(x,sz)    ((x) & (~((sz) - 1)))
 
+#if (FOTA_PRESET_RAM_ENABLE == 1)
 extern int EC_Printf(const char * pFormat, ...);
+extern int EC_Sprintf(char *pBuf, const char * pFormat, ...);
+
 #define FOTA_TRACE(tag,fmt,args...)    EC_Printf(fmt, ##args)
+#define FOTA_SPRINTF(buf,args...)      EC_Sprintf(buf, ##args)
+#define FOTA_RAND()                    (0)
+
+#else
+#define FOTA_TRACE(tag,fmt,args...)    printf(fmt, ##args)
+#define FOTA_SPRINTF(buf,args...)      sprintf(buf, ##args)
+#define FOTA_RAND()                    rand()
+
+#endif
+
 
 /*----------------------------------------------------------------------------*
  *                   DATA TYPE DEFINITION                                     *
@@ -138,6 +164,7 @@ typedef enum
     FOTA_DEF_WDT_STOP,
     FOTA_DEF_GET_RAM_SIZE,
     FOTA_DEF_CHK_BATTERY,
+    FOTA_DEF_CHK_DYN_MEM,
     FOTA_DEF_CHK_REMAP_ZONE,
     FOTA_DEF_CHK_DELTA_STATE,
     FOTA_DEF_CHK_BASE_IMAGE,    /* not used any more, call 'fotaNvmVerifyDelta()' instead, just for compatibility here! */
@@ -171,6 +198,13 @@ typedef struct
     uint8_t  isBattLow;   /* 0/1 */
     uint8_t  rsvd[3];
 }FotaDefChkBattery_t;
+
+/* FOTA_DEF_CHK_DYN_MEM */
+typedef struct
+{
+    uint8_t  isEnable;   /* 0/1 */
+    uint8_t  rsvd[3];
+}FotaDefChkDynMem_t;
 
 /* FOTA_DEF_CHK_REMAP_ZONE */
 typedef struct
@@ -284,7 +318,9 @@ typedef struct
     uint16_t  rsvd1;
     uint32_t  parLen;     /* including hdr len */
     uint8_t   parHash[FOTA_SHA256_HASH_LEN];
+#if !defined(__CC_ARM)
     uint8_t   retention[0];
+#endif
 }CustFotaParHdr_t;
 
 typedef struct

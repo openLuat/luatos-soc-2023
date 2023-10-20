@@ -85,6 +85,9 @@ uint8_t sysROSpaceCheck(uint32_t addr, uint32_t size)
  *                    MACROS                                                  *
  *----------------------------------------------------------------------------*/
 
+#define FOTA_NVM_SECTOR_SIZE           FOTA_BUF_SIZE_4K
+#define FOTA_NVM_BLOCK_SIZE            FOTA_BUF_SIZE_32K
+
 #ifdef FOTA_NVM_FS_ENABLE
 #define FOTA_DELTA_PAR_NAME            "FotaDelta.par"
 #define FOTA_DELTA_PAR_MAXSIZE         FOTA_BUF_SIZE_512K
@@ -98,7 +101,11 @@ uint8_t sysROSpaceCheck(uint32_t addr, uint32_t size)
 #define FOTA_NVM_REMAP_SIZE            (FOTA_NVM_SECTOR_SIZE)
 
 #define FOTA_NVM_DELTA_BACKUP_ADDR     (xxxx)
+#if defined CHIP_EC718 || defined CHIP_EC716
 #define FOTA_NVM_DELTA_BACKUP_SIZE     (FOTA_BUF_SIZE_1K * 44)
+#else
+#define FOTA_NVM_DELTA_BACKUP_SIZE     (FOTA_BUF_SIZE_32K)
+#endif
 
 #else  /* raw flash */
 #define FOTA_NVM_DELTA_ADDR            (FLASH_FOTA_REGION_START)
@@ -108,22 +115,32 @@ uint8_t sysROSpaceCheck(uint32_t addr, uint32_t size)
 #define FOTA_NVM_DELTA_DOWNLOAD_SIZE   (FOTA_NVM_DELTA_SIZE - FOTA_NVM_DELTA_BACKUP_SIZE)
 
 #define FOTA_NVM_DELTA_BACKUP_ADDR     (FOTA_NVM_DELTA_ADDR + FOTA_NVM_DELTA_DOWNLOAD_SIZE)
-#ifdef __USER_CODE__
+#if defined CHIP_EC718 || defined CHIP_EC716
+#if (defined __USER_CODE__) && (defined TYPE_EC718P)
 #define FOTA_NVM_DELTA_BACKUP_SIZE     (FOTA_BUF_SIZE_1K * 96)
 #else
 #define FOTA_NVM_DELTA_BACKUP_SIZE     (FOTA_BUF_SIZE_1K * 44)
+#endif
+#else
+#define FOTA_NVM_DELTA_BACKUP_SIZE     (FOTA_BUF_SIZE_32K)
 #endif
 
 #endif
 
 #define FOTA_NVM_REAL_BACKUP_ADDR      (FOTA_NVM_DELTA_BACKUP_ADDR)
 #define FOTA_NVM_REAL_BACKUP_SIZE      (FOTA_NVM_DELTA_BACKUP_SIZE + FOTA_NVM_BACKUP_MUX_SIZE)
-#ifdef __USER_CODE__
-#define FOTA_NVM_BACKUP_MUX_SIZE       (0)
+#if defined CHIP_EC718 || defined CHIP_EC716
+#if (defined __USER_CODE__) && (defined TYPE_EC718P)
+#define FOTA_NVM_BACKUP_MUX_SIZE       0
 #else
 #define FOTA_NVM_BACKUP_MUX_SIZE       (NVRAM_PHYSICAL_SIZE)
 #endif
+#else
+#define FOTA_NVM_BACKUP_MUX_SIZE       0
+#endif
 
+
+#if defined CHIP_EC618 || defined CHIP_EC618_Z0 || defined CHIP_EC718 || defined CHIP_EC716
 #define FOTA_NVM_A2AP_XIP_ADDR         (AP_FLASH_XIP_ADDR)
 #if defined CHIP_EC618 || defined CHIP_EC618_Z0
 #define FOTA_NVM_A2CP_XIP_ADDR         (AP_VIEW_CPFLASH_XIP_ADDR)
@@ -135,9 +152,6 @@ uint8_t sysROSpaceCheck(uint32_t addr, uint32_t size)
 #endif
 #endif
 
-#define FOTA_NVM_SECTOR_SIZE           FOTA_BUF_SIZE_4K
-#define FOTA_NVM_BLOCK_SIZE            FOTA_BUF_SIZE_32K
-
 #define FOTA_NVM_AP_LOAD_ADDR          (AP_FLASH_LOAD_ADDR & (~AP_FLASH_XIP_ADDR))
 #define FOTA_NVM_AP_LOAD_SIZE          (AP_FLASH_LOAD_SIZE)
 
@@ -147,6 +161,22 @@ uint8_t sysROSpaceCheck(uint32_t addr, uint32_t size)
 #define FOTA_NVM_SYSH_LOAD_ADDR        (SYS_SEC_HAED_ADDR)
 #define FOTA_NVM_SYSH_LOAD_SIZE        (SYS_FLASH_LOAD_SIZE)
 
+#define FLASH_XIP_ADDR                 (AP_FLASH_XIP_ADDR)
+
+#else /* @ec616/ec616s/ec626 */
+#define FOTA_NVM_A2AP_XIP_ADDR         (FLASH_XIP_ADDR)
+#define FOTA_NVM_A2CP_XIP_ADDR         (FLASH_XIP_ADDR)
+
+/* APP type by default */
+#define FOTA_CUST_APP_ENABLE
+#endif
+
+#ifdef FOTA_CUST_APP_ENABLE
+#define FOTA_NVM_APP_LOAD_ADDR         (APP_FLASH_LOAD_ADDR & (~FOTA_NVM_A2AP_XIP_ADDR))
+#define FOTA_NVM_APP_LOAD_SIZE         (APP_FLASH_LOAD_SIZE)
+#endif
+
+#if (defined __USER_CODE__) && (defined TYPE_EC718P) && (!defined __BL_MODE__)
 
 int32_t soc_fota_nvm_init(void)
 {
@@ -159,12 +189,14 @@ int32_t soc_fota_nvm_init(void)
     fotaNvmSetZone(FOTA_NVM_ZONE_DELTA, FOTA_NVM_DELTA_ADDR, FOTA_NVM_DELTA_SIZE, FOTA_NVM_DELTA_BACKUP_SIZE, FOTA_NVM_A2AP_XIP_ADDR);
 #endif
     fotaNvmSetZone(FOTA_NVM_ZONE_BKUP, FOTA_NVM_REAL_BACKUP_ADDR, FOTA_NVM_REAL_BACKUP_SIZE, FOTA_NVM_BACKUP_MUX_SIZE, FOTA_NVM_A2AP_XIP_ADDR);
+#if defined CHIP_EC618 || defined CHIP_EC618_Z0 || defined CHIP_EC718 || defined CHIP_EC716
     fotaNvmSetZone(FOTA_NVM_ZONE_AP, FOTA_NVM_AP_LOAD_ADDR, FOTA_NVM_AP_LOAD_SIZE, 0, FOTA_NVM_A2AP_XIP_ADDR);
     fotaNvmSetZone(FOTA_NVM_ZONE_CP, FOTA_NVM_CP_LOAD_ADDR, FOTA_NVM_CP_LOAD_SIZE, 0, FOTA_NVM_A2CP_XIP_ADDR);
+    fotaNvmSetZone(FOTA_NVM_ZONE_SYSH, FOTA_NVM_SYSH_LOAD_ADDR, FOTA_NVM_SYSH_LOAD_SIZE, 0, FOTA_NVM_A2AP_XIP_ADDR);
+#endif
 #ifdef FOTA_CUST_APP_ENABLE
     fotaNvmSetZone(FOTA_NVM_ZONE_APP, FOTA_NVM_APP_LOAD_ADDR, FOTA_NVM_APP_LOAD_SIZE, 0, FOTA_NVM_A2AP_XIP_ADDR);
 #endif
-    fotaNvmSetZone(FOTA_NVM_ZONE_SYSH, FOTA_NVM_SYSH_LOAD_ADDR, FOTA_NVM_SYSH_LOAD_SIZE, 0, FOTA_NVM_A2AP_XIP_ADDR);
 
 #else
 #ifdef FOTA_NVM_FS_ENABLE
@@ -352,3 +384,5 @@ PLAT_BL_UNCOMP_FLASH_TEXT void decompressRamCodeGetAddrInfo(void)
 
     #endif
 }
+
+#endif

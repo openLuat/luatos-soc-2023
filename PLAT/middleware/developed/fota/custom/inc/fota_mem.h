@@ -18,7 +18,7 @@
 #ifndef FOTA_MEM_H
 #define FOTA_MEM_H
 
-
+uint8_t fotaIsSuppDynMem(void);
 int32_t fotaInitMem(uint8_t *buf, uint32_t size);
 void*   fotaAllocMem(uint32_t size);
 void    fotaFreeMem(void *buf);

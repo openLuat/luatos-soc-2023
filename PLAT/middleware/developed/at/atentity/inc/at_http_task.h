@@ -18,7 +18,7 @@
 #define _AT_HTTP_TASK_H_
 
 #include "at_util.h"
-#include "httpclient.h"
+#include "HTTPClient.h"
 
 #define HTTP_RSP_HEAD_BUFFER_SIZE 800
 #define HTTP_RSP_CONTENT_BUFFER_SIZE  1501

@@ -14,7 +14,7 @@
 #ifndef __EC_MQTT_API_H__
 #define __EC_MQTT_API_H__
 
-#include "CommonTypedef.h"
+#include "commontypedef.h"
 #include "MQTTClient.h"
 
 /******************************************************************************

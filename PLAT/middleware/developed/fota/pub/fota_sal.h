@@ -21,12 +21,36 @@
  *                    INCLUDES                                                *
  *----------------------------------------------------------------------------*/
 #include <stdint.h>
+#if defined CHIP_EC616 || defined CHIP_EC616_Z0 || defined CHIP_EC616S || defined CHIP_EC626
+#define FOTA_PLAT_SCT_ZI /*PLAT_BL_SCT_ZI*/
+
+#if defined CHIP_EC616 || defined CHIP_EC616_Z0
+#include "flash_ec616_rt.h"
+#elif defined CHIP_EC616S
+#include "flash_ec616s_rt.h"
+#elif defined CHIP_EC626
+#include "flash_ec626_rt.h"
+#endif
+
+#ifdef FEATURE_FOTA_ENABLE
+#include "common.h"
+#else
+#include "debug_trace.h"
+#include "debug_log.h"
+#endif
+
+#else /* ec618/ec7xx */
 #include "sctdef.h"
+#include "flash_rt.h"
+
 #ifdef FEATURE_FOTA_ENABLE
 #include "common.h"
 #else
 #include DEBUG_LOG_HEADER_FILE
 #endif
+
+#endif
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -47,11 +71,16 @@ extern "C" {
 #define BSP_QSPI_ERASE_AP_FLASH_32K(addr, size)    BSP_QSPI_Erase_32KBlk_Safe(addr)
 #define BSP_QSPI_WRITE_AP_FLASH(buf, addr, size)   BSP_QSPI_Write(buf, addr, size)
 #define BSP_QSPI_READ_AP_FLASH(buf, addr, size)    BSP_QSPI_XIP_Read(buf, addr, size)
-#else//ec71xx
+#elif defined CHIP_EC718 || defined CHIP_EC716
 #define BSP_QSPI_ERASE_AP_FLASH(addr, size)        FLASH_eraseSectorSafe(addr)
 #define BSP_QSPI_ERASE_AP_FLASH_32K(addr, size)    FLASH_erase32KBlkSafe(addr)
 #define BSP_QSPI_WRITE_AP_FLASH(buf, addr, size)   FLASH_write(buf, addr, size)
 #define BSP_QSPI_READ_AP_FLASH(buf, addr, size)    FLASH_XIPRead(buf, addr, size)
+#else
+#define BSP_QSPI_ERASE_AP_FLASH(addr, size)        BSP_QSPI_Erase_Sector(addr)
+#define BSP_QSPI_ERASE_AP_FLASH_32K(addr, size)    BSP_QSPI_Erase_Block(addr)
+#define BSP_QSPI_WRITE_AP_FLASH(buf, addr, size)   BSP_QSPI_Write(buf, addr, size)
+#define BSP_QSPI_READ_AP_FLASH(buf, addr, size)    ImageGeneralRead(buf, addr, size)
 #endif
 
 
@@ -79,6 +108,13 @@ extern "C" {
 #define BSP_QSPI_WRITE_CP_FLASH(buf, addr, size)   FLASH_write(buf, addr, size)
 #define BSP_QSPI_READ_CP_FLASH(buf, addr, size)    FLASH_XIPRead(buf, addr, size)
 #endif
+#else
+#define BSP_QSPI_ENABLE_CP_FLASH()
+#define BSP_QSPI_DISABLE_CP_FLASH()
+#define BSP_QSPI_ERASE_CP_FLASH(addr, size)        1
+#define BSP_QSPI_ERASE_CP_FLASH_32K(addr, size)    1
+#define BSP_QSPI_WRITE_CP_FLASH(buf, addr, size)   1
+#define BSP_QSPI_READ_CP_FLASH(buf, addr, size)    1
 #endif
 
 #else
@@ -90,11 +126,16 @@ extern "C" {
 #define BSP_QSPI_ERASE_AP_FLASH_32K(addr, size)    BSP_QSPI_Erase_Safe(addr, size)
 #define BSP_QSPI_WRITE_AP_FLASH(buf, addr, size)   BSP_QSPI_Write_Safe(buf, addr, size)
 #define BSP_QSPI_READ_AP_FLASH(buf, addr, size)    BSP_QSPI_Read_Safe(buf, addr, size)
-#else//ec71x
+#elif defined CHIP_EC718 || defined CHIP_EC716
 #define BSP_QSPI_ERASE_AP_FLASH(addr, size)        FLASH_eraseSafe(addr, size)
 #define BSP_QSPI_ERASE_AP_FLASH_32K(addr, size)    FLASH_eraseSafe(addr, size)
 #define BSP_QSPI_WRITE_AP_FLASH(buf, addr, size)   FLASH_writeSafe(buf, addr, size)
 #define BSP_QSPI_READ_AP_FLASH(buf, addr, size)    FLASH_XIPRead(buf, addr, size)
+#else
+#define BSP_QSPI_ERASE_AP_FLASH(addr, size)        BSP_QSPI_Erase_Safe(addr, size)
+#define BSP_QSPI_ERASE_AP_FLASH_32K(addr, size)    BSP_QSPI_Erase_Safe(addr, size)
+#define BSP_QSPI_WRITE_AP_FLASH(buf, addr, size)   BSP_QSPI_Write_Safe(buf, addr, size)
+#define BSP_QSPI_READ_AP_FLASH(buf, addr, size)    BSP_QSPI_Read_Safe(buf, addr, size)
 #endif
 
 
@@ -121,6 +162,13 @@ extern "C" {
 #define BSP_QSPI_WRITE_CP_FLASH(buf, addr, size)   FLASH_writeSafe(buf, addr, size)
 #define BSP_QSPI_READ_CP_FLASH(buf, addr, size)    FLASH_XIPRead(buf, addr, size)
 #endif
+#else
+#define BSP_QSPI_ENABLE_CP_FLASH()
+#define BSP_QSPI_DISABLE_CP_FLASH()
+#define BSP_QSPI_ERASE_CP_FLASH(addr, size)        1
+#define BSP_QSPI_ERASE_CP_FLASH_32K(addr, size)    1
+#define BSP_QSPI_WRITE_CP_FLASH(buf, addr, size)   1
+#define BSP_QSPI_READ_CP_FLASH(buf, addr, size)    1
 #endif
 
 #endif
@@ -151,7 +199,7 @@ extern uint8_t  CPXIP_QSPI_Erase_Sector(uint32_t SectorAddress);
 extern uint8_t  CPXIP_QSPI_Write(uint8_t* pData, uint32_t WriteAddr, uint32_t Size);
 extern uint32_t CPXIP_QSPI_Read(uint8_t *pData,uint32_t ReadAddr, uint32_t Size);
 
-#else
+#elif defined CHIP_EC718 || defined CHIP_EC716
 
 extern uint8_t FLASH_XIPRead(uint8_t* pData, uint32_t ReadAddr, uint32_t Size);
 extern uint8_t FLASH_write(uint8_t* pData, uint32_t WriteAddr, uint32_t Size);
@@ -163,6 +211,13 @@ extern uint8_t CPFLASH_eraseSector(uint32_t SectorAddress);
 extern uint8_t CPFLASH_eraseBlock(uint32_t BlockAddress);
 extern uint8_t CPFLASH_xipInit( void );
 
+#else
+
+extern uint8_t  BSP_QSPI_Erase_Sector(uint32_t SectorAddress);
+extern uint8_t  BSP_QSPI_Erase_Block(uint32_t BlockAddress);
+extern uint8_t  BSP_QSPI_Write(uint8_t* pData, uint32_t WriteAddr, uint32_t Size);
+extern uint32_t ImageGeneralRead(uint8_t * pData, uint32_t  ReadAddr, uint32_t Size);
+//extern uint8_t  BSP_QSPI_Read(uint8_t* pData, uint32_t ReadAddr, uint32_t Size);
 
 #endif
 
