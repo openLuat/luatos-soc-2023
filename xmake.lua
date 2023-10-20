@@ -203,9 +203,22 @@ if CHIP_TARGET == "ec716s" or CHIP_TARGET == "ec718s" then
                 {force=true})
 end 
 
+add_ldflags("--specs=nano.specs",
+            "-Wl,--cref",
+            "-Wl,--check-sections",
+            "-Wl,--gc-sections",
+            "-lm",
+            "-Wl,--print-memory-usage",
+            "-Wl,--wrap=_malloc_r",
+            "-Wl,--wrap=_free_r",
+            "-Wl,--wrap=_realloc_r",
+            "-Wl,--wrap=clock",
+            "-Wl,--wrap=localtime",
+            "-Wl,--wrap=gmtime",
+            "-Wl,--wrap=time",
+            {force = true})
 
-add_ldflags("--specs=nano.specs", {force=true})
-add_asflags("-Wl,--cref -Wl,--check-sections -Wl,--gc-sections -lm -Wl,--print-memory-usage -Wl,--wrap=clock -Wl,--wrap=localtime -Wl,--wrap=gmtime -Wl,--wrap=time -Wl,--wrap=_malloc_r -Wl,--wrap=_free_r -Wl,--wrap=_realloc_r -mcpu=cortex-m3 -mthumb -DTRACE_LEVEL=5 -DSOFTPACK_VERSION=\"\" -DHAVE_STRUCT_TIMESPEC")
+add_asflags("-mcpu=cortex-m3 -mthumb")
 
 add_defines("sprintf=sprintf_")
 add_defines("snprintf=snprintf_")
@@ -331,9 +344,8 @@ add_defines("MBEDTLS_CONFIG_FILE=\"mbedtls_ec7xx_config.h\"","LUAT_USE_FS_VFS")
 -- end
 
 --linkflags
-local LD_BASE_FLAGS = "-Wl,--cref -Wl,--check-sections -Wl,--gc-sections -lm -Wl,--print-memory-usage"
-LD_BASE_FLAGS = LD_BASE_FLAGS .. " -T" .. SDK_TOP .. "/PLAT/core/ld/ec7xx_0h00_flash.ld -Wl,-Map,$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME.."_$(mode).map "
-LD_BASE_FLAGS = LD_BASE_FLAGS .. " -Wl,--wrap=clock -Wl,--wrap=localtime -Wl,--wrap=gmtime -Wl,--wrap=time -Wl,--wrap=_malloc_r -Wl,--wrap=_free_r -Wl,--wrap=_realloc_r -mcpu=cortex-m3 -mthumb -DTRACE_LEVEL=5 -DSOFTPACK_VERSION=\"\" -DHAVE_STRUCT_TIMESPEC"
+local LD_BASE_FLAGS = " -T" .. SDK_TOP .. "/PLAT/core/ld/ec7xx_0h00_flash.ld -Wl,-Map,$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME.."_$(mode).map "
+LD_BASE_FLAGS = LD_BASE_FLAGS .. " -mcpu=cortex-m3 -mthumb "
 
 local LIB_BASE = SDK_TOP .. "/PLAT/libs/"..CHIP_TARGET.."/libstartup.a "
 LIB_BASE = LIB_BASE .. SDK_TOP .. "/PLAT/libs/"..CHIP_TARGET.."/libcore_airm2m.a "
