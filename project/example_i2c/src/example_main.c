@@ -21,12 +21,12 @@
 #include "common_api.h"
 #include "luat_rtos.h"
 #include "luat_debug.h"
-
+#include "luat_mcu.h"
 #include "luat_i2c.h"
 
 luat_rtos_task_handle i2c_task_handle;
 
-#define I2C_ID                  0
+#define I2C_ID                  1
 #define AHT10_ADDRESS_ADR_LOW   0x38
 
 #define AHT10_INIT              0xE1 //初始化命令
@@ -34,13 +34,9 @@ luat_rtos_task_handle i2c_task_handle;
 #define AHT10_SOFT_RESET        0xBA
 #define AHT10_STATE             0x71 //状态字.
 
-/*
-    1.I2C的复用，最新的合宙标准CSDK已经不需要通过RTE_Device.h来控制了，原厂驱动还需要
-    2.I2C的复用 可以通过 int luat_i2c_set_iomux(int id, uint8_t value) 函数实现
-    如果 id 为1 value 为 1，复用到GPIO4，GPIO5；value为其他,复用到 GPIO8,GPIO9（默认接口）;
-    如果 id 为0 value 为 1，复用到GPIO12,GPIO13;value 2,复用到GPIO16，GPIO17；value为其他,复用到模块pin67，pin66
-*/
-static void task_test_i2c(void *param)
+#define SHT30_ADDRESS	0x44
+
+static void task_test_aht10(void *param)
 {
     char soft_reset[] = {AHT10_SOFT_RESET}; 
     char init_cmd[] = {AHT10_INIT,0x08,0x00}; 
@@ -72,9 +68,50 @@ static void task_test_i2c(void *param)
     
 }
 
+static void task_test_sht30(void *param)
+{
+	uint8_t measure_cmd[] = {0x2c, 0x0d};
+	uint8_t recv_date[7] = {0};
+	uint8_t crc1,crc2;
+	uint32_t t,r;
+	double te,hu;
+	int result;
+	luat_i2c_setup(I2C_ID,1);
+	luat_rtos_task_sleep(40);
+	while(1)
+	{
+		result = luat_i2c_send(I2C_ID, SHT30_ADDRESS, measure_cmd, 2, 1);
+		vTaskDelay(1000);
+		if (!result)
+		{
+			result = luat_i2c_recv(I2C_ID, SHT30_ADDRESS, recv_date, 6);
+			if (!result)
+			{
+				crc1 = CRC8Cal(recv_date, 2, 0xff, 0x31, 0);
+				crc2 = CRC8Cal(recv_date + 3, 2, 0xff, 0x31, 0);
+				if ((recv_date[2] == crc1) && (recv_date[5] == crc2))
+				{
+					t = BytesGetBe16(recv_date);
+					r = BytesGetBe16(recv_date);
+					te = t * 175.0 / 65535.0 - 45.0;
+					hu = r * 100.0 /65535.0;
+					LUAT_DEBUG_PRINT("温度 %f，湿度 %f", te, hu);
+				}
+				else
+				{
+					LUAT_DEBUG_PRINT("校验失败 %x,%x,%x,%x", recv_date[2], crc1, recv_date[5], crc2);
+				}
+
+			}
+		}
+	}
+
+}
+
 static void task_demo_i2c(void)
 {
-    luat_rtos_task_create(&i2c_task_handle, 1024, 20, "i2c", task_test_i2c, NULL, NULL);
+//    luat_rtos_task_create(&i2c_task_handle, 2048, 20, "i2c", task_test_aht10, NULL, NULL);
+    luat_rtos_task_create(&i2c_task_handle, 2048, 20, "i2c", task_test_sht30, NULL, NULL);
 }
 
 INIT_TASK_EXPORT(task_demo_i2c,"1");

@@ -24,9 +24,10 @@
 #include "common_api.h"
 #include "soc_i2c.h"
 #include "driver_gpio.h"
+#include "luat_mcu.h"
 #include "gpr_common.h"
-static uint32_t luat_i2c_global_timeout = 25;
-static uint8_t luat_i2c_iomux[I2C_MAX];
+static uint32_t luat_i2c_global_timeout = 50;
+//static uint8_t luat_i2c_iomux[I2C_MAX];
 
 int luat_i2c_exist(int id) {
     return (id < I2C_MAX);
@@ -56,80 +57,38 @@ int luat_i2c_setup(int id, int speed) {
         speed = 1000 * 1000; // SuperFast
     }
     if (!luat_i2c_exist(id)) return -1;
-//    if (id)
-//    {
-//    	switch(luat_i2c_iomux[id])
-//    	{
-//    	case 1:
-//        	GPIO_IomuxEC618(19, 2, 1, 0);
-//        	GPIO_IomuxEC618(20, 2, 1, 0);
-//    		break;
-//    	default:
-//        	GPIO_IomuxEC618(23, 2, 1, 0);
-//        	GPIO_IomuxEC618(24, 2, 1, 0);
-//        	break;
-//    	}
-//
-//    }
-//    else
-//    {
-//    	switch(luat_i2c_iomux[id])
-//    	{
-//    	case 1:
-//        	GPIO_IomuxEC618(27, 2, 1, 0);
-//        	GPIO_IomuxEC618(28, 2, 1, 0);
-//    		break;
-//    	case 2:
-//        	GPIO_IomuxEC618(31, 2, 1, 0);
-//        	GPIO_IomuxEC618(32, 2, 1, 0);
-//    		break;
-//    	default:
-//        	GPIO_IomuxEC618(13, 2, 1, 0);
-//        	GPIO_IomuxEC618(14, 2, 1, 0);
-//        	break;
-//    	}
-//
-//    }
+    if (luat_mcu_iomux_is_default(LUAT_MCU_PERIPHERAL_I2C, id))
+    {
+    	if (id)
+    	{
+    		GPIO_IomuxEC7XX(13, 3, 1, 0);
+    		GPIO_IomuxEC7XX(14, 3, 1, 0);
+    	}
+    	else
+    	{
+    		GPIO_IomuxEC7XX(29, 2, 1, 0);
+    		GPIO_IomuxEC7XX(30, 2, 1, 0);
+    	}
+    }
 	I2C_MasterSetup(id, speed);
     return 0;
 }
 
 int luat_i2c_close(int id) {
     if (!luat_i2c_exist(id)) return -1;
-//    if (id)
-//    {
-//    	switch(luat_i2c_iomux[id])
-//    	{
-//    	case 1:
-//        	GPIO_IomuxEC618(19, 0, 1, 0);
-//        	GPIO_IomuxEC618(20, 0, 1, 0);
-//    		break;
-//    	default:
-//        	GPIO_IomuxEC618(23, 0, 1, 0);
-//        	GPIO_IomuxEC618(24, 0, 1, 0);
-//        	break;
-//    	}
-//
-//    }
-//    else
-//    {
-//    	switch(luat_i2c_iomux[id])
-//    	{
-//    	case 1:
-//        	GPIO_IomuxEC618(27, 0, 1, 0);
-//        	GPIO_IomuxEC618(28, 0, 1, 0);
-//    		break;
-//    	case 2:
-//        	GPIO_IomuxEC618(31, 0, 1, 0);
-//        	GPIO_IomuxEC618(32, 0, 1, 0);
-//    		break;
-//    	default:
-//        	GPIO_IomuxEC618(13, 0, 1, 0);
-//        	GPIO_IomuxEC618(14, 0, 1, 0);
-//        	break;
-//    	}
-//
-//    }
+    if (luat_mcu_iomux_is_default(LUAT_MCU_PERIPHERAL_I2C, id))
+    {
+    	if (id)
+    	{
+    		GPIO_IomuxEC7XX(13, 0, 0, 0);
+    		GPIO_IomuxEC7XX(14, 0, 0, 0);
+    	}
+    	else
+    	{
+    		GPIO_IomuxEC7XX(29, 0, 0, 0);
+    		GPIO_IomuxEC7XX(30, 0, 0, 0);
+    	}
+    }
     return 0;
 }
 

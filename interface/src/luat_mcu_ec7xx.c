@@ -25,6 +25,8 @@
 #include "task.h"
 #include "luat_base.h"
 #include "luat_mcu.h"
+#include "driver_gpio.h"
+#include "plat_config.h"
 
 long luat_mcu_ticks(void) {
     return xTaskGetTickCount();
@@ -83,4 +85,63 @@ void luat_mcu_set_clk_source(uint8_t source_main, uint8_t source_32k, uint32_t d
 void luat_os_reboot(int code){
     (void)code;
     ResetECSystemReset();
+}
+
+static uint8_t luat_mcu_iomux_default[LUAT_MCU_PERIPHERAL_PWM + 1];
+
+uint8_t luat_mcu_iomux_is_default(uint8_t type, uint8_t sn)
+{
+	if (type > LUAT_MCU_PERIPHERAL_PWM) return 1;
+	if (sn > 7) return 1;
+	return (luat_mcu_iomux_default[type] & (1 << sn))?0:1;
+}
+
+void luat_mcu_iomux_ctrl(uint8_t type, uint8_t sn, int pad_index, uint8_t alt, uint8_t is_input)
+{
+	if (type > LUAT_MCU_PERIPHERAL_PWM) return;
+	if (sn > 7) return;
+	if (pad_index != -1)
+	{
+		luat_mcu_iomux_default[type] |= (1 << sn);
+		if (LUAT_MCU_PERIPHERAL_UART == type)
+		{
+			GPIO_IomuxEC7XX(pad_index, alt, 0, 0);
+			if (is_input)
+			{
+				GPIO_PullConfig(pad_index, 1, 1);
+			}
+		}
+		else
+		{
+			GPIO_IomuxEC7XX(pad_index, alt, 1, 0);
+		}
+	}
+	else
+	{
+		luat_mcu_iomux_default[type] &= ~(1 << sn);
+	}
+}
+
+void luat_mcu_set_hardfault_mode(int mode)
+{
+	uint8_t new_mode = EXCEP_OPTION_DUMP_FLASH_EPAT_RESET;
+	switch (mode)
+	{
+	case 0:
+		new_mode = EXCEP_OPTION_DUMP_FLASH_EPAT_LOOP;
+		break;
+	case 1:
+		new_mode = EXCEP_OPTION_DUMP_FLASH_RESET;
+		break;
+	case 2:
+		new_mode = EXCEP_OPTION_DUMP_FLASH_EPAT_RESET;
+		break;
+	default:
+		return;
+	}
+	BSP_SetPlatConfigItemValue(PLAT_CONFIG_ITEM_FAULT_ACTION, new_mode);
+    if(BSP_GetPlatConfigItemValue(PLAT_CONFIG_ITEM_FAULT_ACTION) == EXCEP_OPTION_SILENT_RESET)
+        ResetLockupCfg(true, true);
+    else
+        ResetLockupCfg(false, false);
 }
