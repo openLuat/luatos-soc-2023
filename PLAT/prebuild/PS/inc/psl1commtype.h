@@ -16,7 +16,7 @@
 #ifdef WIN32
 #include "pssys.h"
 #else
-#include "CommonTypedef.h"
+#include "commontypedef.h"
 #endif
 
 
