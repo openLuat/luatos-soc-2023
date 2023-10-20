@@ -410,7 +410,6 @@ add_defines("MBEDTLS_CONFIG_FILE=\"mbedtls_ec7xx_config.h\"","LUAT_USE_FS_VFS")
 
 --linkflags
 local LD_BASE_FLAGS = "-Wl,--cref -Wl,--check-sections -Wl,--gc-sections -lm -Wl,--print-memory-usage"
-LD_BASE_FLAGS = LD_BASE_FLAGS .. " -L" .. SDK_TOP .. "/PLAT/device/target/board/ec7xx_0h00/ap/gcc/"
 LD_BASE_FLAGS = LD_BASE_FLAGS .. " -T" .. SDK_TOP .. "/PLAT/core/ld/ec7xx_0h00_flash.ld -Wl,-Map,$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME.."_$(mode).map "
 LD_BASE_FLAGS = LD_BASE_FLAGS .. " -Wl,--wrap=clock -Wl,--wrap=localtime -Wl,--wrap=gmtime -Wl,--wrap=time -Wl,--wrap=_malloc_r -Wl,--wrap=_free_r -Wl,--wrap=_realloc_r -mcpu=cortex-m3 -mthumb -DTRACE_LEVEL=5 -DSOFTPACK_VERSION=\"\" -DHAVE_STRUCT_TIMESPEC"
 
@@ -491,7 +490,8 @@ target(USER_PROJECT_NAME..".elf")
     set_targetdir("$(buildir)/"..USER_PROJECT_NAME)
 
     add_deps("driver")
--- " -L" .. SDK_TOP .. "/PLAT/device/target/board/ec7xx_0h00/ap/gcc/"
+
+    add_linkdirs("$(projectdir)/PLAT/device/target/board/ec7xx_0h00/ap/gcc/")
     add_linkdirs("$(projectdir)/PLAT/prebuild/PS/lib/gcc/"..CHIP_TARGET..(is_lspd and "/oc" or ""))
     add_linkdirs("$(projectdir)/PLAT/prebuild/PLAT/lib/gcc/"..CHIP_TARGET..(is_lspd and "/oc" or ""))
     add_linkdirs("$(projectdir)/PLAT/libs/"..CHIP_TARGET)
@@ -599,7 +599,7 @@ target(USER_PROJECT_NAME..".elf")
 		os.exec(toolchains .. "/arm-none-eabi-objcopy -O binary $(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".elf $(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".bin")
 		os.exec(toolchains .."/arm-none-eabi-size $(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".elf")
         os.cp("$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".bin", "$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME.."_unZip.bin")
-        os.exec("./PLAT/tools/fcelf.exe -C -bin ".."$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME.."_unZip.bin".. " -cfg ".. SDK_PATH .. "/PLAT/device/target/board/ec7xx_0h00/ap/gcc/sectionInfo_"..CHIP_TARGET..".json".. " -map ".."$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME.. "_debug.map".." -out ".."$(buildir)/"..USER_PROJECT_NAME.."/" .. USER_PROJECT_NAME .. ".bin")
+        os.exec((is_plat("windows") and "./PLAT/tools/fcelf.exe " or "./PLAT/tools/fcelf ").."-C -bin ".."$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME.."_unZip.bin".. " -cfg ".. SDK_PATH .. "/PLAT/device/target/board/ec7xx_0h00/ap/gcc/sectionInfo_"..CHIP_TARGET..".json".. " -map ".."$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME.. "_debug.map".." -out ".."$(buildir)/"..USER_PROJECT_NAME.."/" .. USER_PROJECT_NAME .. ".bin")
 
         os.cp("$(buildir)/"..USER_PROJECT_NAME.."/*.bin", out_path)
 		os.cp("$(buildir)/"..USER_PROJECT_NAME.."/*.map", out_path)
