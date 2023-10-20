@@ -393,10 +393,6 @@ after_load(function (target)
 end)
 
 includes(USER_PROJECT_DIR)
-add_includedirs(USER_PROJECT_DIR .. "/inc", 
-                {public = true})
-add_includedirs(USER_PROJECT_DIR .. "/include", 
-                {public = true})
 
 target("driver")
     set_kind("static")
@@ -422,7 +418,7 @@ target_end()
 target(USER_PROJECT_NAME..".elf")
 	set_kind("binary")
     set_targetdir("$(buildir)/"..USER_PROJECT_NAME)
-
+    
     add_deps("driver")
 
     add_linkdirs("$(projectdir)/PLAT/device/target/board/ec7xx_0h00/ap/gcc/")
@@ -466,10 +462,6 @@ target(USER_PROJECT_NAME..".elf")
     add_ldflags("-Wl,--whole-archive -Wl,--start-group " .. LIB_BASE .. LIB_USER .. " -Wl,--end-group -Wl,--no-whole-archive -ldriver ", {force=true})
 	
     -- on_load(function (target)
-	-- 	out_path = SDK_PATH .. "/out/" ..USER_PROJECT_NAME
-	-- 	if not os.exists(out_path) then
-	-- 		os.mkdir(out_path)
-	-- 	end
         -- if USER_PROJECT_NAME == 'luatos' then
         --     local conf_data = io.readfile("$(projectdir)/project/luatos/inc/luat_conf_bsp.h")
         --     USER_PROJECT_NAME_VERSION = conf_data:match("#define LUAT_BSP_VERSION \"(%w+)\"")
