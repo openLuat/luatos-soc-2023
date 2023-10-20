@@ -32,6 +32,12 @@ static void task1(void *args)
 {
     while(1)
     {
+        int lastState, rtcOrPad;
+        luat_pm_last_state(&lastState, &rtcOrPad);
+        if(rtcOrPad > 0 && rtcOrPad != 0xff)        //深度休眠前若进入飞行模式，并且唤醒后需要进行联网操作的，需要退出飞行模式
+        {
+            luat_mobile_set_flymode(0, 0);
+        }
         luat_pm_request(LUAT_PM_SLEEP_MODE_NONE);
         luat_rtos_task_sleep(10000);
         luat_pm_request(LUAT_PM_SLEEP_MODE_IDLE);

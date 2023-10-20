@@ -28,8 +28,14 @@ package("gnu_rm")
 	if is_host("windows") then
 		set_urls("http://cdndownload.openluat.com/xmake/toolchains/gcc-arm/gcc-arm-none-eabi-10-2020-q4-major-win32.zip")
 		add_versions("ec7xx", "90057b8737b888c53ca5aee332f1f73c401d6d3873124d2c2906df4347ebef9e")
+	elseif is_host("linux") then
+		set_urls("http://cdndownload.openluat.com/xmake/toolchains/gcc-arm/gcc-arm-none-eabi-10-2020-q4-major-x86_64-linux.tar.bz2")
+		add_versions("ec7xx", "21134caa478bbf5352e239fbc6e2da3038f8d2207e089efc96c3b55f1edcd618")
+	elseif is_host("macosx") then
+		set_urls("http://cdndownload.openluat.com/xmake/toolchains/gcc-arm/gcc-arm-none-eabi-10-2020-q4-major-mac.tar.bz2")
+		add_versions("ec7xx", "bed12de3565d4eb02e7b58be945376eaca79a8ae3ebb785ec7344e7e2db0bdc0")
 	end
-	on_install("@windows", "@linux", function (package)
+	on_install("@windows", "@linux", "@macosx", function (package)
 		os.vcp("*", package:installdir())
 	end)
 package_end()
@@ -404,12 +410,8 @@ add_defines("MBEDTLS_CONFIG_FILE=\"mbedtls_ec7xx_config.h\"","LUAT_USE_FS_VFS")
 
 --linkflags
 local LD_BASE_FLAGS = "-Wl,--cref -Wl,--check-sections -Wl,--gc-sections -lm -Wl,--print-memory-usage"
-LD_BASE_FLAGS = LD_BASE_FLAGS .. " -L" .. SDK_TOP .. "/PLAT/device/target/board/ec7xx_0h00/ap/gcc/"
 LD_BASE_FLAGS = LD_BASE_FLAGS .. " -T" .. SDK_TOP .. "/PLAT/core/ld/ec7xx_0h00_flash.ld -Wl,-Map,$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME.."_$(mode).map "
 LD_BASE_FLAGS = LD_BASE_FLAGS .. " -Wl,--wrap=clock -Wl,--wrap=localtime -Wl,--wrap=gmtime -Wl,--wrap=time -Wl,--wrap=_malloc_r -Wl,--wrap=_free_r -Wl,--wrap=_realloc_r -mcpu=cortex-m3 -mthumb -DTRACE_LEVEL=5 -DSOFTPACK_VERSION=\"\" -DHAVE_STRUCT_TIMESPEC"
-
--- add_linkdirs("$(projectdir)/PLAT/libs")
--- add_links("core_airm2m")
 
 local LIB_BASE = SDK_TOP .. "/PLAT/libs/"..CHIP_TARGET.."/libstartup.a "
 LIB_BASE = LIB_BASE .. SDK_TOP .. "/PLAT/libs/"..CHIP_TARGET.."/libcore_airm2m.a "
@@ -425,13 +427,8 @@ if os.getenv("LUAT_FAST_ADD_USER_LIB") == "1" then
     LIB_BASE = LIB_BASE .. SDK_TOP .. os.getenv("USER_LIB") .. " "
 end
 
-if is_lspd then
-    LIB_PS_PRE = SDK_TOP .. "/PLAT/prebuild/PS/lib/gcc/"..CHIP_TARGET.."/oc"
-    LIB_PLAT_PRE = SDK_TOP .. "/PLAT/prebuild/PLAT/lib/gcc/"..CHIP_TARGET.."/oc"
-else
-    LIB_PS_PRE = SDK_TOP .. "/PLAT/prebuild/PS/lib/gcc/"..CHIP_TARGET
-    LIB_PLAT_PRE = SDK_TOP .. "/PLAT/prebuild/PLAT/lib/gcc/"..CHIP_TARGET
-end
+LIB_PS_PRE = SDK_TOP .. "/PLAT/prebuild/PS/lib/gcc/"..CHIP_TARGET..(is_lspd and "/oc" or "")
+LIB_PLAT_PRE = SDK_TOP .. "/PLAT/prebuild/PLAT/lib/gcc/"..CHIP_TARGET..(is_lspd and "/oc" or "")
 
 LIB_BASE = LIB_BASE .. LIB_PS_PRE .. "/libps.a "
 LIB_BASE = LIB_BASE .. LIB_PS_PRE .. "/libpsl1.a "
@@ -493,6 +490,12 @@ target(USER_PROJECT_NAME..".elf")
     set_targetdir("$(buildir)/"..USER_PROJECT_NAME)
 
     add_deps("driver")
+
+    add_linkdirs("$(projectdir)/PLAT/device/target/board/ec7xx_0h00/ap/gcc/")
+    add_linkdirs("$(projectdir)/PLAT/prebuild/PS/lib/gcc/"..CHIP_TARGET..(is_lspd and "/oc" or ""))
+    add_linkdirs("$(projectdir)/PLAT/prebuild/PLAT/lib/gcc/"..CHIP_TARGET..(is_lspd and "/oc" or ""))
+    add_linkdirs("$(projectdir)/PLAT/libs/"..CHIP_TARGET)
+    -- add_links("core_airm2m")
 
     -- mbedtls
     add_files(LUATOS_ROOT .."components/mbedtls/library/*.c")
@@ -596,7 +599,7 @@ target(USER_PROJECT_NAME..".elf")
 		os.exec(toolchains .. "/arm-none-eabi-objcopy -O binary $(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".elf $(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".bin")
 		os.exec(toolchains .."/arm-none-eabi-size $(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".elf")
         os.cp("$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".bin", "$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME.."_unZip.bin")
-        os.exec("./PLAT/tools/fcelf.exe -C -bin ".."$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME.."_unZip.bin".. " -cfg ".. SDK_PATH .. "/PLAT/device/target/board/ec7xx_0h00/ap/gcc/sectionInfo_"..CHIP_TARGET..".json".. " -map ".."$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME.. "_debug.map".." -out ".."$(buildir)/"..USER_PROJECT_NAME.."/" .. USER_PROJECT_NAME .. ".bin")
+        os.exec((is_plat("windows") and "./PLAT/tools/fcelf.exe " or "./PLAT/tools/fcelf ").."-C -bin ".."$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME.."_unZip.bin".. " -cfg ".. SDK_PATH .. "/PLAT/device/target/board/ec7xx_0h00/ap/gcc/sectionInfo_"..CHIP_TARGET..".json".. " -map ".."$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME.. "_debug.map".." -out ".."$(buildir)/"..USER_PROJECT_NAME.."/" .. USER_PROJECT_NAME .. ".bin")
 
         os.cp("$(buildir)/"..USER_PROJECT_NAME.."/*.bin", out_path)
 		os.cp("$(buildir)/"..USER_PROJECT_NAME.."/*.map", out_path)
@@ -605,7 +608,7 @@ target(USER_PROJECT_NAME..".elf")
         
         ---------------------------------------------------------
         -------------- 这部分尚不能跨平台 -------------------------
-        local binpkg = (is_plat("windows") and "./PLAT/tools/fcelf.exe " or "./fcelf ").."-M -input ./PLAT/tools/"..CHIP_TARGET.."/bootloader/ap_bootloader.bin -addrname BL_PKGIMG_LNA -flashsize BOOTLOADER_PKGIMG_LIMIT_SIZE \
+        local binpkg = (is_plat("windows") and "./PLAT/tools/fcelf.exe " or "./PLAT/tools/fcelf ").."-M -input ./PLAT/tools/"..CHIP_TARGET.."/bootloader/ap_bootloader.bin -addrname BL_PKGIMG_LNA -flashsize BOOTLOADER_PKGIMG_LIMIT_SIZE \
                         -input $(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME ..".bin -addrname AP_PKGIMG_LNA -flashsize AP_PKGIMG_LIMIT_SIZE \
                         -input ./PLAT/prebuild/FW/lib/gcc/"..CHIP_TARGET.."/cp-demo-flash.bin -addrname CP_PKGIMG_LNA -flashsize CP_PKGIMG_LIMIT_SIZE \
                         -pkgmode 1 \
