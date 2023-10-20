@@ -35,7 +35,7 @@ int luat_mcu_set_clk(size_t mhz) {
 }
 
 int luat_mcu_get_clk(void) {
-    return 204;
+    return 307;
 }
 
 
