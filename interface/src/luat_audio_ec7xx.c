@@ -512,9 +512,9 @@ void luat_audio_play_global_init_with_task_priority(audio_play_event_cb_fun_t ev
 	audio_play_global_init_with_task_priority(event_cb, data_cb, play_file_fun, play_tts_fun, user_param, priority);
 }
 
-int luat_audio_play_multi_files(uint32_t multimedia_id, audio_play_info_t info[], uint32_t files_num)
+int luat_audio_play_multi_files(uint32_t multimedia_id, luat_audio_play_info_t info[], uint32_t files_num)
 {
-	return audio_play_multi_files(multimedia_id, info, files_num);
+	return audio_play_multi_files(multimedia_id, (audio_play_info_t*)info, files_num);
 }
 
 uint8_t luat_audio_play_is_finish(uint32_t multimedia_id)

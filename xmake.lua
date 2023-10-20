@@ -103,7 +103,90 @@ end
 if is_lspd == true then
     add_defines("OPEN_CPU_MODE")
 end
+if CHIP_TARGET == "ec718p" then
+add_defines("__USER_CODE__",
+            "CORE_IS_AP",
+            "SDK_REL_BUILD",
+            -- "__CURRENT_FILE_NAME__=system_ec7xx",
+            "EC_ASSERT_FLAG",
+            "DHCPD_ENABLE_DEFINE=1",
+            "PM_FEATURE_ENABLE",
+            "UINILOG_FEATURE_ENABLE",
+            "PSRAM_FEATURE_ENABLE",
+            "FEATURE_OS_ENABLE",
+            "FEATURE_FREERTOS_ENABLE",
+            "FEATURE_FOTAPAR_ENABLE",
+            "configUSE_NEWLIB_REENTRANT=1",
+            "ARM_MATH_CM3",
+            "FEATURE_YRCOMPRESS_ENABLE",
+            "FEATURE_CCIO_ENABLE",
+            "DHCPD_ENABLE_DEFINE=1",
+            "LWIP_CONFIG_FILE=\"lwip_config_cat.h\"",
+            --"LWIP_CONFIG_FILE=\"lwip_config_ec7xx0h00.h\"",
+            -- "FEATURE_MBEDTLS_ENABLE",-------------
+            "LFS_NAME_MAX=63",
+            "LFS_DEBUG_TRACE",
+            "FEATURE_LZMA_ENABLE",
+            "WDT_FEATURE_ENABLE=1",
+            "FEATURE_UART_HELP_DUMP_ENABLE",
+            "DEBUG_LOG_HEADER_FILE=\"debug_log_ap.h\"",
+            "TRACE_LEVEL=5",
+            "SOFTPACK_VERSION=\"\"",
+            "HAVE_STRUCT_TIMESPEC",
 
+            "HTTPS_WITH_CA",
+            "FEATURE_HTTPC_ENABLE",
+
+            -- "LITE_FEATURE_MODE",
+            -- "RTE_RNDIS_EN=0", "RTE_ETHER_EN=0",
+            "RTE_USB_EN=1",
+            "RTE_PPP_EN=0",
+            "RTE_ETHER_EN=0",
+            "RTE_RNDIS_EN=0",
+            "RTE_OPAQ_EN=0",-----
+            "RTE_ONE_UART_AT=0",
+            "RTE_TWO_UART_AT=0",
+            "__USER_CODE__",
+            "LUAT_USE_NETWORK",
+            "LUAT_USE_LWIP",
+            "LUAT_USE_TLS",
+            "__USE_SDK_LWIP__",
+            "LUAT_USE_DNS",
+            "__PRINT_ALIGNED_32BIT__",
+            "_REENT_SMALL",
+            "_REENT_GLOBAL_ATEXIT",
+
+            "LWIP_INCLUDED_POLARSSL_MD5=1",
+            "RAMCODE_COMPRESS_EN",
+            "REL_COMPRESS_EN",
+            "__ASSEMBLY__",
+            "LUAT_EC7XX_CSDK",
+            "LUAT_USE_STD_STRING",
+			"LUAT_LOG_NO_NEWLINE"
+)
+
+set_optimize("smallest")
+add_cxflags("-g3",
+            "-mcpu=cortex-m3",
+            "-mthumb",
+            "-std=gnu99",
+            "-nostartfiles",
+            "-mapcs-frame",
+
+            "-ffunction-sections",
+            "-fdata-sections",
+            "-fno-isolate-erroneous-paths-dereference",
+            "-freorder-blocks-algorithm=stc",
+            "-Wall",
+            "-Wno-format",
+            "-gdwarf-2",
+            "-fno-inline",
+            "-mslow-flash-data",
+            "-fstack-usage",
+            "-Wstack-usage=4096",
+
+{force=true})
+else
 add_defines("__USER_CODE__",
             "LTO_FEATURE_MODE",
             "CORE_IS_AP",
@@ -191,6 +274,7 @@ add_cxflags("-g3",
             "-ffat-lto-objects",
             "-Wno-lto-type-mismatch",
 {force=true})
+end
 
 add_ldflags("--specs=nano.specs", {force=true})
 add_asflags("-Wl,--cref -Wl,--check-sections -Wl,--gc-sections -lm -Wl,--print-memory-usage -Wl,--wrap=clock -Wl,--wrap=localtime -Wl,--wrap=gmtime -Wl,--wrap=time -Wl,--wrap=_malloc_r -Wl,--wrap=_free_r -Wl,--wrap=_realloc_r -mcpu=cortex-m3 -mthumb -DTRACE_LEVEL=5 -DSOFTPACK_VERSION=\"\" -DHAVE_STRUCT_TIMESPEC")
@@ -297,6 +381,7 @@ add_includedirs(LUATOS_ROOT .. "/luat/include",
                 LUATOS_ROOT .. "components/mbedtls/include/mbedtls",
                 LUATOS_ROOT .. "components/mbedtls/include/psa",
                 LUATOS_ROOT .. "components/network/adapter",
+				LUATOS_ROOT .. "/components/camera",
 				SDK_TOP .. "/interface/include",
                 {public = true})
 

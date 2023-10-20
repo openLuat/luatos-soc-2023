@@ -13,6 +13,7 @@
 #include "power_audio.h"
 #include "luat_gpio.h"
 #include "luat_debug.h"
+#include "luat_fs.h"
 //AIR780P+TM8211开发板配置
 #define CODEC_PWR_PIN HAL_GPIO_16
 #define CODEC_PWR_PIN_ALT_FUN	4
@@ -113,7 +114,7 @@ static void demo_task(void *arg)
 	info[1].path = "test2.mp3";
 	info[2].path = "test3.mp3";
 	info[3].path = "test4.mp3";
-	luat_audio_play_multi_files(0, (audio_play_info_t*)info, 4);
+	luat_audio_play_multi_files(0, info, 4);
 	luat_rtos_task_sleep(9000);
 //	require_lowpower_state(0);
     while(1)
@@ -135,7 +136,7 @@ static void demo_task(void *arg)
     	info[4].path = NULL;
     	info[4].address = (uint32_t)amr_yuan_data;
     	info[4].rom_data_len = sizeof(amr_yuan_data);
-    	luat_audio_play_multi_files(0, (audio_play_info_t*)info, 5);
+    	luat_audio_play_multi_files(0, info, 5);
     	luat_rtos_task_sleep(9000);
     	luat_meminfo_sys(&total, &used, &max_used);
     	LUAT_DEBUG_PRINT("meminfo total %d, used %d, max_used%d",total, used, max_used);

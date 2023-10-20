@@ -92,7 +92,7 @@ void luat_audio_play_global_init_with_task_priority(audio_play_event_cb_fun_t ev
  * @param files_num 文件数量
  * @return int =0成功，其他失败
  */
-int luat_audio_play_multi_files(uint32_t multimedia_id, audio_play_info_t info[], uint32_t files_num);
+int luat_audio_play_multi_files(uint32_t multimedia_id, luat_audio_play_info_t info[], uint32_t files_num);
 
 /**
  * @brief 是否播放完全部数据
