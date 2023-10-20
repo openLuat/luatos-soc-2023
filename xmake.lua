@@ -208,6 +208,8 @@ add_ldflags("--specs=nano.specs",
             "-Wl,--check-sections",
             "-Wl,--gc-sections",
             "-lm",
+            "-Wl,--no-undefined",
+            "-Wl,--no-print-map-discarded",
             "-Wl,--print-memory-usage",
             "-Wl,--wrap=_malloc_r",
             "-Wl,--wrap=_free_r",
@@ -343,10 +345,6 @@ add_defines("MBEDTLS_CONFIG_FILE=\"mbedtls_ec7xx_config.h\"","LUAT_USE_FS_VFS")
 -- 	is_lspd = true
 -- end
 
---linkflags
-local LD_BASE_FLAGS = " -T" .. SDK_TOP .. "/PLAT/core/ld/ec7xx_0h00_flash.ld -Wl,-Map,$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME.."_$(mode).map "
-LD_BASE_FLAGS = LD_BASE_FLAGS .. " -mcpu=cortex-m3 -mthumb "
-
 local LIB_BASE = SDK_TOP .. "/PLAT/libs/"..CHIP_TARGET.."/libstartup.a "
 LIB_BASE = LIB_BASE .. SDK_TOP .. "/PLAT/libs/"..CHIP_TARGET.."/libcore_airm2m.a "
 LIB_BASE = LIB_BASE .. SDK_TOP .. "/PLAT/libs/"..CHIP_TARGET.."/libfreertos.a "
@@ -461,7 +459,10 @@ target(USER_PROJECT_NAME..".elf")
     local toolchains = nil
     local out_path = nil
     local ld_parameter = nil 
-	add_ldflags(LD_BASE_FLAGS .. " -Wl,--whole-archive -Wl,--start-group " .. LIB_BASE .. LIB_USER .. " -Wl,--end-group -Wl,--no-whole-archive -Wl,--no-undefined -Wl,--no-print-map-discarded -ldriver ", {force=true})
+
+    --linkflags
+    local LD_BASE_FLAGS = "-mcpu=cortex-m3 -mthumb -T" .. SDK_TOP .. "/PLAT/core/ld/ec7xx_0h00_flash.ld -Wl,-Map,$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME.."_$(mode).map"
+	add_ldflags(LD_BASE_FLAGS .. " -Wl,--whole-archive -Wl,--start-group " .. LIB_BASE .. LIB_USER .. " -Wl,--end-group -Wl,--no-whole-archive -ldriver ", {force=true})
 	
     -- on_load(function (target)
 	-- 	out_path = SDK_PATH .. "/out/" ..USER_PROJECT_NAME
