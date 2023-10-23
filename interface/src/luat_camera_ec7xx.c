@@ -22,11 +22,7 @@
 #include "luat_rtos.h"
 #include "common_api.h"
 #include "luat_camera.h"
-#if 0
-extern int32_t CSPI_Setup(uint8_t I2SID, uint32_t BusSpeed, uint8_t SpiMode, uint8_t IsMSB, uint8_t Is2RxWire, uint8_t OnlyY, uint8_t SeqType, uint8_t rowScaleRatio, uint8_t colScaleRatio, uint8_t scaleBytes);
-extern void CSPI_Rx(uint8_t I2SID, uint32_t ByteLen, CBFuncEx_t cb, void *param);
-extern void CSPI_RxStop(uint8_t I2SID);
-extern void CSPI_Stop(uint8_t I2SID);
+#include "driver_usp.h"
 
 typedef struct
 {
@@ -37,7 +33,7 @@ typedef struct
 	uint8_t is_running;
 }luat_camera_ctrl_t;
 
-static luat_camera_ctrl_t g_s_camera[I2S_MAX];
+static luat_camera_ctrl_t g_s_camera[CSPI_MAX];
 
 static int luat_camera_dummy_callback(void *pdata, void *param)
 {
@@ -48,7 +44,7 @@ static int luat_camera_dummy_callback(void *pdata, void *param)
 
 int luat_camera_setup(int id, luat_spi_camera_t *conf, void * callback, void *param)
 {
-	if (id < 0 || id >= I2S_MAX || !conf || !callback) return -ERROR_PARAM_INVALID;
+	if (id < 0 || id >= CSPI_ID2 || !conf || !callback) return -ERROR_PARAM_INVALID;
 	if (g_s_camera[id].is_init) return -ERROR_OPERATION_FAILED;
 	uint16_t color_byte = conf->only_y?1:2;
 	conf->one_buf_height = 8000 / (conf->sensor_width * color_byte);
@@ -59,20 +55,20 @@ int luat_camera_setup(int id, luat_spi_camera_t *conf, void * callback, void *pa
 
 	if (id)
 	{
-		GPIO_IomuxEC618(18, 1, 1, 0);
-		GPIO_IomuxEC618(19, 1, 1, 0);
-		GPIO_IomuxEC618(21, 1, 1, 0);
-		GPIO_IomuxEC618(22, 1, 1, 0);
+		GPIO_IomuxEC7XX(18, 1, 1, 0);
+		GPIO_IomuxEC7XX(19, 1, 1, 0);
+		GPIO_IomuxEC7XX(21, 1, 1, 0);
+		GPIO_IomuxEC7XX(22, 1, 1, 0);
 	}
 	else
 	{
-		GPIO_IomuxEC618(39, 1, 1, 0);
-		GPIO_IomuxEC618(35, 1, 1, 0);
-		GPIO_IomuxEC618(37, 1, 1, 0);
-		GPIO_IomuxEC618(38, 1, 1, 0);
+		GPIO_IomuxEC7XX(35, 1, 1, 0);
+		GPIO_IomuxEC7XX(37, 1, 1, 0);
+		GPIO_IomuxEC7XX(38, 1, 1, 0);
+		GPIO_IomuxEC7XX(39, 1, 1, 0);
 	}
 
-	CSPI_Setup(id, conf->camera_speed, conf->spi_mode, conf->is_msb, conf->is_two_line_rx, conf->only_y, conf->seq_type, conf->rowScaleRatio, conf->colScaleRatio, conf->scaleBytes);
+	CSPI_Setup(id, conf->camera_speed, conf->spi_mode, conf->is_msb, conf->is_two_line_rx, conf->only_y, conf->seq_type, conf->rowScaleRatio, conf->colScaleRatio, conf->scaleBytes, conf->plat_param[0], conf->plat_param[1]);
 
 	g_s_camera[id].is_running = 0;
 	g_s_camera[id].is_init = 1;
@@ -83,7 +79,7 @@ int luat_camera_setup(int id, luat_spi_camera_t *conf, void * callback, void *pa
 
 int luat_camera_start(int id)
 {
-	if (id < 0 || id >= I2S_MAX) return -1;
+	if (id < 0 || id >= CSPI_ID2) return -1;
 	if (!g_s_camera[id].is_init || g_s_camera[id].is_running) return -ERROR_OPERATION_FAILED;
 	CSPI_Rx(id, g_s_camera[id].total_byte, g_s_camera[id].callback, g_s_camera[id].param);
 	g_s_camera[id].is_running = 1;
@@ -93,7 +89,7 @@ int luat_camera_start(int id)
 
 int luat_camera_stop(int id)
 {
-	if (id < 0 || id >= I2S_MAX) return -1;
+	if (id < 0 || id >= CSPI_ID2) return -1;
 	if (!g_s_camera[id].is_init || !g_s_camera[id].is_running) return -ERROR_OPERATION_FAILED;
 	CSPI_RxStop(id);
 	g_s_camera[id].is_running = 0;
@@ -103,7 +99,7 @@ int luat_camera_stop(int id)
 
 int luat_camera_close(int id)
 {
-	if (id < 0 || id >= I2S_MAX) return -1;
+	if (id < 0 || id >= CSPI_ID2) return -1;
 	if (!g_s_camera[id].is_init) return -ERROR_OPERATION_FAILED;
 	CSPI_Stop(id);
 	g_s_camera[id].callback = luat_camera_dummy_callback;
@@ -117,4 +113,4 @@ int luat_camera_init(luat_camera_conf_t *conf) {return -1;}
 int luat_camera_capture(int id, uint8_t quality, const char *path) {return -1;}
 #endif
 
-#endif
+
