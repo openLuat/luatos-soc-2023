@@ -606,7 +606,10 @@ target(USER_PROJECT_NAME..".elf")
             os.cp(out_path.."/"..USER_PROJECT_NAME..".elf", out_path.."/pack")
             os.cp("./PLAT/tools/"..CHIP_TARGET.."/comdb.txt", out_path.."/pack")
             os.cp(out_path.."/".."mem_map.txt", out_path.."/pack")
-            archive.archive(out_path.."/"..USER_PROJECT_NAME..".7z", out_path.."/pack/*",options)
+            local ret = archive.archive(out_path.."/"..USER_PROJECT_NAME..".7z", out_path.."/pack/*",options)
+            if not ret then
+                print("pls install p7zip-full in linux/mac , or 7zip in windows.")
+            end
             os.mv(out_path.."/"..USER_PROJECT_NAME..".7z", out_path.."/"..USER_PROJECT_NAME..".soc")
             os.rm(out_path.."/pack")
         end
