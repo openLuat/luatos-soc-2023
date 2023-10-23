@@ -3,15 +3,15 @@ run-name: ${{ gitea.actor }} is testing out Gitea Actions 🚀
 on: [push]
 
 jobs:
-  EC618-SDK-Build:
+  EC7xx-SDK-Build:
     runs-on: ubuntu-latest
     strategy:    
       matrix:
-        csdk_project: ["example"]
+        csdk_project: ["example", "example_adc", "example_fskv", "example_gpio", "example_uart", "example_rndis"]
     steps:
       - name: 克隆 LuatOS 代码库
         run:  git clone --depth=1 http://192.168.1.231:13000/openLuat/LuatOS.git
-      - name: 克隆 ec618-csdk 代码库
+      - name: 克隆 ec7xx-csdk 代码库
         run:  git clone --depth=1 http://192.168.1.231:13000/openLuat/luatos-soc-2023.git
       - name: 安装 xmake
         run:  curl -fsSL https://xmake.io/shget.text | bash

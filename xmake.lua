@@ -496,6 +496,7 @@ target(USER_PROJECT_NAME..".elf")
     before_link(function(target)
         out_path = SDK_PATH .. "/out/" ..USER_PROJECT_NAME
 		if not os.exists(out_path) then
+			os.mkdir(SDK_PATH .. "/out/")
 			os.mkdir(out_path)
 		end
         toolchains = target:toolchains()[1]:bindir()
