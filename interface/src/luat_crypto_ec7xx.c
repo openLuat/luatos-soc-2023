@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 OpenLuat & AirM2M
+ * Copyright (c) 2023 OpenLuat & AirM2M
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -35,13 +35,60 @@
 #include "mbedtls/aes.h"
 #include "mbedtls/rsa.h"
 
-
-void luat_crypto_md5( unsigned char *input, int ilen, unsigned char output[16] )
+int luat_crypto_md(const char *md, const char *str, size_t str_size, void *out_ptr, const char *key, size_t key_len)
 {
-    mbedtls_md5(input, ilen, output);
+    const mbedtls_md_info_t *info = mbedtls_md_info_from_string(md);
+    if (info == NULL)
+    {
+        return -1;
+    }
+    if (key_len < 1)
+    {
+        mbedtls_md(info, (const unsigned char *)str, str_size, (unsigned char *)out_ptr);
+    }
+    else
+    {
+        mbedtls_md_hmac(info, (const unsigned char *)key, key_len, (const unsigned char *)str, str_size, (unsigned char *)out_ptr);
+    }
+    return 0;
 }
 
+int luat_crypto_md5_simple(const char *str, size_t str_size, void *out_ptr)
+{
+    return luat_crypto_md("MD5", str, str_size, out_ptr, NULL, 0);
+}
 
+int luat_crypto_hmac_md5_simple(const char *str, size_t str_size, const char *mac, size_t mac_size, void *out_ptr)
+{
+    return luat_crypto_md("MD5", str, str_size, out_ptr, mac, mac_size);
+}
+
+int luat_crypto_sha1_simple(const char *str, size_t str_size, void *out_ptr)
+{
+    return luat_crypto_md("SHA1", str, str_size, out_ptr, NULL, 0);
+}
+int luat_crypto_hmac_sha1_simple(const char *str, size_t str_size, const char *mac, size_t mac_size, void *out_ptr)
+{
+    return luat_crypto_md("SHA1", str, str_size, out_ptr, mac, mac_size);
+}
+
+int luat_crypto_sha256_simple(const char *str, size_t str_size, void *out_ptr)
+{
+    return luat_crypto_md("SHA256", str, str_size, out_ptr, NULL, 0);
+}
+int luat_crypto_hmac_sha256_simple(const char *str, size_t str_size, const char *mac, size_t mac_size, void *out_ptr)
+{
+    return luat_crypto_md("SHA256", str, str_size, out_ptr, mac, mac_size);
+}
+
+int luat_crypto_sha512_simple(const char *str, size_t str_size, void *out_ptr)
+{
+    return luat_crypto_md("SHA512", str, str_size, out_ptr, NULL, 0);
+}
+int luat_crypto_hmac_sha512_simple(const char *str, size_t str_size, const char *mac, size_t mac_size, void *out_ptr)
+{
+    return luat_crypto_md("SHA512", str, str_size, out_ptr, mac, mac_size);
+}
 /**
  * @brief BASE64加密
  * @param dst buffer
@@ -70,29 +117,6 @@ int luat_crypto_base64_decode( unsigned char *dst, size_t dlen, size_t *olen, co
     mbedtls_base64_decode(dst, dlen, olen, src, slen);
 }
 
-/**
- * @brief 进行SHA1校验
- * @param input    输入的数据
- * @param ilen     输入的数据长度
- * @param output   输出的SHA1检验值
- */
-void luat_crypto_sha1(const unsigned char *input, size_t ilen, unsigned char output[20])
-{
-    mbedtls_sha1(input, ilen, output);
-}
-
-
-/**
- * @brief 进行SHA256校验
- * @param input    输入的数据
- * @param ilen     输入的数据长度
- * @param output   输出的SHA1检验值
- * @param is_224   是否是224校验
- */
-void luat_crypto_sha256(const unsigned char *input, size_t ilen, unsigned char output[20], int is_224)
-{
-    mbedtls_sha256(input, ilen, output, is_224);
-}
 
 int luat_crypto_trng(char* buff, size_t len) {
     uint8_t tmp[24];
