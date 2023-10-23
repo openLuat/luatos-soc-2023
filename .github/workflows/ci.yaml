@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:    
       matrix:
-        csdk_project: ["example", "example_adc", "example_fskv", "example_gpio", "example_uart", "example_rndis", "example_rtc", "example_luatos_socket", "example_luatos_mqtt"]
+        csdk_project: ["example", "example_adc", "example_fskv", "example_gpio", "example_uart", "example_rndis", "example_rtc", "example_luatos_socket", "example_luatos_mqtt", "example_crypto"]
         csdk_chip: ["ec718p", "ec718s", "ec716s"]
     steps:
       - name: 克隆 LuatOS 代码库
