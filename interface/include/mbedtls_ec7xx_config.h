@@ -27,6 +27,7 @@
 #ifndef MBEDTLS_CONFIG_H
 #define MBEDTLS_CONFIG_H
 #include "luat_rtc.h"
+#include <stdlib.h>
 extern uint32_t luat_get_utc(uint32_t *tamp);
 #if defined(_MSC_VER) && !defined(_CRT_SECURE_NO_DEPRECATE)
 #define _CRT_SECURE_NO_DEPRECATE 1
