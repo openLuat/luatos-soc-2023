@@ -1,5 +1,5 @@
 name: Github Actions
-run-name: ${{ gitea.actor }} is testing out Github Actions 🚀
+run-name: GoGoGo 🚀
 on: [push]
 
 jobs:
