@@ -14,10 +14,7 @@ jobs:
       - name: 克隆 ec7xx-csdk 代码库
         run:  git clone --depth=1 http://192.168.1.231:13000/openLuat/luatos-soc-2023.git
       - name: 安装 xmake
-        run:  |
-          add-apt-repository ppa:xmake-io/xmake -y
-          apt update -y
-          apt install xmake -y
+        run:  curl -fsSL https://xmake.io/shget.text | bash
       - name: 初始化工具链
         run: |
           mkdir tools
@@ -34,6 +31,7 @@ jobs:
         run: |
           export GCC_PATH=`pwd`/tools/gcc-arm-none-eabi-10-2020-q4-major
           export XMAKE_MAIN_REPO=https://gitee.com/tboox/xmake-repo.git
+          source ~/.xmake/profile
           cd luatos-soc-2023
           xmake -y --root
           rm -fr build
