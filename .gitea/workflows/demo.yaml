@@ -15,9 +15,9 @@ jobs:
         run:  git clone --depth=1 http://192.168.1.231:13000/openLuat/luatos-soc-2023.git
       - name: 安装 xmake
         run:  |
-          sudo add-apt-repository ppa:xmake-io/xmake -y
-          sudo apt update -y
-          sudo apt install xmake -y
+          add-apt-repository ppa:xmake-io/xmake -y
+          apt update -y
+          apt install xmake -y
       - name: 初始化工具链
         run: |
           mkdir tools
