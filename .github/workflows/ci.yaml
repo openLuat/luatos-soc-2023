@@ -1,0 +1,31 @@
+name: Github Actions
+run-name: ${{ gitea.actor }} is testing out Github Actions 🚀
+on: [push]
+
+jobs:
+  EC7xx:
+    runs-on: ubuntu-latest
+    strategy:    
+      matrix:
+        csdk_project: ["example", "example_adc", "example_fskv", "example_gpio", "example_uart", "example_rndis", "example_rtc", "example_luatos_socket", "example_luatos_mqtt"]
+        csdk_chip: ["ec718p", "ec718s", "ec716s"]
+    steps:
+      - name: 克隆 LuatOS 代码库
+        run:  git clone --depth=1 https://github.com/openLuat/LuatOS.git
+      - name: 克隆 ec7xx-csdk 代码库
+        run:  git clone --depth=1 https://github.com/openLuat/luatos-soc-2023.git
+      - name: 安装 xmake
+        run:  curl -fsSL https://xmake.io/shget.text | bash
+      - name: 初始化工具链
+        run: |
+          dpkg --add-architecture i386 && apt update
+          apt-get install -y lib32z1 binutils:i386 libc6:i386 libgcc1:i386 libstdc++5:i386 libstdc++6:i386 p7zip-full
+      - name: 构建指定项目
+        run: |
+          source ~/.xmake/profile
+          cd luatos-soc-2023
+          xmake -y --root
+          rm -fr build
+        env:
+          PROJECT_NAME: ${{ matrix.csdk_project }}
+          CHIP_TARGET: ${{ matrix.csdk_chip }}
