@@ -1,7 +1,7 @@
 #ifndef __RTE_DEVICE_H
 #define __RTE_DEVICE_H
 
-#include "ec718.h"
+#include "ec7xx.h"
 
 /*  Peripheral IO Mode Select, Must Configure First !!!
     Note, when receiver works in DMA_MODE, interrupt is also enabled to transfer tailing bytes.
