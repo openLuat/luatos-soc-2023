@@ -3,7 +3,7 @@ run-name: ${{ gitea.actor }} is testing out Gitea Actions 🚀
 on: [push]
 
 jobs:
-  EC7xx-SDK-Build:
+  EC7xx:
     runs-on: ubuntu-latest
     strategy:    
       matrix:
