@@ -15,7 +15,7 @@ jobs:
       - name: 克隆 ec7xx-csdk 代码库
         run:  git clone --depth=1 http://192.168.1.231:13000/openLuat/luatos-soc-2023.git
       - name: 安装 xmake
-        run:  curl -fsSL https://xmake.io/shget.text | bash -s dev
+        run:  curl -fsSL https://xmake.io/shget.text | bash
       - name: 初始化工具链
         run: |
           mkdir tools
