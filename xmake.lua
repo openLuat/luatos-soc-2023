@@ -413,6 +413,7 @@ target("driver")
                 )
 
     set_targetdir("$(buildir)/libdriver_" .. USER_PROJECT_NAME)
+    -- add_linkgroups("driver", {group = true})
 target_end()
 
 target(USER_PROJECT_NAME..".elf")
@@ -425,7 +426,10 @@ target(USER_PROJECT_NAME..".elf")
     add_linkdirs("$(projectdir)/PLAT/prebuild/PS/lib/gcc/"..CHIP_TARGET..(is_lspd and "/oc" or ""))
     add_linkdirs("$(projectdir)/PLAT/prebuild/PLAT/lib/gcc/"..CHIP_TARGET..(is_lspd and "/oc" or ""))
     add_linkdirs("$(projectdir)/PLAT/libs/"..CHIP_TARGET)
-    -- add_links("core_airm2m")
+
+    -- add_linkgroups("startup","core_airm2m","freertos","psnv","tcpipmgr","yrcompress","middleware_ec","lwip","lzma", {whole = true,group = true})
+    -- add_linkgroups("ps","psl1","psif", {whole = true,group = true})
+    -- add_linkgroups("osa","middleware_ec_private","ccio","deltapatch","fota","driver_private","usb_private", {whole = true,group = true})
 
     -- mbedtls
     add_files(LUATOS_ROOT .."components/mbedtls/library/*.c")
