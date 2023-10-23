@@ -7,7 +7,9 @@
 3. **由于依赖luatos主库，所以要在 luatos-soc-2023 所在同级目录 clone [LuatOS](https://gitee.com/openLuat/LuatOS) 仓库，否则编译报错**
 
 ## 文档中心
-[CSDK软件开发资料](https://doc.openluat.com/wiki/37?wiki_page_id=4544)
+
+* [CSDK软件开发资料](https://doc.openluat.com/wiki/37?wiki_page_id=4544)
+* [CI构建状态](https://gitea.wendal.cn/openLuat/luatos-soc-2023/actions)
 
 ## 介绍
 CSDK for ABCDEGF, 适用于所有基于ABCDEGF的合宙模组, 包括衍生型号及海外型号:
