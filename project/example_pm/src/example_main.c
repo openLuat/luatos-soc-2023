@@ -25,11 +25,14 @@
 #include "luat_debug.h"
 #include "luat_mobile.h"
 #include "luat_pm.h"
+#include "luat_gpio.h"
+#include "slpman.h"
 luat_rtos_task_handle task1_handle;
 
 
 static void task1(void *args)
 {
+	luat_gpio_cfg_t gpio_cfg = {0};
     while(1)
     {
         int lastState, rtcOrPad;
@@ -38,6 +41,7 @@ static void task1(void *args)
         {
             luat_mobile_set_flymode(0, 0);
         }
+
         luat_pm_request(LUAT_PM_SLEEP_MODE_NONE);
         luat_rtos_task_sleep(10000);
         luat_pm_request(LUAT_PM_SLEEP_MODE_IDLE);
@@ -45,10 +49,17 @@ static void task1(void *args)
         luat_pm_request(LUAT_PM_SLEEP_MODE_LIGHT);
         luat_rtos_task_sleep(10000);
         luat_mobile_set_flymode(0, 1);
-        luat_pm_dtimer_start(0, 10000);
+        luat_pm_dtimer_start(0, 20000);
         luat_pm_power_ctrl(LUAT_PM_POWER_USB, 0);	//插着USB的时候需要关闭USB电源
         luat_pm_force(LUAT_PM_SLEEP_MODE_STANDBY);
-        luat_rtos_task_sleep(10000);
+        //WAKEPAD4设置成上拉关闭wakeup功能，在全IO开发板上功耗最低
+        gpio_cfg.pin = HAL_WAKEUP_4;
+        gpio_cfg.mode = LUAT_GPIO_INPUT;
+        gpio_cfg.pull = LUAT_GPIO_PULLUP;
+        luat_gpio_open(&gpio_cfg);
+        luat_gpio_close(HAL_WAKEUP_PWRKEY);	//如果powerkey接地了，还需要再关闭powerkey上拉功能
+        luat_gpio_close(HAL_GPIO_23);	//关闭能省0.5uA
+        luat_rtos_task_sleep(30000);
     }
 }
 

@@ -54,8 +54,6 @@ int luat_gpio_open(luat_gpio_cfg_t* gpio)
 
 	if (gpio->pin >= HAL_GPIO_MAX)
 	{
-		if (LUAT_GPIO_OUTPUT == gpio->mode) return -1;
-
 		uint8_t IsRiseHigh = 0;
 		uint8_t IsFallLow = 0;
 		uint8_t Pullup = 0;
@@ -97,13 +95,14 @@ int luat_gpio_open(luat_gpio_cfg_t* gpio)
 			{
 				GPIO_ExtiSetCB(gpio->pin, luat_gpio_irq_callback, gpio->irq_args);
 			}
+
 		}
 		else
 		{
 			GPIO_ExtiSetCB(gpio->pin, NULL, NULL);
 		}
+		GPIO_WakeupPadConfig(gpio->pin, (LUAT_GPIO_OUTPUT == gpio->mode)?false:true, IsRiseHigh, IsFallLow, Pullup, Pulldown);
 
-		GPIO_WakeupPadConfig(gpio->pin, true, IsRiseHigh, IsFallLow, Pullup, Pulldown);
 		if (HAL_WAKEUP_PWRKEY == gpio->pin)
 		{
 			pwrKeySetSWOn();
@@ -259,11 +258,22 @@ void luat_gpio_close(int pin){
     if (pin >= HAL_GPIO_MAX)
     {
     	GPIO_WakeupPadConfig(pin, 0, 0, 0, 0, 0);
+    	return;
     }
     else
     {
     	GPIO_ExtiConfig(pin, 0,0,0);
     }
+    uint8_t alt_fun = 0;
+	for (uint8_t i = 0; i < GPIO_ALT_MAX; i++)
+	{
+		if (pin == gpio_alt[i].pin)
+		{
+			alt_fun = gpio_alt[i].alt;
+			break;
+		}
+	}
+    PAD_setInputOutputDisable(GPIO_ToPadEC7XX(pin, alt_fun));
     return ;
 }
 int luat_gpio_set_irq_cb(int pin, luat_gpio_irq_cb cb, void* args)
