@@ -110,8 +110,8 @@ static void task_test_sht30(void *param)
 
 static void task_demo_i2c(void)
 {
-//    luat_rtos_task_create(&i2c_task_handle, 2048, 20, "i2c", task_test_aht10, NULL, NULL);
-    luat_rtos_task_create(&i2c_task_handle, 2048, 20, "i2c", task_test_sht30, NULL, NULL);
+//    luat_rtos_task_create(&i2c_task_handle, 2048, 20, "i2c", task_test_aht10, NULL, 0);
+    luat_rtos_task_create(&i2c_task_handle, 2048, 20, "i2c", task_test_sht30, NULL, 0);
 }
 
 INIT_TASK_EXPORT(task_demo_i2c,"1");

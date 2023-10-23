@@ -60,7 +60,7 @@ static void task_test_rtc(void *param)
 
 static void task_demo_rtc(void)
 {
-    luat_rtos_task_create(&rtc_task_handle, 1024, 20, "rtc", task_test_rtc, NULL, NULL);
+    luat_rtos_task_create(&rtc_task_handle, 1024, 20, "rtc", task_test_rtc, NULL, 0);
 }
 
 INIT_TASK_EXPORT(task_demo_rtc,"1");

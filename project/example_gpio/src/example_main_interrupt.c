@@ -57,7 +57,7 @@ static void net_led_task(void *param)
 void net_led_demo(void)
 {
     luat_rtos_task_handle net_led_task_handler;
-    luat_rtos_task_create(&net_led_task_handler,2*1024,50,"net_led_task",net_led_task,NULL,NULL);
+    luat_rtos_task_create(&net_led_task_handler,2*1024,50,"net_led_task",net_led_task,NULL,0);
 }
 
 

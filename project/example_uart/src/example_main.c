@@ -80,7 +80,7 @@ static void task_test_uart(void *param)
 
 static void task_demo_uart(void)
 {
-    luat_rtos_task_create(&uart_task_handle, 2048, 20, "uart", task_test_uart, NULL, NULL);
+    luat_rtos_task_create(&uart_task_handle, 2048, 20, "uart", task_test_uart, NULL, 0);
 }
 
 // 除非你已经非常清楚uart0作为普通串口给用户使用所带来的的后果，否则不要打开以下注释掉的代码

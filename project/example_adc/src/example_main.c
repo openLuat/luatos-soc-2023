@@ -82,7 +82,7 @@ static void task_test_adc(void *param)
 
 static void task_demo_adc(void)
 {
-    luat_rtos_task_create(&adc_task_handle, 1024, 20, "adc", task_test_adc, NULL, NULL);
+    luat_rtos_task_create(&adc_task_handle, 1024, 20, "adc", task_test_adc, NULL, 0);
 }
 
 INIT_TASK_EXPORT(task_demo_adc,"1");

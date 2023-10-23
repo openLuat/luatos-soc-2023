@@ -33,7 +33,7 @@ static void net_led_task(void *param)
 void net_led_demo(void)
 {
     luat_rtos_task_handle net_led_task_handler;
-    luat_rtos_task_create(&net_led_task_handler,2*1024,50,"net_led_task",net_led_task,NULL,NULL);
+    luat_rtos_task_create(&net_led_task_handler,2*1024,50,"net_led_task",net_led_task,NULL,0);
 }
 /********************************************GPIO 点亮led GPIO27 end *******************************************/
 
@@ -78,7 +78,7 @@ static void gpio_fun_task(void *param)
 void gpio_fun_demo(void)
 {
     luat_rtos_task_handle gpio_fun_task_handler;
-    luat_rtos_task_create(&gpio_fun_task_handler,2*1024,50,"gpio_fun_task",gpio_fun_task,NULL,NULL);
+    luat_rtos_task_create(&gpio_fun_task_handler,2*1024,50,"gpio_fun_task",gpio_fun_task,NULL,0);
 }
 
 /********************************************GPIO 复用 功能演示 end *******************************************/

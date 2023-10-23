@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:    
       matrix:
-        csdk_project: ["example", "example_adc", "example_fskv", "example_gpio", "example_uart", "example_rndis"]
+        csdk_project: ["example", "example_adc", "example_fskv", "example_gpio", "example_uart", "example_rndis", "example_rtc", "example_luatos_socket", "example_luatos_mqtt"]
     steps:
       - name: 克隆 LuatOS 代码库
         run:  git clone --depth=1 http://192.168.1.231:13000/openLuat/LuatOS.git
