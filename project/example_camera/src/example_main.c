@@ -74,7 +74,13 @@ enum
 {
 	CAMERA_FRAME_START = USER_EVENT_ID_START,
 	CAMERA_FRAME_DATA,
-	CAMERA_FRAME_END
+	CAMERA_FRAME_END,
+	CAMERA_FRAME_DECODE,
+
+	CAMERA_BUF_FREE = 0,
+	CAMERA_BUF_RXING,
+	CAMERA_BUF_RX_DONE,
+	CAMERA_BUF_IS_DECODING,
 };
 
 typedef struct
@@ -83,7 +89,9 @@ typedef struct
 	void *p_cache[2];
 	uint16_t one_buf_height;
 	uint8_t pic_cache_sn;
-	uint8_t decode_cache_sn;
+	uint8_t recv_pause;
+	uint8_t is_decoding;
+	uint8_t buff_state[2];
 }luat_camera_app_t;
 
 static luat_camera_app_t g_s_camera_app;
@@ -296,7 +304,9 @@ static void luat_usb_recv_cb(int uart_id, uint32_t data_len)
 
 static int luat_image_decode_callback(void *pdata, void *param)
 {
+	uint32_t buffer_sn = (uint32_t)param;
 	uint8_t buf[2500];	//由于解码stack很大，才可以这么用
+//	LUAT_DEBUG_PRINT("buffer %d decode done!", buffer_sn);
 	if (pdata)
 	{
 		uint32_t len = (uint32_t)pdata;
@@ -322,31 +332,89 @@ static int luat_image_decode_callback(void *pdata, void *param)
 	{
 		LUAT_DEBUG_PRINT("解码失败");
 	}
+
+	g_s_camera_app.buff_state[buffer_sn] = CAMERA_BUF_FREE;
+	return 0;
 }
 
 static int luat_camera_irq_callback(void *pdata, void *param)
 {
 	if (!pdata)
 	{
+#ifdef CAMERA_TEST_QRCODE
+		if (g_s_camera_app.recv_pause)
+		{
+			goto BUFFER_CHECK;
+		}
+#else
 		luat_rtos_event_send(g_s_task_handle, CAMERA_FRAME_START, 0, 0, 0, 0);
 		g_s_camera_app.pic_data_buffer.Pos = 0;
+#endif
 		return 0;
 	}
 
 	if (INVALID_HANDLE_VALUE == pdata)
 	{
 #ifdef CAMERA_TEST_QRCODE
-		g_s_camera_app.decode_cache_sn = g_s_camera_app.pic_cache_sn;
-		g_s_camera_app.pic_cache_sn = (g_s_camera_app.pic_cache_sn + 1) & 0x01;
-	    Buffer_StaticInit(&g_s_camera_app.pic_data_buffer, g_s_camera_app.p_cache[g_s_camera_app.pic_cache_sn], CAMERA_W *CAMERA_H);
-#endif
+		if (!g_s_camera_app.recv_pause)
+		{
+			g_s_camera_app.buff_state[g_s_camera_app.pic_cache_sn] = CAMERA_BUF_RX_DONE;
+			uint32_t decode_buffer = g_s_camera_app.pic_cache_sn;
+			g_s_camera_app.pic_cache_sn = !g_s_camera_app.pic_cache_sn;
+			if (g_s_camera_app.buff_state[g_s_camera_app.pic_cache_sn] != CAMERA_BUF_FREE)
+			{
+//				LUAT_DEBUG_PRINT("all buffer full %d,%d", g_s_camera_app.buff_state[0], g_s_camera_app.buff_state[1]);
+				g_s_camera_app.recv_pause = 1;
+			}
+			else
+			{
+				luat_rtos_event_send(g_s_task_handle, CAMERA_FRAME_DECODE, decode_buffer, 0, 0, 0);
+			}
+			g_s_camera_app.buff_state[g_s_camera_app.pic_cache_sn] = CAMERA_BUF_RXING;
+			Buffer_StaticInit(&g_s_camera_app.pic_data_buffer, g_s_camera_app.p_cache[g_s_camera_app.pic_cache_sn], CAMERA_W *CAMERA_H);
+		}
+		else
+		{
+			goto BUFFER_CHECK;
+		}
+#else
 	    luat_rtos_event_send(g_s_task_handle, CAMERA_FRAME_END, 0, 0, 0, 0);
+#endif
 		return 0;
 	}
+#ifdef CAMERA_TEST_QRCODE
+	if (g_s_camera_app.recv_pause)
+	{
+		return 0;
+	}
+#endif
 	Buffer_Struct *buf = (Buffer_Struct *)pdata;
 	OS_BufferWriteLimit(&g_s_camera_app.pic_data_buffer, buf->Data, buf->MaxLen);
 	luat_rtos_event_send(g_s_task_handle, CAMERA_FRAME_DATA, 0, 0, 0, 0);
 	return 0;
+BUFFER_CHECK:
+	if (!g_s_camera_app.buff_state[0] || !g_s_camera_app.buff_state[1])
+	{
+		if (!g_s_camera_app.buff_state[0])
+		{
+			g_s_camera_app.pic_cache_sn = 0;
+			if (CAMERA_BUF_RX_DONE == g_s_camera_app.buff_state[1])
+			{
+				luat_rtos_event_send(g_s_task_handle, CAMERA_FRAME_DECODE, 1, 0, 0, 0);
+			}
+		}
+		else
+		{
+			g_s_camera_app.pic_cache_sn = 1;
+			if (CAMERA_BUF_RX_DONE == g_s_camera_app.buff_state[0])
+			{
+				luat_rtos_event_send(g_s_task_handle, CAMERA_FRAME_DECODE, 0, 0, 0, 0);
+			}
+		}
+		g_s_camera_app.buff_state[g_s_camera_app.pic_cache_sn] = CAMERA_BUF_RXING;
+		Buffer_StaticInit(&g_s_camera_app.pic_data_buffer, g_s_camera_app.p_cache[g_s_camera_app.pic_cache_sn], CAMERA_W *CAMERA_H);
+		g_s_camera_app.recv_pause = 0;
+	}
 }
 
 static int luat_bf30a2_init(void)
@@ -411,6 +479,7 @@ CAM_OPEN_FAIL:
 	return -1;
 }
 
+
 static void luat_camera_task(void *param)
 {
 	luat_event_t event;
@@ -442,7 +511,6 @@ static void luat_camera_task(void *param)
     //使用2个缓存来保存图像，1个接收，1个解码
     Buffer_StaticInit(&g_s_camera_app.pic_data_buffer, g_s_camera_app.p_cache[0], CAMERA_W *CAMERA_H);
     g_s_camera_app.pic_cache_sn = 0;
-    g_s_camera_app.decode_cache_sn = 0;
 #else
     while(1)
     {
@@ -507,10 +575,17 @@ static void luat_camera_task(void *param)
 #endif
 			break;
 		case CAMERA_FRAME_END:
+			DBG("1fps done");
+			break;
+		case CAMERA_FRAME_DECODE:
 #ifdef CAMERA_TEST_QRCODE
-			LUAT_DEBUG_PRINT("decode buf %d", g_s_camera_app.decode_cache_sn);
-			luat_camera_image_decode_once(g_s_camera_app.p_cache[g_s_camera_app.decode_cache_sn], CAMERA_W, CAMERA_H, 60, luat_image_decode_callback, NULL);
-
+			if (g_s_camera_app.buff_state[event.param1] != CAMERA_BUF_RX_DONE)
+			{
+				LUAT_DEBUG_PRINT("decode buf %d state error %d", g_s_camera_app.buff_state[event.param1]);
+				break;
+			}
+			g_s_camera_app.buff_state[event.param1] = CAMERA_BUF_IS_DECODING;
+			luat_camera_image_decode_once(g_s_camera_app.p_cache[event.param1], CAMERA_W, CAMERA_H, 100, luat_image_decode_callback, event.param1);
 #endif
 			break;
 		}
