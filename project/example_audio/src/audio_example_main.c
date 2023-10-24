@@ -175,7 +175,10 @@ static void test_audio_demo_init(void)
 	luat_gpio_open(&gpio_cfg);
 	gpio_cfg.alt_fun = CODEC_PWR_PIN_ALT_FUN;
 	luat_gpio_open(&gpio_cfg);
+	// 当前仅EC718p支持这个demo
+	#if defined TYPE_EC718P
 	luat_rtos_task_create(&task_handle, 2048, 20, "test", demo_task, NULL, 0);
+	#endif
 }
 
 INIT_TASK_EXPORT(test_audio_demo_init, "1");
