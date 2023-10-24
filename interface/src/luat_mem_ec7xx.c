@@ -26,6 +26,12 @@
 
 #include <stdlib.h>
 #include "luat_base.h"
+#include "common_api.h"
+#include "mem_map.h"
+#ifdef PSRAM_EXIST
+static uint32_t luat_psram_address = PSRAM_START_ADDR;
+#endif
+#define OSI_ALIGN_UP(v, n) (((unsigned long)(v) + (n)-1) & ~((n)-1))
 extern void soc_get_heap_info(uint32_t *total, uint32_t *total_free, uint32_t *min_free);
 void* luat_heap_malloc(size_t len) {
     return malloc(len);
@@ -50,3 +56,20 @@ void luat_meminfo_sys(size_t *total, size_t *used, size_t *max_used) {
 	*max_used = *total - min_free;
 }
 
+void *luat_psram_static_alloc(size_t size)
+{
+#ifdef PSRAM_EXIST
+	uint32_t cr = OS_EnterCritical();
+	volatile void *address = NULL;
+	size = OSI_ALIGN_UP(size, 8);
+	if ((luat_psram_address + size) < PSRAM_END_ADDR)
+	{
+		address = luat_psram_address;
+		luat_psram_address += size;
+	}
+	OS_ExitCritical(cr);
+	return address;
+#else
+	return NULL;
+#endif
+}

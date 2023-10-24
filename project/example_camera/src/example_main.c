@@ -36,15 +36,16 @@
 #include "luat_uart.h"
 #include "luat_i2c.h"
 #include "mem_map.h"
+extern void *luat_psram_static_alloc(size_t size);
 
-//#define CAMERA_TEST_QRCODE			//扫码+预览
+#define CAMERA_TEST_QRCODE			//扫码+预览
 //#define CAMERA_TEST_CAPTURE		//摄像+预览
-#define CAMERA_TEST_VIDEO		//摄像从USB串口输出到电脑
+//#define CAMERA_TEST_VIDEO		//摄像从USB串口输出到电脑
 
 #ifdef CAMERA_TEST_QRCODE
 #undef CAMERA_TEST_CAPTURE
 #undef CAMERA_TEST_VIDEO
-#define LCD_ENABLE
+//#define LCD_ENABLE
 #endif
 
 #ifdef CAMERA_TEST_CAPTURE
@@ -79,7 +80,10 @@ enum
 typedef struct
 {
 	Buffer_Struct pic_data_buffer;
+	void *p_cache[2];
 	uint16_t one_buf_height;
+	uint8_t pic_cache_sn;
+	uint8_t decode_cache_sn;
 }luat_camera_app_t;
 
 static luat_camera_app_t g_s_camera_app;
@@ -290,6 +294,35 @@ static void luat_usb_recv_cb(int uart_id, uint32_t data_len)
 }
 #endif
 
+static int luat_image_decode_callback(void *pdata, void *param)
+{
+	uint8_t buf[2500];	//由于解码stack很大，才可以这么用
+	if (pdata)
+	{
+		uint32_t len = (uint32_t)pdata;
+		if (len < 2500)
+		{
+			buf[len] = 0;
+			if (luat_camera_image_decode_get_result(buf) != 1)
+			{
+				LUAT_DEBUG_PRINT("解码结果获取失败");
+			}
+			else
+			{
+				LUAT_DEBUG_PRINT("解码结果 %s", buf);
+			}
+
+		}
+		else
+		{
+			LUAT_DEBUG_PRINT("解码长度异常");
+		}
+	}
+	else
+	{
+		LUAT_DEBUG_PRINT("解码失败");
+	}
+}
 
 static int luat_camera_irq_callback(void *pdata, void *param)
 {
@@ -302,7 +335,12 @@ static int luat_camera_irq_callback(void *pdata, void *param)
 
 	if (INVALID_HANDLE_VALUE == pdata)
 	{
-		luat_rtos_event_send(g_s_task_handle, CAMERA_FRAME_END, 0, 0, 0, 0);
+#ifdef CAMERA_TEST_QRCODE
+		g_s_camera_app.decode_cache_sn = g_s_camera_app.pic_cache_sn;
+		g_s_camera_app.pic_cache_sn = (g_s_camera_app.pic_cache_sn + 1) & 0x01;
+	    Buffer_StaticInit(&g_s_camera_app.pic_data_buffer, g_s_camera_app.p_cache[g_s_camera_app.pic_cache_sn], CAMERA_W *CAMERA_H);
+#endif
+	    luat_rtos_event_send(g_s_task_handle, CAMERA_FRAME_END, 0, 0, 0, 0);
 		return 0;
 	}
 	Buffer_Struct *buf = (Buffer_Struct *)pdata;
@@ -392,10 +430,32 @@ static void luat_camera_task(void *param)
     luat_uart_setup(&uart);
     luat_uart_ctrl(LUAT_VUART_ID_0, LUAT_UART_SET_RECV_CALLBACK, luat_usb_recv_cb);
 #endif
+#ifdef CAMERA_TEST_QRCODE
+#ifdef PSRAM_EXIST
+
+    g_s_camera_app.p_cache[0] = luat_psram_static_alloc(CAMERA_W * CAMERA_H);
+    g_s_camera_app.p_cache[1] = luat_psram_static_alloc(CAMERA_W * CAMERA_H);
+    void *stack = luat_psram_static_alloc(220 * 1024);
+    LUAT_DEBUG_PRINT("psram use %x,%x,%x",g_s_camera_app.p_cache[0], g_s_camera_app.p_cache[1], stack);
+    LUAT_DEBUG_PRINT("decoder init %d", luat_camera_image_decode_init(0, stack, 220 * 1024, 30));
+    //扫码库初始化之后，由于用的PSRAM空间做stack，会强制不进入休眠状态，如果要休眠，必须调用luat_camera_image_decode_deinit关闭扫码库
+    //使用2个缓存来保存图像，1个接收，1个解码
+    Buffer_StaticInit(&g_s_camera_app.pic_data_buffer, g_s_camera_app.p_cache[0], CAMERA_W *CAMERA_H);
+    g_s_camera_app.pic_cache_sn = 0;
+    g_s_camera_app.decode_cache_sn = 0;
+#else
+    while(1)
+    {
+    	LUAT_DEBUG_PRINT("ram not enough");
+    	luat_rtos_task_sleep(5000);
+    }
+#endif
+#else
 #ifdef PSRAM_EXIST
     Buffer_StaticInit(&g_s_camera_app.pic_data_buffer, PSRAM_START_ADDR, CAMERA_W *CAMERA_H*2);
 #else
     OS_InitBuffer(&g_s_camera_app.pic_data_buffer, CAMERA_W *CAMERA_H*2);
+#endif
 #endif
 
     // BF30A2初始化流程，如果有低功耗休眠要求，在唤醒后需要重新走一遍
@@ -408,8 +468,7 @@ static void luat_camera_task(void *param)
     	}
     }
 #ifdef CAMERA_TEST_QRCODE
-    cache = malloc(16 + g_s_camera_app.one_buf_height * CAMERA_H);
-    block_len = g_s_camera_app.one_buf_height * CAMERA_H;
+
 #else
     cache = malloc(16 + g_s_camera_app.one_buf_height * CAMERA_W * 2);
     block_len = g_s_camera_app.one_buf_height * CAMERA_W * 2;
@@ -436,7 +495,6 @@ static void luat_camera_task(void *param)
 		case CAMERA_FRAME_START:
 			pos = 0;
 			v_len = 0;
-			DBG("!");
 			break;
 		case CAMERA_FRAME_DATA:
 #ifdef USB_UART_ENABLE
@@ -449,7 +507,11 @@ static void luat_camera_task(void *param)
 #endif
 			break;
 		case CAMERA_FRAME_END:
-			DBG("!");
+#ifdef CAMERA_TEST_QRCODE
+			LUAT_DEBUG_PRINT("decode buf %d", g_s_camera_app.decode_cache_sn);
+			luat_camera_image_decode_once(g_s_camera_app.p_cache[g_s_camera_app.decode_cache_sn], CAMERA_W, CAMERA_H, 60, luat_image_decode_callback, NULL);
+
+#endif
 			break;
 		}
 	}

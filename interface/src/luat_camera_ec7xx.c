@@ -23,14 +23,18 @@
 #include "common_api.h"
 #include "luat_camera.h"
 #include "driver_usp.h"
+#include "soc_image_decode.h"
 
 typedef struct
 {
 	CBFuncEx_t callback;
 	void *param;
 	uint32_t total_byte;
+	uint16_t image_w;
+	uint16_t image_h;
 	uint8_t is_init;
 	uint8_t is_running;
+	uint8_t is_scan_mode;
 }luat_camera_ctrl_t;
 
 static luat_camera_ctrl_t g_s_camera[CSPI_MAX];
@@ -72,10 +76,29 @@ int luat_camera_setup(int id, luat_spi_camera_t *conf, void * callback, void *pa
 
 	g_s_camera[id].is_running = 0;
 	g_s_camera[id].is_init = 1;
-
+	g_s_camera[id].is_scan_mode = conf->image_scan;
 	return 0;
 }
 
+int luat_camera_image_decode_init(uint8_t type, void *stack, uint32_t stack_length, uint32_t priority)
+{
+	return soc_image_decode_init(stack, stack_length, priority, type);
+}
+
+int luat_camera_image_decode_once(uint8_t *data, uint16_t image_w, uint16_t image_h, uint32_t timeout, void *callback, void *param)
+{
+	return soc_image_decode_once(data, image_w, image_h, timeout, callback, param);
+}
+
+void luat_camera_image_decode_deinit(void)
+{
+	soc_image_decode_deinit();
+}
+
+int luat_camera_image_decode_get_result(uint8_t *buf)
+{
+	return soc_image_decode_get_result(buf);
+}
 
 int luat_camera_start(int id)
 {
