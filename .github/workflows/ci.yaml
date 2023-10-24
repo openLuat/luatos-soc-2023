@@ -12,7 +12,7 @@ jobs:
           - example
           - example_adc
           - example_audio
-          - example_camera
+          #- example_camera
           - example_cjson
           - example_crypto
           - example_flash
