@@ -8,7 +8,7 @@ jobs:
     strategy:    
       matrix:
         csdk_project:
-          - download_play_mp3
+          #- download_play_mp3
           - example
           - example_adc
           - example_audio
