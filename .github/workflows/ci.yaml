@@ -9,6 +9,7 @@ jobs:
       matrix:
         csdk_project: ["example", "example_adc", "example_fskv", "example_gpio", "example_uart", "example_rndis", "example_rtc", "example_luatos_socket", "example_luatos_mqtt", "example_crypto"]
         csdk_chip: ["ec718p", "ec718s", "ec716s"]
+      fail-fast: false
     steps:
       - name: 初始化工具链
         run: |
