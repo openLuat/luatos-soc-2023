@@ -375,7 +375,7 @@ target("driver")
     set_kind("static")
     add_deps(USER_PROJECT_NAME)
     --driver
-	add_files(SDK_TOP .. "/PLAT/core/speed/*.c",
+	add_files(SDK_TOP .. "/PLAT/core/code/*.c",
             SDK_TOP .. "/PLAT/driver/board/ec7xx_0h00/src/*c",
             SDK_TOP .. "/PLAT/driver/hal/**.c",
             SDK_TOP .. "/PLAT/driver/chip/ec7xx/ap/src/"..CHIP.."/adc.c",
