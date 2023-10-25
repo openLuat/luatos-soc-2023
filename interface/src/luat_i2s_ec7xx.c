@@ -20,7 +20,7 @@
  */
 #include "common_api.h"
 #include "luat_i2s.h"
-#include "driver_usp.h"
+#include "driver_i2s.h"
 #include "driver_gpio.h"
 void luat_i2s_init(void)
 {
