@@ -7,6 +7,8 @@ uint32_t soc_ap_body_max_size(void)
 	return AP_BODY_MAX_SIZE;
 }
 
+__attribute__((weak)) void user_code_run(void) {;}
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
