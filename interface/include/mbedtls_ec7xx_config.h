@@ -3635,7 +3635,6 @@ extern uint32_t luat_get_utc(uint32_t *tamp);
 //#define MBEDTLS_PLATFORM_FPRINTF_MACRO      fprintf /**< Default fprintf macro to use, can be undefined */
 #define MBEDTLS_PLATFORM_PRINTF_MACRO        printf_ /**< Default printf macro to use, can be undefined */
 /* Note: your snprintf must correctly zero-terminate the buffer! */
-#include "printf.h"
 #define MBEDTLS_PLATFORM_SNPRINTF_MACRO    snprintf_ /**< Default snprintf macro to use, can be undefined */
 #define MBEDTLS_PLATFORM_VSNPRINTF_MACRO    vsnprintf_ /**< Default vsnprintf macro to use, can be undefined */
 //#define MBEDTLS_PLATFORM_NV_SEED_READ_MACRO   mbedtls_platform_std_nv_seed_read /**< Default nv_seed_read function to use, can be undefined */

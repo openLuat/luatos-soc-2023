@@ -1,8 +1,8 @@
 DbVersion
-1526011701,100
+1556174904,100
 <end>
 BuildInfo
-The current data file was built by the Application Ver. 2.2.77.207, Wed Oct 25 14:59:07 2023
+The current data file was built by the Application Ver. 2.2.77.207, Tue Oct 24 18:23:56 2023
 <end>
 EnumVals
 0,2048,0,0,PHY_ONLINE,PHY_ICS_MODULE,PhyIcsMeasMainEntrance_0,P_INFO,swLogPrintf("ICS MEAS of euArfcn %d will be started ");
@@ -4521,77 +4521,77 @@ EnumVals
 323584,662714624,0,0,PLAT_AP,UICC,UsatProcSendSmRsp_1,P_WARNING,swLogPrintf("abnormal result smsProblemPresent %d smsProblem 0x%x ");
 323584,662716416,0,0,PLAT_AP,UICC,UsatProcTimerExpiration_0,P_VALUE,swLogPrintf("Check if busy statusWords %x ");
 323584,662718464,0,0,PLAT_AP,UICC,UiccCtrlHandleTerminalProfileReq_abTP,P_WARNING,swLogPrintf("read abnormal tpLen %d from NVM , use default value and save ");
-325632,666896640,0,0,PLAT_AP,FOTA,FOTA_NVM_SET,P_ERROR,swLogPrintf("set : invalid zoneId ( %d ) ! max ( %d ) \n ");
-325632,666898688,0,0,PLAT_AP,FOTA,FOTA_NVM_CLEAR_0,P_WARNING,swLogPrintf("clr : invalid zoneId ( %d ) ! max ( %d ) \n ");
-325632,666900736,0,0,PLAT_AP,FOTA,FOTA_NVM_CLEAR_1,P_WARNING,swLogPrintf("clr : no fota zone ( %d ) ! bmZoneId ( 0x%x ) \n ");
-325632,666902528,0,0,PLAT_AP,FOTA,FOTA_NVM_CLEAR_2,P_WARNING,swLogPrintf("clr zone ( %d ) : no fota zone? \n ");
-325632,666904832,0,0,PLAT_AP,FOTA,FOTA_NVM_CLEAR_3,P_WARNING,swLogPrintf("clr zone ( %d ) : offset ( %d ) unaligned by 4K! \n ");
-325632,666907136,0,0,PLAT_AP,FOTA,FOTA_NVM_CLEAR_4,P_WARNING,swLogPrintf("clr zone ( %d ) : len ( %d ) overflowed! set it with max ( %d ) ! \n ");
-325632,666909184,0,0,PLAT_AP,FOTA,FOTA_NVM_CLEAR_5,P_ERROR,swLogPrintf("clr zone ( %d ) : invalid offset ( %d ) ! max ( %d ) \n ");
-325632,666910976,0,0,PLAT_AP,FOTA,FOTA_NVM_CLEAR_6,P_ERROR,swLogPrintf("clr zone ( %d ) : currAddr ( %d ) unaligned by 4K err! \n ");
-325632,666913280,0,0,PLAT_AP,FOTA,FOTA_NVM_CLEAR_7,P_ERROR,swLogPrintf("clr zone ( %d ) : err! curr / erase Len ( 0x%x / 0x%x ) invalid! \n ");
-325632,666915328,0,0,PLAT_AP,FOTA,FOTA_NVM_CLEAR_8,P_ERROR,swLogPrintf("clr zone ( %d ) : err! currAddr ( 0x%x ) , errno ( %d ) \n ");
-325632,666917120,0,0,PLAT_AP,FOTA,FOTA_NVM_WRITE_1,P_WARNING,swLogPrintf("wr : invalid zoneId ( %d ) ! max ( %d ) \n ");
-325632,666919168,0,0,PLAT_AP,FOTA,FOTA_NVM_WRITE_2,P_WARNING,swLogPrintf("wr : no fota zone ( %d ) ! bmZoneId ( 0x%x ) \n ");
-325632,666920960,0,0,PLAT_AP,FOTA,FOTA_NVM_WRITE_3,P_WARNING,swLogPrintf("wr zone ( %d ) : no fota zone??? \n ");
-325632,666923008,0,0,PLAT_AP,FOTA,FOTA_NVM_WRITE_4,P_WARNING,swLogPrintf("wr zone ( %d ) : zero buf len? \n ");
-325632,666925568,0,0,PLAT_AP,FOTA,FOTA_NVM_WRITE_5,P_WARNING,swLogPrintf("wr zone ( %d ) : len ( %d ) overflowed! set it with max ( %d ) ! \n ");
-325632,666927616,0,0,PLAT_AP,FOTA,FOTA_NVM_WRITE_6,P_ERROR,swLogPrintf("wr zone ( %d ) : invalid offset ( %d ) ! max ( %d ) \n ");
-325632,666929408,0,0,PLAT_AP,FOTA,FOTA_NVM_READ_1,P_WARNING,swLogPrintf("rd : invalid zoneId ( %d ) ! max ( %d ) \n ");
-325632,666931456,0,0,PLAT_AP,FOTA,FOTA_NVM_READ_2,P_WARNING,swLogPrintf("rd : no fota zone ( %d ) ! bmZoneId ( 0x%x ) \n ");
-325632,666933248,0,0,PLAT_AP,FOTA,FOTA_NVM_READ_3,P_WARNING,swLogPrintf("rd zone ( %d ) : no fota zone??? \n ");
-325632,666935296,0,0,PLAT_AP,FOTA,FOTA_NVM_READ_4,P_WARNING,swLogPrintf("rd zone ( %d ) : zero buf len? \n ");
-325632,666937856,0,0,PLAT_AP,FOTA,FOTA_NVM_READ_5,P_WARNING,swLogPrintf("rd zone ( %d ) : len ( %d ) overflowed! set it with max ( %d ) ! \n ");
-325632,666939904,0,0,PLAT_AP,FOTA,FOTA_NVM_READ_6,P_ERROR,swLogPrintf("rd zone ( %d ) : invalid offset ( %d ) ! max ( %d ) \n ");
-325632,666943487,0,0,PLAT_AP,FOTA,FOTA_NVM_SET_DFU_0,P_WARNING,swLogPrintf("set DFU : null ptr! \n ");
-325632,666945535,0,0,PLAT_AP,FOTA,FOTA_NVM_SET_DFU_1,P_ERROR,swLogPrintf("set DFU : clear bkup zone failure! \n ");
-325632,666945793,0,0,PLAT_AP,FOTA,FOTA_NVM_SET_DFU_2,P_WARNING,swLogPrintf("set DFU : ' %s ' , errno ( %d ) ! \n ");
-325632,666949631,0,0,PLAT_AP,FOTA,FOTA_NVM_GET_DFU_0,P_WARNING,swLogPrintf("get DFU : null ptr! \n ");
-325632,666951679,0,0,PLAT_AP,FOTA,FOTA_NVM_GET_DFU_1,P_WARNING,swLogPrintf("get DFU : not inited? do it now! \n ");
-325632,666953727,0,0,PLAT_AP,FOTA,FOTA_NVM_GET_DFU_2,P_ERROR,swLogPrintf("get DFU : read bkup zone failure! \n ");
-325632,666955775,0,0,PLAT_AP,FOTA,FOTA_NVM_GET_DFU_3,P_INFO,swLogPrintf("get DFU : ' success ' \n ");
-325632,666957823,0,0,PLAT_AP,FOTA,FOTA_NVM_GET_DFU_4,P_INFO,swLogPrintf("get DFU : ' failure ' \n ");
-325632,666959871,0,0,PLAT_AP,FOTA,FOTA_NVM_GET_DFU_5,P_INFO,swLogPrintf("get DFU : ' no result ' \n ");
-325632,666960128,0,0,PLAT_AP,FOTA,FOTA_CHK_DELTA_1,P_SIG,swLogPrintf("delta : not a par! pmagic ( %x%x ) \n ");
-325632,666963967,0,0,PLAT_AP,FOTA,FOTA_CHK_DELTA_2,P_ERROR,swLogPrintf("delta : par-h chksum calc fail! \n ");
-325632,666966015,0,0,PLAT_AP,FOTA,FOTA_CHK_DELTA_3,P_ERROR,swLogPrintf("delta : par-pl chksum calc fail! \n ");
-325632,666968063,0,0,PLAT_AP,FOTA,FOTA_CHK_DELTA_4,P_WARNING,swLogPrintf("delta : unmatched chksum! curr / wanted as follows : \n ");
-325632,666968064,0,0,PLAT_AP,FOTA,FOTA_IS_IDENTICAL_1,P_ERROR,swLogPrintf("image ( %d ) : fw chksum calc fail! \n ");
-325632,666970112,0,0,PLAT_AP,FOTA,FOTA_IS_IDENTICAL_2,P_WARNING,swLogPrintf("image ( %d ) : non-identical! curr / wanted as follows : \n ");
-325632,666972160,0,0,PLAT_AP,FOTA,FOTA_IS_IDENTICAL_3,P_INFO,swLogPrintf("image ( %d ) : identical! \n ");
-325632,666974464,0,0,PLAT_AP,FOTA,FOTA_CHK_IMAGE_1,P_SIG,swLogPrintf("image : not a * .par! pmagic ( %x%x ) \n ");
-325632,666976512,0,0,PLAT_AP,FOTA,FOTA_CHK_IMAGE_2,P_SIG,swLogPrintf("image : * .par len ( %d ) err , maxsize ( %d ) \n ");
-325632,666978304,0,0,PLAT_AP,FOTA,FOTA_CHK_IMAGE_3,P_INFO,swLogPrintf("image : * .par pcap ( %d ) \n ");
-325632,666982399,0,0,PLAT_AP,FOTA,FOTA_NVM_GET_ZID_1,P_ERROR,swLogPrintf("get zid : null size ptr! \n ");
-325632,666982656,0,0,PLAT_AP,FOTA,FOTA_NVM_GET_ZID_2,P_SIG,swLogPrintf("get zid : set default zone ( %d : %d ) ! \n ");
-325632,666984448,0,0,PLAT_AP,FOTA,FOTA_NVM_GET_ZID_3,P_WARNING,swLogPrintf("get zid : unknown starting addr ( 0x%x ) ! \n ");
-325632,666986752,0,0,PLAT_AP,FOTA,FOTA_NVM_GET_ZID_4,P_WARNING,swLogPrintf("get zid : in_size ( %d ) ! = zone_size ( %d ) ! \n ");
-325632,666988800,0,0,PLAT_AP,FOTA,FOTA_NVM_GET_SZ_1,P_WARNING,swLogPrintf("get size : invalid zoneId ( %d ) ! max ( %d ) \n ");
-325632,666990848,0,0,PLAT_AP,FOTA,FOTA_NVM_GET_SZ_2,P_WARNING,swLogPrintf("get size : no fota zone ( %d ) ! bmZoneId ( 0x%x ) \n ");
-325632,666992896,0,0,PLAT_AP,FOTA,FOTA_NVM_GET_HNDL_1,P_WARNING,swLogPrintf("get handle : invalid zoneId ( %d ) ! max ( %d ) \n ");
-325632,666994944,0,0,PLAT_AP,FOTA,FOTA_NVM_GET_HNDL_2,P_WARNING,swLogPrintf("get handle : no fota zone ( %d ) ! bmZoneId ( 0x%x ) \n ");
-325632,666996992,0,0,PLAT_AP,FOTA,FOTA_NVM_GET_XTRAS_1,P_WARNING,swLogPrintf("get xtras : invalid zoneId ( %d ) ! max ( %d ) \n ");
-325632,666999040,0,0,PLAT_AP,FOTA,FOTA_NVM_GET_XTRAS_2,P_WARNING,swLogPrintf("get xtras : no fota zone ( %d ) ! bmZoneId ( 0x%x ) \n ");
-325632,667000832,0,0,PLAT_AP,FOTA,VERIFY_DELTA_1,P_ERROR,swLogPrintf("validate delta err! errno ( %d ) ");
-325632,667004927,0,0,PLAT_AP,FOTA,VERIFY_DELTA_2,P_SIG,swLogPrintf("validate delta ok! ");
-325632,667006975,0,0,PLAT_AP,FOTA,VERIFY_DELTA_3,P_WARNING,swLogPrintf("however , base fw is unmatched! ");
-325632,667009023,0,0,PLAT_AP,FOTA,HANDLE_SYS_PWOFF_2,P_ERROR,swLogPrintf("create power off timer error! ");
-325632,667009024,0,0,PLAT_AP,FOTA,FOTA_INIT_CHKSUM,P_WARNING,swLogPrintf("chksum : undef algo ( %d ) ! \n ");
-325632,667011072,0,0,PLAT_AP,FOTA,FOTA_DEINIT_CHKSUM,P_WARNING,swLogPrintf("chksum : undef algo ( %d ) ! \n ");
-325632,667013120,0,0,PLAT_AP,FOTA,FOTA_CALC_CHKSUM,P_WARNING,swLogPrintf("chksum : undef algo ( %d ) ! \n ");
-325632,667015168,0,0,PLAT_AP,FOTA,FOTA_FREE_1,P_ERROR,swLogPrintf("buf ( 0x%x ) head bound magic chk err! \n ");
-325632,667017216,0,0,PLAT_AP,FOTA,FOTA_FREE_2,P_ERROR,swLogPrintf("buf ( 0x%x ) tail bound magic chk err! \n ");
-325632,667019264,0,0,PLAT_AP,FOTA,FOTA_CONVTO_ZONEID,P_WARNING,swLogPrintf("undef fwAttr ( %d ) ! \n ");
-325632,667021312,0,0,PLAT_AP,FOTA,FOTA_CONVTO_FWATTR,P_WARNING,swLogPrintf("invalid zoneId ( %d ) ! \n ");
-325632,667023360,0,0,PLAT_AP,FOTA,FOTA_CHKSUM_FLASH_1,P_WARNING,swLogPrintf("err! not aligned by %d bytes @non-last data! \n ");
-325632,667025408,0,0,PLAT_AP,FOTA,FOTA_CHKSUM_FLASH_2,P_ERROR,swLogPrintf("sha256sum : alloc buffer ( %d ) failure! \n ");
-325632,667027456,0,0,PLAT_AP,FOTA,FOTA_CHKSUM_FLASH_3,P_WARNING,swLogPrintf("zid ( %d ) flash read failure! \n ");
-325632,667029504,0,0,PLAT_AP,FOTA,FOTA_CHKSUM_FLASH_4,P_ERROR,swLogPrintf("zid ( %d ) flash cs-calc fail! \n ");
-325632,667031552,0,0,PLAT_AP,FOTA,FOTA_CHKSUM_BUF_1,P_WARNING,swLogPrintf("err! not aligned by %d bytes @non-last data! \n ");
-325632,667033856,0,0,PLAT_AP,FOTA,FOTA_CHKSUM_BUF_2,P_ERROR,swLogPrintf("buf ( 0x%x / %d ) chksum fail! \n ");
-325632,667035648,0,0,PLAT_AP,FOTA,FOTA_DUMP_OCTETS_1,P_INFO,swLogPrintf("total length ( %d ) : \n ");
-325632,667038212,0,0,PLAT_AP,FOTA,FOTA_DUMP_OCTETS_2,P_INFO,swLogPrintf("[ %d / %d ] %s \n ");
-325632,667040260,0,0,PLAT_AP,FOTA,FOTA_DUMP_OCTETS_3,P_INFO,swLogPrintf("[ %d / %d ] %s \n ");
+325632,666898431,0,0,PLAT_AP,FOTA,HANDLE_SYS_PWOFF_2,P_ERROR,swLogPrintf("create power off timer error! ");
+325632,666898432,0,0,PLAT_AP,FOTA,FOTA_INIT_CHKSUM,P_WARNING,swLogPrintf("chksum : undef algo ( %d ) ! \n ");
+325632,666900480,0,0,PLAT_AP,FOTA,FOTA_DEINIT_CHKSUM,P_WARNING,swLogPrintf("chksum : undef algo ( %d ) ! \n ");
+325632,666902528,0,0,PLAT_AP,FOTA,FOTA_CALC_CHKSUM,P_WARNING,swLogPrintf("chksum : undef algo ( %d ) ! \n ");
+325632,666904576,0,0,PLAT_AP,FOTA,FOTA_FREE_1,P_ERROR,swLogPrintf("buf ( 0x%x ) head bound magic chk err! \n ");
+325632,666906624,0,0,PLAT_AP,FOTA,FOTA_FREE_2,P_ERROR,swLogPrintf("buf ( 0x%x ) tail bound magic chk err! \n ");
+325632,666908928,0,0,PLAT_AP,FOTA,FOTA_NVM_SET,P_ERROR,swLogPrintf("set : invalid zoneId ( %d ) ! max ( %d ) \n ");
+325632,666910976,0,0,PLAT_AP,FOTA,FOTA_NVM_CLEAR_0,P_WARNING,swLogPrintf("clr : invalid zoneId ( %d ) ! max ( %d ) \n ");
+325632,666913024,0,0,PLAT_AP,FOTA,FOTA_NVM_CLEAR_1,P_WARNING,swLogPrintf("clr : no fota zone ( %d ) ! bmZoneId ( 0x%x ) \n ");
+325632,666914816,0,0,PLAT_AP,FOTA,FOTA_NVM_CLEAR_2,P_WARNING,swLogPrintf("clr zone ( %d ) : no fota zone? \n ");
+325632,666917120,0,0,PLAT_AP,FOTA,FOTA_NVM_CLEAR_3,P_WARNING,swLogPrintf("clr zone ( %d ) : offset ( %d ) unaligned by 4K! \n ");
+325632,666919424,0,0,PLAT_AP,FOTA,FOTA_NVM_CLEAR_4,P_WARNING,swLogPrintf("clr zone ( %d ) : len ( %d ) overflowed! set it with max ( %d ) ! \n ");
+325632,666921472,0,0,PLAT_AP,FOTA,FOTA_NVM_CLEAR_5,P_ERROR,swLogPrintf("clr zone ( %d ) : invalid offset ( %d ) ! max ( %d ) \n ");
+325632,666923264,0,0,PLAT_AP,FOTA,FOTA_NVM_CLEAR_6,P_ERROR,swLogPrintf("clr zone ( %d ) : currAddr ( %d ) unaligned by 4K err! \n ");
+325632,666925568,0,0,PLAT_AP,FOTA,FOTA_NVM_CLEAR_7,P_ERROR,swLogPrintf("clr zone ( %d ) : err! curr / erase Len ( 0x%x / 0x%x ) invalid! \n ");
+325632,666927616,0,0,PLAT_AP,FOTA,FOTA_NVM_CLEAR_8,P_ERROR,swLogPrintf("clr zone ( %d ) : err! currAddr ( 0x%x ) , errno ( %d ) \n ");
+325632,666929408,0,0,PLAT_AP,FOTA,FOTA_NVM_WRITE_1,P_WARNING,swLogPrintf("wr : invalid zoneId ( %d ) ! max ( %d ) \n ");
+325632,666931456,0,0,PLAT_AP,FOTA,FOTA_NVM_WRITE_2,P_WARNING,swLogPrintf("wr : no fota zone ( %d ) ! bmZoneId ( 0x%x ) \n ");
+325632,666933248,0,0,PLAT_AP,FOTA,FOTA_NVM_WRITE_3,P_WARNING,swLogPrintf("wr zone ( %d ) : no fota zone??? \n ");
+325632,666935296,0,0,PLAT_AP,FOTA,FOTA_NVM_WRITE_4,P_WARNING,swLogPrintf("wr zone ( %d ) : zero buf len? \n ");
+325632,666937856,0,0,PLAT_AP,FOTA,FOTA_NVM_WRITE_5,P_WARNING,swLogPrintf("wr zone ( %d ) : len ( %d ) overflowed! set it with max ( %d ) ! \n ");
+325632,666939904,0,0,PLAT_AP,FOTA,FOTA_NVM_WRITE_6,P_ERROR,swLogPrintf("wr zone ( %d ) : invalid offset ( %d ) ! max ( %d ) \n ");
+325632,666941696,0,0,PLAT_AP,FOTA,FOTA_NVM_READ_1,P_WARNING,swLogPrintf("rd : invalid zoneId ( %d ) ! max ( %d ) \n ");
+325632,666943744,0,0,PLAT_AP,FOTA,FOTA_NVM_READ_2,P_WARNING,swLogPrintf("rd : no fota zone ( %d ) ! bmZoneId ( 0x%x ) \n ");
+325632,666945536,0,0,PLAT_AP,FOTA,FOTA_NVM_READ_3,P_WARNING,swLogPrintf("rd zone ( %d ) : no fota zone??? \n ");
+325632,666947584,0,0,PLAT_AP,FOTA,FOTA_NVM_READ_4,P_WARNING,swLogPrintf("rd zone ( %d ) : zero buf len? \n ");
+325632,666950144,0,0,PLAT_AP,FOTA,FOTA_NVM_READ_5,P_WARNING,swLogPrintf("rd zone ( %d ) : len ( %d ) overflowed! set it with max ( %d ) ! \n ");
+325632,666952192,0,0,PLAT_AP,FOTA,FOTA_NVM_READ_6,P_ERROR,swLogPrintf("rd zone ( %d ) : invalid offset ( %d ) ! max ( %d ) \n ");
+325632,666955775,0,0,PLAT_AP,FOTA,FOTA_NVM_SET_DFU_0,P_WARNING,swLogPrintf("set DFU : null ptr! \n ");
+325632,666957823,0,0,PLAT_AP,FOTA,FOTA_NVM_SET_DFU_1,P_ERROR,swLogPrintf("set DFU : clear bkup zone failure! \n ");
+325632,666958081,0,0,PLAT_AP,FOTA,FOTA_NVM_SET_DFU_2,P_WARNING,swLogPrintf("set DFU : ' %s ' , errno ( %d ) ! \n ");
+325632,666961919,0,0,PLAT_AP,FOTA,FOTA_NVM_GET_DFU_0,P_WARNING,swLogPrintf("get DFU : null ptr! \n ");
+325632,666963967,0,0,PLAT_AP,FOTA,FOTA_NVM_GET_DFU_1,P_WARNING,swLogPrintf("get DFU : not inited? do it now! \n ");
+325632,666966015,0,0,PLAT_AP,FOTA,FOTA_NVM_GET_DFU_2,P_ERROR,swLogPrintf("get DFU : read bkup zone failure! \n ");
+325632,666968063,0,0,PLAT_AP,FOTA,FOTA_NVM_GET_DFU_3,P_INFO,swLogPrintf("get DFU : ' success ' \n ");
+325632,666970111,0,0,PLAT_AP,FOTA,FOTA_NVM_GET_DFU_4,P_INFO,swLogPrintf("get DFU : ' failure ' \n ");
+325632,666972159,0,0,PLAT_AP,FOTA,FOTA_NVM_GET_DFU_5,P_INFO,swLogPrintf("get DFU : ' no result ' \n ");
+325632,666972416,0,0,PLAT_AP,FOTA,FOTA_CHK_DELTA_1,P_SIG,swLogPrintf("delta : not a par! pmagic ( %x%x ) \n ");
+325632,666976255,0,0,PLAT_AP,FOTA,FOTA_CHK_DELTA_2,P_ERROR,swLogPrintf("delta : par-h chksum calc fail! \n ");
+325632,666978303,0,0,PLAT_AP,FOTA,FOTA_CHK_DELTA_3,P_ERROR,swLogPrintf("delta : par-pl chksum calc fail! \n ");
+325632,666980351,0,0,PLAT_AP,FOTA,FOTA_CHK_DELTA_4,P_WARNING,swLogPrintf("delta : unmatched chksum! curr / wanted as follows : \n ");
+325632,666980352,0,0,PLAT_AP,FOTA,FOTA_IS_IDENTICAL_1,P_ERROR,swLogPrintf("image ( %d ) : fw chksum calc fail! \n ");
+325632,666982400,0,0,PLAT_AP,FOTA,FOTA_IS_IDENTICAL_2,P_WARNING,swLogPrintf("image ( %d ) : non-identical! curr / wanted as follows : \n ");
+325632,666984448,0,0,PLAT_AP,FOTA,FOTA_IS_IDENTICAL_3,P_INFO,swLogPrintf("image ( %d ) : identical! \n ");
+325632,666986752,0,0,PLAT_AP,FOTA,FOTA_CHK_IMAGE_1,P_SIG,swLogPrintf("image : not a * .par! pmagic ( %x%x ) \n ");
+325632,666988800,0,0,PLAT_AP,FOTA,FOTA_CHK_IMAGE_2,P_SIG,swLogPrintf("image : * .par len ( %d ) err , maxsize ( %d ) \n ");
+325632,666990592,0,0,PLAT_AP,FOTA,FOTA_CHK_IMAGE_3,P_INFO,swLogPrintf("image : * .par pcap ( %d ) \n ");
+325632,666992896,0,0,PLAT_AP,FOTA,FOTA_NVM_GET_SZ_1,P_WARNING,swLogPrintf("get size : invalid zoneId ( %d ) ! max ( %d ) \n ");
+325632,666994944,0,0,PLAT_AP,FOTA,FOTA_NVM_GET_SZ_2,P_WARNING,swLogPrintf("get size : no fota zone ( %d ) ! bmZoneId ( 0x%x ) \n ");
+325632,666996992,0,0,PLAT_AP,FOTA,FOTA_NVM_GET_HNDL_1,P_WARNING,swLogPrintf("get handle : invalid zoneId ( %d ) ! max ( %d ) \n ");
+325632,666999040,0,0,PLAT_AP,FOTA,FOTA_NVM_GET_HNDL_2,P_WARNING,swLogPrintf("get handle : no fota zone ( %d ) ! bmZoneId ( 0x%x ) \n ");
+325632,667001088,0,0,PLAT_AP,FOTA,FOTA_NVM_GET_XTRAS_1,P_WARNING,swLogPrintf("get xtras : invalid zoneId ( %d ) ! max ( %d ) \n ");
+325632,667003136,0,0,PLAT_AP,FOTA,FOTA_NVM_GET_XTRAS_2,P_WARNING,swLogPrintf("get xtras : no fota zone ( %d ) ! bmZoneId ( 0x%x ) \n ");
+325632,667004928,0,0,PLAT_AP,FOTA,VERIFY_DELTA_1,P_ERROR,swLogPrintf("validate delta err! errno ( %d ) ");
+325632,667009023,0,0,PLAT_AP,FOTA,VERIFY_DELTA_2,P_SIG,swLogPrintf("validate delta ok! ");
+325632,667011071,0,0,PLAT_AP,FOTA,VERIFY_DELTA_3,P_WARNING,swLogPrintf("however , base fw is unmatched! ");
+325632,667011072,0,0,PLAT_AP,FOTA,FOTA_CONVTO_ZONEID,P_WARNING,swLogPrintf("undef fwAttr ( %d ) ! \n ");
+325632,667013120,0,0,PLAT_AP,FOTA,FOTA_CONVTO_FWATTR,P_WARNING,swLogPrintf("invalid zoneId ( %d ) ! \n ");
+325632,667015168,0,0,PLAT_AP,FOTA,FOTA_CHKSUM_FLASH_1,P_WARNING,swLogPrintf("err! not aligned by %d bytes @non-last data! \n ");
+325632,667017216,0,0,PLAT_AP,FOTA,FOTA_CHKSUM_FLASH_2,P_ERROR,swLogPrintf("sha256sum : alloc buffer ( %d ) failure! \n ");
+325632,667019264,0,0,PLAT_AP,FOTA,FOTA_CHKSUM_FLASH_3,P_WARNING,swLogPrintf("zid ( %d ) flash read failure! \n ");
+325632,667021312,0,0,PLAT_AP,FOTA,FOTA_CHKSUM_FLASH_4,P_ERROR,swLogPrintf("zid ( %d ) flash cs-calc fail! \n ");
+325632,667023360,0,0,PLAT_AP,FOTA,FOTA_CHKSUM_BUF_1,P_WARNING,swLogPrintf("err! not aligned by %d bytes @non-last data! \n ");
+325632,667025664,0,0,PLAT_AP,FOTA,FOTA_CHKSUM_BUF_2,P_ERROR,swLogPrintf("buf ( 0x%x / %d ) chksum fail! \n ");
+325632,667027456,0,0,PLAT_AP,FOTA,FOTA_DUMP_OCTETS_1,P_INFO,swLogPrintf("total length ( %d ) : \n ");
+325632,667030020,0,0,PLAT_AP,FOTA,FOTA_DUMP_OCTETS_2,P_INFO,swLogPrintf("[ %d / %d ] %s \n ");
+325632,667032068,0,0,PLAT_AP,FOTA,FOTA_DUMP_OCTETS_3,P_INFO,swLogPrintf("[ %d / %d ] %s \n ");
+325632,667035647,0,0,PLAT_AP,FOTA,FOTA_NVM_GET_ZID_1,P_ERROR,swLogPrintf("get zid : null size ptr! \n ");
+325632,667035904,0,0,PLAT_AP,FOTA,FOTA_NVM_GET_ZID_2,P_SIG,swLogPrintf("get zid : set default zone ( %d : %d ) ! \n ");
+325632,667037696,0,0,PLAT_AP,FOTA,FOTA_NVM_GET_ZID_3,P_WARNING,swLogPrintf("get zid : unknown starting addr ( 0x%x ) ! \n ");
+325632,667040000,0,0,PLAT_AP,FOTA,FOTA_NVM_GET_ZID_4,P_WARNING,swLogPrintf("get zid : in_size ( %d ) ! = zone_size ( %d ) ! \n ");
 332800,681577216,0,0,PLAT_AP,NVRAM,restoreFactoryCprs_0,P_INFO,swLogPrintf("outStream = 0x%x , outStreamLen = %d..inStream = 0x%x , inStreamLen = %d.. ");
 332800,681578496,0,0,PLAT_AP,NVRAM,restoreFactoryCprs_1,P_ERROR,swLogPrintf("restoreFactoryCprs len error!! len = %d ");
 332800,681580800,0,0,PLAT_AP,NVRAM,restoreFactoryCprs_2,P_ERROR,swLogPrintf("fac nv %d is invalid , bitmap 0x%x!! ");
@@ -9121,5 +9121,5 @@ MW_INFO_PHY_EDRX_PARAM,midWareNvmInfoPhyEdrxParam
 plat_config,plat_config_fs_t
 <end>
 OptionalSegment
-optional_sk_01,0F6E27E4A5BAC7CB520E4C591A59C86CAA057BED6FCFF2B580D8A98BC3ABB9D4
+optional_sk_01,DCAFC1541C36B2CA3556F58A4B315DACEF9B4AFD3A45D35FBAB6D2600544F197
 <end>
