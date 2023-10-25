@@ -8,8 +8,10 @@ target(TARGET_NAME)
     set_kind("static")
     set_targetdir(LIB_DIR)
     set_warnings("error")
-    --8K版本用下面的库，注释掉16K的库
-    -- LIB_USER = LIB_USER .. SDK_TOP .. "/PLAT/core/lib/libaisound50_8K.a "
+
+    -- mbedtls
+    add_defines("LUAT_USE_TLS","MBEDTLS_CONFIG_FILE=\"mbedtls_ec7xx_config.h\"",{public = true})
+
     --加入代码和头文件
     add_includedirs("./inc",{public = true})
     -- add_includedirs(SDK_TOP .. "/interface/private_include", 
