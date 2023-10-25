@@ -306,12 +306,10 @@ add_includedirs(
                 SDK_TOP .. "/PLAT/prebuild/PLAT/inc",
                 SDK_TOP .. "/thirdparty/littlefs",
                 SDK_TOP .. "/thirdparty/littlefs/port",
-
-{public = true})
+                {public = true})
             
 -- CSDK 宏定义
-add_defines("LUAT_USE_TLS","MBEDTLS_CONFIG_FILE=\"mbedtls_ec7xx_config.h\"")
-add_defines("LUAT_USE_FS_VFS")
+add_defines("LUAT_USE_FS_VFS","MBEDTLS_CONFIG_FILE=\"mbedtls_ec7xx_config.h\"")
 -- CSDK相关头文件引用
 add_includedirs(LUATOS_ROOT .. "/luat/include",
                 LUATOS_ROOT .. "/components/mobile",
@@ -410,8 +408,6 @@ target(USER_PROJECT_NAME..".elf")
     -- add_linkgroups("ps","psl1","psif", {whole = true,group = true})
     -- add_linkgroups("osa","middleware_ec_private","ccio","deltapatch","fota","driver_private","usb_private", {whole = true,group = true})
 
-    -- mbedtls
-    add_files(LUATOS_ROOT .."components/mbedtls/library/*.c")
     -- interface
     add_files(SDK_TOP .. "/interface/src/*.c")
     -- network
@@ -419,6 +415,8 @@ target(USER_PROJECT_NAME..".elf")
             LUATOS_ROOT .."components/ethernet/common/dns_client.c"
             )
 
+    -- mbedtls
+    add_files(LUATOS_ROOT .."components/mbedtls/library/*.c",{public = true})
     -- printf
     add_files(LUATOS_ROOT.."components/printf/*.c")
     -- weak
