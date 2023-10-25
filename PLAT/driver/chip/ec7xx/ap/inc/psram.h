@@ -146,7 +146,7 @@ uint8_t PSRAM_setClk122M( void );
 uint8_t PSRAM_readMR(BOOL isQpiMod );
 uint8_t PSRAM_writeMR(BOOL isQpiMod, uint8_t setVal );
 uint8_t PSRAM_init( void );
-uint8_t PSRAM_dmaAcceccClkCtrl( BOOL onoff );
+uint8_t PSRAM_dmaAccessClkCtrl( BOOL onoff );
 uint8_t PSRAM_setClk102M( void );
 
 
