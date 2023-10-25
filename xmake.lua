@@ -16,7 +16,6 @@ local CHIP_TARGET = "ec718p"
 -- local LUAT_SCRIPT_SIZE
 -- local LUAT_SCRIPT_OTA_SIZE
 
-USER_AP_SIZE = nil
 local script_addr = nil
 local full_addr = nil
 
@@ -93,10 +92,6 @@ set_optimize("smallest")
 local CHIP = "ec718"
 if CHIP_TARGET == "ec718p" then
     add_defines("CHIP_EC718","TYPE_EC718P")
-	if USER_AP_SIZE then
-		add_defines("AP_FLASH_LOAD_SIZE="..USER_AP_SIZE)
-		add_defines("AP_PKGIMG_LIMIT_SIZE="..USER_AP_SIZE)
-	end
 elseif CHIP_TARGET == "ec718s" then
     is_lspd = true
     add_defines("CHIP_EC718","TYPE_EC718S")
@@ -105,7 +100,7 @@ elseif CHIP_TARGET == "ec716s" then
     CHIP = "ec716"
     add_defines("CHIP_EC716","TYPE_EC716S")
 end
-
+USER_CHIP_TARGET = CHIP_TARGET
 -- 若启用is_lspd, 加上额外的宏
 if is_lspd == true then
     add_defines("OPEN_CPU_MODE")
@@ -156,7 +151,6 @@ add_defines("__USER_CODE__",
             "__USER_CODE__",
             "LUAT_USE_NETWORK",
             "LUAT_USE_LWIP",
-            "LUAT_USE_TLS",
             "__USE_SDK_LWIP__",
             "LUAT_USE_DNS",
             "__PRINT_ALIGNED_32BIT__",
@@ -312,12 +306,10 @@ add_includedirs(
                 SDK_TOP .. "/PLAT/prebuild/PLAT/inc",
                 SDK_TOP .. "/thirdparty/littlefs",
                 SDK_TOP .. "/thirdparty/littlefs/port",
-
-{public = true})
-
+                {public = true})
+            
 -- CSDK 宏定义
-add_defines("MBEDTLS_CONFIG_FILE=\"mbedtls_ec7xx_config.h\"","LUAT_USE_FS_VFS")
-
+add_defines("LUAT_USE_FS_VFS","MBEDTLS_CONFIG_FILE=\"mbedtls_ec7xx_config.h\"")
 -- CSDK相关头文件引用
 add_includedirs(LUATOS_ROOT .. "/luat/include",
                 LUATOS_ROOT .. "/components/mobile",
@@ -331,21 +323,6 @@ add_includedirs(LUATOS_ROOT .. "/luat/include",
 				LUATOS_ROOT .. "/components/camera",
 				SDK_TOP .. "/interface/include",
                 {public = true})
-
--- if USER_PROJECT_NAME == 'luatos' then
---     if os.getenv("LUAT_EC7XX_LITE_MODE") == "1" then
---         add_defines("LUAT_EC7XX_LITE_MODE", "LUAT_SCRIPT_SIZE=448", "LUAT_SCRIPT_OTA_SIZE=284")
---     end
---     if os.getenv("LUAT_USE_TTS") == "1" then
---         add_defines("LUAT_USE_TTS")
---     end
---     if os.getenv("LUAT_USE_TTS_ONCHIP") == "1" then
---         add_defines("LUAT_USE_TTS_ONCHIP")
---     end
---     add_defines("__LUATOS__","LWIP_NUM_SOCKETS=8")
--- 	add_defines("OPEN_CPU_MODE")
--- 	is_lspd = true
--- end
 
 local LIB_BASE = SDK_TOP .. "/PLAT/libs/"..CHIP_TARGET.."/libstartup.a "
 LIB_BASE = LIB_BASE .. SDK_TOP .. "/PLAT/libs/"..CHIP_TARGET.."/libcore_airm2m.a "
@@ -419,7 +396,7 @@ target_end()
 target(USER_PROJECT_NAME..".elf")
 	set_kind("binary")
     set_targetdir("$(buildir)/"..USER_PROJECT_NAME)
-    
+    add_deps(USER_PROJECT_NAME)
     add_deps("driver")
 
     add_linkdirs("$(projectdir)/PLAT/device/target/board/ec7xx_0h00/ap/gcc/")
@@ -431,8 +408,6 @@ target(USER_PROJECT_NAME..".elf")
     -- add_linkgroups("ps","psl1","psif", {whole = true,group = true})
     -- add_linkgroups("osa","middleware_ec_private","ccio","deltapatch","fota","driver_private","usb_private", {whole = true,group = true})
 
-    -- mbedtls
-    add_files(LUATOS_ROOT .."components/mbedtls/library/*.c")
     -- interface
     add_files(SDK_TOP .. "/interface/src/*.c")
     -- network
@@ -440,6 +415,8 @@ target(USER_PROJECT_NAME..".elf")
             LUATOS_ROOT .."components/ethernet/common/dns_client.c"
             )
 
+    -- mbedtls
+    add_files(LUATOS_ROOT .."components/mbedtls/library/*.c",{public = true})
     -- printf
     add_files(LUATOS_ROOT.."components/printf/*.c")
     -- weak
@@ -449,14 +426,6 @@ target(USER_PROJECT_NAME..".elf")
     -- vfs
     add_files(LUATOS_ROOT.."luat/vfs/luat_fs_lfs2.c",
             LUATOS_ROOT.."luat/vfs/luat_vfs.c")
-    
-    -- if USER_PROJECT_NAME ~= 'luatos' then
-    --     -- remove_files(
-    --     -- )
-    --     -- add_files(SDK_TOP.."/thirdparty/flashdb/src/*.c",{public = true})
-    -- else
-    --     -- remove_files(SDK_TOP .. "/interface/src/luat_kv_ec7xx.c")
-    -- end
 
     local toolchains = nil
     local out_path = nil
@@ -465,34 +434,6 @@ target(USER_PROJECT_NAME..".elf")
     --linkflags
     add_ldflags("-Wl,--whole-archive -Wl,--start-group " .. LIB_BASE .. LIB_USER .. " -Wl,--end-group -Wl,--no-whole-archive -ldriver ", {force=true})
 	
-    -- on_load(function (target)
-        -- if USER_PROJECT_NAME == 'luatos' then
-        --     local conf_data = io.readfile("$(projectdir)/project/luatos/inc/luat_conf_bsp.h")
-        --     USER_PROJECT_NAME_VERSION = conf_data:match("#define LUAT_BSP_VERSION \"(%w+)\"")
-        --     VM_64BIT = conf_data:find("\r#define LUAT_CONF_VM_64bit") or conf_data:find("\n#define LUAT_CONF_VM_64bit")
-        --     local TTS_ONCHIP = conf_data:find("\r#define LUAT_USE_TTS_ONCHIP") or conf_data:find("\n#define LUAT_USE_TTS_ONCHIP")
-
-        --     local mem_map_data = io.readfile("$(projectdir)/PLAT/device/target/board/ec7xx_0h00/common/inc/mem_map.h")
-        --     FLASH_FOTA_REGION_START = tonumber(mem_map_data:match("#define FLASH_FOTA_REGION_START%s+%((%g+)%)"))
-        --     if TTS_ONCHIP or os.getenv("LUAT_USE_TTS_ONCHIP") == "1" then
-        --         LUAT_SCRIPT_SIZE = 64
-        --         LUAT_SCRIPT_OTA_SIZE = 48
-        --     elseif os.getenv("LUAT_EC718_LITE_MODE") == "1" then
-        --         LUAT_SCRIPT_SIZE = 448
-        --         LUAT_SCRIPT_OTA_SIZE = 284
-        --     else
-        --         LUAT_SCRIPT_SIZE = tonumber(conf_data:match("\r#define LUAT_SCRIPT_SIZE (%d+)") or conf_data:match("\n#define LUAT_SCRIPT_SIZE (%d+)"))
-        --         LUAT_SCRIPT_OTA_SIZE = tonumber(conf_data:match("\r#define LUAT_SCRIPT_OTA_SIZE (%d+)") or conf_data:match("\n#define LUAT_SCRIPT_OTA_SIZE (%d+)"))
-        --     end
-        --     print(string.format("script zone %d ota %d", LUAT_SCRIPT_SIZE, LUAT_SCRIPT_OTA_SIZE))
-        --     LUA_SCRIPT_ADDR = FLASH_FOTA_REGION_START - (LUAT_SCRIPT_SIZE + LUAT_SCRIPT_OTA_SIZE) * 1024
-        --     LUA_SCRIPT_OTA_ADDR = FLASH_FOTA_REGION_START - LUAT_SCRIPT_OTA_SIZE * 1024
-        --     script_addr = string.format("%X", LUA_SCRIPT_ADDR)
-        --     full_addr = string.format("%X", LUA_SCRIPT_OTA_ADDR)
-        --     -- print(FLASH_FOTA_REGION_START,LUAT_SCRIPT_SIZE,LUAT_SCRIPT_OTA_SIZE)
-        --     -- print(script_addr,full_addr)
-        -- end
-    -- end)
     before_link(function(target)
         out_path = SDK_PATH .. "/out/" ..USER_PROJECT_NAME
 		if not os.exists(out_path) then
