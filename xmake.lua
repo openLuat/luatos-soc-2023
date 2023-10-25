@@ -316,8 +316,8 @@ add_includedirs(
 {public = true})
 
 -- CSDK 宏定义
-add_defines("MBEDTLS_CONFIG_FILE=\"mbedtls_ec7xx_config.h\"","LUAT_USE_FS_VFS")
-
+add_defines("LUAT_USE_TLS","MBEDTLS_CONFIG_FILE=\"mbedtls_ec7xx_config.h\"")
+add_defines("LUAT_USE_FS_VFS")
 -- CSDK相关头文件引用
 add_includedirs(LUATOS_ROOT .. "/luat/include",
                 LUATOS_ROOT .. "/components/mobile",
