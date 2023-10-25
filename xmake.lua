@@ -9,14 +9,13 @@ LUATOS_ROOT = SDK_TOP .. "/../LuatOS/"
 local SDK_PATH
 local USER_PROJECT_NAME = "example"
 USER_PROJECT_DIR  = ""
-local CHIP_TARGET = "ec718p"
+CHIP_TARGET = "ec718p"
 
 -- local USER_PROJECT_NAME_VERSION
 -- local VM_64BIT = nil
 -- local LUAT_SCRIPT_SIZE
 -- local LUAT_SCRIPT_OTA_SIZE
 
-USER_AP_SIZE = nil
 local script_addr = nil
 local full_addr = nil
 
@@ -93,10 +92,6 @@ set_optimize("smallest")
 local CHIP = "ec718"
 if CHIP_TARGET == "ec718p" then
     add_defines("CHIP_EC718","TYPE_EC718P")
-	if USER_AP_SIZE then
-		add_defines("AP_FLASH_LOAD_SIZE="..USER_AP_SIZE)
-		add_defines("AP_PKGIMG_LIMIT_SIZE="..USER_AP_SIZE)
-	end
 elseif CHIP_TARGET == "ec718s" then
     is_lspd = true
     add_defines("CHIP_EC718","TYPE_EC718S")
@@ -419,7 +414,7 @@ target_end()
 target(USER_PROJECT_NAME..".elf")
 	set_kind("binary")
     set_targetdir("$(buildir)/"..USER_PROJECT_NAME)
-    
+    add_deps(USER_PROJECT_NAME)
     add_deps("driver")
 
     add_linkdirs("$(projectdir)/PLAT/device/target/board/ec7xx_0h00/ap/gcc/")

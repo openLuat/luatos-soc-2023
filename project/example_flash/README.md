@@ -16,7 +16,17 @@
 
 ### 第一步, 项目中空出对应的空间
 
-设置项目内xmake.lua的USER_AP_SIZE，默认是留空，使用全部的空间为程序区，填写一个比0x2b3000小的值，缩小程序区，留下的是用户区。demo是0x1b3000，留出了1MB空间为用户区
+项目内xmake.lua配置宏定义即可：
+
+```lua
+    -- 程序区缩小到1b3000，剩余2b3000 - 1b3000 = 100000 1MB空间为用户区
+    if CHIP_TARGET == ec718p then
+        add_defines("AP_FLASH_LOAD_SIZE=0x1b3000",{public = true})
+        add_defines("AP_PKGIMG_LIMIT_SIZE=0x1b3000",{public = true})
+    end
+```
+
+使用全部的空间为程序区，填写一个比0x2b3000小的值，缩小程序区，留下的是用户区。demo是0x1b3000，留出了1MB空间为用户区
 
 ### 第二步, 确定刷入的地址/大小/名称
 
