@@ -29,7 +29,7 @@ typedef struct
 {
 	CBFuncEx_t callback;
 	void *param;
-	uint32_t total_byte;
+	void *buf[2];
 	uint16_t image_w;
 	uint16_t image_h;
 	uint8_t is_init;
@@ -50,18 +50,8 @@ int luat_camera_setup(int id, luat_spi_camera_t *conf, void * callback, void *pa
 {
 	if (id < 0 || id >= CSPI_ID2 || !conf || !callback) return -ERROR_PARAM_INVALID;
 	if (g_s_camera[id].is_init) return -ERROR_OPERATION_FAILED;
-	uint16_t color_byte = conf->only_y?1:2;
-	uint16_t buf_max_height = 8000 / (conf->sensor_width * color_byte);
-	for(conf->one_buf_height = buf_max_height; conf->one_buf_height > 0; conf->one_buf_height--)
-	{
-		if (!(conf->sensor_height % conf->one_buf_height))
-		{
-			break;
-		}
-	}
 
 //	DBG("one buf height %d", conf->one_buf_height);
-	g_s_camera[id].total_byte = conf->one_buf_height * conf->sensor_width * color_byte;
 	g_s_camera[id].callback = callback;
 	g_s_camera[id].param = param;
 
@@ -85,6 +75,10 @@ int luat_camera_setup(int id, luat_spi_camera_t *conf, void * callback, void *pa
 	g_s_camera[id].is_running = 0;
 	g_s_camera[id].is_init = 1;
 	g_s_camera[id].is_scan_mode = conf->image_scan;
+	g_s_camera[id].image_w = conf->sensor_width;
+	g_s_camera[id].image_h = conf->sensor_height;
+	g_s_camera[id].buf[0] = conf->buf[0];
+	g_s_camera[id].buf[1] = conf->buf[1];
 	return 0;
 }
 
@@ -112,7 +106,7 @@ int luat_camera_start(int id)
 {
 	if (id < 0 || id >= CSPI_ID2) return -1;
 	if (!g_s_camera[id].is_init || g_s_camera[id].is_running) return -ERROR_OPERATION_FAILED;
-	CSPI_Rx(id, g_s_camera[id].total_byte, g_s_camera[id].callback, g_s_camera[id].param);
+	CSPI_Rx(id, g_s_camera[id].buf, g_s_camera[id].image_w, g_s_camera[id].image_h, g_s_camera[id].callback, g_s_camera[id].param);
 	g_s_camera[id].is_running = 1;
 	return 0;
 }
