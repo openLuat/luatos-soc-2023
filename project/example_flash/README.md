@@ -20,10 +20,8 @@
 
 ```lua
     -- 程序区缩小到1b3000，剩余2b3000 - 1b3000 = 100000 1MB空间为用户区
-    if CHIP_TARGET == ec718p then
-        add_defines("AP_FLASH_LOAD_SIZE=0x1b3000",{public = true})
-        add_defines("AP_PKGIMG_LIMIT_SIZE=0x1b3000",{public = true})
-    end
+    add_defines("AP_FLASH_LOAD_SIZE=0x1b3000",{public = true})
+    add_defines("AP_PKGIMG_LIMIT_SIZE=0x1b3000",{public = true})
 ```
 
 使用全部的空间为程序区，填写一个比0x2b3000小的值，缩小程序区，留下的是用户区。demo是0x1b3000，留出了1MB空间为用户区
