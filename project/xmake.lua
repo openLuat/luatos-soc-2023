@@ -318,6 +318,17 @@ target(USER_PROJECT_NAME..".elf")
             target:add("ldflags","-L./"..linkdir, {force=true})
         end  
         ld_parameter = {"-E","-P"}
+
+        for _, dep in pairs(target:orderdeps()) do
+            if dep:name() ~= "driver" then
+                for _, dep_define_flasg in pairs(dep:get("defines")) do
+                    if dep_define_flasg:startswith("AP_FLASH_LOAD_SIZE=") or dep_define_flasg:startswith("AP_PKGIMG_LIMIT_SIZE=") then
+                        table.insert(ld_parameter,"-D" .. dep_define_flasg)
+                    end
+                end
+            end
+        end
+
         for _, define_flasg in pairs(target:get("defines")) do
             table.insert(ld_parameter,"-D" .. define_flasg)
         end
