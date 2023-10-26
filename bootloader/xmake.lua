@@ -7,7 +7,18 @@ BL_LIB_BASE = BL_LIB_BASE .. "$(projectdir)/PLAT/libs/"..CHIP_TARGET.."/bootload
 BL_LIB_BASE = BL_LIB_BASE .. "$(projectdir)/PLAT/libs/"..CHIP_TARGET.."/bootloader/libmiddleware_ec.a "
 BL_LIB_BASE = BL_LIB_BASE .. "$(projectdir)/PLAT/libs/"..CHIP_TARGET.."/bootloader/liblzma.a "
 
-local LIB_PLAT_PRE = "$(projectdir)/PLAT/prebuild/PLAT/lib/gcc/"..CHIP_TARGET..(is_lspd and "/oc" or "")
+local LIB_PS_PLAT = "full"
+if is_lspd then
+    LIB_PS_PLAT = "oc"
+else 
+    if CHIP_TARGET == "ec718p" then
+        LIB_PS_PLAT = "full"
+    else
+        LIB_PS_PLAT = "mid"
+    end
+end
+
+local LIB_PLAT_PRE = "$(projectdir)/PLAT/prebuild/PLAT/lib/gcc/"..CHIP_TARGET.."/"..LIB_PS_PLAT
 
 BL_LIB_BASE = BL_LIB_BASE .. LIB_PLAT_PRE .. "/libosa.a "
 BL_LIB_BASE = BL_LIB_BASE .. LIB_PLAT_PRE .. "/libmiddleware_ec_private.a "

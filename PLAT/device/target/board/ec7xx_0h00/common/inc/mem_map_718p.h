@@ -16,21 +16,21 @@ flash xip address(from both ap/cp view): 0x00800000---0x00c00000
 0x00002000          |---------------------------------|
                     |      fuse mirror 4KB            |
 0x00003000          |---------------------------------|
-                    |      bl 68KB                    |
+                    |      bl 68+4KB                  |
 0x00015000          |---------------------------------|
                     |      rel data(factory)20KB      |
 0x0001a000          |---------------------------------|
                     |      cp img 400KB               |
 0x0007e000          |---------------------------------|
-                    |      app img 2756KB             |
-0x00331000          |---------------------------------|
-                    |      fota 352KB                 |
-0x00389000          |---------------------------------|
-                    |      hib backup 96KB            |
-0x003a1000          |---------------------------------|
-                    |      FS  256KB                  |
-0x003e1000          |---------------------------------|
-                    |       kv 64KB           		  |
+                    |      app img 2856KB             |
+0x00348000          |---------------------------------|
+                    |      fota 308KB  (212KB可用)    |
+0x00395000          |---------------------------------|
+                    |      fs 208KB                   |
+0x003c9000          |---------------------------------|
+                    |      kv  64KB                   |
+0x003d9000          |---------------------------------|
+                    |       hib backup 96KB           |
 0x003f1000          |---------------------------------|
                     |      rel data 52KB              |
 0x003fe000          |---------------------------------|
@@ -65,14 +65,14 @@ flash xip address(from both ap/cp view): 0x00800000---0x00c00000
 
 #ifdef __USER_CODE__
 #ifndef AP_FLASH_LOAD_SIZE
-#define AP_FLASH_LOAD_SIZE              (0x2b3000)//2756KB
+#define AP_FLASH_LOAD_SIZE              (0x2ca000)//2856KB
 #endif
-#define AP_FLASH_LOAD_UNZIP_SIZE        (0x2c1000)//2820KB ,for ld
+#define AP_FLASH_LOAD_UNZIP_SIZE        (0x2d7000)//2908kB ,for ld
 
 //fota addr and size
 #ifndef FLASH_FOTA_REGION_START
-#define FLASH_FOTA_REGION_START         (0x331000)
-#define FLASH_FOTA_REGION_LEN           (0x64000)//400KB
+#define FLASH_FOTA_REGION_START         (0x348000)
+#define FLASH_FOTA_REGION_LEN           (0x4d000)//308KB
 #define FLASH_FOTA_REGION_END           (0x395000)
 #endif
 

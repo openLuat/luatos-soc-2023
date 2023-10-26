@@ -71,19 +71,19 @@ do {                                    \
 
 /* !!! Del do while. Otherwise, use continue/break between OsaDebugBegin and OsaDebugEnd,
    will invaild and cause ambiguity !!! */
-#if defined (TYPE_EC718S)
-#define OsaDebugBegin(cond, v1, v2, V3)             \
-        if (!(cond))                            \
-        {                                       \
-            ECPLAT_PRINTF(UNILOG_OSA, OsaCheckDebugFalse_e_1, P_ERROR, "Debug Error, file: %s, line: %d, (0x%x, 0x%x)", (UINT8 *)_STRINGNIFY_(__CURRENT_FILE_NAME__), __LINE__, (UINT32)(v1), (UINT32)(v2));
+#if defined (TYPE_EC718S) || defined (TYPE_EC716S)
+#define OsaDebugBegin(cond, v1, v2, V3)     \
+if (!(cond))                                \
+{                                           \
+    ECPLAT_PRINTF(UNILOG_OSA, OsaCheckDebugFalse_e_1, P_ERROR, "Debug Error, file: %s, line: %d, (0x%x, 0x%x)", (UINT8 *)_STRINGNIFY_(__CURRENT_FILE_NAME__), __LINE__, (UINT32)(v1), (UINT32)(v2));
 
 #define OsaDebugEnd()                       \
 }
 #else
 #define OsaDebugBegin(cond, v1, v2, v3)     \
-    if (!(cond))                            \
-    {                                       \
-        ECPLAT_PRINTF(UNILOG_OSA, OsaCheckDebugFalse_e_1, P_ERROR, "Debug Error, func: %s, line: %d, (0x%x, 0x%x, 0x%x)", __FUNCTION__, __LINE__, (UINT32)(v1), (UINT32)(v2), (UINT32)(v3));
+if (!(cond))                                \
+{                                           \
+    ECPLAT_PRINTF(UNILOG_OSA, OsaCheckDebugFalse_e_1, P_ERROR, "Debug Error, func: %s, line: %d, (0x%x, 0x%x, 0x%x)", __FUNCTION__, __LINE__, (UINT32)(v1), (UINT32)(v2), (UINT32)(v3));
 
 #define OsaDebugEnd()                       \
 }

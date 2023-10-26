@@ -49,28 +49,44 @@
 
 #if (defined TYPE_EC718S) || (defined TYPE_EC716S)
 #if defined GCF_FEATURE_MODE
-#undef       PS_ENABLE_WIFISCAN_FEATURE             /* 718S GCF, disable WIFISCAN feature */
-#undef       PS_ENABLE_UICC_USAT_FEATURE            /* 718S GCF, disable SIM STK feature */
-#undef       PS_ENABLE_CP_OPT_FEATURE               /* 718S GCF, disable Control Plane opt feature */
-#undef       PS_ENABLE_RATE_CTRL_FEATURE            /* 718S GCF, disable PLMN & APN Rate Control feature */
+#undef       PS_ENABLE_UICC_USAT_FEATURE            /* 718S basic(GCF), disable SIM STK feature */
+#undef       PS_ENABLE_CP_OPT_FEATURE               /* 718S basic(GCF), disable Control Plane opt feature */
+#undef       PS_ENABLE_RATE_CTRL_FEATURE            /* 718S basic(GCF), disable PLMN & APN Rate Control feature */
 
-#define      PS_ENABLE_TEST_LOOP_BACK_MODE_FEATURE  /* 718S GCF, enable TEST LOOP BACK MODE feature */
-#define      PS_ENABLE_SMS_FEATURE                  /* 718S GCF, enable SMS feature */
-#define      PS_ENABLE_RLC_UM_FEATURE               /* 718S GCF, enable RLC UM feature */
-#define      PS_ENABLE_MDT_FEATURE                  /* 718S GCF, enable RlfReport/MDT/ConnEstFailReport feature, also need enable PS_ENABLE_MDT_ASN1_FEATURE. */
-#define      PS_ENABLE_CMAS_ETWS_FEATURE            /* 718S GCF, enable CMAS & ETWS feature */
-#define      PS_ENABLE_MODIFY_AND_DEDICATED_BR_FEATURE   /* 718S GCF, enable dedicated BR operation feature. */
-#define      PS_ENABLE_EDRX_FEATURE                 /* 718S GCF, enable edrx feature */
+#define      PS_ENABLE_TEST_LOOP_BACK_MODE_FEATURE  /* 718S basic(GCF), enable TEST LOOP BACK MODE feature */
+#define      PS_ENABLE_SMS_FEATURE                  /* 718S basic(GCF), enable SMS feature */
+#define      PS_ENABLE_WIFISCAN_FEATURE             /* 718S basic(GCF), enable WIFISCAN feature */
+#define      PS_ENABLE_RLC_UM_FEATURE               /* 718S basic(GCF), enable RLC UM feature */
+#define      PS_ENABLE_MDT_FEATURE                  /* 718S basic(GCF), enable RlfReport/MDT/ConnEstFailReport feature, also need enable PS_ENABLE_MDT_ASN1_FEATURE. */
+#define      PS_ENABLE_CMAS_ETWS_FEATURE            /* 718S basic(GCF), enable CMAS & ETWS feature */
+#define      PS_ENABLE_MODIFY_AND_DEDICATED_BR_FEATURE   /* 718S basic(GCF), enable dedicated BR operation feature. */
+#define      PS_ENABLE_EDRX_FEATURE                 /* 718S basic(GCF), enable edrx feature */
+#elif defined MID_FEATURE_MODE
+#undef       PS_ENABLE_CP_OPT_FEATURE               /* 718S mid, disable Control Plane opt feature */
+#undef       PS_ENABLE_RATE_CTRL_FEATURE            /* 718S mid, disable PLMN & APN Rate Control feature */
+#undef       PS_ENABLE_TEST_LOOP_BACK_MODE_FEATURE  /* 718S mid, disable TEST LOOP BACK MODE feature */
+
+#define      PS_ENABLE_SMS_FEATURE                  /* 718S mid, enable SMS feature */
+#define      PS_ENABLE_WIFISCAN_FEATURE             /* 718S mid, enable WIFISCAN feature */
+#define      PS_ENABLE_UICC_USAT_FEATURE            /* 718S mid, enable SIM STK feature */
+#define      PS_ENABLE_RLC_UM_FEATURE               /* 718S mid, enable RLC UM feature */
+#define      PS_ENABLE_MDT_FEATURE                  /* 718S mid, enable RlfReport/MDT/ConnEstFailReport feature, suggest synchronous disable PS_ENABLE_MDT_ASN1_FEATURE. */
+
+#undef       PS_ENABLE_CMAS_ETWS_FEATURE            /* 718S mid, disable CMAS & ETWS feature */
+#undef       PS_ENABLE_MODIFY_AND_DEDICATED_BR_FEATURE   /* 718S mid, disable dedicated BR operation feature. */
+#undef       PS_ENABLE_EDRX_FEATURE                 /* 718S mid, disable edrx feature */
 #else
-#undef       PS_ENABLE_TEST_LOOP_BACK_MODE_FEATURE  /* 718S non-GCF, disable TEST LOOP BACK MODE feature */
-#undef       PS_ENABLE_SMS_FEATURE                  /* 718S non-GCF, disable SMS feature */
-#undef       PS_ENABLE_WIFISCAN_FEATURE             /* 718S non-GCF, disable WIFISCAN feature */
-#define      PS_ENABLE_UICC_USAT_FEATURE            /* 718S non-GCF, enable SIM STK feature */
-#undef       PS_ENABLE_CP_OPT_FEATURE               /* 718S non-GCF, disable Control Plane opt feature */
-#undef       PS_ENABLE_RATE_CTRL_FEATURE            /* 718S non-GCF, disable PLMN & APN Rate Control feature */
-#define      PS_ENABLE_RLC_UM_FEATURE               /* 718S non-GCF, enable RLC UM feature */
-#define      PS_ENABLE_MDT_FEATURE                  /* 718S non-GCF, enable RlfReport/MDT/ConnEstFailReport feature, suggest synchronous disable PS_ENABLE_MDT_ASN1_FEATURE. */
-#undef       PS_ENABLE_CMAS_ETWS_FEATURE            /* 718S non-GCF, disable CMAS & ETWS feature */
+#undef       PS_ENABLE_CP_OPT_FEATURE               /* 718S mini, disable Control Plane opt feature */
+#undef       PS_ENABLE_RATE_CTRL_FEATURE            /* 718S mini, disable PLMN & APN Rate Control feature */
+#undef       PS_ENABLE_TEST_LOOP_BACK_MODE_FEATURE  /* 718S mini, disable TEST LOOP BACK MODE feature */
+#undef       PS_ENABLE_SMS_FEATURE                  /* 718S mini, disable SMS feature */
+#undef       PS_ENABLE_WIFISCAN_FEATURE             /* 718S mini, disable WIFISCAN feature */
+
+#define      PS_ENABLE_UICC_USAT_FEATURE            /* 718S mini, enable SIM STK feature */
+#define      PS_ENABLE_RLC_UM_FEATURE               /* 718S mini, enable RLC UM feature */
+#define      PS_ENABLE_MDT_FEATURE                  /* 718S mini, enable RlfReport/MDT/ConnEstFailReport feature, suggest synchronous disable PS_ENABLE_MDT_ASN1_FEATURE. */
+
+#undef       PS_ENABLE_CMAS_ETWS_FEATURE            /* 718S mini, disable CMAS & ETWS feature */
 
 /*   1. Cat1 disable dedicated BR operation feature.(Contains +CGDSCONT/CGEQOS/CGTFT/CGACT)
  *       1.1 dedicated BR
@@ -84,8 +100,8 @@
  *       2.3 The modification Indicate function is disabled;
  *       2.4 The modification function in abort precedure is disabled.
  */
-#undef       PS_ENABLE_MODIFY_AND_DEDICATED_BR_FEATURE   /* 718S non-GCF, disable dedicated BR operation feature. */
-#undef       PS_ENABLE_EDRX_FEATURE                 /* 718S non-GCF, disable edrx feature */
+#undef       PS_ENABLE_MODIFY_AND_DEDICATED_BR_FEATURE   /* 718S mini, disable dedicated BR operation feature. */
+#undef       PS_ENABLE_EDRX_FEATURE                 /* 718S mini, disable edrx feature */
 #endif
 
 #else

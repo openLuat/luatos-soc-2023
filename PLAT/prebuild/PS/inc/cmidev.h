@@ -2085,6 +2085,8 @@ typedef struct CmiDevRrcStatusInfo_Tag
     UINT32                  cellId;
     CmiDevIntraCellInfo     intraCellList[CMI_DEV_QENG_INTRA_NCELL_NUM]; //64 bytes
     CmiDevInterCellInfo     interCellList[CMI_DEV_QENG_INTER_NCELL_NUM]; //256 bytes
+    UINT16                  drx;
+    UINT16                  srvd;
 }CmiDevRrcStatusInfo;   //336 bytes
 
 /*

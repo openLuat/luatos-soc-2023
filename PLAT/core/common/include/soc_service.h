@@ -113,6 +113,15 @@ typedef enum SOC_MOBILE_SMS_STATUS
 	SOC_MOBILE_SMS_ACK,
 }SOC_MOBILE_SMS_STATUS_E;
 
+enum
+{
+	SOC_SYS_CTRL_CAMERA,
+	SOC_SYS_CTRL_AUDIO,
+	SOC_SYS_CTRL_SOFT_DAC,
+	SOC_SYS_CTRL_IMAGE_DECODE,
+	SOC_SYS_CTRL_USER = 16,
+	SOC_SYS_CTRL_MAX = 32,
+};
 
 void soc_vsprintf(const char * format, va_list ap);
 
@@ -170,4 +179,8 @@ void soc_mobile_print_cell_info(uint8_t sim_id);
 
 uint8_t soc_rndis_is_enable(void);
 uint32_t soc_rndis_host_ip(void);
+void soc_psram_speed_init(void);
+void soc_psram_dma_on_off(uint32_t mask_bit, uint8_t on_off);
+void soc_cp_force_wakeup_on_off(uint32_t mask_bit, uint8_t on_off);
+void soc_sys_force_wakeup_on_off(uint32_t mask_bit, uint8_t on_off);
 #endif /* CORE_INCLUDE_SOC_SERVICE_H_ */

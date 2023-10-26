@@ -196,8 +196,21 @@ if os.getenv("LUAT_FAST_ADD_USER_LIB") == "1" then
     LIB_BASE = LIB_BASE .. SDK_TOP .. os.getenv("USER_LIB") .. " "
 end
 
-LIB_PS_PRE = SDK_TOP .. "/PLAT/prebuild/PS/lib/gcc/"..CHIP_TARGET..(is_lspd and "/oc" or "")
-LIB_PLAT_PRE = SDK_TOP .. "/PLAT/prebuild/PLAT/lib/gcc/"..CHIP_TARGET..(is_lspd and "/oc" or "")
+local LIB_PS_PLAT = "full"
+local LIB_FW = "oc"
+if is_lspd then
+    LIB_PS_PLAT = "oc"
+    LIB_FW = "wifi"
+else 
+    if CHIP_TARGET == "ec718p" then
+        LIB_PS_PLAT = "full"
+    else
+        LIB_PS_PLAT = "mid"
+    end
+end
+
+LIB_PS_PRE = SDK_TOP .. "/PLAT/prebuild/PS/lib/gcc/"..CHIP_TARGET.."/"..LIB_PS_PLAT
+LIB_PLAT_PRE = SDK_TOP .. "/PLAT/prebuild/PLAT/lib/gcc/"..CHIP_TARGET.."/"..LIB_PS_PLAT
 
 LIB_BASE = LIB_BASE .. LIB_PS_PRE .. "/libps.a "
 LIB_BASE = LIB_BASE .. LIB_PS_PRE .. "/libpsl1.a "
@@ -269,18 +282,18 @@ target(USER_PROJECT_NAME..".elf")
     -- interface
     add_files(SDK_TOP .. "/interface/src/*.c")
     -- network
-    add_files(LUATOS_ROOT .."components/network/adapter/luat_network_adapter.c",
-            LUATOS_ROOT .."components/ethernet/common/dns_client.c"
+    add_files(LUATOS_ROOT .."/components/network/adapter/luat_network_adapter.c",
+            LUATOS_ROOT .."/components/ethernet/common/dns_client.c"
             )
 
     -- mbedtls
-    add_files(LUATOS_ROOT .."components/mbedtls/library/*.c",{public = true})
+    add_files(LUATOS_ROOT .."/components/mbedtls/library/*.c",{public = true})
     -- printf
-    add_files(LUATOS_ROOT.."components/printf/*.c")
+    add_files(LUATOS_ROOT.."/components/printf/*.c")
     -- weak
     -- add_files(LUATOS_ROOT.."luat/weak/luat_log_weak.c")
     -- littlefs
-    add_files(SDK_TOP.."thirdparty/littlefs/**.c")
+    add_files(SDK_TOP.."/thirdparty/littlefs/**.c")
     -- vfs
     add_files(LUATOS_ROOT.."luat/vfs/luat_fs_lfs2.c",
             LUATOS_ROOT.."luat/vfs/luat_vfs.c")
@@ -338,7 +351,7 @@ target(USER_PROJECT_NAME..".elf")
         -------------- 这部分尚不能跨平台 -------------------------
         local binpkg = (is_plat("windows") and "./PLAT/tools/fcelf.exe " or "./PLAT/tools/fcelf ").."-M -input ./build/ap_bootloader/ap_bootloader.bin -addrname BL_PKGIMG_LNA -flashsize BOOTLOADER_PKGIMG_LIMIT_SIZE \
                         -input $(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME ..".bin -addrname AP_PKGIMG_LNA -flashsize AP_PKGIMG_LIMIT_SIZE \
-                        -input ./PLAT/prebuild/FW/lib/gcc/"..CHIP_TARGET.."/cp-demo-flash.bin -addrname CP_PKGIMG_LNA -flashsize CP_PKGIMG_LIMIT_SIZE \
+                        -input ./PLAT/prebuild/FW/lib/gcc/"..CHIP_TARGET.."/"..LIB_FW.."/cp-demo-flash.bin -addrname CP_PKGIMG_LNA -flashsize CP_PKGIMG_LIMIT_SIZE \
                         -pkgmode 1 \
                         -banoldtool 1 \
                         -productname "..CHIP_TARGET:upper().."_PRD \

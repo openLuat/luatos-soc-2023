@@ -1,8 +1,8 @@
 DbVersion
-524908390,100
+809249213,100
 <end>
 BuildInfo
-The current data file was built by the Application Ver. 2.2.77.207, Thu Oct 26 13:00:42 2023
+The current data file was built by the Application Ver. 2.2.77.207, Thu Oct 26 13:36:01 2023
 <end>
 EnumVals
 0,2048,0,0,PHY_ONLINE,PHY_ICS_MODULE,PhyIcsMeasMainEntrance_1,P_ERROR,swLogPrintf("Incorrect ICS stage ( %d ) for new euArfcn arranged for ICS MEAS ");
@@ -487,7 +487,7 @@ EnumVals
 265216,543267072,0,0,PLAT_AP,PLA_DRIVER,prvEnterLowPowerState_17,P_VALUE,swLogPrintf("NVIC ISPR 0x%x ICSR 0x%x \r \n ");
 265216,543269632,0,0,PLAT_AP,PLA_DRIVER,prvEnterLowPowerState_18,P_VALUE,swLogPrintf("XIC0 0x%x XIC1 0x%x XIC2 0x%x XIC3 0x%x \r \n ");
 265216,543272704,0,0,PLAT_AP,PLA_DRIVER,apmuPrintBootTimeStamp_0,P_VALUE,swLogPrintf("BootTime Print : Pre Paging SlowCnt = %u , %u , %u , %u , %u , %u , %u CurSlowCnt = %u ");
-265216,543274752,0,0,PLAT_AP,PLA_DRIVER,apmuPrintBootTimeStamp_1,P_VALUE,swLogPrintf("BootTime Print : Post Paging SlowCnt = %d , %d , %d , %d , %d , %d , %d CurSlowCnt = %u ");
+265216,543274752,0,0,PLAT_AP,PLA_DRIVER,apmuPrintBootTimeStamp_1,P_VALUE,swLogPrintf("BootTime Print : Post Paging SlowCnt = %u , %u , %u , %u , %u , %u , %u CurSlowCnt = %u ");
 265216,543275264,0,0,PLAT_AP,PLA_DRIVER,apmuPrintBootTimeStamp_2,P_VALUE,swLogPrintf("Last Sc Ratio = %d , slowCnt when ratio change = %d ");
 265216,543279103,0,0,PLAT_AP,PLA_DRIVER,atwait_expired_1,P_VALUE,swLogPrintf("Wait AT Timer Expired ");
 265216,543279104,0,0,PLAT_AP,PLA_DRIVER,at_wait_start_1,P_VALUE,swLogPrintf("Wait AT Timer Start-%u ");
@@ -1561,36 +1561,37 @@ EnumVals
 269312,552026111,0,0,PLAT_AP,PMU,mcuModeInit_1,P_SIG,swLogPrintf("Mcu Mode : Switch to Comm Mode ");
 269312,552028159,0,0,PLAT_AP,PMU,slpManStartPowerOff_0,P_SIG,swLogPrintf("Power Off Start ");
 269312,552029184,0,0,PLAT_AP,PMU,slpManAonWdtFeed_1,P_VALUE,swLogPrintf("Current Systick = %u nvicEnable = 0x%x , nvicPending = 0x%x , SystickEn = 0x%x , SystickCfg = 0x%x ");
-269312,552030208,0,0,PLAT_AP,PMU,slpManRegisterPSRamInitCb_1,P_VALUE,swLogPrintf("Register PS Ram Init callback = 0x%x ");
-269312,552032512,0,0,PLAT_AP,PMU,slpManRegisterPSRamInitCb_2,P_WARNING,swLogPrintf("PS Ram Init callback exist = 0x%x , but rewrite by new callback = 0x%x ");
-269312,552034560,0,0,PLAT_AP,PMU,dcxoRestore,P_INFO,swLogPrintf("DCXO restore! temprPreAttach = %d , freqPPMPreAttach = %d ");
-269312,552038399,0,0,PLAT_AP,PMU,cmsProcSignal_Utc,P_ERROR,swLogPrintf("SIG_CMS_UTC_TIME_DCXO_REQ UTC Read Error! ");
-269312,552038656,0,0,PLAT_AP,PMU,mainTask_1,P_VALUE,swLogPrintf("APHL BootFlag = %e<APBootFlag_e> , APLL BootFlag = %e<APBootFlag_e> ");
-269312,552040704,0,0,PLAT_AP,PMU,IPC0_Check,P_VALUE,swLogPrintf("XIC0 Latch = 0x%x , NVIC = 0x%x ");
-269312,552042496,0,0,PLAT_AP,PMU,usblpw_wkup_or_init_pre_0,P_WARNING,swLogPrintf("ctx stat reg %d ");
-269312,552045312,0,0,PLAT_AP,PMU,usblpw_wkup_or_init_0,P_VALUE,swLogPrintf("pwr state 0x%x , bootstat 0x%x , lastwkup 0x%x , othwk stg 0x%x ");
-269312,552047360,0,0,PLAT_AP,PMU,usblpw_wkup_or_init_1,P_VALUE,swLogPrintf("pwr state 0x%x , bootstat 0x%x , lastwkup 0x%x , inimod 0x%x ");
-269312,552048896,0,0,PLAT_AP,PMU,usblpw_wkup_or_init_2,P_VALUE,swLogPrintf("othwk stg 0x%x , proc_stat 0x%x ");
-269312,552050688,0,0,PLAT_AP,PMU,chargeStatusCb_1,P_VALUE,swLogPrintf("Charge Status update = %d ");
-269312,552052736,0,0,PLAT_AP,PMU,apflashXIPSize,P_VALUE,swLogPrintf("AP Flash XIP Size = 0x%x ");
-269312,552054784,0,0,PLAT_AP,PMU,Pad0_WakeupIntHandler_1,P_VALUE,swLogPrintf("Pad%d Wakeup ");
-269312,552058879,0,0,PLAT_AP,PMU,ChrgPad_WakeupIntHandler_1,P_VALUE,swLogPrintf("charge Wakeup ");
-269312,552060927,0,0,PLAT_AP,PMU,PwrKey_WakeupIntHandler_1,P_VALUE,swLogPrintf("Pwr key Wakeup ");
-269312,552060928,0,0,PLAT_AP,PMU,GPR_rmiErrDetectIsr_1,P_WARNING,swLogPrintf("Rmi Err Detect Address = 0x%x ");
-269312,552065023,0,0,PLAT_AP,PMU,apmu2PeriWFITimerExp_0,P_VALUE,swLogPrintf("apmu2PeriWFITimerExp Enter ");
-269312,552065536,0,0,PLAT_AP,PMU,apmuPeriStartWFITimer_0,P_ERROR,swLogPrintf("clkRet1 = %d , clkRet2 = %d , CLKFREQ = 0x%x ");
-269312,552067072,0,0,PLAT_AP,PMU,apmuPeriStartWFITimer_1,P_VALUE,swLogPrintf("apmuPeriStartWFITimer set to %u ms ");
-269312,552069632,0,0,PLAT_AP,PMU,apmuPeriStartCPTimer_0,P_ERROR,swLogPrintf("clkRet1 = %d , clkRet2 = %d , CLKFREQ = 0x%x ");
-269312,552071168,0,0,PLAT_AP,PMU,apmuPeriStartCPTimer_1,P_VALUE,swLogPrintf("apmuCreateModemStartTimer set to %u ms ");
-269312,552073216,0,0,PLAT_AP,PMU,chargeIntHandler_1,P_VALUE,swLogPrintf("Charger Int Enter , Status Update = %d ");
-269312,552075264,0,0,PLAT_AP,PMU,chargeDetectInit_1,P_VALUE,swLogPrintf("Charger Detect Init , Status Update = %d ");
-269312,552079359,0,0,PLAT_AP,PMU,pwrKeySendKeyStatus_1,P_VALUE,swLogPrintf("Power Key message send error ");
-269312,552081407,0,0,PLAT_AP,PMU,pwrKeySendKeyStatus_2,P_VALUE,swLogPrintf("Power Key queue not ready ");
-269312,552081408,0,0,PLAT_AP,PMU,pwrKeySendKeyStatusInIsr_1,P_VALUE,swLogPrintf("Power Key message send in isr error , status = %d ");
-269312,552085503,0,0,PLAT_AP,PMU,pwrKeySendKeyStatusInIsr_2,P_VALUE,swLogPrintf("Power Key queue not ready in isr ");
-269312,552087551,0,0,PLAT_AP,PMU,pwrKeyQueueInit_1,P_VALUE,swLogPrintf("Power Key task queue init error ");
-269312,552087552,0,0,PLAT_AP,PMU,pwrKeyInit_1,P_VALUE,swLogPrintf("Pwrkey Status = %d ");
-269312,552091647,0,0,PLAT_AP,PMU,cmsProcSignal_1,P_VALUE,swLogPrintf("cmsProcSignal CP start ind ");
+269312,552030208,0,0,PLAT_AP,PMU,slpManSetCPSleepEnable_1,P_SIG,swLogPrintf("SetCPSleepEnable = %d ");
+269312,552032256,0,0,PLAT_AP,PMU,slpManRegisterPSRamInitCb_1,P_VALUE,swLogPrintf("Register PS Ram Init callback = 0x%x ");
+269312,552034560,0,0,PLAT_AP,PMU,slpManRegisterPSRamInitCb_2,P_WARNING,swLogPrintf("PS Ram Init callback exist = 0x%x , but rewrite by new callback = 0x%x ");
+269312,552036608,0,0,PLAT_AP,PMU,dcxoRestore,P_INFO,swLogPrintf("DCXO restore! temprPreAttach = %d , freqPPMPreAttach = %d ");
+269312,552040447,0,0,PLAT_AP,PMU,cmsProcSignal_Utc,P_ERROR,swLogPrintf("SIG_CMS_UTC_TIME_DCXO_REQ UTC Read Error! ");
+269312,552040704,0,0,PLAT_AP,PMU,mainTask_1,P_VALUE,swLogPrintf("APHL BootFlag = %e<APBootFlag_e> , APLL BootFlag = %e<APBootFlag_e> ");
+269312,552042752,0,0,PLAT_AP,PMU,IPC0_Check,P_VALUE,swLogPrintf("XIC0 Latch = 0x%x , NVIC = 0x%x ");
+269312,552044544,0,0,PLAT_AP,PMU,usblpw_wkup_or_init_pre_0,P_WARNING,swLogPrintf("ctx stat reg %d ");
+269312,552047360,0,0,PLAT_AP,PMU,usblpw_wkup_or_init_0,P_VALUE,swLogPrintf("pwr state 0x%x , bootstat 0x%x , lastwkup 0x%x , othwk stg 0x%x ");
+269312,552049408,0,0,PLAT_AP,PMU,usblpw_wkup_or_init_1,P_VALUE,swLogPrintf("pwr state 0x%x , bootstat 0x%x , lastwkup 0x%x , inimod 0x%x ");
+269312,552050944,0,0,PLAT_AP,PMU,usblpw_wkup_or_init_2,P_VALUE,swLogPrintf("othwk stg 0x%x , proc_stat 0x%x ");
+269312,552052736,0,0,PLAT_AP,PMU,chargeStatusCb_1,P_VALUE,swLogPrintf("Charge Status update = %d ");
+269312,552054784,0,0,PLAT_AP,PMU,apflashXIPSize,P_VALUE,swLogPrintf("AP Flash XIP Size = 0x%x ");
+269312,552056832,0,0,PLAT_AP,PMU,Pad0_WakeupIntHandler_1,P_VALUE,swLogPrintf("Pad%d Wakeup ");
+269312,552060927,0,0,PLAT_AP,PMU,ChrgPad_WakeupIntHandler_1,P_VALUE,swLogPrintf("charge Wakeup ");
+269312,552062975,0,0,PLAT_AP,PMU,PwrKey_WakeupIntHandler_1,P_VALUE,swLogPrintf("Pwr key Wakeup ");
+269312,552062976,0,0,PLAT_AP,PMU,GPR_rmiErrDetectIsr_1,P_WARNING,swLogPrintf("Rmi Err Detect Address = 0x%x ");
+269312,552067071,0,0,PLAT_AP,PMU,apmu2PeriWFITimerExp_0,P_VALUE,swLogPrintf("apmu2PeriWFITimerExp Enter ");
+269312,552067584,0,0,PLAT_AP,PMU,apmuPeriStartWFITimer_0,P_ERROR,swLogPrintf("clkRet1 = %d , clkRet2 = %d , CLKFREQ = 0x%x ");
+269312,552069120,0,0,PLAT_AP,PMU,apmuPeriStartWFITimer_1,P_VALUE,swLogPrintf("apmuPeriStartWFITimer set to %u ms ");
+269312,552071680,0,0,PLAT_AP,PMU,apmuPeriStartCPTimer_0,P_ERROR,swLogPrintf("clkRet1 = %d , clkRet2 = %d , CLKFREQ = 0x%x ");
+269312,552073216,0,0,PLAT_AP,PMU,apmuPeriStartCPTimer_1,P_VALUE,swLogPrintf("apmuCreateModemStartTimer set to %u ms ");
+269312,552075264,0,0,PLAT_AP,PMU,chargeIntHandler_1,P_VALUE,swLogPrintf("Charger Int Enter , Status Update = %d ");
+269312,552077312,0,0,PLAT_AP,PMU,chargeDetectInit_1,P_VALUE,swLogPrintf("Charger Detect Init , Status Update = %d ");
+269312,552081407,0,0,PLAT_AP,PMU,pwrKeySendKeyStatus_1,P_VALUE,swLogPrintf("Power Key message send error ");
+269312,552083455,0,0,PLAT_AP,PMU,pwrKeySendKeyStatus_2,P_VALUE,swLogPrintf("Power Key queue not ready ");
+269312,552083456,0,0,PLAT_AP,PMU,pwrKeySendKeyStatusInIsr_1,P_VALUE,swLogPrintf("Power Key message send in isr error , status = %d ");
+269312,552087551,0,0,PLAT_AP,PMU,pwrKeySendKeyStatusInIsr_2,P_VALUE,swLogPrintf("Power Key queue not ready in isr ");
+269312,552089599,0,0,PLAT_AP,PMU,pwrKeyQueueInit_1,P_VALUE,swLogPrintf("Power Key task queue init error ");
+269312,552089600,0,0,PLAT_AP,PMU,pwrKeyInit_1,P_VALUE,swLogPrintf("Pwrkey Status = %d ");
+269312,552093695,0,0,PLAT_AP,PMU,cmsProcSignal_1,P_VALUE,swLogPrintf("cmsProcSignal CP start ind ");
 270336,553650432,0,0,PLAT_AP,CCIO,ADD_DEV_1,P_INFO,swLogPrintf("device ( 0x%x / %d ) is added! ");
 270336,553652224,0,0,PLAT_AP,CCIO,DEL_DEV_0,P_INFO,swLogPrintf("device ( 0x%x ) is deleted! ");
 270336,553656319,0,0,PLAT_AP,CCIO,DEL_DEV_1,P_SIG,swLogPrintf("no devices in the list! ");
@@ -8146,5 +8147,5 @@ MW_INFO_PHY_EDRX_PARAM,midWareNvmInfoPhyEdrxParam
 plat_config,plat_config_fs_t
 <end>
 OptionalSegment
-optional_sk_01,FAB219A02623E369BAF6BB7C0350468475842C73DF9477EAE971B29495E7F556
+optional_sk_01,9456A5D99F37732BF074979279C436B35C13B44C6E2FBB118F8144BB1D096EF0
 <end>

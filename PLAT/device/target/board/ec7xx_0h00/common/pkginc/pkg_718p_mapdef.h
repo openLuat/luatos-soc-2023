@@ -17,7 +17,7 @@
 
 #ifdef __USER_CODE__
 #ifndef AP_PKGIMG_LIMIT_SIZE
-#define AP_PKGIMG_LIMIT_SIZE (0x2b3000)
+#define AP_PKGIMG_LIMIT_SIZE (0x2ca000)
 #endif
 #else
 #define AP_PKGIMG_LIMIT_SIZE (0x30b000)

@@ -9,9 +9,6 @@ LUATOS_ROOT = SDK_TOP .. "/../LuatOS/"
 USER_PROJECT_NAME = "example"
 CHIP_TARGET = "ec718p"
 
-local script_addr = nil
-local full_addr = nil
-
 package("gnu_rm")
 	set_kind("toolchain")
 	set_homepage("https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm")
@@ -59,13 +56,6 @@ if os.getenv("LSPD_MODE") == "enable" then
 else
     is_lspd = false
 end
-
-if os.getenv("ROOT_PATH") then
-	SDK_TOP = os.getenv("ROOT_PATH")
-else
-	SDK_TOP = os.curdir()
-end
-SDK_TOP = SDK_TOP .. "/"
 
 set_plat("cross")
 set_arch("arm")

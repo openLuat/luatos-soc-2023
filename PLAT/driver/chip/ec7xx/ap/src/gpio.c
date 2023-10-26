@@ -95,14 +95,13 @@ void GPIO_driverDeInit(void)
 bool GPIO_hasPinWaitInterrupt(void)
 {
     GPIO_TypeDef *base;
-    base = EIGEN_GPIO(0);
-    if(base->INTENSET != 0)
-        return true;
-
-    base = EIGEN_GPIO(1);
-    if(base->INTENSET != 0)
-        return true;
-    
+    uint8_t i = 0;
+    for(i=0; i<GPIO_INSTANCE_NUM; i++)
+    {
+        base = EIGEN_GPIO(i);
+        if(base->INTENSET != 0)
+            return true;
+    }
     return false;
 }
 #endif

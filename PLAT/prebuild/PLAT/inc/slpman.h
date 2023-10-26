@@ -1062,7 +1062,13 @@ void slpManSetUsbHighFreqFlag(bool needHighFreq);
 */
 void slpManDCXOOutputEn(bool en);
 #endif
-
+/**
+* @brief void slpManSetCPSleepEnable(bool en)
+* @details  enable or disable cp sleep 
+* @param    en: true enable cp sleep
+                false disable cp sleep
+*/
+void slpManSetCPSleepEnable(bool en);
 /** \} */
 
 
