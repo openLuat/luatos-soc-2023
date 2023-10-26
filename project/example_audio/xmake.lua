@@ -1,4 +1,4 @@
-local TARGET_NAME = "example_audio"
+local TARGET_NAME = os.scriptdir():match(".+[/\\]([%w_]+)")
 local LIB_DIR = "$(buildir)/".. TARGET_NAME .. "/"
 local LIB_NAME = "lib" .. TARGET_NAME .. ".a "
 

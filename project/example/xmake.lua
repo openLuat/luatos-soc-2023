@@ -1,4 +1,4 @@
-local TARGET_NAME = os.scriptdir():match(".+\\(%w+)") or os.scriptdir():match(".+/(%w+)")
+local TARGET_NAME = os.scriptdir():match(".+[/\\]([%w_]+)")
 local LIB_DIR = "$(buildir)/".. TARGET_NAME .. "/"
 local LIB_NAME = "lib" .. TARGET_NAME .. ".a "
 local CHIP_TARGET = CHIP_TARGET
