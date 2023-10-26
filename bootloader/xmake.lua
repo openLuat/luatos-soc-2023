@@ -173,7 +173,7 @@ target("ap_bootloader.elf")
         for _, includedirs_flasg in pairs(target:get("includedirs")) do
             table.insert(mem_parameter,"-I" .. includedirs_flasg)
         end
-        os.execv(toolchains .. "/arm-none-eabi-gcc",table.join(mem_parameter, {"-o","build/ap_bootloader/mem_map.txt","-"}),{stdin = SDK_PATH .. "/PLAT/device/target/board/ec7xx_0h00/common/inc/mem_map.h"})
+        os.execv(toolchains .. "/arm-none-eabi-gcc",table.join(mem_parameter, {"-o",SDK_PATH .. "/build/ap_bootloader/mem_map.txt","-"}),{stdin = SDK_PATH .. "/PLAT/device/target/board/ec7xx_0h00/common/inc/mem_map.h"})
         os.exec(toolchains .. "/arm-none-eabi-objcopy -O binary $(buildir)/ap_bootloader/ap_bootloader.elf $(buildir)/ap_bootloader/ap_bootloader.bin")
         os.iorun(toolchains .. "/arm-none-eabi-size $(buildir)/ap_bootloader/ap_bootloader.elf")
         os.cp("$(buildir)/ap_bootloader/ap_bootloader.bin", "$(buildir)/ap_bootloader/ap_bootloader_unZip.bin")
