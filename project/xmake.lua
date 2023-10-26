@@ -266,6 +266,7 @@ target(USER_PROJECT_NAME..".elf")
     add_deps(USER_PROJECT_NAME)
     add_deps("driver")
 
+    add_linkdirs("$(projectdir)/lib")
     add_linkdirs("$(projectdir)/PLAT/device/target/board/ec7xx_0h00/ap/gcc/")
     add_linkdirs("$(projectdir)/PLAT/prebuild/PS/lib/gcc/"..CHIP_TARGET.."/"..LIB_PS_PLAT)
     add_linkdirs("$(projectdir)/PLAT/prebuild/PLAT/lib/gcc/"..CHIP_TARGET.."/"..LIB_PS_PLAT)
