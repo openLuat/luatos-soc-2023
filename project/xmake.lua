@@ -56,7 +56,7 @@ add_defines("sprintf=sprintf_",
 add_cxflags("-fno-inline",
             "-mslow-flash-data",
             "-fstack-usage",
-            "-Wstack-usage=4096",
+            -- "-Wstack-usage=4096",
             {force=true})
 
 if CHIP_TARGET == "ec716s" or CHIP_TARGET == "ec718s" then
