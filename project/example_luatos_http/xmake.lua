@@ -8,7 +8,7 @@ target(TARGET_NAME)
     set_warnings("error")
 
     -- mbedtls
-    add_defines("LUAT_USE_TLS","MBEDTLS_CONFIG_FILE=\"mbedtls_ec7xx_config.h\"",{public = true})
+    add_defines("LUAT_USE_TLS",{public = true})
 
     --加入代码和头文件
     add_includedirs("./inc",{public = true})
