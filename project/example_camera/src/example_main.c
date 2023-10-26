@@ -496,7 +496,7 @@ static void luat_camera_task(void *param)
 			v_len = 0;
 			break;
 		case CAMERA_FRAME_END:
-			DBG("1fps done");
+			LUAT_DEBUG_PRINT("1fps done");
 			break;
 		case CAMERA_FRAME_DECODE:
 #ifdef CAMERA_TEST_QRCODE
@@ -504,7 +504,12 @@ static void luat_camera_task(void *param)
 			{
 				g_s_camera_app.is_decoding = 1;
 			}
+			else
+			{
+				break;
+			}
 			memcpy(cache, g_s_camera_app.p_cache[event.param1], CAMERA_W * CAMERA_H);
+			LUAT_DEBUG_PRINT("解码开始");
 			luat_camera_image_decode_once(cache, CAMERA_W, CAMERA_H, 60, luat_image_decode_callback, event.param1);
 #endif
 			break;
