@@ -5,7 +5,7 @@ add_rules("mode.debug", "mode.release")
 set_defaultmode("debug")
 
 SDK_TOP = "$(projectdir)"
-LUATOS_ROOT = SDK_TOP .. "/../LuatOS/"
+LUATOS_ROOT = "$(projectdir)/../LuatOS/"
 USER_PROJECT_NAME = "example"
 CHIP_TARGET = "ec718p"
 

@@ -82,88 +82,87 @@ add_ldflags("-lm",
 -- ==============================
 -- === includes =====
 -- SDK相关头文件引用
-add_includedirs(
-                SDK_TOP .. "/PLAT/device/target/board/common/ARMCM3/inc",
-                SDK_TOP .. "/PLAT/device/target/board/ec7xx_0h00/common/inc",
-                SDK_TOP .. "/PLAT/device/target/board/ec7xx_0h00/common/pkginc",
-                SDK_TOP .. "/PLAT/device/target/board/ec7xx_0h00/ap/gcc",
-                SDK_TOP .. "/PLAT/device/target/board/ec7xx_0h00/ap/inc",
-                SDK_TOP .. "/PLAT/driver/board/ec7xx_0h00/inc",
-                SDK_TOP .. "/PLAT/driver/board/ec7xx_0h00/inc/eeprom",
-                SDK_TOP .. "/PLAT/driver/board/ec7xx_0h00/inc/camera",
-                SDK_TOP .. "/PLAT/driver/board/ec7xx_0h00/inc/camera/sp0A39",
-                SDK_TOP .. "/PLAT/driver/board/ec7xx_0h00/inc/camera/sp0821",
-                SDK_TOP .. "/PLAT/driver/board/ec7xx_0h00/inc/camera/gc6123",
-                SDK_TOP .. "/PLAT/driver/board/ec7xx_0h00/inc/camera/gc6153",
-                SDK_TOP .. "/PLAT/driver/board/ec7xx_0h00/inc/camera/gc032A",
-                SDK_TOP .. "/PLAT/driver/board/ec7xx_0h00/inc/camera/bf30a2",
-                SDK_TOP .. "/PLAT/driver/board/ec7xx_0h00/inc/audio",
-                SDK_TOP .. "/PLAT/driver/board/ec7xx_0h00/inc/audio/codec",
-                SDK_TOP .. "/PLAT/driver/board/ec7xx_0h00/inc/audio/codec/es8388",
-                SDK_TOP .. "/PLAT/driver/board/ec7xx_0h00/inc/audio/codec/es8311",
-                SDK_TOP .. "/PLAT/driver/board/ec7xx_0h00/inc/lcd/lcdDev",
-                SDK_TOP .. "/PLAT/driver/board/ec7xx_0h00/inc/lcd",
-                SDK_TOP .. "/PLAT/driver/board/ec7xx_0h00/inc/ntc",
-                SDK_TOP .. "/PLAT/driver/board/ec7xx_0h00/inc/exstorage",
-                SDK_TOP .. "/PLAT/driver/hal/common/inc",
-                SDK_TOP .. "/PLAT/driver/hal/ec7xx/ap/inc",
-                SDK_TOP .. "/PLAT/driver/hal/ec7xx/ap/inc/"..CHIP,
-                SDK_TOP .. "/PLAT/driver/chip/ec7xx/ap/inc",
-                SDK_TOP .. "/PLAT/driver/chip/ec7xx/ap/inc/"..CHIP,
-                SDK_TOP .. "/PLAT/driver/chip/ec7xx/ap/inc_cmsis",
-                SDK_TOP .. "/PLAT/os/freertos/inc",
-                SDK_TOP .. "/PLAT/os/freertos/CMSIS/common/inc",
-                SDK_TOP .. "/PLAT/os/freertos/CMSIS/ap/inc",
-                SDK_TOP .. "/PLAT/os/freertos/portable/mem/tlsf",
-                SDK_TOP .. "/PLAT/os/freertos/portable/gcc",
-                SDK_TOP .. "/PLAT/middleware/developed/nvram/ec7xx/inc",
-                SDK_TOP .. "/PLAT/middleware/developed/nvram/inc",
-                SDK_TOP .. "/PLAT/middleware/developed/cms/psdial/inc",
-                SDK_TOP .. "/PLAT/middleware/developed/cms/cms/inc",
-                SDK_TOP .. "/PLAT/middleware/developed/cms/psil/inc",
-                SDK_TOP .. "/PLAT/middleware/developed/cms/psstk/inc",
-                SDK_TOP .. "/PLAT/middleware/developed/cms/sockmgr/inc",
-                SDK_TOP .. "/PLAT/middleware/developed/cms/cmsnetlight/inc",
-                SDK_TOP .. "/PLAT/middleware/developed/ecapi/aal/inc",
-                SDK_TOP .. "/PLAT/middleware/developed/ecapi/appmwapi/inc",
-                SDK_TOP .. "/PLAT/middleware/developed/ecapi/psapi/inc",
-                SDK_TOP .. "/PLAT/middleware/developed/common/inc",
-                SDK_TOP .. "/PLAT/middleware/developed/psnv/inc",
-                SDK_TOP .. "/PLAT/os/freertos/portable/gcc",
-                SDK_TOP .. "/PLAT/middleware/developed/tcpipmgr/app/inc",
-                SDK_TOP .. "/PLAT/middleware/developed/tcpipmgr/common/inc",
-                SDK_TOP .. "/PLAT/os/freertos/inc",
-                SDK_TOP .. "/PLAT/middleware/developed/yrcompress",
-                SDK_TOP .. "/PLAT/prebuild/PS/inc",
-                SDK_TOP .. "/PLAT/middleware/thirdparty/lwip/src/include",
-                SDK_TOP .. "/PLAT/middleware/thirdparty/lwip/src/include/lwip",
-                SDK_TOP .. "/PLAT/middleware/developed/ccio/pub",
-                SDK_TOP .. "/PLAT/middleware/developed/ccio/device/inc",
-                SDK_TOP .. "/PLAT/middleware/developed/ccio/service/inc",
-                SDK_TOP .. "/PLAT/middleware/developed/ccio/custom/inc",
-                SDK_TOP .. "/PLAT/middleware/developed/fota/pub",
-                SDK_TOP .. "/PLAT/middleware/developed/fota/custom/inc",
-                SDK_TOP .. "/PLAT/middleware/thirdparty/lwip/src/include",
-                SDK_TOP .. "/PLAT/middleware/thirdparty/lwip/src/include/posix",
-                SDK_TOP .. "/PLAT/middleware/developed/at/atdecoder/inc",
-                SDK_TOP .. "/PLAT/middleware/developed/at/atps/inc",
-                SDK_TOP .. "/PLAT/middleware/developed/at/atps/inc/cnfind",
-                SDK_TOP .. "/PLAT/middleware/developed/at/atcust/inc",
-                SDK_TOP .. "/PLAT/middleware/developed/at/atcust/inc/cnfind",
-                SDK_TOP .. "/PLAT/middleware/developed/at/atentity/inc",
-                SDK_TOP .. "/PLAT/middleware/developed/at/atreply/inc",
-                SDK_TOP .. "/PLAT/middleware/developed/at/atref/inc",
-                SDK_TOP .. "/PLAT/middleware/developed/at/atref/inc/cnfind",
-                SDK_TOP .. "/PLAT/tools/"..CHIP_TARGET,
-                SDK_TOP .. "/PLAT/core/driver/include",
-                SDK_TOP .. "/PLAT/core/common/include",
-                SDK_TOP .. "/PLAT/core/multimedia/include",
-                SDK_TOP .. "/PLAT/core/tts/include",
-				SDK_TOP .. "/PLAT/core/include",
-                SDK_TOP .. "/PLAT/prebuild/PS/inc",
-                SDK_TOP .. "/PLAT/prebuild/PLAT/inc",
-                SDK_TOP .. "/thirdparty/littlefs",
-                SDK_TOP .. "/thirdparty/littlefs/port",
+add_includedirs("$(projectdir)/PLAT/device/target/board/common/ARMCM3/inc",
+                "$(projectdir)/PLAT/device/target/board/ec7xx_0h00/common/inc",
+                "$(projectdir)/PLAT/device/target/board/ec7xx_0h00/common/pkginc",
+                "$(projectdir)/PLAT/device/target/board/ec7xx_0h00/ap/gcc",
+                "$(projectdir)/PLAT/device/target/board/ec7xx_0h00/ap/inc",
+                "$(projectdir)/PLAT/driver/board/ec7xx_0h00/inc",
+                "$(projectdir)/PLAT/driver/board/ec7xx_0h00/inc/eeprom",
+                "$(projectdir)/PLAT/driver/board/ec7xx_0h00/inc/camera",
+                "$(projectdir)/PLAT/driver/board/ec7xx_0h00/inc/camera/sp0A39",
+                "$(projectdir)/PLAT/driver/board/ec7xx_0h00/inc/camera/sp0821",
+                "$(projectdir)/PLAT/driver/board/ec7xx_0h00/inc/camera/gc6123",
+                "$(projectdir)/PLAT/driver/board/ec7xx_0h00/inc/camera/gc6153",
+                "$(projectdir)/PLAT/driver/board/ec7xx_0h00/inc/camera/gc032A",
+                "$(projectdir)/PLAT/driver/board/ec7xx_0h00/inc/camera/bf30a2",
+                "$(projectdir)/PLAT/driver/board/ec7xx_0h00/inc/audio",
+                "$(projectdir)/PLAT/driver/board/ec7xx_0h00/inc/audio/codec",
+                "$(projectdir)/PLAT/driver/board/ec7xx_0h00/inc/audio/codec/es8388",
+                "$(projectdir)/PLAT/driver/board/ec7xx_0h00/inc/audio/codec/es8311",
+                "$(projectdir)/PLAT/driver/board/ec7xx_0h00/inc/lcd/lcdDev",
+                "$(projectdir)/PLAT/driver/board/ec7xx_0h00/inc/lcd",
+                "$(projectdir)/PLAT/driver/board/ec7xx_0h00/inc/ntc",
+                "$(projectdir)/PLAT/driver/board/ec7xx_0h00/inc/exstorage",
+                "$(projectdir)/PLAT/driver/hal/common/inc",
+                "$(projectdir)/PLAT/driver/hal/ec7xx/ap/inc",
+                "$(projectdir)/PLAT/driver/hal/ec7xx/ap/inc/"..CHIP,
+                "$(projectdir)/PLAT/driver/chip/ec7xx/ap/inc",
+                "$(projectdir)/PLAT/driver/chip/ec7xx/ap/inc/"..CHIP,
+                "$(projectdir)/PLAT/driver/chip/ec7xx/ap/inc_cmsis",
+                "$(projectdir)/PLAT/os/freertos/inc",
+                "$(projectdir)/PLAT/os/freertos/CMSIS/common/inc",
+                "$(projectdir)/PLAT/os/freertos/CMSIS/ap/inc",
+                "$(projectdir)/PLAT/os/freertos/portable/mem/tlsf",
+                "$(projectdir)/PLAT/os/freertos/portable/gcc",
+                "$(projectdir)/PLAT/middleware/developed/nvram/ec7xx/inc",
+                "$(projectdir)/PLAT/middleware/developed/nvram/inc",
+                "$(projectdir)/PLAT/middleware/developed/cms/psdial/inc",
+                "$(projectdir)/PLAT/middleware/developed/cms/cms/inc",
+                "$(projectdir)/PLAT/middleware/developed/cms/psil/inc",
+                "$(projectdir)/PLAT/middleware/developed/cms/psstk/inc",
+                "$(projectdir)/PLAT/middleware/developed/cms/sockmgr/inc",
+                "$(projectdir)/PLAT/middleware/developed/cms/cmsnetlight/inc",
+                "$(projectdir)/PLAT/middleware/developed/ecapi/aal/inc",
+                "$(projectdir)/PLAT/middleware/developed/ecapi/appmwapi/inc",
+                "$(projectdir)/PLAT/middleware/developed/ecapi/psapi/inc",
+                "$(projectdir)/PLAT/middleware/developed/common/inc",
+                "$(projectdir)/PLAT/middleware/developed/psnv/inc",
+                "$(projectdir)/PLAT/os/freertos/portable/gcc",
+                "$(projectdir)/PLAT/middleware/developed/tcpipmgr/app/inc",
+                "$(projectdir)/PLAT/middleware/developed/tcpipmgr/common/inc",
+                "$(projectdir)/PLAT/os/freertos/inc",
+                "$(projectdir)/PLAT/middleware/developed/yrcompress",
+                "$(projectdir)/PLAT/prebuild/PS/inc",
+                "$(projectdir)/PLAT/middleware/thirdparty/lwip/src/include",
+                "$(projectdir)/PLAT/middleware/thirdparty/lwip/src/include/lwip",
+                "$(projectdir)/PLAT/middleware/developed/ccio/pub",
+                "$(projectdir)/PLAT/middleware/developed/ccio/device/inc",
+                "$(projectdir)/PLAT/middleware/developed/ccio/service/inc",
+                "$(projectdir)/PLAT/middleware/developed/ccio/custom/inc",
+                "$(projectdir)/PLAT/middleware/developed/fota/pub",
+                "$(projectdir)/PLAT/middleware/developed/fota/custom/inc",
+                "$(projectdir)/PLAT/middleware/thirdparty/lwip/src/include",
+                "$(projectdir)/PLAT/middleware/thirdparty/lwip/src/include/posix",
+                "$(projectdir)/PLAT/middleware/developed/at/atdecoder/inc",
+                "$(projectdir)/PLAT/middleware/developed/at/atps/inc",
+                "$(projectdir)/PLAT/middleware/developed/at/atps/inc/cnfind",
+                "$(projectdir)/PLAT/middleware/developed/at/atcust/inc",
+                "$(projectdir)/PLAT/middleware/developed/at/atcust/inc/cnfind",
+                "$(projectdir)/PLAT/middleware/developed/at/atentity/inc",
+                "$(projectdir)/PLAT/middleware/developed/at/atreply/inc",
+                "$(projectdir)/PLAT/middleware/developed/at/atref/inc",
+                "$(projectdir)/PLAT/middleware/developed/at/atref/inc/cnfind",
+                "$(projectdir)/PLAT/tools/"..CHIP_TARGET,
+                "$(projectdir)/PLAT/core/driver/include",
+                "$(projectdir)/PLAT/core/common/include",
+                "$(projectdir)/PLAT/core/multimedia/include",
+                "$(projectdir)/PLAT/core/tts/include",
+				"$(projectdir)/PLAT/core/include",
+                "$(projectdir)/PLAT/prebuild/PS/inc",
+                "$(projectdir)/PLAT/prebuild/PLAT/inc",
+                "$(projectdir)/thirdparty/littlefs",
+                "$(projectdir)/thirdparty/littlefs/port",
                 {public = true})
             
 -- CSDK 宏定义
@@ -179,22 +178,19 @@ add_includedirs(LUATOS_ROOT .. "/luat/include",
                 LUATOS_ROOT .. "components/mbedtls/include/psa",
                 LUATOS_ROOT .. "components/network/adapter",
 				LUATOS_ROOT .. "/components/camera",
-				SDK_TOP .. "/interface/include",
+				"$(projectdir)/interface/include",
                 {public = true})
 
-local LIB_BASE = SDK_TOP .. "/PLAT/libs/"..CHIP_TARGET.."/libstartup.a "
-LIB_BASE = LIB_BASE .. SDK_TOP .. "/PLAT/libs/"..CHIP_TARGET.."/libcore_airm2m.a "
-LIB_BASE = LIB_BASE .. SDK_TOP .. "/PLAT/libs/"..CHIP_TARGET.."/libfreertos.a "
-LIB_BASE = LIB_BASE .. SDK_TOP .. "/PLAT/libs/"..CHIP_TARGET.."/libpsnv.a "
-LIB_BASE = LIB_BASE .. SDK_TOP .. "/PLAT/libs/"..CHIP_TARGET.."/libtcpipmgr.a "
-LIB_BASE = LIB_BASE .. SDK_TOP .. "/PLAT/libs/"..CHIP_TARGET.."/libyrcompress.a "
-LIB_BASE = LIB_BASE .. SDK_TOP .. "/PLAT/libs/"..CHIP_TARGET.."/libmiddleware_ec.a "
-LIB_BASE = LIB_BASE .. SDK_TOP .. "/PLAT/libs/"..CHIP_TARGET.."/liblwip.a "
+local LIB_BASE = "$(projectdir)/PLAT/libs/"..CHIP_TARGET.."/libstartup.a "
+LIB_BASE = LIB_BASE .. "$(projectdir)/PLAT/libs/"..CHIP_TARGET.."/libcore_airm2m.a "
+LIB_BASE = LIB_BASE .. "$(projectdir)/PLAT/libs/"..CHIP_TARGET.."/libfreertos.a "
+LIB_BASE = LIB_BASE .. "$(projectdir)/PLAT/libs/"..CHIP_TARGET.."/libpsnv.a "
+LIB_BASE = LIB_BASE .. "$(projectdir)/PLAT/libs/"..CHIP_TARGET.."/libtcpipmgr.a "
+LIB_BASE = LIB_BASE .. "$(projectdir)/PLAT/libs/"..CHIP_TARGET.."/libyrcompress.a "
+LIB_BASE = LIB_BASE .. "$(projectdir)/PLAT/libs/"..CHIP_TARGET.."/libmiddleware_ec.a "
+LIB_BASE = LIB_BASE .. "$(projectdir)/PLAT/libs/"..CHIP_TARGET.."/liblwip.a "
 
-LIB_BASE = LIB_BASE .. SDK_TOP .. "/PLAT/libs/"..CHIP_TARGET.."/liblzma.a "
-if os.getenv("LUAT_FAST_ADD_USER_LIB") == "1" then
-    LIB_BASE = LIB_BASE .. SDK_TOP .. os.getenv("USER_LIB") .. " "
-end
+LIB_BASE = LIB_BASE .. "$(projectdir)/PLAT/libs/"..CHIP_TARGET.."/liblzma.a "
 
 local LIB_PS_PLAT = "full"
 local LIB_FW = "oc"
@@ -209,8 +205,8 @@ else
     end
 end
 
-LIB_PS_PRE = SDK_TOP .. "/PLAT/prebuild/PS/lib/gcc/"..CHIP_TARGET.."/"..LIB_PS_PLAT
-LIB_PLAT_PRE = SDK_TOP .. "/PLAT/prebuild/PLAT/lib/gcc/"..CHIP_TARGET.."/"..LIB_PS_PLAT
+LIB_PS_PRE = "$(projectdir)/PLAT/prebuild/PS/lib/gcc/"..CHIP_TARGET.."/"..LIB_PS_PLAT
+LIB_PLAT_PRE = "$(projectdir)/PLAT/prebuild/PLAT/lib/gcc/"..CHIP_TARGET.."/"..LIB_PS_PLAT
 
 LIB_BASE = LIB_BASE .. LIB_PS_PRE .. "/libps.a "
 LIB_BASE = LIB_BASE .. LIB_PS_PRE .. "/libpsl1.a "
@@ -246,18 +242,18 @@ target("driver")
     set_kind("static")
     add_deps(USER_PROJECT_NAME)
     --driver
-	add_files(SDK_TOP .. "/PLAT/core/code/*.c",
-            SDK_TOP .. "/PLAT/driver/board/ec7xx_0h00/src/*c",
-            SDK_TOP .. "/PLAT/driver/hal/**.c",
-            SDK_TOP .. "/PLAT/driver/chip/ec7xx/ap/src/"..CHIP.."/adc.c",
-            SDK_TOP .. "/PLAT/driver/chip/ec7xx/ap/src/*.c",
-            SDK_TOP .. "/PLAT/driver/chip/ec7xx/ap/src/usb/open/*.c",
-            SDK_TOP .. "/PLAT/driver/chip/ec7xx/common/gcc/memcpy-armv7m.S",
+	add_files("$(projectdir)/PLAT/core/code/*.c",
+            "$(projectdir)/PLAT/driver/board/ec7xx_0h00/src/*c",
+            "$(projectdir)/PLAT/driver/hal/**.c",
+            "$(projectdir)/PLAT/driver/chip/ec7xx/ap/src/"..CHIP.."/adc.c",
+            "$(projectdir)/PLAT/driver/chip/ec7xx/ap/src/*.c",
+            "$(projectdir)/PLAT/driver/chip/ec7xx/ap/src/usb/open/*.c",
+            "$(projectdir)/PLAT/driver/chip/ec7xx/common/gcc/memcpy-armv7m.S",
             {public = true})
 
 	remove_files(
-                SDK_TOP .. "/PLAT/driver/chip/ec7xx/ap/src/cspi.c",
-                SDK_TOP .. "/PLAT/driver/chip/ec7xx/ap/src/swdio.c"
+                "$(projectdir)/PLAT/driver/chip/ec7xx/ap/src/cspi.c",
+                "$(projectdir)/PLAT/driver/chip/ec7xx/ap/src/swdio.c"
                 )
 
     set_targetdir("$(buildir)/libdriver_" .. USER_PROJECT_NAME)
@@ -271,8 +267,8 @@ target(USER_PROJECT_NAME..".elf")
     add_deps("driver")
 
     add_linkdirs("$(projectdir)/PLAT/device/target/board/ec7xx_0h00/ap/gcc/")
-    add_linkdirs("$(projectdir)/PLAT/prebuild/PS/lib/gcc/"..CHIP_TARGET..(is_lspd and "/oc" or ""))
-    add_linkdirs("$(projectdir)/PLAT/prebuild/PLAT/lib/gcc/"..CHIP_TARGET..(is_lspd and "/oc" or ""))
+    add_linkdirs("$(projectdir)/PLAT/prebuild/PS/lib/gcc/"..CHIP_TARGET.."/"..LIB_PS_PLAT)
+    add_linkdirs("$(projectdir)/PLAT/prebuild/PLAT/lib/gcc/"..CHIP_TARGET.."/"..LIB_PS_PLAT)
     add_linkdirs("$(projectdir)/PLAT/libs/"..CHIP_TARGET)
 
     -- add_linkgroups("startup","core_airm2m","freertos","psnv","tcpipmgr","yrcompress","middleware_ec","lwip","lzma", {whole = true,group = true})
@@ -280,7 +276,7 @@ target(USER_PROJECT_NAME..".elf")
     -- add_linkgroups("osa","middleware_ec_private","ccio","deltapatch","fota","driver_private","usb_private", {whole = true,group = true})
 
     -- interface
-    add_files(SDK_TOP .. "/interface/src/*.c")
+    add_files("$(projectdir)/interface/src/*.c")
     -- network
     add_files(LUATOS_ROOT .."/components/network/adapter/luat_network_adapter.c",
             LUATOS_ROOT .."/components/ethernet/common/dns_client.c"
@@ -293,7 +289,7 @@ target(USER_PROJECT_NAME..".elf")
     -- weak
     -- add_files(LUATOS_ROOT.."luat/weak/luat_log_weak.c")
     -- littlefs
-    add_files(SDK_TOP.."/thirdparty/littlefs/**.c")
+    add_files("$(projectdir)/thirdparty/littlefs/**.c")
     -- vfs
     add_files(LUATOS_ROOT.."luat/vfs/luat_fs_lfs2.c",
             LUATOS_ROOT.."luat/vfs/luat_vfs.c")
