@@ -19,6 +19,6 @@ target(TARGET_NAME)
     remove_files(LUATOS_ROOT.."components/network/libemqtt/luat_lib_mqtt.c")
 
     --自动链接
-    LIB_USER = LIB_USER .. SDK_TOP .."/".. LIB_DIR .. LIB_NAME .. " "
+    LIB_USER = LIB_USER .. "$(projectdir)/" .. LIB_DIR .. LIB_NAME .. " "
     --甚至可以加入自己的库
 target_end()
