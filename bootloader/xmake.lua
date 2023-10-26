@@ -159,6 +159,12 @@ target("ap_bootloader.elf")
                 "$(projectdir)/PLAT/project/ec7xx_0h00/ap/apps/bootloader/code/common/secure/ecc/src/*.c"
                 )
 
+    add_linkdirs("$(projectdir)/PLAT/prebuild/PLAT/lib/gcc/"..CHIP_TARGET.."/"..LIB_PS_PLAT)
+    add_linkdirs("$(projectdir)/PLAT/libs/"..CHIP_TARGET.."/bootloader")
+
+    -- add_linkgroups("startup","core_airm2m","middleware_ec","lzma", {whole = true,group = true})
+    -- add_linkgroups("osa","middleware_ec_private","ccio","fota","deltapatch2","driver_private_bl","bootloader","usbbl_priv", {whole = true,group = true})
+
     add_ldflags("-T$(projectdir)/PLAT/core/ld/ec7xx_0h00_flash_bl.ld","-Wl,-Map,$(buildir)/ap_bootloader/ap_bootloader_$(mode).map",{force = true})
     add_ldflags("-Wl,--whole-archive -Wl,--start-group " .. BL_LIB_BASE .. " -Wl,--end-group -Wl,--no-whole-archive ", {force=true})
     local toolchains = nil
