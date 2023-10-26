@@ -7,39 +7,24 @@ if is_lspd == true then
     add_defines("OPEN_CPU_MODE")
 end
 
-add_defines("__USER_CODE__",
-            "CORE_IS_AP",
-            "SDK_REL_BUILD",
-            -- "__CURRENT_FILE_NAME__=system_ec7xx",
+add_defines(
             "EC_ASSERT_FLAG",
-            "DHCPD_ENABLE_DEFINE=1",
             "PM_FEATURE_ENABLE",
             "UINILOG_FEATURE_ENABLE",
             "PSRAM_FEATURE_ENABLE",
             "FEATURE_OS_ENABLE",
             "FEATURE_FREERTOS_ENABLE",
-            "FEATURE_FOTAPAR_ENABLE",
             "configUSE_NEWLIB_REENTRANT=1",
-            "ARM_MATH_CM3",
             "FEATURE_YRCOMPRESS_ENABLE",
             "FEATURE_CCIO_ENABLE",
-            "DHCPD_ENABLE_DEFINE=1",
             "LWIP_CONFIG_FILE=\"lwip_config_cat.h\"",
             --"LWIP_CONFIG_FILE=\"lwip_config_ec7xx0h00.h\"",
             -- "FEATURE_MBEDTLS_ENABLE",-------------
             "LFS_NAME_MAX=63",
             "LFS_DEBUG_TRACE",
-            "FEATURE_LZMA_ENABLE",
-            "WDT_FEATURE_ENABLE=1",
             "FEATURE_UART_HELP_DUMP_ENABLE",
-            "DEBUG_LOG_HEADER_FILE=\"debug_log_ap.h\"",
-            "TRACE_LEVEL=5",
-            "SOFTPACK_VERSION=\"\"",
-            "HAVE_STRUCT_TIMESPEC",
-
             "HTTPS_WITH_CA",
             "FEATURE_HTTPC_ENABLE",
-
             -- "LITE_FEATURE_MODE",
             -- "RTE_RNDIS_EN=0", "RTE_ETHER_EN=0",
             "RTE_USB_EN=1",
@@ -57,37 +42,22 @@ add_defines("__USER_CODE__",
             "__PRINT_ALIGNED_32BIT__",
             "_REENT_SMALL",
             "_REENT_GLOBAL_ATEXIT",
-
             "LWIP_INCLUDED_POLARSSL_MD5=1",
-            "RAMCODE_COMPRESS_EN",
-            "REL_COMPRESS_EN",
-            "__ASSEMBLY__",
             "LUAT_EC7XX_CSDK",
             "LUAT_USE_STD_STRING",
-			"LUAT_LOG_NO_NEWLINE")
-
-add_cxflags("-g3",
-            "-mcpu=cortex-m3",
-            "-mthumb",
-            "-std=gnu99",
-            "-nostartfiles",
-            "-mapcs-frame",
-
-            "-ffunction-sections",
-            "-fdata-sections",
-            "-fno-isolate-erroneous-paths-dereference",
-            "-freorder-blocks-algorithm=stc",
-            "-Wall",
-            "-Wno-format",
-            "-gdwarf-2",
-            "-fno-inline",
+            "LUAT_LOG_NO_NEWLINE",
+            "DHCPD_ENABLE_DEFINE=1",
+            "DEBUG_LOG_HEADER_FILE=\"debug_log_ap.h\"",
+            {public = true})
+add_defines("sprintf=sprintf_",
+            "snprintf=snprintf_",
+            "vsnprintf=vsnprintf_",
+            {public = true})
+add_cxflags("-fno-inline",
             "-mslow-flash-data",
             "-fstack-usage",
             "-Wstack-usage=4096",
-
-{force=true})
-
-add_asflags("-mcpu=cortex-m3 -mthumb")
+            {force=true})
 
 if CHIP_TARGET == "ec716s" or CHIP_TARGET == "ec718s" then
     -- 开启 lto
@@ -99,28 +69,15 @@ if CHIP_TARGET == "ec716s" or CHIP_TARGET == "ec718s" then
                 {force=true})
 end 
 
-add_ldflags("--specs=nano.specs",
-            "-Wl,--cref",
-            "-Wl,--check-sections",
-            "-Wl,--gc-sections",
-            "-lm",
-            "-Wl,--no-undefined",
-            "-Wl,--no-print-map-discarded",
-            "-Wl,--print-memory-usage",
-            "-Wl,--wrap=_malloc_r",
-            "-Wl,--wrap=_free_r",
-            "-Wl,--wrap=_realloc_r",
-            "-Wl,--wrap=clock",
-            "-Wl,--wrap=localtime",
-            "-Wl,--wrap=gmtime",
-            "-Wl,--wrap=time",
-            "-mcpu=cortex-m3 -mthumb -T$(projectdir)/PLAT/core/ld/ec7xx_0h00_flash.ld",
-            "-Wl,-Map,$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME.."_$(mode).map",
-            {force = true})
-
-add_defines("sprintf=sprintf_")
-add_defines("snprintf=snprintf_")
-add_defines("vsnprintf=vsnprintf_")
+add_ldflags("-lm",
+                "-Wl,--wrap=_malloc_r",
+                "-Wl,--wrap=_free_r",
+                "-Wl,--wrap=_realloc_r",
+                "-Wl,--wrap=clock",
+                "-Wl,--wrap=localtime",
+                "-Wl,--wrap=gmtime",
+                "-Wl,--wrap=time",
+                {force = true})
 
 -- ==============================
 -- === includes =====
@@ -331,7 +288,8 @@ target(USER_PROJECT_NAME..".elf")
     local toolchains = nil
     local out_path = nil
     local ld_parameter = nil 
-
+    
+    add_ldflags("-T$(projectdir)/PLAT/core/ld/ec7xx_0h00_flash.ld","-Wl,-Map,$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME.."_$(mode).map",{force = true})
     --linkflags
     add_ldflags("-Wl,--whole-archive -Wl,--start-group " .. LIB_BASE .. LIB_USER .. " -Wl,--end-group -Wl,--no-whole-archive -ldriver ", {force=true})
 	
