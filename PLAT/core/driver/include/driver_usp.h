@@ -24,7 +24,9 @@ void I2S_TxDebug(uint8_t I2SID);
 void I2S_RxDebug(uint8_t I2SID);
 
 int32_t CSPI_Setup(uint8_t ID, uint32_t BusSpeed, uint8_t SpiMode, uint8_t IsMSB, uint8_t Is2RxWire, uint8_t OnlyY, uint8_t SeqType, uint8_t rowScaleRatio, uint8_t colScaleRatio, uint8_t scaleBytes, uint8_t ddrMode, uint8_t dummyAllowed);
-void CSPI_Rx(uint8_t ID, void *buf[2], uint16_t W, uint16_t H, CBFuncEx_t cb, void *param);
+void CSPI_Rx(uint8_t ID, void *buf, uint16_t W, uint16_t H, CBFuncEx_t cb, void *param);
+void CSPI_RxContinue(uint8_t ID, void *buf);
 void CSPI_RxStop(uint8_t ID);
 void CSPI_Stop(uint8_t ID);
+void CSPI_Pause(uint8_t ID, uint8_t OnOff);
 #endif

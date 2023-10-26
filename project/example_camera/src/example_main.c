@@ -80,6 +80,7 @@ enum
 typedef struct
 {
 	void *p_cache[2];
+	uint8_t cur_cache;
 	uint8_t is_decoding;
 }luat_camera_app_t;
 
@@ -337,7 +338,19 @@ static int luat_camera_irq_callback(void *pdata, void *param)
 		return 0;
 	}
 #ifdef CAMERA_TEST_QRCODE
-	luat_rtos_event_send(g_s_task_handle, CAMERA_FRAME_DECODE, pdata, 0, 0, 0);
+	uint8_t cur_cache = g_s_camera_app.cur_cache;
+	if (!g_s_camera_app.is_decoding)
+	{
+		g_s_camera_app.cur_cache = !g_s_camera_app.cur_cache;
+		luat_camera_continue_with_buffer(CAMERA_SPI_ID, g_s_camera_app.p_cache[g_s_camera_app.cur_cache]);
+		g_s_camera_app.is_decoding = 1;
+		luat_rtos_event_send(g_s_task_handle, CAMERA_FRAME_DECODE, cur_cache, 0, 0, 0);
+	}
+	else
+	{
+		luat_camera_continue_with_buffer(CAMERA_SPI_ID, g_s_camera_app.p_cache[g_s_camera_app.cur_cache]);
+	}
+
 #else
 	luat_rtos_event_send(g_s_task_handle, CAMERA_FRAME_END, pdata, 0, 0, 0);
 #endif
@@ -380,8 +393,6 @@ static int luat_bf30a2_init(void)
     g_s_camera_app.p_cache[1] = luat_psram_static_alloc(CAMERA_W * CAMERA_H * 2);
 #endif
 
-    spi_camera.buf[0] = g_s_camera_app.p_cache[0];
-    spi_camera.buf[1] = g_s_camera_app.p_cache[1];
 #ifdef CAMERA_TEST_QRCODE
     void *stack = luat_psram_static_alloc(220 * 1024);
     LUAT_DEBUG_PRINT("psram use %x,%x,%x",g_s_camera_app.p_cache[0], g_s_camera_app.p_cache[1], stack);
@@ -424,7 +435,8 @@ static int luat_bf30a2_init(void)
 			goto CAM_OPEN_FAIL;
 		}
 	}
-	luat_camera_start(CAMERA_SPI_ID);
+	g_s_camera_app.cur_cache = 0;
+	luat_camera_start_with_buffer(CAMERA_SPI_ID, g_s_camera_app.p_cache[0]);
 	return 0;
 CAM_OPEN_FAIL:
 	luat_camera_close(CAMERA_SPI_ID);
@@ -467,7 +479,7 @@ static void luat_camera_task(void *param)
     	}
     }
 #ifdef CAMERA_TEST_QRCODE
-    cache = luat_psram_static_alloc(CAMERA_W * CAMERA_H);
+
 #else
     cache = malloc(16 + g_s_camera_app.one_buf_height * CAMERA_W * 2);
     block_len = g_s_camera_app.one_buf_height * CAMERA_W * 2;
@@ -500,17 +512,8 @@ static void luat_camera_task(void *param)
 			break;
 		case CAMERA_FRAME_DECODE:
 #ifdef CAMERA_TEST_QRCODE
-			if (!g_s_camera_app.is_decoding)
-			{
-				g_s_camera_app.is_decoding = 1;
-			}
-			else
-			{
-				break;
-			}
-			memcpy(cache, g_s_camera_app.p_cache[event.param1], CAMERA_W * CAMERA_H);
-			LUAT_DEBUG_PRINT("解码开始");
-			luat_camera_image_decode_once(cache, CAMERA_W, CAMERA_H, 60, luat_image_decode_callback, event.param1);
+			LUAT_DEBUG_PRINT("解码开始 buf%d", event.param1);
+			luat_camera_image_decode_once(g_s_camera_app.p_cache[event.param1], CAMERA_W, CAMERA_H, 60, luat_image_decode_callback, event.param1);
 #endif
 			break;
 		}

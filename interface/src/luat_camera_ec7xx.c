@@ -29,7 +29,6 @@ typedef struct
 {
 	CBFuncEx_t callback;
 	void *param;
-	void *buf[2];
 	uint16_t image_w;
 	uint16_t image_h;
 	uint8_t is_init;
@@ -77,8 +76,6 @@ int luat_camera_setup(int id, luat_spi_camera_t *conf, void * callback, void *pa
 	g_s_camera[id].is_scan_mode = conf->image_scan;
 	g_s_camera[id].image_w = conf->sensor_width;
 	g_s_camera[id].image_h = conf->sensor_height;
-	g_s_camera[id].buf[0] = conf->buf[0];
-	g_s_camera[id].buf[1] = conf->buf[1];
 	return 0;
 }
 
@@ -104,13 +101,22 @@ int luat_camera_image_decode_get_result(uint8_t *buf)
 
 int luat_camera_start(int id)
 {
+	return -1;
+}
+
+int luat_camera_start_with_buffer(int id, void *buf)
+{
 	if (id < 0 || id >= CSPI_ID2) return -1;
 	if (!g_s_camera[id].is_init || g_s_camera[id].is_running) return -ERROR_OPERATION_FAILED;
-	CSPI_Rx(id, g_s_camera[id].buf, g_s_camera[id].image_w, g_s_camera[id].image_h, g_s_camera[id].callback, g_s_camera[id].param);
+	CSPI_Rx(id, buf, g_s_camera[id].image_w, g_s_camera[id].image_h, g_s_camera[id].callback, g_s_camera[id].param);
 	g_s_camera[id].is_running = 1;
 	return 0;
 }
 
+void luat_camera_continue_with_buffer(int id, void *buf)
+{
+	CSPI_RxContinue(id, buf);
+}
 
 int luat_camera_stop(int id)
 {
