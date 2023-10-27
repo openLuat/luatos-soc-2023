@@ -29,6 +29,8 @@ jobs:
           - example_rndis
           - example_rtc
           - example_uart
+          - example_lbsLoc
+          - example_gnss
         csdk_chip:
           - ec718p
           - ec718s
@@ -42,9 +44,14 @@ jobs:
           sudo dpkg --add-architecture i386 && sudo apt update
           sudo apt-get install -y lib32z1 libc6:i386 libgcc1:i386 libstdc++5:i386 libstdc++6:i386
       - name: 克隆 LuatOS 代码库
-        run:  git clone --depth=1 https://github.com/openLuat/LuatOS.git
+        uses: actions/checkout
+        with:
+          repository: "https://github.com/openLuat/LuatOS.git"
+          path: "LuatOS"
       - name: 克隆 ec7xx-csdk 代码库
-        run:  git clone --depth=1 https://github.com/openLuat/luatos-soc-2023.git
+        uses: actions/checkout
+        with:
+          path: "luatos-soc-2023"
       - name: 下载Gcc
         run: |
           mkdir tools
