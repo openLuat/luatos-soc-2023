@@ -87,13 +87,13 @@ void luat_os_reboot(int code){
     ResetECSystemReset();
 }
 
-static uint8_t luat_mcu_iomux_default[LUAT_MCU_PERIPHERAL_PWM + 1];
+static uint8_t luat_mcu_iomux_ctrl_by_user[LUAT_MCU_PERIPHERAL_PWM + 1];
 
 uint8_t luat_mcu_iomux_is_default(uint8_t type, uint8_t sn)
 {
 	if (type > LUAT_MCU_PERIPHERAL_PWM) return 1;
 	if (sn > 7) return 1;
-	return (luat_mcu_iomux_default[type] & (1 << sn))?0:1;
+	return (luat_mcu_iomux_ctrl_by_user[type] & (1 << sn))?0:1;
 }
 
 void luat_mcu_iomux_ctrl(uint8_t type, uint8_t sn, int pad_index, uint8_t alt, uint8_t is_input)
@@ -102,7 +102,7 @@ void luat_mcu_iomux_ctrl(uint8_t type, uint8_t sn, int pad_index, uint8_t alt, u
 	if (sn > 7) return;
 	if (pad_index != -1)
 	{
-		luat_mcu_iomux_default[type] |= (1 << sn);
+		luat_mcu_iomux_ctrl_by_user[type] |= (1 << sn);
 		if (LUAT_MCU_PERIPHERAL_UART == type)
 		{
 			GPIO_IomuxEC7XX(pad_index, alt, 0, 0);
@@ -118,7 +118,7 @@ void luat_mcu_iomux_ctrl(uint8_t type, uint8_t sn, int pad_index, uint8_t alt, u
 	}
 	else
 	{
-		luat_mcu_iomux_default[type] &= ~(1 << sn);
+		luat_mcu_iomux_ctrl_by_user[type] &= ~(1 << sn);
 	}
 }
 
