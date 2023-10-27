@@ -178,6 +178,7 @@ add_includedirs(LUATOS_ROOT .. "/luat/include",
                 LUATOS_ROOT .. "components/mbedtls/include/psa",
                 LUATOS_ROOT .. "components/network/adapter",
 				LUATOS_ROOT .. "/components/camera",
+				LUATOS_ROOT .. "/components/wlan",
 				"$(projectdir)/interface/include",
                 {public = true})
 
