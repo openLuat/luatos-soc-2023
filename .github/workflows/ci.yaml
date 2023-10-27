@@ -36,17 +36,10 @@ jobs:
           - ec718s
           - ec716s
     steps:
-      - name: 初始化工具链
-        run: |
-          sudo add-apt-repository ppa:xmake-io/xmake -y
-          sudo apt update -y
-          sudo apt-get update -y && sudo apt-get install -y gcc make g++ wget curl xmake p7zip-full
-          sudo dpkg --add-architecture i386 && sudo apt update
-          sudo apt-get install -y lib32z1 libc6:i386 libgcc1:i386 libstdc++5:i386 libstdc++6:i386
       - name: 克隆 LuatOS 代码库
         uses: actions/checkout@v4
         with:
-          repository: "https://github.com/openLuat/LuatOS.git"
+          repository: "openLuat/LuatOS"
           path: "LuatOS"
       - name: 克隆 ec7xx-csdk 代码库
         uses: actions/checkout@v4
@@ -57,6 +50,13 @@ jobs:
           mkdir tools
           wget -q -O tools/gcc-arm-none-eabi-10-2020-q4-major-x86_64-linux.tar.bz2 https://github.com/wendal/xmake-docker/releases/download/dev-gcc/gcc-arm-none-eabi-10-2020-q4-major-x86_64-linux.tar.bz2
           cd tools && tar xf gcc-arm-none-eabi-10-2020-q4-major-x86_64-linux.tar.bz2
+      - name: 初始化工具链
+        run: |
+          sudo add-apt-repository ppa:xmake-io/xmake -y
+          sudo apt update -y
+          sudo apt-get update -y && sudo apt-get install -y gcc make g++ wget curl xmake p7zip-full
+          sudo dpkg --add-architecture i386 && sudo apt update
+          sudo apt-get install -y lib32z1 libc6:i386 libgcc1:i386 libstdc++5:i386 libstdc++6:i386
       - name: 构建指定项目
         run: |
           export GCC_PATH=`pwd`/tools/gcc-arm-none-eabi-10-2020-q4-major
