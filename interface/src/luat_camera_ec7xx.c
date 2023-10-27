@@ -69,13 +69,21 @@ int luat_camera_setup(int id, luat_spi_camera_t *conf, void * callback, void *pa
 		GPIO_IomuxEC7XX(39, 1, 1, 0);
 	}
 
-	CSPI_Setup(id, conf->camera_speed, conf->spi_mode, conf->is_msb, conf->is_two_line_rx, conf->only_y, conf->seq_type, conf->rowScaleRatio, conf->colScaleRatio, conf->scaleBytes, conf->plat_param[0], conf->plat_param[1]);
+	CSPI_Setup(id, conf->camera_speed, conf->spi_mode, conf->is_msb, conf->is_two_line_rx, conf->only_y, conf->seq_type, conf->rowScaleRatio, conf->colScaleRatio, conf->scaleBytes, conf->plat_param[0], conf->plat_param[1], conf->plat_param[2]);
 
 	g_s_camera[id].is_running = 0;
 	g_s_camera[id].is_init = 1;
 	g_s_camera[id].is_scan_mode = conf->image_scan;
 	g_s_camera[id].image_w = conf->sensor_width;
 	g_s_camera[id].image_h = conf->sensor_height;
+	return 0;
+}
+
+int luat_camera_set_image_w_h(int id, uint16_t w, uint16_t h)
+{
+	if (id < 0 || id >= CSPI_ID2 ) return -ERROR_PARAM_INVALID;
+	g_s_camera[id].image_w = w;
+	g_s_camera[id].image_h = h;
 	return 0;
 }
 
