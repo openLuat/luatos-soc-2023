@@ -1,6 +1,7 @@
 #include "bsp_common.h"
 #include "platform_define.h"
 #include "luat_uart.h"
+#include "luat_mcu.h"
 #define MAX_DEVICE_COUNT (UART_MAX+1)
 static luat_uart_ctrl_param_t uart_cb[MAX_DEVICE_COUNT]={0};
 static Buffer_Struct g_s_vuart_rx_buffer;
@@ -21,7 +22,7 @@ typedef struct
 	};
 	uint32_t rx_buf_size;
 	uint16_t unused;
-	uint8_t alt_type;
+	// uint8_t alt_type;
 	uint8_t rs485_pin;
 }serials_info;
 
@@ -84,61 +85,31 @@ int luat_uart_setup(luat_uart_t* uart) {
     Uart_SetDebug(uart->id, 1);
 	Uart_SetErrorDropData(uart->id, 1);
 #endif
-    switch (uart->id)
+    if(luat_mcu_iomux_is_default(LUAT_MCU_PERIPHERAL_UART, uart->id))
     {
-	// case UART_ID0:
-    //     if (g_s_serials[UART_ID0].alt_type) {
-	//         GPIO_IomuxEC7XX(GPIO_ToPadEC7XX(HAL_GPIO_16, 0), 3, 0, 0);
-	//         GPIO_IomuxEC7XX(GPIO_ToPadEC7XX(HAL_GPIO_17, 0), 3, 0, 0);
-	//         GPIO_PullConfig(GPIO_ToPadEC7XX(HAL_GPIO_16, 0), 1, 1);
-    //     }
-    //     else {
-	//         GPIO_IomuxEC7XX(GPIO_ToPadEC7XX(HAL_GPIO_14, 0), 3, 0, 0);
-	//         GPIO_IomuxEC7XX(GPIO_ToPadEC7XX(HAL_GPIO_15, 0), 3, 0, 0);
-	//         GPIO_PullConfig(GPIO_ToPadEC7XX(HAL_GPIO_14, 0), 1, 1);
-    //     }
-	// 	break;
-	case UART_ID1:
-	    GPIO_IomuxEC7XX(GPIO_ToPadEC7XX(HAL_GPIO_18, 0), 1, 0, 0);
-	    GPIO_IomuxEC7XX(GPIO_ToPadEC7XX(HAL_GPIO_19, 0), 1, 0, 0);
-	    GPIO_PullConfig(GPIO_ToPadEC7XX(HAL_GPIO_18, 0), 1, 1);
-	    break;
-	case UART_ID2:
-		if ((1 == g_s_serials[UART_ID2].alt_type))
-		{
-		    GPIO_IomuxEC7XX(GPIO_ToPadEC7XX(HAL_GPIO_6, 0), 2, 0, 0);
-		    GPIO_IomuxEC7XX(GPIO_ToPadEC7XX(HAL_GPIO_7, 0), 2, 0, 0);
-		    GPIO_PullConfig(GPIO_ToPadEC7XX(HAL_GPIO_6, 0), 1, 1);
-		}
-		else if (2 == g_s_serials[UART_ID2].alt_type)
-		{
-		    GPIO_IomuxEC7XX(GPIO_ToPadEC7XX(HAL_GPIO_10, 0), 3, 0, 0);
-		    GPIO_IomuxEC7XX(GPIO_ToPadEC7XX(HAL_GPIO_11, 0), 3, 0, 0);
-		    GPIO_PullConfig(GPIO_ToPadEC7XX(HAL_GPIO_10, 0), 1, 1);
-		}
-		else
-		{
-		    GPIO_IomuxEC7XX(GPIO_ToPadEC7XX(HAL_GPIO_12, 0), 3, 0, 0);
+        switch (uart->id)
+        {
+        case UART_ID0:
+            GPIO_IomuxEC7XX(GPIO_ToPadEC7XX(HAL_GPIO_16, 0), 1, 0, 0);
+	        GPIO_IomuxEC7XX(GPIO_ToPadEC7XX(HAL_GPIO_17, 0), 1, 0, 0);
+	        GPIO_PullConfig(GPIO_ToPadEC7XX(HAL_GPIO_16, 0), 1, 1);
+        case UART_ID1:
+            GPIO_IomuxEC7XX(GPIO_ToPadEC7XX(HAL_GPIO_18, 0), 1, 0, 0);
+	        GPIO_IomuxEC7XX(GPIO_ToPadEC7XX(HAL_GPIO_19, 0), 1, 0, 0);
+	        GPIO_PullConfig(GPIO_ToPadEC7XX(HAL_GPIO_18, 0), 1, 1);
+            break;
+        case UART_ID2:
+            GPIO_IomuxEC7XX(GPIO_ToPadEC7XX(HAL_GPIO_12, 0), 3, 0, 0);
 		    GPIO_IomuxEC7XX(GPIO_ToPadEC7XX(HAL_GPIO_13, 0), 3, 0, 0);
 		    GPIO_PullConfig(GPIO_ToPadEC7XX(HAL_GPIO_12, 0), 1, 1);
-		}
-		break;
-    case UART_ID3:
-        if ((1 == g_s_serials[UART_ID3].alt_type))
-        {
-            GPIO_IomuxEC7XX(GPIO_ToPadEC7XX(HAL_GPIO_14, 0), 3, 0, 0);
-		    GPIO_IomuxEC7XX(GPIO_ToPadEC7XX(HAL_GPIO_15, 0), 3, 0, 0);
-		    GPIO_PullConfig(GPIO_ToPadEC7XX(HAL_GPIO_14, 0), 1, 1);
-        }
-        else
-        {
+            break;
+        case UART_ID3:
             GPIO_IomuxEC7XX(GPIO_ToPadEC7XX(HAL_GPIO_34, 0), 3, 0, 0);
 		    GPIO_IomuxEC7XX(GPIO_ToPadEC7XX(HAL_GPIO_35, 0), 3, 0, 0);
 		    GPIO_PullConfig(GPIO_ToPadEC7XX(HAL_GPIO_34, 0), 1, 1);
+        default:
+            break;
         }
-        break;
-	default:
-		break;
     }
     int parity = 0;
      if (uart->parity == 1)parity = UART_PARITY_ODD;
