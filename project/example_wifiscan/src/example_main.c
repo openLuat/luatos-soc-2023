@@ -24,7 +24,7 @@
 #include "luat_rtos.h"
 #include "luat_mem.h"
 #include "luat_debug.h"
-#include "luat_wifiscan.h"
+#include "luat_wlan.h"
 #include "luat_mobile.h"
 
 luat_rtos_task_handle Wifiscan_Task_Handle;

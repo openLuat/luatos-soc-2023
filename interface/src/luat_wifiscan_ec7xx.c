@@ -19,7 +19,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "luat_wifiscan.h"
+#include "luat_wlan.h"
 #include "common_api.h"
 #include "ps_lib_api.h"
 #include "luat_debug.h"
