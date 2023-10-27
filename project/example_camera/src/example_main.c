@@ -1347,7 +1347,9 @@ static void camera_demo_init(void)
 	gpio_cfg.alt_fun = CAMERA_POWER_PIN_ALT;
 #endif
 	luat_gpio_open(&gpio_cfg);
+#ifdef TYPE_EC718P
 	luat_rtos_task_create(&g_s_task_handle, 4 * 1024, 50, "camera", luat_camera_task, NULL, 64);
+#endif
 }
 
 INIT_TASK_EXPORT(camera_demo_init, "1");
