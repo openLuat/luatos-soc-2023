@@ -49,7 +49,7 @@ if os.getenv("PROJECT_NAME") then
 	USER_PROJECT_NAME = os.getenv("PROJECT_NAME")
 end
 
--- 是否启用低速模式, 内存更大, 但与rndis不兼容
+-- 是否启用低速模式, 内存更大
 if os.getenv("LSPD_MODE") == "enable" then
     is_lspd = true
 else

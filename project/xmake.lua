@@ -7,8 +7,7 @@ if is_lspd == true then
     add_defines("OPEN_CPU_MODE")
 end
 
-add_defines(
-            "EC_ASSERT_FLAG",
+add_defines("EC_ASSERT_FLAG",
             "PM_FEATURE_ENABLE",
             "UINILOG_FEATURE_ENABLE",
             "PSRAM_FEATURE_ENABLE",
@@ -26,11 +25,8 @@ add_defines(
             "HTTPS_WITH_CA",
             "FEATURE_HTTPC_ENABLE",
             -- "LITE_FEATURE_MODE",
-            -- "RTE_RNDIS_EN=0", "RTE_ETHER_EN=0",
             "RTE_USB_EN=1",
             "RTE_PPP_EN=0",
-            "RTE_ETHER_EN=0",
-            "RTE_RNDIS_EN=0",
             "RTE_OPAQ_EN=0",-----
             "RTE_ONE_UART_AT=0",
             "RTE_TWO_UART_AT=0",
