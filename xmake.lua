@@ -94,30 +94,27 @@ add_cxflags("-specs=nano.specs",
             "-g3",
             "-mcpu=cortex-m3",
             "-mthumb",
-            "-std=gnu99",
             "-nostartfiles",
             "-mapcs-frame",
             "-ffunction-sections",
             "-fdata-sections",
             "-fno-isolate-erroneous-paths-dereference",
             "-freorder-blocks-algorithm=stc",
-            "-Wall",
             "-Wno-format",
-            "-gdwarf-2",
+            -- "-gdwarf-2",
             {force=true})
 
 add_asflags("-mcpu=cortex-m3 -mthumb")
 
-add_ldflags("--specs=nano.specs",
+add_ldflags("-mcpu=cortex-m3",
+            "-mthumb",
+            "-lm",
             "-Wl,--cref",
             "-Wl,--check-sections",
             "-Wl,--gc-sections",
-            "-lm",
             "-Wl,--no-undefined",
             "-Wl,--no-print-map-discarded",
             "-Wl,--print-memory-usage",
-            "-mcpu=cortex-m3",
-            "-mthumb",
             {force = true})
 
 after_load(function (target)
