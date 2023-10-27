@@ -36,15 +36,19 @@ jobs:
           - ec718s
           - ec716s
     steps:
+      # - name: 克隆 LuatOS 代码库
+      #   uses: actions/checkout@v4
+      #   with:
+      #     repository: "openLuat/LuatOS"
+      #     path: "LuatOS"
+      # - name: 克隆 ec7xx-csdk 代码库
+      #   uses: actions/checkout@v4
+      #   with:
+      #     path: "luatos-soc-2023"
       - name: 克隆 LuatOS 代码库
-        uses: actions/checkout@v4
-        with:
-          repository: "openLuat/LuatOS"
-          path: "LuatOS"
+        run:  git clone --depth=1 https://github.com/openLuat/LuatOS.git
       - name: 克隆 ec7xx-csdk 代码库
-        uses: actions/checkout@v4
-        with:
-          path: "luatos-soc-2023"
+        run:  git clone --depth=1 https://github.com/openLuat/luatos-soc-2023.git
       - name: 下载Gcc
         run: |
           mkdir tools
