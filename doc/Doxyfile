@@ -917,7 +917,8 @@ INPUT                  = F:/Air780EP_EF/LuatOS/luat/include/luat_adc.h \
                          ../../LuatOS/luat/include/luat_i2c.h \
                          ../../LuatOS/luat/include/luat_debug.h \
                          ../../LuatOS/components/fskv/luat_fskv.h \
-                         ../../LuatOS/components/iconv/luat_iconv.h
+                         ../../LuatOS/components/iconv/luat_iconv.h \
+                         ../../LuatOS/luat/include/luat_wifiscan.h
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
