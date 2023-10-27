@@ -179,6 +179,7 @@ add_includedirs(LUATOS_ROOT .. "/luat/include",
                 LUATOS_ROOT .. "components/network/adapter",
 				LUATOS_ROOT .. "/components/camera",
 				LUATOS_ROOT .. "/components/wlan",
+                LUATOS_ROOT .. "/components/minmea",
 				"$(projectdir)/interface/include",
                 {public = true})
 
@@ -299,7 +300,8 @@ target(USER_PROJECT_NAME..".elf")
     -- vfs
     add_files(LUATOS_ROOT.."luat/vfs/luat_fs_lfs2.c",
             LUATOS_ROOT.."luat/vfs/luat_vfs.c")
-
+    
+    add_files(LUATOS_ROOT.."/components/minmea/minmea.c")
     local toolchains = nil
     local out_path = nil
     local ld_parameter = nil 
