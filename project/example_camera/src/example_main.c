@@ -70,8 +70,8 @@ extern void *luat_psram_static_alloc(size_t size);
 //#define g_s_camera_app.image_h 320
 #define BF30A2_I2C_ADDRESS	(0x6e)
 #define GC032A_I2C_ADDR		(0x21)
-#define CAMERA_USE_BFXXXX
-//#define CAMERA_USE_GC032A
+//#define CAMERA_USE_BFXXXX
+#define CAMERA_USE_GC032A
 
 enum
 {
@@ -1052,7 +1052,8 @@ static int luat_gc032a_init(void)
 			goto CAM_OPEN_FAIL;
 		}
 	}
-
+	g_s_camera_app.image_w = 640;
+	g_s_camera_app.image_h = 480;
 	luat_camera_set_image_w_h(CAMERA_SPI_ID, g_s_camera_app.image_w, g_s_camera_app.image_h);
 #ifdef PSRAM_EXIST
 #ifdef CAMERA_TEST_QRCODE
