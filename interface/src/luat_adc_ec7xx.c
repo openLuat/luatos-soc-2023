@@ -82,7 +82,7 @@ static int adc_range_to_resdiv(int id, int range, AdcAioResDiv_e *resdiv, float 
 {
     adc_range_resdiv_map_item_t map[]=
     {
-        {LUAT_ADC_AIO_RANGE_1_2, ADC_AIO_RESDIV_RATIO_1, (float)1},
+        {LUAT_ADC_AIO_RANGE_1_2, ADC_AIO_RESDIV_BYPASS, (float)1},
         {LUAT_ADC_AIO_RANGE_1_4, ADC_AIO_RESDIV_RATIO_28OVER32, (float)32/28},
         {LUAT_ADC_AIO_RANGE_1_6, ADC_AIO_RESDIV_RATIO_24OVER32, (float)32/24},
         {LUAT_ADC_AIO_RANGE_1_9, ADC_AIO_RESDIV_RATIO_16OVER32, (float)32/16},
