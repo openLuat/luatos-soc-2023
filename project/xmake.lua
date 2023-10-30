@@ -65,7 +65,7 @@ if CHIP_TARGET == "ec716s" or CHIP_TARGET == "ec718s" then
                 {force=true})
 end 
 
-add_ldflags("-lm",
+add_ldflags("--specs=nano.specs", "-lm",
                 "-Wl,--wrap=_malloc_r",
                 "-Wl,--wrap=_free_r",
                 "-Wl,--wrap=_realloc_r",

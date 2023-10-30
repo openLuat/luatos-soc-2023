@@ -980,8 +980,8 @@ static int luat_bfxxxx_init(void)
 #endif
 
 #ifdef CAMERA_TEST_QRCODE
-    void *stack = luat_psram_static_alloc(220 * 1024);
-    LUAT_DEBUG_PRINT("psram use %x,%x,%x",g_s_camera_app.p_cache[0], g_s_camera_app.p_cache[1], stack);
+    void *stack = malloc(220 * 1024);
+    LUAT_DEBUG_PRINT("ram use %x,%x,%x",g_s_camera_app.p_cache[0], g_s_camera_app.p_cache[1], stack);
     LUAT_DEBUG_PRINT("decoder init %d", luat_camera_image_decode_init(0, stack, 220 * 1024, 30));
 #else
     LUAT_DEBUG_PRINT("psram use %x,%x",g_s_camera_app.p_cache[0], g_s_camera_app.p_cache[1]);
@@ -1065,8 +1065,8 @@ static int luat_gc032a_init(void)
 #endif
 
 #ifdef CAMERA_TEST_QRCODE
-    void *stack = luat_psram_static_alloc(220 * 1024);
-    LUAT_DEBUG_PRINT("psram use %x,%x,%x",g_s_camera_app.p_cache[0], g_s_camera_app.p_cache[1], stack);
+    void *stack = malloc(220 * 1024);
+    LUAT_DEBUG_PRINT("ram use %x,%x,%x",g_s_camera_app.p_cache[0], g_s_camera_app.p_cache[1], stack);
     LUAT_DEBUG_PRINT("decoder init %d", luat_camera_image_decode_init(0, stack, 220 * 1024, 30));
 #else
     LUAT_DEBUG_PRINT("psram use %x,%x",g_s_camera_app.p_cache[0], g_s_camera_app.p_cache[1]);
