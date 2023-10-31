@@ -67,6 +67,9 @@ flash xip address(from both ap/cp view): 0x00800000---0x00c00000
 #ifndef AP_FLASH_LOAD_SIZE
 #define AP_FLASH_LOAD_SIZE              (0x2ca000)//2856KB
 #endif
+#ifndef FULL_OTA_SAVE_ADDR
+#define FULL_OTA_SAVE_ADDR              (0x0)
+#endif
 #define AP_FLASH_LOAD_UNZIP_SIZE        (0x2d7000)//2908kB ,for ld
 
 //fota addr and size

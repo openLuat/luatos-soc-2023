@@ -322,7 +322,7 @@ target(USER_PROJECT_NAME..".elf")
         for _, dep in pairs(target:orderdeps()) do
             if dep:name() ~= "driver" then
                 for _, dep_define_flasg in pairs(dep:get("defines")) do
-                    if dep_define_flasg:startswith("AP_FLASH_LOAD_SIZE=") or dep_define_flasg:startswith("AP_PKGIMG_LIMIT_SIZE=") then
+                    if dep_define_flasg:startswith("AP_FLASH_LOAD_SIZE=") or dep_define_flasg:startswith("AP_PKGIMG_LIMIT_SIZE=") or dep_define_flasg:startswith("FULL_OTA_SAVE_ADDR=") then
                         table.insert(ld_parameter,"-D" .. dep_define_flasg)
                     end
                 end
