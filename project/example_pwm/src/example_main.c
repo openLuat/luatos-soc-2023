@@ -2,7 +2,7 @@
 #include "luat_rtos.h"
 #include "luat_debug.h"
 #include "luat_pwm.h"
-
+#include "luat_mcu.h"
 
 luat_rtos_task_handle pwm_task_handle;
 
@@ -10,10 +10,10 @@ luat_rtos_task_handle pwm_task_handle;
 
 static void task_test_pwm(void *param)
 {
-    luat_pwm_open(0, 8000, 500, 1000);
-    luat_pwm_open(1, 8000, 500, 0);
-    luat_pwm_open(2, 8000, 500, 0);
-    luat_pwm_open(4, 8000, 500, 0);
+    luat_pwm_open(0, 8000, 500, 0, 0, -1);
+    luat_pwm_open(1, 8000, 500, 0, 0, -1);
+    luat_pwm_open(2, 8000, 500, 0, 0, -1);
+    luat_pwm_open(4, 8000, 500, 0, 0, -1);
     size_t pl = 0;
     while (1)
     {
