@@ -25,6 +25,7 @@
  * Air780EP，使用内部LDO输出，就是VDD_EXT
  * 由于需要的ram比较多，如果有PSRAM，可以正常编译，如果没有，必须开启低速网络编译模式
  * 根据实际需要开启相关功能
+ * 扫码由于PSRAM的硬件限制，8W可以双buffer，30W只能单buffer
  */
 
 #include "common_api.h"
@@ -38,13 +39,14 @@
 #include "mem_map.h"
 extern void *luat_psram_static_alloc(size_t size);
 
-//#define CAMERA_TEST_QRCODE			//扫码+预览
+//#define CAMERA_TEST_QRCODE			//扫码
 //#define CAMERA_TEST_CAPTURE		//摄像+预览
 //#define CAMERA_TEST_VIDEO		//摄像从USB串口输出到电脑
 #define CAMERA_TEST_ONLY		//只测试摄像头没有输出足够的数据
 #ifdef CAMERA_TEST_QRCODE
 #undef CAMERA_TEST_CAPTURE
 #undef CAMERA_TEST_VIDEO
+#undef CAMERA_TEST_ONLY
 //#define LCD_ENABLE
 #endif
 
@@ -87,6 +89,8 @@ typedef struct
 	uint16_t image_h;
 	uint8_t cur_cache;
 	uint8_t is_decoding;
+	uint8_t is_rx_running;
+	uint8_t decode_and_rx_enable;
 }luat_camera_app_t;
 
 static luat_camera_app_t g_s_camera_app;
@@ -863,33 +867,87 @@ static int luat_image_decode_callback(void *pdata, void *param)
 
 static int luat_camera_irq_callback(void *pdata, void *param)
 {
-	if (INVALID_HANDLE_VALUE == pdata)
-	{
 #ifdef CAMERA_TEST_QRCODE
-#else
-		luat_rtos_event_send(g_s_task_handle, CAMERA_FRAME_START, 0, 0, 0, 0);
-#endif
-		return 0;
-	}
-#ifdef CAMERA_TEST_QRCODE
-	uint8_t cur_cache = g_s_camera_app.cur_cache;
-	if (!g_s_camera_app.is_decoding)
+	if (g_s_camera_app.decode_and_rx_enable)
 	{
-		g_s_camera_app.cur_cache = !g_s_camera_app.cur_cache;
-		luat_camera_continue_with_buffer(CAMERA_SPI_ID, g_s_camera_app.p_cache[g_s_camera_app.cur_cache]);
-		g_s_camera_app.is_decoding = 1;
-		luat_rtos_event_send(g_s_task_handle, CAMERA_FRAME_DECODE, cur_cache, 0, 0, 0);
+		uint8_t cur_cache = g_s_camera_app.cur_cache;
+		switch ((uint32_t)pdata)
+		{
+		case LUAT_CAMERA_FRAME_START:
+			luat_rtos_event_send(g_s_task_handle, CAMERA_FRAME_START, cur_cache, 0, 0, 0);
+			break;
+		case LUAT_CAMERA_FRAME_END:
+			break;
+		case LUAT_CAMERA_FRAME_RX_DONE:
+			if (!g_s_camera_app.is_decoding)
+			{
+				g_s_camera_app.is_decoding = 1;
+				luat_rtos_event_send(g_s_task_handle, CAMERA_FRAME_DECODE, cur_cache, 0, 0, 0);
+				g_s_camera_app.cur_cache = !g_s_camera_app.cur_cache;
+				luat_camera_continue_with_buffer(CAMERA_SPI_ID, g_s_camera_app.p_cache[g_s_camera_app.cur_cache]);
+			}
+			else
+			{
+				luat_camera_continue_with_buffer(CAMERA_SPI_ID, g_s_camera_app.p_cache[g_s_camera_app.cur_cache]);
+			}
+			break;
+		case LUAT_CAMARA_FRAME_ERROR:
+			DBG("!");
+			luat_camera_continue_with_buffer(CAMERA_SPI_ID, g_s_camera_app.p_cache[g_s_camera_app.cur_cache]);
+			break;
+		}
 	}
 	else
 	{
-		luat_camera_continue_with_buffer(CAMERA_SPI_ID, g_s_camera_app.p_cache[g_s_camera_app.cur_cache]);
+		switch ((uint32_t)pdata)
+		{
+		case LUAT_CAMERA_FRAME_START:
+			luat_rtos_event_send(g_s_task_handle, CAMERA_FRAME_START, 0, 0, 0, 0);
+			break;
+		case LUAT_CAMERA_FRAME_END:
+			if (!g_s_camera_app.is_rx_running && !g_s_camera_app.is_decoding)
+			{
+				g_s_camera_app.is_rx_running = 1;
+				luat_camera_continue_with_buffer(CAMERA_SPI_ID, g_s_camera_app.p_cache[0]);
+			}
+			break;
+		case LUAT_CAMERA_FRAME_RX_DONE:
+			if (!g_s_camera_app.is_decoding)
+			{
+				g_s_camera_app.is_decoding = 1;
+				g_s_camera_app.is_rx_running = 0;
+				luat_rtos_event_send(g_s_task_handle, CAMERA_FRAME_DECODE, 0, 0, 0, 0);
+			}
+			break;
+		case LUAT_CAMARA_FRAME_ERROR:
+			DBG("!");
+			luat_camera_continue_with_buffer(CAMERA_SPI_ID, g_s_camera_app.p_cache[0]);
+			break;
+		}
 	}
 
-#else
+
+#endif
+#ifdef CAMERA_TEST_ONLY
 	uint8_t cur_cache = g_s_camera_app.cur_cache;
-	g_s_camera_app.cur_cache = !g_s_camera_app.cur_cache;
-	luat_camera_continue_with_buffer(CAMERA_SPI_ID, g_s_camera_app.p_cache[g_s_camera_app.cur_cache]);
-	luat_rtos_event_send(g_s_task_handle, CAMERA_FRAME_END, cur_cache, 0, 0, 0);
+	switch ((uint32_t)pdata)
+	{
+	case LUAT_CAMERA_FRAME_START:
+		luat_rtos_event_send(g_s_task_handle, CAMERA_FRAME_START, cur_cache, 0, 0, 0);
+		break;
+	case LUAT_CAMERA_FRAME_END:
+		break;
+	case LUAT_CAMERA_FRAME_RX_DONE:
+		g_s_camera_app.cur_cache = !g_s_camera_app.cur_cache;
+		luat_camera_continue_with_buffer(CAMERA_SPI_ID, g_s_camera_app.p_cache[g_s_camera_app.cur_cache]);
+		luat_rtos_event_send(g_s_task_handle, CAMERA_FRAME_END, cur_cache, 0, 0, 0);
+		break;
+	case LUAT_CAMARA_FRAME_ERROR:
+		g_s_camera_app.cur_cache = !g_s_camera_app.cur_cache;
+		luat_camera_continue_with_buffer(CAMERA_SPI_ID, g_s_camera_app.p_cache[g_s_camera_app.cur_cache]);
+
+		break;
+	}
 #endif
 	return 0;
 
@@ -938,7 +996,7 @@ static int luat_bfxxxx_init(void)
 		LUAT_DEBUG_PRINT("find BF30A2");
 		g_s_camera_app.image_w = 240;
 		g_s_camera_app.image_h = 320;
-
+		g_s_camera_app.decode_and_rx_enable = 1;	//8W扫码才可以双buffer
 		for(int i = 0; i < sizeof(g_s_bf302a_reg_table)/sizeof(camera_reg_t); i++)
 		{
 			if (luat_i2c_send(CAMERA_I2C_ID, BF30A2_I2C_ADDRESS, &g_s_bf302a_reg_table[i].reg, 2, 1))
@@ -996,6 +1054,7 @@ static int luat_bfxxxx_init(void)
 
 	g_s_camera_app.cur_cache = 0;
 	luat_camera_start_with_buffer(CAMERA_SPI_ID, g_s_camera_app.p_cache[0]);
+	g_s_camera_app.is_rx_running = 1;
 	return 0;
 CAM_OPEN_FAIL:
 	luat_camera_close(CAMERA_SPI_ID);
@@ -1029,7 +1088,7 @@ static int luat_gc032a_init(void)
 			.seq_type = 1,
 			.plat_param = {1,1,1,0}
 	};
-
+	g_s_camera_app.decode_and_rx_enable = 0;
 	luat_camera_setup(CAMERA_SPI_ID, &spi_camera, luat_camera_irq_callback, NULL);	//输出MCLK供给camera时钟
 	luat_rtos_task_sleep(1);
 
@@ -1065,9 +1124,9 @@ static int luat_gc032a_init(void)
 #endif
 
 #ifdef CAMERA_TEST_QRCODE
-    void *stack = malloc(220 * 1024);
+    void *stack = luat_psram_static_alloc(250 * 1024);
     LUAT_DEBUG_PRINT("ram use %x,%x,%x",g_s_camera_app.p_cache[0], g_s_camera_app.p_cache[1], stack);
-    LUAT_DEBUG_PRINT("decoder init %d", luat_camera_image_decode_init(0, stack, 220 * 1024, 30));
+    LUAT_DEBUG_PRINT("decoder init %d", luat_camera_image_decode_init(0, stack, 250 * 1024, 30));
 #else
     LUAT_DEBUG_PRINT("psram use %x,%x",g_s_camera_app.p_cache[0], g_s_camera_app.p_cache[1]);
 #endif
@@ -1081,6 +1140,7 @@ static int luat_gc032a_init(void)
 
 	g_s_camera_app.cur_cache = 0;
 	luat_camera_start_with_buffer(CAMERA_SPI_ID, g_s_camera_app.p_cache[0]);
+	g_s_camera_app.is_rx_running = 1;
 	return 0;
 CAM_OPEN_FAIL:
 	luat_camera_close(CAMERA_SPI_ID);
@@ -1096,7 +1156,6 @@ static void luat_camera_task(void *param)
 	luat_event_t event;
 	uint32_t all,now_free_block,min_free_block;
 	luat_debug_set_fault_mode(LUAT_DEBUG_FAULT_HANG);
-	luat_rtos_task_sleep(1000);
 #ifdef LCD_ENABLE
 	luat_lcd_run_user_api(luat_spi_lcd_init, NULL, 0, 0);
 #endif
@@ -1152,12 +1211,10 @@ static void luat_camera_task(void *param)
 		switch(event.id)
 		{
 		case CAMERA_FRAME_START:
-#ifdef CAMERA_TEST_ONLY
-			LUAT_DEBUG_PRINT("1fps start");
-#endif
+			LUAT_DEBUG_PRINT("1fps start, use buf %d", event.param1);
 			break;
 		case CAMERA_FRAME_END:
-			LUAT_DEBUG_PRINT("1fps done");
+			LUAT_DEBUG_PRINT("1fps done, use buf %d", event.param1);
 			break;
 		case CAMERA_FRAME_DECODE:
 #ifdef CAMERA_TEST_QRCODE
@@ -1191,4 +1248,3 @@ static void camera_demo_init(void)
 }
 
 INIT_TASK_EXPORT(camera_demo_init, "1");
-

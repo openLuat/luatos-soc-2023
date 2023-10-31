@@ -12,6 +12,13 @@
 #define __CORE_I2S_H__
 #include "bsp_common.h"
 #include "i2s.h"
+enum
+{
+	CSPI_FRAME_START = 0,
+	CSPI_FRAME_END,
+	CSPI_FRAME_SUCC,
+	CSPI_FRAME_ERROR,
+};
 void I2S_FullConfig(uint8_t I2SID, I2sDataFmt_t DataFmt, I2sSlotCtrl_t SlotCtrl, I2sBclkFsCtrl_t BclkFsCtrl, I2sDmaCtrl_t DmaCtrl);
 void I2S_BaseConfig(uint8_t I2SID, uint8_t Mode, uint8_t FrameSize);
 int32_t I2S_Start(uint8_t I2SID, uint8_t IsPlay, uint32_t SampleRate, uint8_t ChannelNum);

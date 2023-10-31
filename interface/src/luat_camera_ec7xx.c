@@ -40,9 +40,9 @@ static luat_camera_ctrl_t g_s_camera[CSPI_MAX];
 
 static int luat_camera_dummy_callback(void *pdata, void *param)
 {
-	return 0;
+	int id = (int)param;
+	return g_s_camera[id].callback(pdata, g_s_camera[id].param);
 }
-
 
 
 int luat_camera_setup(int id, luat_spi_camera_t *conf, void * callback, void *param)
@@ -116,7 +116,7 @@ int luat_camera_start_with_buffer(int id, void *buf)
 {
 	if (id < 0 || id >= CSPI_ID2) return -1;
 	if (!g_s_camera[id].is_init || g_s_camera[id].is_running) return -ERROR_OPERATION_FAILED;
-	CSPI_Rx(id, buf, g_s_camera[id].image_w, g_s_camera[id].image_h, g_s_camera[id].callback, g_s_camera[id].param);
+	CSPI_Rx(id, buf, g_s_camera[id].image_w, g_s_camera[id].image_h, luat_camera_dummy_callback, id);
 	g_s_camera[id].is_running = 1;
 	return 0;
 }
