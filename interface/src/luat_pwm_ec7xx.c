@@ -155,9 +155,12 @@ int luat_pwm_open(int channel, size_t freq,  size_t pulse, int pnum) {
 	switch (g_s_pwm_table[channel].stop_level)
 	{
 	case 0:
-		stop_level = TIMER_PWM_STOP_LOW;
+		stop_level = TIMER_PWM_STOP_HOLD;
 		break;
 	case 1:
+		stop_level = TIMER_PWM_STOP_LOW;
+		break;
+	case 2:
 		stop_level = TIMER_PWM_STOP_HIGH;
 		break;
 	default:
@@ -192,68 +195,28 @@ int luat_pwm_open(int channel, size_t freq,  size_t pulse, int pnum) {
         XIC_EnableIRQ(g_s_pwm_table[channel].irq_line);
         XIC_SuppressOvfIRQ(g_s_pwm_table[channel].irq_line);
     }
-    if (luat_mcu_iomux_is_default(LUAT_MCU_PERIPHERAL_PWM, channel))
-    {
-        switch (channel)
-        {
-        case 0:
-            GPIO_IomuxEC7XX(16, 5, 1, 0);
-            break;
-        case 1:
-            GPIO_IomuxEC7XX(49, 5, 1, 0);
-            break;
-        case 2:
-            GPIO_IomuxEC7XX(50, 5, 1, 0);
-            break;
-        case 4:
-            GPIO_IomuxEC7XX(52, 5, 1, 0);
-            break;
-        default:
-            break;
-        }
-    }
-
-	switch (g_s_pwm_table[channel].reverse)
-    {
-	case 0 :
-		break;
-    case 1:
-		switch (channel)
+	if(0 == g_s_pwm_table[channel].reverse)
+	{
+    	if (luat_mcu_iomux_is_default(LUAT_MCU_PERIPHERAL_PWM, channel))
     	{
-    	case 0:
-    	    GPIO_IomuxEC7XX(49, 3, 1, 0);
-    	    break;
-    	case 1:
-			GPIO_IomuxEC7XX(16, 4, 1, 0);
-    	    break;
-    	case 2:
-    	    GPIO_IomuxEC7XX(51, 3, 1, 0);
-    	    break;
-    	case 4:
-    	    GPIO_IomuxEC7XX(52, 3, 1, 0);
-    	    break;
-    	default:
-    	    break;
+        	switch (channel)
+        	{
+        	case 0:
+        	    GPIO_IomuxEC7XX(16, 5, 1, 0);
+        	    break;
+        	case 1:
+        	    GPIO_IomuxEC7XX(49, 5, 1, 0);
+        	    break;
+        	case 2:
+        	    GPIO_IomuxEC7XX(50, 5, 1, 0);
+        	    break;
+        	case 4:
+        	    GPIO_IomuxEC7XX(52, 5, 1, 0);
+        	    break;
+        	default:
+        	    break;
+        	}
     	}
-        break;
-    case 2:
-        if (channel == 1)
-		{
-			GPIO_IomuxEC7XX(48, 3, 1, 0);
-		}
-		else if(channel == 4)
-		{
-			GPIO_IomuxEC7XX(47, 3, 1, 0);
-		}			
-        break;
-	case 3:
-		if(channel == 4)
-		{
-			GPIO_IomuxEC7XX(45, 3, 1, 0);
-		}			
-        break;
-    default:
-        break;
 	}
     TIMER_start(channel);
     return 0;
