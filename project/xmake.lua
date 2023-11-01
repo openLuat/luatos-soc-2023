@@ -176,6 +176,7 @@ add_includedirs(LUATOS_ROOT .. "/luat/include",
 				LUATOS_ROOT .. "/components/camera",
 				LUATOS_ROOT .. "/components/wlan",
                 LUATOS_ROOT .. "/components/minmea",
+                LUATOS_ROOT .. "/components/sms",
 				"$(projectdir)/interface/include",
                 {public = true})
 

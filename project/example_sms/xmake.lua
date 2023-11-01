@@ -16,7 +16,7 @@ target(TARGET_NAME)
     -- end
 
     --加入代码和头文件
-    add_includedirs(LUATOS_ROOT.."components/sms", {public = true})
+   
     add_includedirs("./inc",{public = true})
     add_files("./src/*.c",{public = true})
 
