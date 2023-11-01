@@ -1,8 +1,8 @@
 DbVersion
-1996304471,100
+946096362,100
 <end>
 BuildInfo
-The current data file was built by the Application Ver. 2.2.77.207, Mon Oct 30 14:24:09 2023
+The current data file was built by the Application Ver. 2.2.77.207, Wed Nov  1 13:17:45 2023
 <end>
 EnumVals
 0,2048,0,0,PHY_ONLINE,PHY_ICS_MODULE,PhyIcsMeasMainEntrance_0,P_INFO,swLogPrintf("ICS MEAS of euArfcn %d will be started ");
@@ -2194,6 +2194,11 @@ EnumVals
 274432,562069503,0,0,PLAT_AP,ATCMD_EXEC,atRfNstRspDebug_1,P_VALUE,swLogPrintf("NstRspDebug ");
 274432,562069760,0,0,PLAT_AP,ATCMD_EXEC,RfOpenApiDcdcVpaCfg_1,P_INFO,swLogPrintf("dcdc vpa Cfg , %x , %x ");
 274432,562071808,0,0,PLAT_AP,ATCMD_EXEC,RfOpenApiLdoFemVbatCfg_1,P_INFO,swLogPrintf("ldoFemVbat Cfg , %x , %x ");
+274432,562073856,0,0,PLAT_AP,ATCMD_EXEC,smsEncodeConcatenatedSms8bit_warn_1,P_WARNING,swLogPrintf("AT CMD , UDH is illegal : maxNum : %d , seqNum : %d ");
+274432,562075648,0,0,PLAT_AP,ATCMD_EXEC,smsPduEncodeUDH_warn_1,P_WARNING,swLogPrintf("UDH_IEI : %d is not support ");
+274432,562077696,0,0,PLAT_AP,ATCMD_EXEC,smsPduDecodeUDH_warn_1,P_WARNING,swLogPrintf("UDH_IEI : %d is not support ");
+274432,562080512,0,0,PLAT_AP,ATCMD_EXEC,smsSendTextSms_1,P_INFO,swLogPrintf("SC address Type : %d , address Length : %d , bcd [ 0 ] : %c , bcd [ 1 ] : %c ");
+274432,562081792,0,0,PLAT_AP,ATCMD_EXEC,smsSendSms_warn_1,P_WARNING,swLogPrintf("AT CMD , AT+CMGC does not support TEXT mode : %d ");
 277504,568330496,0,0,PLAT_AP,PS_DIAL,psDialGetPlmnCfgByImsi_1,P_WARNING,swLogPrintf("Can ' t find DialPlmnCfg for PLMN : 0x%x , 0x%x ");
 277504,568332544,0,0,PLAT_AP,PS_DIAL,psDialProcCmiPsBearerActedInd_1,P_WARNING,swLogPrintf("PS DIAL , bearer type : %d not valid , cid : %d ");
 277504,568334336,0,0,PLAT_AP,PS_DIAL,psDialProccCmiPsBearerDeActInd_1,P_VALUE,swLogPrintf("PS DIAL , CID : %d , deactivated. ");
@@ -2300,6 +2305,57 @@ EnumVals
 279552,572530688,0,0,PLAT_AP,CMS,cmsPriSynApiCall_1,P_DEBUG,swLogPrintf("SIG sent pointer : %x ");
 279552,572532736,0,0,PLAT_AP,CMS,psDialWakeupPs_1,P_WARNING,swLogPrintf("PS DIAL received sig : 0x%x , while waiting for PS waking up , just enqueue ");
 279552,572534784,0,0,PLAT_AP,CMS,psDialFirstPowerPs_1,P_WARNING,swLogPrintf("PS DIAL received sig : 0x%x , during first power cfun , just enqueue ");
+279552,572537088,0,0,PLAT_AP,CMS,smsGsmDefaultAlphabet2Ascii_warn_1,P_WARNING,swLogPrintf("PSIL SMS , invalid input pInGsm [ %d ] : 0x%x ");
+279552,572539136,0,0,PLAT_AP,CMS,smsAscii2GsmDefaultAlphabet_warn_1,P_WARNING,swLogPrintf("PSIL SMS , output length ( %d ) should not exceed %d ");
+279552,572541184,0,0,PLAT_AP,CMS,smsAscii2GsmDefaultAlphabet_warn_2,P_WARNING,swLogPrintf("PSIL SMS , input length ( %d ) should not exceed %d ");
+279552,572543232,0,0,PLAT_AP,CMS,smsAscii2GsmDefaultAlphabet_warn_3,P_WARNING,swLogPrintf("PSIL SMS , invalid input pInGsm [ %d ] : 0x%x ");
+279552,572545024,0,0,PLAT_AP,CMS,smsMsgEncodeUserData_warn_1,P_WARNING,swLogPrintf("PSIL SMS , invalid UCS2 length : %d ");
+279552,572549119,0,0,PLAT_AP,CMS,smsMsgEncodeUserData_warn_2,P_WARNING,swLogPrintf("PSIL SMS , user data header length is 0 ");
+279552,572551167,0,0,PLAT_AP,CMS,smsMsgEncodeUserData_warn_3,P_WARNING,swLogPrintf("PSIL SMS , UDH is not supported in DCS 8BIT ");
+279552,572553215,0,0,PLAT_AP,CMS,smsMsgEncodeUserData_warn_4,P_WARNING,swLogPrintf("PSIL SMS , user data header length is 0 ");
+279552,572553216,0,0,PLAT_AP,CMS,smsMsgEncodeUserData_warn_5,P_WARNING,swLogPrintf("PSIL SMS , length = %d , user data size should be from 0 to 140 ");
+279552,572557311,0,0,PLAT_AP,CMS,smsMsgEncodeUserData_warn_6,P_WARNING,swLogPrintf("PSIL SMS , not valid UCS2 PDU ");
+279552,572559359,0,0,PLAT_AP,CMS,smsMsgEncodeUserData_warn_7,P_WARNING,swLogPrintf("PSIL SMS , UDH is not supported in DCS UCS2 ");
+279552,572561407,0,0,PLAT_AP,CMS,smsMsgEncodeUserData_warn_8,P_WARNING,swLogPrintf("PSIL SMS , user data header length is 0 ");
+279552,572561408,0,0,PLAT_AP,CMS,smsMsgEncodeUserData_warn_9,P_WARNING,swLogPrintf("PSIL SMS , invalid codingScheme = %d ");
+279552,572563456,0,0,PLAT_AP,CMS,smsMsgEncodeUserData_warn_10,P_WARNING,swLogPrintf("PSIL SMS , length = %d , user data size should be from 0 to 140 ");
+279552,572565760,0,0,PLAT_AP,CMS,smsSubmitText2Pdu_warn_1,P_WARNING,swLogPrintf("PSIL SMS , send Text SMS , length : %d > MAX : %d ");
+279552,572567808,0,0,PLAT_AP,CMS,smsSubmitText2Pdu_info_1,P_INFO,swLogPrintf("PSIL SMS , send Text SMS , length : %d , MAX : %d ");
+279552,572570368,0,0,PLAT_AP,CMS,smsSubmitText2Pdu_info_2,P_INFO,swLogPrintf("PSIL SMS , Da length : %d , offset : %d , DSC : %d , VPF : %d ");
+279552,572572160,0,0,PLAT_AP,CMS,smsSubmitText2Pdu_info_3,P_INFO,swLogPrintf("PSIL SMS , enCode PDU length : %d , offset : %d , DSC : %d ");
+279552,572573952,0,0,PLAT_AP,CMS,smsDeliverText2Pdu_warn_1,P_WARNING,swLogPrintf("PSIL SMS , deliver Text SMS , length : %d is 0 , or > MAX : %d ");
+279552,572576000,0,0,PLAT_AP,CMS,smsDeliverText2Pdu_info_1,P_INFO,swLogPrintf("PSIL SMS , deliver Text SMS , length : %d , MAX : %d ");
+279552,572578304,0,0,PLAT_AP,CMS,smsDeliverText2Pdu_info_2,P_INFO,swLogPrintf("PSIL SMS , Da length : %d , offset : %d , DSC : %d ");
+279552,572580352,0,0,PLAT_AP,CMS,smsDeliverText2Pdu_info_3,P_INFO,swLogPrintf("PSIL SMS , enCode PDU length : %d , offset : %d , DSC : %d ");
+279552,572582656,0,0,PLAT_AP,CMS,smsSendPduSms_warn_1,P_WARNING,swLogPrintf("PSIL SMS , invalid SC address in input PDU , hex vale : 0x%x , digit Length : %d , lenInHdr : %d , offset : %d ");
+279552,572583936,0,0,PLAT_AP,CMS,smsWriteTextSmsToStorage_warn_1,P_WARNING,swLogPrintf("PSIL SMS , smsMsgType %d not supported ");
+279552,572585984,0,0,PLAT_AP,CMS,smsWriteTextSmsToStorage_warn_2,P_WARNING,swLogPrintf("PSIL SMS , smsMsgType %d not supported ");
+279552,572588032,0,0,PLAT_AP,CMS,smsWriteTextSmsToStorage_warn_3,P_WARNING,swLogPrintf("PSIL SMS , smsMemType %d not supported ");
+279552,572590848,0,0,PLAT_AP,CMS,smsWritePduSmsToStorage_warn_1,P_WARNING,swLogPrintf("PSIL SMS , invalid SC address in input PDU , hex vale : 0x%x , digit Length : %d , lenInHdr : %d , offset : %d ");
+279552,572592128,0,0,PLAT_AP,CMS,smsWritePduSmsToStorage_warn_2,P_WARNING,swLogPrintf("PSIL SMS , smsRecMsgType %d is not supported ");
+279552,572594176,0,0,PLAT_AP,CMS,smsWritePduSmsToStorage_warn_3,P_WARNING,swLogPrintf("PSIL SMS , smsMemType %d not supported ");
+279552,572596224,0,0,PLAT_AP,CMS,smsSendStoredSms_warn_1,P_WARNING,swLogPrintf("PSIL SMS , TP-MTI ( %d ) is not SMS-SUBMIT ");
+279552,572599040,0,0,PLAT_AP,CMS,smsSrvCenterAddrToText_1,P_INFO,swLogPrintf("SC address Type : %d , Address Len : %d , bcd [ 0 ] : %c , bcd [ 1 ] : %c ");
+279552,572600320,0,0,PLAT_AP,CMS,smsSrvCenterAddrToText_2,P_INFO,swLogPrintf("smscBufLen %d is not enouth ");
+279552,572602368,0,0,PLAT_AP,CMS,smsSetSrvCenterAddr_warn_1,P_WARNING,swLogPrintf("PSIL SMS , invalid UCS2 length : %d ");
+279552,572606463,0,0,PLAT_AP,CMS,smsDeleteSmsStoreRecord_2,P_WARNING,swLogPrintf("PSIL SMS , read SMS storage memory failure ! ");
+279552,572606976,0,0,PLAT_AP,CMS,smsDeleteSmsStoreRecord_3,P_WARNING,swLogPrintf("PSIL SMS , delete fail , input param are invalid , Del_Operat : %d , DEL_Index : %d , Del_Flag : %d ");
+279552,572609024,0,0,PLAT_AP,CMS,smsPduDecodeUserData_1,P_INFO,swLogPrintf("userDataLen %d , msgParsed %d , msgBodyLen %d ");
+279552,572611076,0,0,PLAT_AP,CMS,smsPduDecodeUserData_2,P_INFO,swLogPrintf("PSIL SMS , codingType : %d , out Length : %d , decodeUserData : %s ");
+279552,572612864,0,0,PLAT_AP,CMS,smsGetTPUserDataSize_0,P_INFO,swLogPrintf("PSIL SMS , pTPUDLen : %d , pduDataLen : %d ");
+279552,572614912,0,0,PLAT_AP,CMS,smsSubmitTpduLen_0,P_INFO,swLogPrintf("PSIL SMS , offset : %d , tpUserDataLen : %d ");
+279552,572617216,0,0,PLAT_AP,CMS,SmsSumbitPduToText_1,P_INFO,swLogPrintf("SmsSubmitPduToText , FO : %d , offset : %d , VPF : %d ");
+279552,572619264,0,0,PLAT_AP,CMS,SmsSubmitPduToText_2,P_INFO,swLogPrintf("PSIL SMS , PDU length : %d , offset : %d , VPF : %d ");
+279552,572621568,0,0,PLAT_AP,CMS,SmsSubmitPduToText_3,P_INFO,swLogPrintf("PSIL SMS , pduLen : %d , dsc : %d , hdrpresent : %d , offset : %d ");
+279552,572623104,0,0,PLAT_AP,CMS,smsDeliverTpduLen_0,P_INFO,swLogPrintf("PSIL SMS , offset : %d , tpUserDataLen : %d ");
+279552,572625664,0,0,PLAT_AP,CMS,SmsDeliverPduToText_1,P_INFO,swLogPrintf("PSIL SMS , PDU length : %d , dsc : %d , hdrpresent : %d , offset : %d ");
+279552,572626944,0,0,PLAT_AP,CMS,SmsSubmitRptPduToText_1,P_ERROR,swLogPrintf("PSIL SMS , PDU length is wrong : %d ");
+279552,572628992,0,0,PLAT_AP,CMS,SmsSubmitRptPduToText_2,P_ERROR,swLogPrintf("PSIL SMS , PDU length is wrong : %d ");
+279552,572631040,0,0,PLAT_AP,CMS,smsStateStrToInt_1,P_INFO,swLogPrintf("PSIL SMS , SMS status : %d ");
+279552,572633089,0,0,PLAT_AP,CMS,smsStateIntToStr_1,P_INFO,swLogPrintf("PSIL SMS , SMS Status : %s ");
+279552,572635652,0,0,PLAT_AP,CMS,smsDecodeCbsData_1,P_INFO,swLogPrintf("PSIL SMS , codingType : %d , out Length : %d , decodeUserData : %s ");
+279552,572637442,0,0,PLAT_AP,CMS,smsAsciiToUcs2_1,P_INFO,swLogPrintf("PSIL SMS , iLengh : %d , pAscii : %s ");
+279552,572639490,0,0,PLAT_AP,CMS,smsUcs2ToAscii_1,P_INFO,swLogPrintf("PSIL SMS , iLengh : %d , pUcs2 : %s ");
 280576,574622720,0,0,PLAT_AP,SIM_BIP,SimBipProcLinkUp_1,P_WARNING,swLogPrintf("Sim bip link up : dest ipv4 addr %u.%u.%u.%u , port %d ");
 280576,574625791,0,0,PLAT_AP,SIM_BIP,SimBipProcLinkUp_2,P_WARNING,swLogPrintf("Sim bip link up failed , close socket! ");
 280576,574627839,0,0,PLAT_AP,SIM_BIP,SimBipProcLinkUp_3,P_WARNING,swLogPrintf("Sim bip link up failed , connect server error! ");
@@ -4493,12 +4549,35 @@ EnumVals
 317440,650182655,0,0,PLAT_AP,PLA_MIDWARE,mwNvmInfoSetPhyDebugAtCmdInfo_w_2,P_WARNING,swLogPrintf("MW NVM INFO , can ' t set PHY debug AT info , as NVM not read ");
 317440,650184703,0,0,PLAT_AP,PLA_MIDWARE,mwNvmInfoGetSimEdrxValue_1,P_WARNING,swLogPrintf("MW NVM INFO , can ' t get PHY edrx info , as NVM not read ");
 317440,650186751,0,0,PLAT_AP,PLA_MIDWARE,mwNvmInfoSetSimEdrxValue_2,P_WARNING,swLogPrintf("MW NVM INFO , can ' t set PHY edrx info , as NVM not read ");
-317440,650188799,0,0,PLAT_AP,PLA_MIDWARE,npiLoadNvmConfig_1,P_ERROR,swLogPrintf("Can ' t open NVM : ' npiconfig.nvm ' , use the defult value ");
-317440,650190847,0,0,PLAT_AP,PLA_MIDWARE,npiLoadNvmConfig_2,P_ERROR,swLogPrintf("NPI NVM : ' npiconfig.nvm ' , can ' t read header , use the defult value ");
-317440,650191360,0,0,PLAT_AP,PLA_MIDWARE,npiLoadNvmConfig_3,P_ERROR,swLogPrintf("' npiconfig.nvm ' version : %d file body size not right : ( %u / %u ) , use the defult value ");
-317440,650194943,0,0,PLAT_AP,PLA_MIDWARE,npiSaveNvmConfig_1,P_ERROR,swLogPrintf("NPI NVM , can ' t open / create NVM : ' npiconfig.nvm ' , save NVM failed ");
-317440,650196991,0,0,PLAT_AP,PLA_MIDWARE,npiSaveNvmConfig_2,P_ERROR,swLogPrintf("NPI NVM : ' npiconfig.nvm ' , write the file header failed ");
-317440,650199039,0,0,PLAT_AP,PLA_MIDWARE,npiSaveNvmConfig_3,P_ERROR,swLogPrintf("NPI NVM : ' npiconfig.nvm ' , write the file body failed ");
+317440,650186753,0,0,PLAT_AP,PLA_MIDWARE,mwNvmSmsRead_1,P_DEBUG,swLogPrintf("MW NVM SMS , NVM file : %s , can ' t read , using default value ");
+317440,650189825,0,0,PLAT_AP,PLA_MIDWARE,mwNvmSmsRead_2,P_DEBUG,swLogPrintf("MW NVM INFO , NVM file : %s , file size not right : %d / %d , or version not right : %d / %d , using default value ");
+317440,650190848,0,0,PLAT_AP,PLA_MIDWARE,mwNvmSmsGetRecByIndex_1,P_WARNING,swLogPrintf("MW NVM SMS , input invalid index : %d , can ' t get SMS record from NVM ");
+317440,650194943,0,0,PLAT_AP,PLA_MIDWARE,mwNvmSmsGetRecByIndex_3,P_WARNING,swLogPrintf("MW NVM SMS , Read SMS Storage memory failure! ");
+317440,650195200,0,0,PLAT_AP,PLA_MIDWARE,mwNvmSmsGetRecByIndex_4,P_WARNING,swLogPrintf("MW NVM SMS , index : %d , stored number : %d , there is no SMS message. ");
+317440,650196992,0,0,PLAT_AP,PLA_MIDWARE,mwNvmSmsUpdateAndSaveRecByIndex_1,P_WARNING,swLogPrintf("MW NVM SMS , input invalid index : %d , can ' t update SMS record ");
+317440,650201087,0,0,PLAT_AP,PLA_MIDWARE,mwNvmSmsUpdateAndSaveRecByIndex_3,P_WARNING,swLogPrintf("MW NVM SMS , read SMS Storage memory fail! ");
+317440,650201344,0,0,PLAT_AP,PLA_MIDWARE,mwNvmSmsUpdateAndSaveRecByIndex_4,P_WARNING,swLogPrintf("MW NVM SMS , index : %d , stored number : %d , the specificed stored SMS message record is NULL. ");
+317440,650203136,0,0,PLAT_AP,PLA_MIDWARE,mwNvmSmsUpdateAndSaveRecByIndex_5,P_INFO,swLogPrintf("MW NVM SMS , Updated SMS Record with the index ( %d ) Done and Saved to NVRAM ");
+317440,650207231,0,0,PLAT_AP,PLA_MIDWARE,mwNvmSmsAddAndSaveRec_2,P_WARNING,swLogPrintf("MW NVM SMS , Read SMS Storage memory failure , try again ! ");
+317440,650209279,0,0,PLAT_AP,PLA_MIDWARE,mwNvmSmsAddAndSaveRec_3,P_WARNING,swLogPrintf("MW NVM SMS , Read SMS Storage memory failure ! ");
+317440,650211327,0,0,PLAT_AP,PLA_MIDWARE,mwNvmSmsAddAndSaveRec_4,P_WARNING,swLogPrintf("MW NVM SMS , SMS Record Box is full , can ' t add SMS record to NVM ");
+317440,650213375,0,0,PLAT_AP,PLA_MIDWARE,mwNvmSmsAddAndSaveRec_5,P_WARNING,swLogPrintf("MW NVM SMS , SMS Record Box is full , can ' t add SMS record to NVM ");
+317440,650213632,0,0,PLAT_AP,PLA_MIDWARE,mwNvmSmsAddAndSaveRec_6,P_INFO,swLogPrintf("MW NVM SMS , added SMS success , index : %d , stored Counter : %d ");
+317440,650215424,0,0,PLAT_AP,PLA_MIDWARE,mwNvmSmsDelAndSaveRecByIndex_1,P_WARNING,swLogPrintf("MW NVM SMS , input invalid index : %d , can ' t delete SMS record from NVM ");
+317440,650219519,0,0,PLAT_AP,PLA_MIDWARE,mwNvmSmsDelAndSaveRecByIndex_3,P_WARNING,swLogPrintf("MW NVM SMS , read SMS Storage memory failure ! ");
+317440,650219520,0,0,PLAT_AP,PLA_MIDWARE,mwNvmSmsDelAndSaveRecByIndex_4,P_INFO,swLogPrintf("MW NVM SMS , the specificed index : %d SMS record has been Deleted! ");
+317440,650221824,0,0,PLAT_AP,PLA_MIDWARE,mwNvmSmsDelAndSaveRecByIndex_5,P_INFO,swLogPrintf("MW NVM SMS , deleted SMS specified index ( %d ) success , SMS stored number : %d ");
+317440,650223616,0,0,PLAT_AP,PLA_MIDWARE,mwNvmSmsDelRecByStatus_1,P_WARNING,swLogPrintf("MW NVM SMS , input invalid Status : %d , can ' t delete SMS records from NVM ");
+317440,650225664,0,0,PLAT_AP,PLA_MIDWARE,mwNvmSmsDelRecByStatus_2,P_INFO,swLogPrintf("MW NVM SMS , No need to Deleted : %d , SMS records list is NULL ");
+317440,650227968,0,0,PLAT_AP,PLA_MIDWARE,mwNvmSmsDelRecByStatus_3,P_INFO,swLogPrintf("MW NVM SMS , Deleted the specified Status SMS done , delete Statu : %d success , remaining SMS number : %d ");
+317440,650229760,0,0,PLAT_AP,PLA_MIDWARE,mwNvmSmsDelAndSaveRecByStatus_1,P_WARNING,swLogPrintf("MW NVM SMS , input invalid Status : %d , can ' t delete SMS records from NVM ");
+317440,650233855,0,0,PLAT_AP,PLA_MIDWARE,mwNvmSmsDelAndSaveRecByStatus_3,P_WARNING,swLogPrintf("MW NVM SMS , Read SMS Storage memory failure ! ");
+317440,650235903,0,0,PLAT_AP,PLA_MIDWARE,npiLoadNvmConfig_1,P_ERROR,swLogPrintf("Can ' t open NVM : ' npiconfig.nvm ' , use the defult value ");
+317440,650237951,0,0,PLAT_AP,PLA_MIDWARE,npiLoadNvmConfig_2,P_ERROR,swLogPrintf("NPI NVM : ' npiconfig.nvm ' , can ' t read header , use the defult value ");
+317440,650238464,0,0,PLAT_AP,PLA_MIDWARE,npiLoadNvmConfig_3,P_ERROR,swLogPrintf("' npiconfig.nvm ' version : %d file body size not right : ( %u / %u ) , use the defult value ");
+317440,650242047,0,0,PLAT_AP,PLA_MIDWARE,npiSaveNvmConfig_1,P_ERROR,swLogPrintf("NPI NVM , can ' t open / create NVM : ' npiconfig.nvm ' , save NVM failed ");
+317440,650244095,0,0,PLAT_AP,PLA_MIDWARE,npiSaveNvmConfig_2,P_ERROR,swLogPrintf("NPI NVM : ' npiconfig.nvm ' , write the file header failed ");
+317440,650246143,0,0,PLAT_AP,PLA_MIDWARE,npiSaveNvmConfig_3,P_ERROR,swLogPrintf("NPI NVM : ' npiconfig.nvm ' , write the file body failed ");
 318464,652216320,0,0,PLAT_AP,PLA_APP,CpStatusTask_0,P_VALUE,swLogPrintf("AP : Test task loop-%d ");
 318464,652218368,0,0,PLAT_AP,PLA_APP,funcTestGetPinValue_0,P_VALUE,swLogPrintf("WakeupPinValue = %d ");
 318464,652222463,0,0,PLAT_AP,PLA_APP,appInit_0,P_VALUE,swLogPrintf("AP : CP Power Off ");
@@ -7557,6 +7636,10 @@ EnumVals
 578560,1185273856,0,0,PS1,SMS,CatUpProcGosTimerExpiryIndSig_1,P_ERROR,swLogPrintf("Unexpected Gos Timer Expiry : %d ");
 578560,1185275904,0,0,PS1,SMS,CatUpTaskEntry_1,P_ERROR,swLogPrintf("Unexpected sigId : %d ");
 578560,1185277952,0,0,PS1,SMS,CedrProcBearerTimerExpiry_1,P_ERROR,swLogPrintf("Unexpected Bearer Timer Expiry : %d ");
+578560,1185280000,0,0,PS1,SMS,smsPduDecodeCbsDCS_1,P_WARNING,swLogPrintf("unknown cb DCS value : %d ");
+578560,1185282048,0,0,PS1,SMS,smsPduDecodeCbsDCS_2,P_WARNING,swLogPrintf("unknown reserved DCS value : %d ");
+578560,1185284096,0,0,PS1,SMS,smsPduDecodeCbsDCS_3,P_WARNING,swLogPrintf("unknown cb reserved DCS value : %d ");
+578560,1185286144,0,0,PS1,SMS,smsPduDecodeCbsDCS_4,P_WARNING,swLogPrintf("unknown DCS value : %d ");
 580608,1189087232,0,0,PS1,NAS_PLMN,CePlmnAddPreferFreqStatic_1,P_VALUE,swLogPrintf("CE PLMN , cell locked , can ' t add the FREQ : 0x%x into the FREQ header ");
 580608,1189089280,0,0,PS1,NAS_PLMN,CePlmnAddPreferFreqStatic_2,P_VALUE,swLogPrintf("CE PLMN , euArfcn ( 0x%x ) is not belong any band in nvm , can ' t add to the FREQ header ");
 580608,1189091584,0,0,PS1,NAS_PLMN,CePlmnAddPreferFreqStatic_3,P_VALUE,swLogPrintf("CE PLMN , Current utcSec : %d , preFreqUpdateUtc : %d ");
@@ -8931,7 +9014,9 @@ bf23c39d946e378ab3e870c8f92b59ba45bcb48f8fb6ef38d96357d0e1005a03a4707d22b3535804
 bbca95d4680b56eb3600ebdafe7c317b6485a9b4cdd8f062b2163348506ef4817455a5018e55de132c3c6c2d82beebad19fe62e40aceb0f96f1879d1549dc4a68d356ca63f86ac7c4386eef957afe2ff1a3b085f9886de33ee0add4500445a48
 386bc640a7422158f4f1c1dced0291208d26a136f7cbf684dac0e6db4d81df443e829e970351c3d77684013bc0dbd04906d5173aa5f9a001fc2d01070d5832723c90572404fb27bdb3992f0671d9d9b65041ade050a7702aad055e0d75c65e3a7b90df90560cb0cfe48a2956996f5907e6721e4151155ae2cff90a5de275f7d0aae494d7daab1f7a9732179b8cafd562f8a23f7376a97af2759ee649f1afb6d07c88574e120462fae52928c31796650e
 8f17639025f6e8813af6133001e9f9c32917c7d960c47a674376d332faaa8cf98e79b74baa3d927d323afdc914619b7fbea3fe8eedbff6105d225f1a90b37fbc98d81b0ed20b316dd1aad9746a7cf8e9532e45d73ac44ba933c940a7dd1f085b812cbe5c10ed44148d657b53b7adb1d563eca19060a5c0ef56d75c1823249b22b4c9edbeef223cbef498d5c5e59f927955103678f580c7e304eb525858048768cf8c4860382831d61b2aec4256c599c6
+5d2a9eedaf3ec596e0a3592b97c13bcb6342db89a2f929db3281d7a97c77f44795bcb79296cf19c0697c8c1437eb3519f06d9e9f4763d9ea9aa781494d1da14eaac2f01f1c0bed82c2cffb25199d940889c177c2127579a290861dfad2312ad734c3475d1cc76fe99eae73c44167bbe202738e0817fe2d9e5b983e30e05ffa573e829e970351c3d77684013bc0dbd04906d5173aa5f9a001fc2d01070d583272d1c5c0e83dfbf27d50f2fa45429a97c6301da045d0ddebf14f05ee72ece3d13e945e87844b98958c59543917fff098885633f1e09821f5976a532749ae035042626ad963d13817a22d23be3cac06df9df78b55cc11cfd6dcc8073493e8087f6e8b9f74b01c527b948830f37ea8cfa0327cc7d723e3de6421c2067ab002e6ab3514cb1a7f9f37de294da2f284c2488c8e5d4492f7cc3d04167586fb822a371cec
 bb3ce6345352ae3f864f107d09c8487f5357c99fed64b42d0110b225834c3632792db5e6c635c916f510aa3be4b9a038945e87844b98958c59543917fff0988821e0821aba9a78eb0d1cca1875e4701e3dca4dc0d79be04a5cf89c4c593694356d28eeea88e9f39395d1fc03006e8233a99568c1d9a9dc408bc26065efd674f8baf7e8a083d13ae8f5bf6f68b02441aa678db09e54aec00ccea2ec93e392f938
+ef0dc27b7eab2262e35a79ef0ced53e53fc1e8f59707fa7e20ef0459ff8d60ce3e829e970351c3d77684013bc0dbd04906d5173aa5f9a001fc2d01070d5832724ecd984d1dbbacdbad6db6e13b619d380809ccda599f9c143280efbf5f11e19de8c3c4751baaf6de83e328b245e4149dd87e7cd9c8a3b4ebdc4c78300a24580156f7f87ab99facbfe85bc130c3d8fc04222a7e2e89f57d61ebf1bc24afd3b2cb88be0a13ef035e74feca2b246d02808c3d8df9fc74729c5c0948cdb1f765c97433e68175c31560f5959b07bcb02b688e32a83b4922c57ab35f07f3c2541ec2c926148293b64005c5e46d78dff03ebabc
 ca930e8f42d0d52705ce3267358cebbcc9d6fd48b5db1cea3b4d92d5367860008eba1ce84b7415ea06846968d17d5c5cd4e9a1814a006b111ab877db3e1dd19a97b82e4bffeea0516aa2c134afff31b2f8a23f7376a97af2759ee649f1afb6d07c88574e120462fae52928c31796650e
 54bb8875c740d2470cd6d7adca92083f11b941835990b43818d95927fca6c1dc5041ade050a7702aad055e0d75c65e3a7b90df90560cb0cfe48a2956996f5907c24cec92e9638795e9452cc8dba5f7d0daaf09b800049a13d1f98621d34ce408ffd42dc5a523f720aace211648774caa6554613db6d81495e6e2132c1ea8962755103678f580c7e304eb5258580487680e1f7ec55296bb8d9018d032f8dafa4efa652e7bf88c21336e52b0031db517bddf522259d6d48940bb150b15d01a8be6745d2fbc349b649e469f84eae4b9ee32
 36c24f20269c1c659d60f1614a7560ec7d3f8f84b95a9ddc4aff25eeac8a6f77f847cde4ba1470350409ecf67e25d191daaf09b800049a13d1f98621d34ce408ffd42dc5a523f720aace211648774caa4486d22796da9d7491d8f943a7013af90f68768871c7255ecef83c9642035346bea3fe8eedbff6105d225f1a90b37fbcbc5a8031a7c246266363157b7473aef9
@@ -9095,6 +9180,7 @@ MW_CFG_URC_DELAY_PARAM,MWNvmCfgUrcDelayParam
 MW_CFG_URC_RI_OTHER_PARAM,MWNvmCfgUrcRIOtherParam
 MW_CFG_URC_RI_SMS_INCOMING_PARAM,MWNvmCfgUrcRISmsIncomingParam
 mwinfo,MidWareNvmInfo
+mwsms,MidWareNvmSms
 CCM_CFG_SMS_SERVICE_TYPE,MsgService
 CCM_CFG_NW_MODE,NwMode
 OSASIGIDTAG,OSASIGID
@@ -9124,5 +9210,5 @@ MW_INFO_PHY_EDRX_PARAM,midWareNvmInfoPhyEdrxParam
 plat_config,plat_config_fs_t
 <end>
 OptionalSegment
-optional_sk_01,83B2FF68BD6A5F276AF73A99160B45D11E29645DDBC776110A118C6FA3DA7710
+optional_sk_01,EA8136CBBC03A1C2A949F6DC314ABFF6257176AE6AD68102FBE5A4EA85DF5C58
 <end>
