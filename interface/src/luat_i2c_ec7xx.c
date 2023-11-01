@@ -59,6 +59,18 @@ int luat_i2c_setup(int id, int speed) {
     if (!luat_i2c_exist(id)) return -1;
     if (luat_mcu_iomux_is_default(LUAT_MCU_PERIPHERAL_I2C, id))
     {
+#if defined TYPE_EC716S
+		if (id)
+    	{
+    		GPIO_IomuxEC7XX(10, 1, 1, 0);
+    		GPIO_IomuxEC7XX(11, 1, 1, 0);
+    	}
+    	else
+    	{
+    		GPIO_IomuxEC7XX(8, 1, 1, 0);
+    		GPIO_IomuxEC7XX(9, 1, 1, 0);
+    	}
+#else
     	if (id)
     	{
     		GPIO_IomuxEC7XX(13, 3, 1, 0);
@@ -69,6 +81,7 @@ int luat_i2c_setup(int id, int speed) {
     		GPIO_IomuxEC7XX(29, 2, 1, 0);
     		GPIO_IomuxEC7XX(30, 2, 1, 0);
     	}
+#endif
     }
 	I2C_MasterSetup(id, speed);
     return 0;
