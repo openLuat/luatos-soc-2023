@@ -168,29 +168,52 @@ int luat_uart_setup(luat_uart_t* uart) {
 #endif
     if(luat_mcu_iomux_is_default(LUAT_MCU_PERIPHERAL_UART, uart->id))
     {
+
+#if defined TYPE_EC716S
         switch (uart->id)
         {
         case UART_ID0:
-            GPIO_IomuxEC7XX(GPIO_ToPadEC7XX(HAL_GPIO_16, 0), 1, 0, 0);
-	        GPIO_IomuxEC7XX(GPIO_ToPadEC7XX(HAL_GPIO_17, 0), 1, 0, 0);
-	        GPIO_PullConfig(GPIO_ToPadEC7XX(HAL_GPIO_16, 0), 1, 1);
+            GPIO_IomuxEC7XX(18, 1, 0, 0);
+	        GPIO_IomuxEC7XX(19, 1, 0, 0);
+	        GPIO_PullConfig(18, 1, 1);
         case UART_ID1:
-            GPIO_IomuxEC7XX(GPIO_ToPadEC7XX(HAL_GPIO_18, 0), 1, 0, 0);
-	        GPIO_IomuxEC7XX(GPIO_ToPadEC7XX(HAL_GPIO_19, 0), 1, 0, 0);
-	        GPIO_PullConfig(GPIO_ToPadEC7XX(HAL_GPIO_18, 0), 1, 1);
+            GPIO_IomuxEC7XX(20, 1, 0, 0);
+	        GPIO_IomuxEC7XX(21, 1, 0, 0);
+	        GPIO_PullConfig(20, 1, 1);
             break;
         case UART_ID2:
-            GPIO_IomuxEC7XX(GPIO_ToPadEC7XX(HAL_GPIO_12, 0), 3, 0, 0);
-		    GPIO_IomuxEC7XX(GPIO_ToPadEC7XX(HAL_GPIO_13, 0), 3, 0, 0);
-		    GPIO_PullConfig(GPIO_ToPadEC7XX(HAL_GPIO_12, 0), 1, 1);
+            GPIO_IomuxEC7XX(16, 2, 0, 0);
+		    GPIO_IomuxEC7XX(17, 2, 0, 0);
+		    GPIO_PullConfig(16, 1, 1);
             break;
-        case UART_ID3:
-            GPIO_IomuxEC7XX(GPIO_ToPadEC7XX(HAL_GPIO_34, 0), 3, 0, 0);
-		    GPIO_IomuxEC7XX(GPIO_ToPadEC7XX(HAL_GPIO_35, 0), 3, 0, 0);
-		    GPIO_PullConfig(GPIO_ToPadEC7XX(HAL_GPIO_34, 0), 1, 1);
         default:
             break;
         }
+#else
+        switch (uart->id)
+        {
+        case UART_ID0:
+            GPIO_IomuxEC7XX(31, 1, 0, 0);
+	        GPIO_IomuxEC7XX(32, 1, 0, 0);
+	        GPIO_PullConfig(31, 1, 1);
+        case UART_ID1:
+            GPIO_IomuxEC7XX(33, 1, 0, 0);
+	        GPIO_IomuxEC7XX(34, 1, 0, 0);
+	        GPIO_PullConfig(33, 1, 1);
+            break;
+        case UART_ID2:
+            GPIO_IomuxEC7XX(27, 3, 0, 0);
+		    GPIO_IomuxEC7XX(28, 3, 0, 0);
+		    GPIO_PullConfig(27, 1, 1);
+            break;
+        case UART_ID3:
+            GPIO_IomuxEC7XX(40, 3, 0, 0);
+		    GPIO_IomuxEC7XX(41, 3, 0, 0);
+		    GPIO_PullConfig(40, 1, 1);
+        default:
+            break;
+        }
+#endif
     }
     int parity = 0;
      if (uart->parity == 1)parity = UART_PARITY_ODD;

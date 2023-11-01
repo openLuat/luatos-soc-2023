@@ -199,6 +199,25 @@ int luat_pwm_open(int channel, size_t freq,  size_t pulse, int pnum) {
 	{
     	if (luat_mcu_iomux_is_default(LUAT_MCU_PERIPHERAL_PWM, channel))
     	{
+#if defined TYPE_EC716S
+			switch (channel)
+        	{
+        	case 0:
+        	    GPIO_IomuxEC7XX(22, 3, 1, 0);
+        	    break;
+        	case 1:
+        	    GPIO_IomuxEC7XX(23, 5, 1, 0);
+        	    break;
+        	case 2:
+        	    GPIO_IomuxEC7XX(24, 5, 1, 0);
+        	    break;
+        	case 4:
+        	    GPIO_IomuxEC7XX(26, 5, 1, 0);
+        	    break;
+        	default:
+        	    break;
+        	}
+#else
         	switch (channel)
         	{
         	case 0:
@@ -216,6 +235,7 @@ int luat_pwm_open(int channel, size_t freq,  size_t pulse, int pnum) {
         	default:
         	    break;
         	}
+#endif
     	}
 	}
     TIMER_start(channel);
