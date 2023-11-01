@@ -10,6 +10,7 @@ target(TARGET_NAME)
     
     add_includedirs("./inc",{public = true})
     add_files("./src/*.c",{public = true})
+    add_includedirs(LUATOS_ROOT.."components/sms", {public = true})
     add_includedirs(LUATOS_ROOT.."components/network/libhttp", {public = true})
     add_includedirs(LUATOS_ROOT.."components/network/http_parser", {public = true})
     add_files(LUATOS_ROOT.."components/network/libhttp/*.c")

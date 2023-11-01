@@ -2,7 +2,7 @@
 #include "network_service.h"
 #include "socket_service.h"
 #include "usb_service.h"
-//#include "luat_sms_app.h"
+#include "luat_sms_app.h"
 #include "gpsmsg.h"
 
 
@@ -16,5 +16,5 @@ INIT_TASK_EXPORT(gps_service_init, "2");
 INIT_TASK_EXPORT(agps_service_init, "3");
 //INIT_TASK_EXPORT(fota_task_init, "3");
 INIT_TASK_EXPORT(luat_service_init, "4");
-//INIT_TASK_EXPORT(luat_sms_task_init, "4");
+INIT_TASK_EXPORT(luat_sms_task_init, "4");
 
