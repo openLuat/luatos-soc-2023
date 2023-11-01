@@ -86,7 +86,8 @@ add_defines("__USER_CODE__",
             "SOFTPACK_VERSION=\"\"",
             "HAVE_STRUCT_TIMESPEC",
             "FEATURE_FOTAPAR_ENABLE",
-            "__ASSEMBLY__"
+            "__ASSEMBLY__",
+            "FEATURE_PS_SMS_AT_ENABLE"
             -- "__CURRENT_FILE_NAME__=system_ec7xx",
             )
 
