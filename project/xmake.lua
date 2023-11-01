@@ -194,16 +194,12 @@ local LIB_PS_PLAT = "full"
 local LIB_FW = "oc"
 if is_lspd then
     LIB_PS_PLAT = "oc"
-	if CHIP_TARGET == "ec718p" then
-		LIB_FW = "oc"
-	else
-		LIB_FW = "wifi"
-	end
 else 
     if CHIP_TARGET == "ec718p" then
         LIB_PS_PLAT = "full"
     else
         LIB_PS_PLAT = "mid"
+        LIB_FW = "wifi"
     end
 end
 
