@@ -239,11 +239,16 @@ int luat_pm_get_poweron_reason(void)
 }
 ///---------------------------------------
 
-extern void pwrKeyStartPowerOff(void);
 int luat_pm_poweroff(void)
 {
-    pwrKeyStartPowerOff();
+	slpManStartPowerOff();
     return 0;
+}
+
+int luat_pm_reset(void)
+{
+	ResetECSystemReset();
+	return 0;
 }
 
 int luat_pm_power_ctrl(int id, uint8_t onoff)
