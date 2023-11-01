@@ -10,9 +10,9 @@ target(TARGET_NAME)
     add_includedirs("./inc",{public = true})
     add_files("./src/*.c",{public = true})
 
-    add_includedirs(LUATOS_ROOT.."components/fskv", {public = true})
-    add_files(LUATOS_ROOT.."components/fskv/*.c")
-    remove_files(LUATOS_ROOT.."components/fskv/luat_lib_fskv.c")
+    add_includedirs(LUATOS_ROOT.."/components/fskv", {public = true})
+    add_files(LUATOS_ROOT.."/components/fskv/*.c")
+    remove_files(LUATOS_ROOT.."/components/fskv/luat_lib_fskv.c")
 
     --可以继续增加add_includedirs和add_files
     --自动链接

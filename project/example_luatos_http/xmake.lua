@@ -14,11 +14,11 @@ target(TARGET_NAME)
     add_includedirs("./inc",{public = true})
     add_files("./src/*.c",{public = true})
 
-    add_includedirs(LUATOS_ROOT.."components/network/libhttp", {public = true})
-    add_includedirs(LUATOS_ROOT.."components/network/http_parser", {public = true})
-    add_files(LUATOS_ROOT.."components/network/libhttp/*.c")
-    remove_files(LUATOS_ROOT.."components/network/libhttp/luat_lib_http.c")
-    add_files(LUATOS_ROOT.."components/network/http_parser/*.c")
+    add_includedirs(LUATOS_ROOT.."/components/network/libhttp", {public = true})
+    add_includedirs(LUATOS_ROOT.."/components/network/http_parser", {public = true})
+    add_files(LUATOS_ROOT.."/components/network/libhttp/*.c")
+    remove_files(LUATOS_ROOT.."/components/network/libhttp/luat_lib_http.c")
+    add_files(LUATOS_ROOT.."/components/network/http_parser/*.c")
     
 
     --自动链接

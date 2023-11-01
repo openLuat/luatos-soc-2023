@@ -166,13 +166,13 @@ add_defines("LUAT_USE_FS_VFS","MBEDTLS_CONFIG_FILE=\"mbedtls_ec7xx_config.h\"")
 -- CSDK相关头文件引用
 add_includedirs(LUATOS_ROOT .. "/luat/include",
                 LUATOS_ROOT .. "/components/mobile",
-                LUATOS_ROOT .. "components/printf",
-                LUATOS_ROOT .. "components/ethernet/common",
-                LUATOS_ROOT .. "components/mbedtls",
-                LUATOS_ROOT .. "components/mbedtls/include",
-                LUATOS_ROOT .. "components/mbedtls/include/mbedtls",
-                LUATOS_ROOT .. "components/mbedtls/include/psa",
-                LUATOS_ROOT .. "components/network/adapter",
+                LUATOS_ROOT .. "/components/printf",
+                LUATOS_ROOT .. "/components/ethernet/common",
+                LUATOS_ROOT .. "/components/mbedtls",
+                LUATOS_ROOT .. "/components/mbedtls/include",
+                LUATOS_ROOT .. "/components/mbedtls/include/mbedtls",
+                LUATOS_ROOT .. "/components/mbedtls/include/psa",
+                LUATOS_ROOT .. "/components/network/adapter",
 				LUATOS_ROOT .. "/components/camera",
 				LUATOS_ROOT .. "/components/wlan",
                 LUATOS_ROOT .. "/components/minmea",
@@ -287,12 +287,12 @@ target(USER_PROJECT_NAME..".elf")
     -- printf
     add_files(LUATOS_ROOT.."/components/printf/*.c")
     -- weak
-    -- add_files(LUATOS_ROOT.."luat/weak/luat_log_weak.c")
+    -- add_files(LUATOS_ROOT.."/luat/weak/luat_log_weak.c")
     -- littlefs
     add_files("$(projectdir)/thirdparty/littlefs/**.c")
     -- vfs
-    add_files(LUATOS_ROOT.."luat/vfs/luat_fs_lfs2.c",
-            LUATOS_ROOT.."luat/vfs/luat_vfs.c")
+    add_files(LUATOS_ROOT.."/luat/vfs/luat_fs_lfs2.c",
+            LUATOS_ROOT.."/luat/vfs/luat_vfs.c")
     
     add_files(LUATOS_ROOT.."/components/minmea/minmea.c")
     local toolchains = nil

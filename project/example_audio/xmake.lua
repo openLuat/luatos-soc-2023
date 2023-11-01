@@ -11,16 +11,16 @@ target(TARGET_NAME)
     add_files("./src/*.c",{public = true})
 
     --加入amr编解码库
-    add_includedirs(LUATOS_ROOT .. "components/multimedia/amr_decode/amr_common/dec/include",{public = true})
-    add_includedirs(LUATOS_ROOT .. "components/multimedia/amr_decode/amr_nb/common/include",{public = true})
-    add_includedirs(LUATOS_ROOT .. "components/multimedia/amr_decode/amr_nb/dec/include",{public = true})
-    add_includedirs(LUATOS_ROOT .. "components/multimedia/amr_decode/amr_wb/dec/include",{public = true})
-    add_includedirs(LUATOS_ROOT .. "components/multimedia/amr_decode/opencore-amrnb",{public = true})
-    add_includedirs(LUATOS_ROOT .. "components/multimedia/amr_decode/opencore-amrwb",{public = true})
-    add_includedirs(LUATOS_ROOT .. "components/multimedia/amr_decode/oscl",{public = true})
-    add_includedirs(LUATOS_ROOT .. "components/multimedia/amr_decode/amr_nb/enc/src",{public = true})
+    add_includedirs(LUATOS_ROOT .. "/components/multimedia/amr_decode/amr_common/dec/include",{public = true})
+    add_includedirs(LUATOS_ROOT .. "/components/multimedia/amr_decode/amr_nb/common/include",{public = true})
+    add_includedirs(LUATOS_ROOT .. "/components/multimedia/amr_decode/amr_nb/dec/include",{public = true})
+    add_includedirs(LUATOS_ROOT .. "/components/multimedia/amr_decode/amr_wb/dec/include",{public = true})
+    add_includedirs(LUATOS_ROOT .. "/components/multimedia/amr_decode/opencore-amrnb",{public = true})
+    add_includedirs(LUATOS_ROOT .. "/components/multimedia/amr_decode/opencore-amrwb",{public = true})
+    add_includedirs(LUATOS_ROOT .. "/components/multimedia/amr_decode/oscl",{public = true})
+    add_includedirs(LUATOS_ROOT .. "/components/multimedia/amr_decode/amr_nb/enc/src",{public = true})
     -- **.c会递归所有子文件夹下的文件
-    add_files(LUATOS_ROOT .. "components/multimedia/amr_decode/**.c",{public = true})
+    add_files(LUATOS_ROOT .. "/components/multimedia/amr_decode/**.c",{public = true})
 
     --可以继续增加add_includedirs和add_files
     --自动链接

@@ -7,8 +7,8 @@ target(TARGET_NAME)
     set_targetdir(LIB_DIR)
     set_warnings("error")
     -- cjson
-    add_includedirs(LUATOS_ROOT.."components/cjson",{public = true})
-    add_files(LUATOS_ROOT.."components/cjson/*.c")
+    add_includedirs(LUATOS_ROOT.."/components/cjson",{public = true})
+    add_files(LUATOS_ROOT.."/components/cjson/*.c")
     --加入代码和头文件
     add_includedirs("./inc",{public = true})
     add_files("./src/**.c")

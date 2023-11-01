@@ -14,9 +14,9 @@ target(TARGET_NAME)
     add_includedirs("./inc",{public = true})
     add_files("./src/*.c",{public = true})
 
-    add_includedirs(LUATOS_ROOT.."components/network/libemqtt", {public = true})
-    add_files(LUATOS_ROOT.."components/network/libemqtt/*.c")
-    remove_files(LUATOS_ROOT.."components/network/libemqtt/luat_lib_mqtt.c")
+    add_includedirs(LUATOS_ROOT.."/components/network/libemqtt", {public = true})
+    add_files(LUATOS_ROOT.."/components/network/libemqtt/*.c")
+    remove_files(LUATOS_ROOT.."/components/network/libemqtt/luat_lib_mqtt.c")
 
     --自动链接
     LIB_USER = LIB_USER .. "$(projectdir)/" .. LIB_DIR .. LIB_NAME .. " "
