@@ -207,7 +207,9 @@ void audio_data_cb(uint8_t *data, uint32_t len, uint8_t bits, uint8_t channels)
 {
 	//这里可以对音频数据进行软件音量缩放，或者直接清空来静音
 	//软件音量缩放参考HAL_I2sSrcAdjustVolumn
+#if ES8311 == 1
 	HAL_I2sSrcAdjustVolumn((int16_t *)data, len, 5);
+#endif
 	//LUAT_DEBUG_PRINT("%x,%d,%d,%d", data, len, bits, channels);
 }
 
@@ -230,18 +232,34 @@ static void tts_config(void)
 	luat_audio_play_tts_set_resource((void*)ivtts_16k, (void*)sdk_id, NULL);
 }
 
-static void codec_config()
+static int codec_config()
 {
 #if ES8311 == 1
 	luat_gpio_set(CODEC_PWR_PIN, 1);
 	luat_i2c_setup(1, 0);
-	LUAT_DEBUG_PRINT("test ttt %d", sizeof(es8311_reg_table)/sizeof(i2c_reg_t));
+	uint8_t tx_buf[2] = {0};
+	uint8_t rx_buf[2] = {0};
+	tx_buf[0] = 0xfd;
+    luat_i2c_send(1, 0x18, tx_buf, 1, 1);
+    luat_i2c_recv(1, 0x18, rx_buf, 1);
+
+    tx_buf[0] = 0xfe;
+    luat_i2c_send(1, 0x18, tx_buf, 1, 1);
+    luat_i2c_recv(1, 0x18, rx_buf + 1, 1);
+
+	if (rx_buf[0] != 0x83 && rx_buf[1] != 0x11)
+	{
+		LUAT_DEBUG_PRINT("not find es8311");
+		return -1;
+	}
+	LUAT_DEBUG_PRINT("find es8311");
 	for (int i = 0; i < sizeof(es8311_reg_table)/sizeof(i2c_reg_t); i++)
     {
 		luat_i2c_send(1, 0x18, &es8311_reg_table[i], 2, 1);
     }
 	luat_rtos_task_sleep(500);
 #endif
+	return 0;
 }
 
 static void play_channel_config(void)
@@ -271,7 +289,15 @@ static void demo_task(void *arg)
 	luat_rtos_timer_create(&g_s_delay_timer);
     luat_audio_play_global_init(audio_event_cb, audio_data_cb, luat_audio_play_file_default_fun, luat_audio_play_tts_default_fun, NULL);
 	tts_config();
-	codec_config();
+	int result = codec_config();
+	if(result)
+	{
+		while (1)
+		{
+			LUAT_DEBUG_PRINT("codec config fail");
+			luat_rtos_task_sleep(1000);
+		}
+	}
 	play_channel_config();
 
 
