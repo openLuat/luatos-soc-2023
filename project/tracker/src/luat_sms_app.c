@@ -6,8 +6,9 @@
 #include "luat_mem.h"
 #include "protocol_text.h"
 #include "param_ctrl.h"
+#include "time.h"
 #define CMD_MAX_LEN 180
-#define NUMBER "13733176917"
+#define NUMBER "17527613057"
 extern luat_rtos_task_handle sms_task_handle;
 static luat_rtos_task_handle send_msg_task_handle;
 static luat_rtos_task_handle recv_msg_task_handle;
@@ -221,15 +222,27 @@ static void luat_sms_send_cb(int ret)
 
 static void msg_recv_task_proc(void *arg)
 {
-    luat_debug_set_fault_mode(LUAT_DEBUG_FAULT_HANG);
+    //luat_debug_set_fault_mode(LUAT_DEBUG_FAULT_HANG);
 	int ret = -1;
     uint32_t message_id;
 	LUAT_SMS_RECV_MSG_T *data = NULL;
-
+    uint8_t hour=0;
+    uint8_t minute=0;
+    uint8_t second=0;
+    int count=0;
 	while(1)
 	{
 		if(luat_rtos_message_recv(recv_msg_task_handle, &message_id, (void **)&data, LUAT_WAIT_FOREVER) == 0)
 		{
+           
+          
+            struct tm *t = localtime(NULL);
+            if ((t->tm_hour!=data->time.hour)||(t->tm_min!=data->time.minute))
+            {
+                LUAT_DEBUG_PRINT("time:[%02d]", t->tm_hour);
+                LUAT_DEBUG_PRINT("time:[%02d]", t->tm_min);
+                break;
+            }
 	        LUAT_DEBUG_PRINT("Dcs:[%d]", data->dcs_info.alpha_bet);
 	        LUAT_DEBUG_PRINT("Time:[\"%02d/%02d/%02d,%02d:%02d:%02d %c%02d\"]", data->time.year, data->time.month, data->time.day, data->time.hour, data->time.minute, data->time.second,data->time.tz_sign, data->time.tz);
 	        LUAT_DEBUG_PRINT("Phone:[%s]", data->phone_address);
