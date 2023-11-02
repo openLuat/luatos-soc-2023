@@ -67,8 +67,8 @@ typedef struct
     uint16_t province;                          //省域
     uint16_t city;                              //市域
     uint8_t oemid[5];                           //终端制造商编号
-    uint8_t devicetype[8];                      //终端型号
-    uint8_t deviceid[7];                        //终端ID
+    uint8_t devicetype[11];                      //终端型号
+    uint8_t deviceid[11];                        //终端ID
     uint8_t vehiclecolor;                       //车牌颜色
     uint8_t vehiclenumber[12];                  //公安交通同管理部门颁发的机劢车号牌
     uint16_t uploadtime;                        //缺省时间汇报间隔

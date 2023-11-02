@@ -8,13 +8,13 @@ static int g_s_gps_status = 0;
 static int g_s_relay_status = 0;
 
 Jt808Msg jt808_message = {
-    .addr = "112.125.89.8",
-    .port = 46765,
+    .addr = "58.61.154.237",
+    .port = 7018,
     .province = 00,
     .city = 00,
     .oemid = "xxx",
-    .devicetype = "xxx",
-    .deviceid = "xxx",
+    .devicetype = "AD09",
+    .deviceid = "17527613057",
     .vehiclecolor = 1,
     .vehiclenumber = "xxx",
     .uploadtime = 1,

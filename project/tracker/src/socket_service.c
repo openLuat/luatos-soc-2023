@@ -27,7 +27,7 @@ static int g_s_socket_id = -1;
 static uint8_t g_s_is_connected = 0;
 static uint8_t g_s_is_tcp_connect_task_exist = 0;
 extern Jt808Msg jt808_message;
-static uint8_t g_s_is_auth = 0;
+static uint8_t g_s_is_auth = 1;
 
 
 //socket数据发送task mailbox长度
@@ -263,6 +263,7 @@ static void send_data_from_task_callback(int result, uint32_t callback_param)
 
 static void tcp_connect_task_proc(void *arg)
 {
+	
 	ip_addr_t remote_ip;
     struct sockaddr_in name;
     socklen_t sockaddr_t_size = sizeof(name);

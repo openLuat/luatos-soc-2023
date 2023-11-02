@@ -6,7 +6,7 @@ target(TARGET_NAME)
     set_kind("static")
     set_targetdir(LIB_DIR)
 
-     add_defines("LUAT_USE_TLS",{public = true})
+     --add_defines("LUAT_USE_TLS",{public = true})
     
     add_includedirs("./inc",{public = true})
     add_files("./src/*.c",{public = true})

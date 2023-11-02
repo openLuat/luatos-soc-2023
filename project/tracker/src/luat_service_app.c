@@ -62,7 +62,7 @@ static void locrpt_task_proc(void *arg)
 	{
 		if (network_service_is_connect() == 1)
 		{
-			if (gpsx.gpssta == 1 && locinfo_upload_enable == 1 && device_is_stop == 0)
+			if (gpsx.gpssta == 1) //&& locinfo_upload_enable == 1 && device_is_stop == 0)
 			{
 				protocol_jt_pack_gps_msg(&gpsx, data, &len, 100, 0, 0);
 				result = socket_service_send_data(data, len, send_data_from_task_callback, 0);
@@ -74,8 +74,10 @@ static void locrpt_task_proc(void *arg)
 				{
 					LUAT_DEBUG_PRINT("sync result %d", result);
 				}
+				LUAT_DEBUG_PRINT("locinfo_upload_enable %d", locinfo_upload_enable);
 			}
 		}
+		LUAT_DEBUG_PRINT("gpsx.gpssta %d", gpsx.gpssta);
 		luat_rtos_task_sleep((jt808_message.uploadtime) * 1000);
 	}
 	luat_rtos_task_delete(locrpt_task_handle);
@@ -99,8 +101,9 @@ static void heartrpt_task_proc(void *arg)
 		{
 			LUAT_DEBUG_PRINT("sync result %d", result);
 		}
-
+     
 		luat_rtos_task_sleep((jt808_message.heart_interval) * 1000);
+		//luat_lbs_task_init();
 	}
 	luat_rtos_task_delete(heartrpt_task_handle);
 }
@@ -200,6 +203,7 @@ static void luat_mx3416_monitor_task(void *args)
 	uint16_t len;
 	while (1)
 	{
+		//luat_lbs_task_init();
 		int result = luat_rtos_message_recv(mx3416_monitor_task_handle, &message_id, (void **)&tmp, 10000);
 		LUAT_DEBUG_PRINT("monitor task recv message timeout %d", result);
 		if (-ERROR_TIMEOUT == result)
@@ -261,7 +265,7 @@ static void history_data_trans_task()
 	{
 		if (network_service_is_connect() == 0)
 		{
-			if (gpsx.gpssta == 1 && locinfo_upload_enable == 1 && device_is_stop == 0)
+			if (gpsx.gpssta == 1 )//&& locinfo_upload_enable == 1 && device_is_stop == 0)
 			{
 				if (luat_fs_fexist(HISTORY_DATA_PATH) == 0)
 				{
@@ -365,6 +369,7 @@ static void luat_acc_monitor_task(void *args)
 	locinfo_upload_enable = 1;
 	while (1)
 	{
+
 		if (0 == luat_rtos_message_recv(acc_monitor_task_handle, &message_id, (void **)&data, LUAT_WAIT_FOREVER))
 		{
 			if (g_s_acc_status == 1)
@@ -466,7 +471,7 @@ static void luat_send_data_task_proc(void *arg)
 	{
 		LUAT_DEBUG_PRINT("sync result %d", result);
 	}
-
+    //luat_rtos_task_sleep(20000);
 	// 基站定位
 	luat_lbs_task_init();
 

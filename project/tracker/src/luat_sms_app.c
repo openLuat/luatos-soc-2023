@@ -7,7 +7,7 @@
 #include "protocol_text.h"
 #include "param_ctrl.h"
 #define CMD_MAX_LEN 180
-#define NUMBER "121xxxx21xx"
+#define NUMBER "13733176917"
 extern luat_rtos_task_handle sms_task_handle;
 static luat_rtos_task_handle send_msg_task_handle;
 static luat_rtos_task_handle recv_msg_task_handle;
@@ -196,21 +196,22 @@ static void msg_send_task_proc(void *arg)
     luat_rtos_task_delete(send_msg_task_handle);
 }
 
-static void luat_sms_recv_cb(uint8_t event,void *param)
+static void luat_sms_recv_cb(uint8_t event, void *param)
 {
-    LUAT_SMS_RECV_MSG_T *sms_data = NULL;
-    sms_data = (LUAT_SMS_RECV_MSG_T *)malloc(sizeof(LUAT_SMS_RECV_MSG_T));
-    memset(sms_data, 0x00, sizeof(LUAT_SMS_RECV_MSG_T));
-    memcpy(sms_data, (LUAT_SMS_RECV_MSG_T *)param, sizeof(LUAT_SMS_RECV_MSG_T));
-    int ret = luat_rtos_message_send(recv_msg_task_handle, 0, sms_data);
-	if(ret != 0)
-	{
-		LUAT_MEM_FREE(sms_data);
-		sms_data = NULL;
-	}
+    if (event == 0)
+    {
+        LUAT_SMS_RECV_MSG_T *sms_data = NULL;
+        sms_data = (LUAT_SMS_RECV_MSG_T *)malloc(sizeof(LUAT_SMS_RECV_MSG_T));
+        memset(sms_data, 0x00, sizeof(LUAT_SMS_RECV_MSG_T));
+        memcpy(sms_data, (LUAT_SMS_RECV_MSG_T *)param, sizeof(LUAT_SMS_RECV_MSG_T));
+        int ret = luat_rtos_message_send(recv_msg_task_handle, 0, sms_data);
+        if (ret != 0)
+        {
+            LUAT_MEM_FREE(sms_data);
+            sms_data = NULL;
+        }
+    }
 }
-
-
 
 static void luat_sms_send_cb(int ret)
 {
@@ -220,6 +221,7 @@ static void luat_sms_send_cb(int ret)
 
 static void msg_recv_task_proc(void *arg)
 {
+    luat_debug_set_fault_mode(LUAT_DEBUG_FAULT_HANG);
 	int ret = -1;
     uint32_t message_id;
 	LUAT_SMS_RECV_MSG_T *data = NULL;
@@ -277,6 +279,6 @@ void luat_sms_task_init(void)
 	luat_sms_init();
     luat_sms_recv_msg_register_handler(luat_sms_recv_cb);
     luat_sms_send_msg_register_handler(luat_sms_send_cb);
-    luat_rtos_task_create(&send_msg_task_handle, 4096, 30, "msg_send", msg_send_task_proc, NULL, 50);
-    luat_rtos_task_create(&recv_msg_task_handle, 4096, 30, "msg_recv", msg_recv_task_proc, NULL, 50);
+    luat_rtos_task_create(&send_msg_task_handle, 3*1024, 30, "msg_send", msg_send_task_proc, NULL, 50);
+    luat_rtos_task_create(&recv_msg_task_handle, 3*1024, 30, "msg_recv", msg_recv_task_proc, NULL, 50);
 }
