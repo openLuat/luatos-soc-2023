@@ -39,7 +39,9 @@
 #define __SOC_OTA_SDK_DATA_LOAD_ADDRESS__	(FLASH_FOTA_REGION_START + AP_FLASH_XIP_ADDR)
 #define __SOC_OTA_SDK_DATA_SAVE_ADDRESS__	(FLASH_FOTA_REGION_START)
 #define __SOC_OTA_COMMON_DATA_LOAD_ADDRESS_LIMIT__	(AP_FLASH_LOAD_ADDR + AP_FLASH_LOAD_SIZE)
-
+#ifndef FULL_OTA_SAVE_ADDR
+#define FULL_OTA_SAVE_ADDR              (0x0)
+#endif
 #ifdef LUAT_USE_TLS
 #if MBEDTLS_VERSION_NUMBER >= 0x03000000
 #define mbedtls_md5_starts_ret mbedtls_md5_starts
@@ -67,6 +69,7 @@ enum
 	OTA_STATE_WRITE_COMMON_DATA,
 	OTA_STATE_WRITE_SDK_DATA,
 	OTA_STATE_OK,
+	OTA_STATE_ERROR,
 };
 
 static luat_fota_ctrl_t g_s_fota;
@@ -109,7 +112,7 @@ static void luat_fota_finish(void)
 	free(g_s_fota.p_fota_file_head);
 	g_s_fota.p_fota_file_head = NULL;
 	OS_DeInitBuffer(&g_s_fota.data_buffer);
-	DBG("fota ok!, wait reboot");
+	DBG("fota type %d ok!, wait reboot", g_s_fota.ota_type);
 }
 
 int luat_fota_init(uint32_t start_address, uint32_t len, luat_spi_device_t* spi_device, const char *path, uint32_t pathlen)
@@ -177,7 +180,7 @@ REPEAT:
 			OS_BufferRemove(&g_s_fota.data_buffer, sizeof(CoreUpgrade_FileHeadCalMD5Struct));
 			if (g_s_fota.p_fota_file_head->MaigcNum != __APP_START_MAGIC__)
 			{
-				DBG("magic num error %x", g_s_fota.p_fota_file_head->MaigcNum);
+				DBG("OTA包头标志error %x", g_s_fota.p_fota_file_head->MaigcNum);
 				g_s_fota.data_buffer.Pos = 0;
 				return -1;
 			}
@@ -231,10 +234,12 @@ REPEAT:
 			uint8_t md5[16];
 #ifdef LUAT_USE_TLS
 			mbedtls_md5_finish_ret(g_s_fota.md5_ctx, md5);
+#else
+			WinMD5(__SOC_OTA_COMMON_DATA_LOAD_ADDRESS__, g_s_fota.p_fota_file_head->CommonDataLen, md5);
 #endif
 			if (memcmp(md5, g_s_fota.p_fota_file_head->CommonMD5, 16))
 			{
-				DBG("common data md5 check failed");
+				DBG("全量包或者脚本包完整性检测失败");
 				g_s_fota.ota_state = OTA_STATE_IDLE;
 				g_s_fota.data_buffer.Pos = 0;
 				return -1;
@@ -246,12 +251,13 @@ REPEAT:
 				{
 					g_s_fota.ota_state = OTA_STATE_WRITE_SDK_DATA;
 					g_s_fota.ota_done_len = 0;
+					g_s_fota.ota_type = CORE_OTA_MODE_DIFF;
 					DBG("write core data");
 					goto REPEAT;
 				}
 				else
 				{
-					DBG("common data md5 ok");
+					DBG("only common data");
 					g_s_fota.ota_type = CORE_OTA_MODE_FULL;
 					luat_fota_finish();
 					return 0;
@@ -286,7 +292,7 @@ REPEAT:
 			fotaNvmDoExtension(FOTA_DEF_CHK_DELTA_STATE, (void*)&chkDelta);
 			if(!chkDelta.isValid)
 			{
-				DBG("validate delta err! errno(%d)", chkDelta.state);
+				DBG("差分包完整性检查错误! errno(%d)", chkDelta.state);
 				g_s_fota.ota_state = OTA_STATE_IDLE;
 				g_s_fota.data_buffer.Pos = 0;
 				return -1;
@@ -297,7 +303,7 @@ REPEAT:
 				fotaNvmDoExtension(FOTA_DEF_CHK_BASE_IMAGE, (void*)&chkBase);
 				if(!chkBase.isMatched)
 				{
-					DBG("however, base fw is unmatched!");
+					DBG("模块固件版本和差分中的旧固件版本不一致，不能升级!");
 					fotaNvmClearDelta(0, 4096);
 					g_s_fota.ota_state = OTA_STATE_IDLE;
 					g_s_fota.data_buffer.Pos = 0;
@@ -313,9 +319,12 @@ REPEAT:
 			goto REPEAT;
 		}
 		break;
+	case OTA_STATE_ERROR:
+		return -1;
 	default:
 		return 0;
 		break;
+
 	}
 	return 1;
 }
@@ -326,6 +335,7 @@ int luat_fota_done(void)
 	{
 	case OTA_STATE_IDLE:
 		return -1;
+	case OTA_STATE_ERROR:
 	case OTA_STATE_OK:
 		return 0;
 	default:
