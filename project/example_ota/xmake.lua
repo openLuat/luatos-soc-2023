@@ -17,8 +17,8 @@ target(TARGET_NAME)
     add_includedirs("./inc",{public = true})
     add_files("./src/*.c",{public = true})
 	--ymodem
-    add_includedirs(LUATOS_ROOT .. "components/ymodem")
-    add_files(LUATOS_ROOT .. "components/ymodem/luat_ymodem.c")
+    add_includedirs(LUATOS_ROOT .. "/components/ymodem")
+    add_files(LUATOS_ROOT .. "/components/ymodem/luat_ymodem.c")
     --可以继续增加add_includedirs和add_files
     --自动链接
     LIB_USER = LIB_USER .. "$(projectdir)/" .. LIB_DIR .. LIB_NAME .. " "

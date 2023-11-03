@@ -11,6 +11,7 @@ target(TARGET_NAME)
     if CHIP_TARGET == "ec718p" then
        add_defines("AP_FLASH_LOAD_SIZE=0x1b7000",{public = true})
        add_defines("AP_PKGIMG_LIMIT_SIZE=0x1b7000",{public = true})
+	   add_defines("FULL_OTA_SAVE_ADDR=0x235000",{public = true})
     end
     --加入代码和头文件
     add_includedirs("./inc",{public = true})

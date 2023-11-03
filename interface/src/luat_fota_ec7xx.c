@@ -29,7 +29,9 @@
 #ifdef LUAT_USE_TLS
 #include "mbedtls/md5.h"
 #else
-#include "md5.h"
+extern int WinMD5(const unsigned char *input,
+	size_t ilen,
+	unsigned char output[16]);
 #endif
 #include "fota_nvm.h"
 #include "mem_map.h"
@@ -198,6 +200,12 @@ REPEAT:
 #endif
 			if (g_s_fota.p_fota_file_head->CommonDataLen)
 			{
+				if (__SOC_OTA_COMMON_DATA_LOAD_ADDRESS__ < __SOC_OTA_COMMON_DATA_LOAD_ADDRESS_LIMIT__)
+				{
+					DBG("全量或者脚本包保存地址(%x)在程序区(%x)内，请检查FULL_OTA_SAVE_ADDR和AP_FLASH_LOAD_SIZE定义是否正确！", __SOC_OTA_COMMON_DATA_LOAD_ADDRESS__, __SOC_OTA_COMMON_DATA_LOAD_ADDRESS_LIMIT__);
+					g_s_fota.ota_state = OTA_STATE_ERROR;
+					return -1;
+				}
 				g_s_fota.ota_state = OTA_STATE_WRITE_COMMON_DATA;
 				DBG("write common data");
 				goto REPEAT;
