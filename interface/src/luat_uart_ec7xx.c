@@ -176,6 +176,7 @@ int luat_uart_setup(luat_uart_t* uart) {
             GPIO_IomuxEC7XX(18, 1, 0, 0);
 	        GPIO_IomuxEC7XX(19, 1, 0, 0);
 	        GPIO_PullConfig(18, 1, 1);
+	        break;
         case UART_ID1:
             GPIO_IomuxEC7XX(20, 1, 0, 0);
 	        GPIO_IomuxEC7XX(21, 1, 0, 0);
@@ -196,6 +197,7 @@ int luat_uart_setup(luat_uart_t* uart) {
             GPIO_IomuxEC7XX(31, 1, 0, 0);
 	        GPIO_IomuxEC7XX(32, 1, 0, 0);
 	        GPIO_PullConfig(31, 1, 1);
+	        break;
         case UART_ID1:
             GPIO_IomuxEC7XX(33, 1, 0, 0);
 	        GPIO_IomuxEC7XX(34, 1, 0, 0);
@@ -210,6 +212,7 @@ int luat_uart_setup(luat_uart_t* uart) {
             GPIO_IomuxEC7XX(40, 3, 0, 0);
 		    GPIO_IomuxEC7XX(41, 3, 0, 0);
 		    GPIO_PullConfig(40, 1, 1);
+		    break;
         default:
             break;
         }
