@@ -7,6 +7,7 @@ set_defaultmode("debug")
 LUATOS_ROOT = "$(projectdir)/../LuatOS"
 USER_PROJECT_NAME = "example"
 CHIP_TARGET = "ec718p"
+is_lspd = true
 
 package("gnu_rm")
 	set_kind("toolchain")
@@ -44,6 +45,10 @@ if os.getenv("CHIP_TARGET") then
 	CHIP_TARGET = os.getenv("CHIP_TARGET")
 end
 
+if CHIP_TARGET == "ec718p" then
+    is_lspd = false
+end
+
 -- 获取项目名称
 if os.getenv("PROJECT_NAME") then
 	USER_PROJECT_NAME = os.getenv("PROJECT_NAME")
@@ -66,10 +71,8 @@ CHIP = "ec718"
 if CHIP_TARGET == "ec718p" then
     add_defines("CHIP_EC718","TYPE_EC718P")
 elseif CHIP_TARGET == "ec718s" then
-    is_lspd = true
     add_defines("CHIP_EC718","TYPE_EC718S")
 elseif CHIP_TARGET == "ec716s" then
-    is_lspd = true
     CHIP = "ec716"
     add_defines("CHIP_EC716","TYPE_EC716S")
 end
