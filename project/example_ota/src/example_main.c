@@ -70,6 +70,7 @@ static void luat_ymodem_cb(uint8_t *data, uint32_t data_len)
 		if (data_len)
 		{
 			LUAT_DEBUG_PRINT("get data %u", data_len);
+			luat_fota_write(data, data_len);
 		}
 		else
 		{
@@ -85,6 +86,11 @@ static void luat_ymodem_cb(uint8_t *data, uint32_t data_len)
 		else
 		{
 			LUAT_DEBUG_PRINT("end");
+			if (!luat_fota_done())
+			{
+				LUAT_DEBUG_PRINT("OTA包写入完成，重启模块!");
+				luat_os_reboot(0);
+			}
 		}
 	}
 }
@@ -110,6 +116,7 @@ static void luat_test_task(void *param)
     uint32_t read_len;
     uint8_t ack, flag, file_ok, all_done;
     int result;
+    luat_fota_init(0,0,NULL,NULL,0);
     while(1)
     {
     	if (luat_rtos_event_recv(g_s_task_handle, OTA_NEW_DATA, &event, NULL, 250))

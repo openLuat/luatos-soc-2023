@@ -7,6 +7,10 @@ BL_LIB_BASE = BL_LIB_BASE .. "$(projectdir)/PLAT/libs/"..CHIP_TARGET.."/bootload
 BL_LIB_BASE = BL_LIB_BASE .. "$(projectdir)/PLAT/libs/"..CHIP_TARGET.."/bootloader/libmiddleware_ec.a "
 BL_LIB_BASE = BL_LIB_BASE .. "$(projectdir)/PLAT/libs/"..CHIP_TARGET.."/bootloader/liblzma.a "
 
+if CHIP_TARGET == "ec718p" then
+BL_LIB_BASE = BL_LIB_BASE .. "$(projectdir)/lib/libffota.a "
+end
+
 local LIB_PS_PLAT = "full"
 if is_lspd then
     LIB_PS_PLAT = "oc"
