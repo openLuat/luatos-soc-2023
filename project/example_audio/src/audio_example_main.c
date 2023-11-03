@@ -21,6 +21,7 @@
 #define PA_PWR_PIN_ALT_FUN	0
 
 #define ES8311  0
+#define TM8211	1
 
 typedef struct
  {
@@ -102,7 +103,7 @@ static i2c_reg_t es8311_resume_reg_table[] =
 	{0x17,0xd2},
 };
 
-void es8311standBy()
+void es8311_standby()
 {
 	for (int i = 0; i < sizeof(es8311_standby_reg_table) / sizeof(i2c_reg_t); i++)
 	{
@@ -110,11 +111,31 @@ void es8311standBy()
 	}
 }
 
-void es8311resume()
+void es8311_resume()
 {
 	for (int i = 0; i < sizeof(es8311_resume_reg_table) / sizeof(i2c_reg_t); i++)
 	{
 		luat_i2c_send(1, 0x18, &es8311_resume_reg_table[i], 2, 1);
+	}
+}
+
+void codec_ctrl(uint8_t onoff)
+{
+	if (1 == onoff)
+	{
+#if ES8311 == 1
+	es8311_resume();
+#else
+	luat_gpio_set(CODEC_PWR_PIN, 1);
+#endif
+	}
+	else
+	{
+#if ES8311 == 1
+	es8311_standby();
+#else
+	luat_gpio_set(CODEC_PWR_PIN, 0);
+#endif
 	}
 }
 
@@ -133,11 +154,7 @@ void audio_event_cb(uint32_t event, void *param)
 	switch(event)
 	{
 	case LUAT_MULTIMEDIA_CB_AUDIO_DECODE_START:
-#if ES8311 == 1
-	es8311resume();
-#else
-	luat_gpio_set(CODEC_PWR_PIN, 1);
-#endif
+		codec_ctrl(1);
 		luat_audio_play_write_blank_raw(0, 3, 1);
 		break;
 	case LUAT_MULTIMEDIA_CB_AUDIO_OUTPUT_START:
@@ -155,11 +172,7 @@ void audio_event_cb(uint32_t event, void *param)
 		luat_rtos_timer_stop(g_s_delay_timer);
 		LUAT_DEBUG_PRINT("audio play done, result=%d!", luat_audio_play_get_last_error(0));
 		luat_gpio_set(PA_PWR_PIN, 0);
-#if ES8311 == 1
-	es8311standBy();
-#else
-	luat_gpio_set(CODEC_PWR_PIN, 0);
-#endif
+		codec_ctrl(0);
 		//如果用软件DAC，打开下面的2句注释，消除POP音和允许进低功耗
 //		luat_rtos_task_sleep(10);
 //		SoftDAC_Stop();
@@ -347,13 +360,16 @@ static void test_audio_demo_init(void)
 	luat_gpio_set_default_cfg(&gpio_cfg);
 	luat_rtos_task_handle task_handle;
 
-	luat_gpio_open(&gpio_cfg);
+	// pa power ctrl init
 	gpio_cfg.pin = PA_PWR_PIN;
+	gpio_cfg.alt_fun = PA_PWR_PIN_ALT_FUN;
 	luat_gpio_open(&gpio_cfg);
+
+	// codec power ctrl init
 	gpio_cfg.pin = CODEC_PWR_PIN;
-	luat_gpio_open(&gpio_cfg);
 	gpio_cfg.alt_fun = CODEC_PWR_PIN_ALT_FUN;
 	luat_gpio_open(&gpio_cfg);
+
 	// 当前仅EC718p支持这个demo
 	#if defined TYPE_EC718P
 	luat_rtos_task_create(&task_handle, 2048, 20, "test", demo_task, NULL, 0);

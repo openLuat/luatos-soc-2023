@@ -9,18 +9,9 @@
 #include "interf_enc.h"
 #include "luat_uart.h"
 #include "luat_mem.h"
-//AIR780E+TM8211开发板配置
+//AIR780EP音频开发板配置
 #define MIC_VOL_EN	HAL_GPIO_26
 #define MIC_VOL_EN_ALT_FUN	0
-#define LED2_PIN	HAL_GPIO_24
-#define LED2_PIN_ALT_FUN	0
-#define LED3_PIN	HAL_GPIO_28
-#define LED3_PIN_ALT_FUN	0
-#define LED4_PIN	HAL_GPIO_27
-#define LED4_PIN_ALT_FUN	0
-#define CHARGE_EN_PIN	HAL_GPIO_2
-#define CHARGE_EN_PIN_ALT_FUN	0
-
 
 #define CODEC_PWR_PIN HAL_GPIO_16
 #define CODEC_PWR_PIN_ALT_FUN	4
@@ -339,27 +330,19 @@ static void test_record_demo_init(void)
 	luat_gpio_cfg_t gpio_cfg;
 	luat_gpio_set_default_cfg(&gpio_cfg);
 	luat_rtos_task_handle task_handle;
-
-	gpio_cfg.pin = LED2_PIN;
-	gpio_cfg.pull = LUAT_GPIO_DEFAULT;
-	luat_gpio_open(&gpio_cfg);
-	gpio_cfg.pin = LED3_PIN;
-	luat_gpio_open(&gpio_cfg);
+	
 	gpio_cfg.pin = MIC_VOL_EN;
 	luat_gpio_open(&gpio_cfg);
 	luat_gpio_set(MIC_VOL_EN, 1);
-	gpio_cfg.pin = LED4_PIN;
-	luat_gpio_open(&gpio_cfg);
-	gpio_cfg.pin = CHARGE_EN_PIN;
-	luat_gpio_open(&gpio_cfg);
+
 	gpio_cfg.pin = PA_PWR_PIN;
 	luat_gpio_open(&gpio_cfg);
+
 	gpio_cfg.pin = CODEC_PWR_PIN;
-	luat_gpio_open(&gpio_cfg);
 	gpio_cfg.alt_fun = CODEC_PWR_PIN_ALT_FUN;
 	luat_gpio_open(&gpio_cfg);
 	luat_gpio_set(CODEC_PWR_PIN, 1);
-	//demo用于AIR780e + es8311录音放音功能
+
 	luat_rtos_task_create(&task_handle, 4096, 20, "es8311", es8311_demo_task, NULL, 0);
 }
 
