@@ -300,6 +300,11 @@ void luat_mobile_user_ctrl_apn(void)
 	s_disable_default_pdp = 1;
 }
 
+void luat_mobile_user_ctrl_apn_stop(void)
+{
+	s_disable_default_pdp = 0;
+}
+
 void luat_mobile_set_default_pdn_ipv6(uint8_t onoff)
 {
 	s_default_pdn_ip_type = onoff?3:1;
