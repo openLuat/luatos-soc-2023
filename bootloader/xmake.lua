@@ -14,6 +14,7 @@ else
     if CHIP_TARGET == "ec718p" then
         LIB_PS_PLAT = "full"
     else
+        add_defines("MID_FEATURE_MODE")
         LIB_PS_PLAT = "mid"
     end
 end
