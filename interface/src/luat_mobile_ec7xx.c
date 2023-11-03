@@ -747,19 +747,20 @@ int luat_mobile_sms_event_register_handler(luat_mobile_sms_event_callback_t call
 extern soc_mobile_set_rrc_release_time(uint8_t s);
 void luat_mobile_set_rrc_auto_release_time(uint8_t s)
 {
+	if (1 == s) s = 2;
 	soc_mobile_set_rrc_release_time(s);
 }
 
 extern void soc_mobile_release_rrc_pause(uint8_t onoff);
 void luat_mobile_rrc_auto_release_pause(uint8_t onoff)
 {
-	soc_mobile_release_rrc_pause(onoff);
+	;
 }
 
 extern void soc_mobile_rrc_release_once(void);
 void luat_mobile_rrc_release_once(void)
 {
-	soc_mobile_rrc_release_once();
+	;
 }
 
 int luat_mobile_reset_stack(void)
