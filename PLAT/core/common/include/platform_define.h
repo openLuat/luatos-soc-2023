@@ -105,7 +105,9 @@ enum
 	VIRTUAL_UART0 = 0,
 	VIRTUAL_UART_MAX,
 	SPI_ID0 = 0,
+#ifndef CHIP_EC716
 	SPI_ID1,
+#endif
 	SPI_MAX,
 
 	USP_ID0 = 0,
