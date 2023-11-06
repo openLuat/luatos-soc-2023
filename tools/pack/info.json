@@ -55,7 +55,7 @@
 		"extra_param" : "002f0200"
 	},
     "fota" : {
-        "magic_num" : "eaf18c16",
+        "magic_num" : "eac37218",
         "block_len" : "40000", 
         "core_type" : "diff",
         "ap_type" : "diff",
