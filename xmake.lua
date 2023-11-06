@@ -112,6 +112,7 @@ add_asflags("-mcpu=cortex-m3 -mthumb")
 
 add_ldflags("-mcpu=cortex-m3",
             "-mthumb",
+            "--specs=nano.specs",
             "-lm",
             "-Wl,--cref",
             "-Wl,--check-sections",
