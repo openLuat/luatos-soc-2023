@@ -108,7 +108,7 @@ extern "C" {
 #define CCIO_DEV_NO_MAX_I2S         CCIO_DEV_NO_MAX(CCIO_DEV_NO_BASE_I2S, CCIO_CHAN_I2S_MAXNUM)
 
 /*
- * 14~15 is reserved for other hw type, such as i2c, ...
+ * 12~15 is reserved for other hw type, such as i2s,i2c, ...
  */
 /* RADIO: 16-31 */
 #define CCIO_DEV_NO_BASE_RADIO      16
@@ -193,6 +193,7 @@ typedef enum
     CSIO_DT_PPP,
     CSIO_DT_DIAG,
     CSIO_DT_OPAQ,
+    CSIO_DT_AUDIO,
 
     CSIO_DT_MAXNUM
 }CsioDevType_e;

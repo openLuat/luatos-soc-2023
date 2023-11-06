@@ -53,6 +53,7 @@ extern "C" {
 #define ATOSC_RBUF_REAL_SIZE      CCIO_RBUF_REAL_SIZE(CCIO_BUF_SIZE_8K)  /* atos for rf calibration */
 #define PPPOS_RBUF_REAL_SIZE      CCIO_RBUF_REAL_SIZE(CCIO_BUF_SIZE_8K)
 #define OPAQOS_RBUF_REAL_SIZE     CCIO_RBUF_REAL_SIZE(CCIO_BUF_SIZE_4K)  /* opaque or raw data */
+#define AUDIOOS_RBUF_REAL_SIZE    CCIO_RBUF_REAL_SIZE(15*CCIO_BUF_SIZE_128)  /* audio or raw data */
 
 #define CCID_RBUF_REAL_SIZE       CCIO_RBUF_REAL_SIZE(CCIO_BUF_SIZE_4K)  /* ccid data */
 
@@ -65,6 +66,10 @@ extern "C" {
 #define ATOS_RBUF_AVLB_THRES      CCIO_BUF_SIZE_512
 #define PPPOS_RBUF_AVLB_THRES     CCIO_BUF_SIZE_512
 #define OPAQOS_RBUF_AVLB_THRES    CCIO_BUF_SIZE_512
+#ifdef __USER_CODE__
+#else
+#define AUDIOOS_RBUF_AVLB_THRES   CCIO_BUF_SIZE_512
+#endif
 #define RNDIS_RBUF_AVLB_THRES    (CCIO_RNDIS_XFER_MAXSIZE + CCIO_RBUF_NPT_HDR_SIZE * (CCIO_RNDIS_MAX_PKT_PER_XFER + 1))
 #define ECM_RBUF_AVLB_THRES       1600
 #define CCID_RBUF_AVLB_THRES      CCIO_BUF_SIZE_512
@@ -122,11 +127,27 @@ void ccioDeinitDiagServProvider(CcioEntity_t *chent);
 void ccioInitOpaqServProvider(CcioDevice_t *chdev);
 
 /**
+  \fn     void ccioInitAudioServProvider(CcioDevice_t *chdev)
+  \brief  init audio service provider
+  \return
+*/
+void ccioInitAudioServProvider(CcioDevice_t *chdev);
+
+
+/**
   \fn     void ccioDeinitOpaqServProvider(CcioEntity_t *chent)
   \brief  deinit opaque service provider
   \return
 */
 void ccioDeinitOpaqServProvider(CcioEntity_t *chent);
+
+/**
+  \fn     void ccioDeinitAudioServProvider(CcioEntity_t *chent)
+  \brief  deinit audio service provider
+  \return
+*/
+void ccioDeinitAudioServProvider(CcioEntity_t *chent);
+
 
 /**
   \fn     void ccioAlterAtServProvider(CcioEntity_t *chent, CsioDevType_e newType)

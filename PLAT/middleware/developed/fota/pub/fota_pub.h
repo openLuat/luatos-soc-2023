@@ -101,7 +101,7 @@ typedef enum
     FOTA_FA_CP,
     FOTA_FA_APP,
     FOTA_FA_APP2,
-    FOTA_FA_APP3,
+    FOTA_FA_XOBJ,
     FOTA_FA_SYSH,
 
     FOTA_FA_MAXNUM
@@ -117,7 +117,7 @@ typedef enum
     FOTA_NVM_ZONE_CP,
     FOTA_NVM_ZONE_APP,
     FOTA_NVM_ZONE_APP2,
-    FOTA_NVM_ZONE_APP3,
+    FOTA_NVM_ZONE_XOBJ,
     FOTA_NVM_ZONE_SYSH,
 
     FOTA_NVM_ZONE_MAXNUM,
@@ -135,7 +135,7 @@ typedef uint32_t FotaNvmZoneId_bm;
 #define FOTA_NVM_BM_ZONE_CP        (1 << FOTA_NVM_ZONE_CP)
 #define FOTA_NVM_BM_ZONE_APP       (1 << FOTA_NVM_ZONE_APP)
 #define FOTA_NVM_BM_ZONE_APP2      (1 << FOTA_NVM_ZONE_APP2)
-#define FOTA_NVM_BM_ZONE_APP3      (1 << FOTA_NVM_ZONE_APP3)
+#define FOTA_NVM_BM_ZONE_XOBJ      (1 << FOTA_NVM_ZONE_XOBJ)
 #define FOTA_NVM_BM_ZONE_SYSH      (1 << FOTA_NVM_ZONE_SYSH)
 
 
@@ -177,7 +177,10 @@ typedef enum
     FOTA_DEF_SET_DFU_RESULT,
     FOTA_DEF_GET_DFU_RESULT,   /* not used any more, call 'fotaNvmGetOtaResult()' instead, just for compatibility here! */
     FOTA_DEF_PREPARE_DFU,
-    FOTA_DEF_CLOSING_DFU
+    FOTA_DEF_CLOSING_DFU,
+    FOTA_DEF_ADJ_ZONE_SIZE,
+    FOTA_DEF_SET_XOBJ_ZONE,
+    FOTA_DEF_CHK_HLS_STATE
 }FotaDoExtensionFlags_e;
 
 /* FOTA_DEF_US_DELAY */
@@ -189,7 +192,7 @@ typedef struct
 /* FOTA_DEF_GET_RAM_SIZE */
 typedef struct
 {
-    uint32_t  avlbSize;
+    uint32_t avlbSize;
 }FotaDefGetRamSize_t;
 
 /* FOTA_DEF_CHK_BATTERY */
@@ -231,9 +234,9 @@ typedef struct
 /* FOTA_DEF_IS_IMAGE_IDENTICAL */
 typedef struct
 {
-    uint32_t zid;
-    uint32_t size;
-    uint8_t *hash;
+    uint32_t  zid;
+    uint32_t  size;
+    uint8_t  *hash;
 }FotaDefIsImageIdentical_t;
 
 typedef enum
@@ -296,6 +299,30 @@ typedef struct
 {
     uint8_t  rsvd[4];
 }FotaDefClosingDfu_t;
+
+/* FOTA_DEF_ADJ_ZONE_SIZE */
+typedef struct
+{
+    uint32_t  zid;
+    uint32_t  size;
+}FotaDefAdjZoneSize_t;
+
+/* FOTA_DEF_SET_XOBJ_ZONE */
+typedef struct
+{
+    uint32_t  handle;
+    uint32_t  size;
+    uint32_t  ovhd;
+    uint32_t  extras;
+}FotaDefSetXobjZone_t;
+
+/* FOTA_DEF_CHK_HLS_STATE */
+typedef struct
+{
+    uint8_t  isEnable;
+    uint8_t  rsvd[3];
+}FotaDefChkHlsState_t;
+
 
 /*
  * definition of 'pmagic': ec-delta/diff-fw

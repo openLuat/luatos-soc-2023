@@ -33,20 +33,15 @@ extern "C" {
 
 /*----------------------------------------------------------------------------*
  *                    MACROS                                                  *
- *----------------------------------------------------------------------------*/
-// Codec I2C address
-#define ES8388_IICADDR                      0x11
-#define NAU88C22_IICADDR                    0x1A
-#define ES8311_IICADDR                      0x18
-    
+ *----------------------------------------------------------------------------*/  
 // Sample rate that 618 supports
-#define SAMPLE_RATE_8K                      0x1
-#define SAMPLE_RATE_16K                     0x2
+#define SAMPLE_RATE_8K                      0x0
+#define SAMPLE_RATE_16K                     0x1
+#define SAMPLE_RATE_22_05K                  0x2
 #define SAMPLE_RATE_32K                     0x3
-#define SAMPLE_RATE_22_05K                  0x4
-#define SAMPLE_RATE_44_1K                   0x5
-#define SAMPLE_RATE_48K                     0x6
-#define SAMPLE_RATE_96K                     0x7
+#define SAMPLE_RATE_44_1K                   0x4
+#define SAMPLE_RATE_48K                     0x5
+#define SAMPLE_RATE_96K                     0x6
 
 // I2S DMA chain num
 #define I2S_DMA_TX_DESCRIPTOR_CHAIN_NUM     20
@@ -158,8 +153,8 @@ typedef struct
 
 typedef enum
 {
-    CODEC_MASTER_MODE       = 0,        ///< Codec plays as master    
-    CODEC_SLAVE_MODE        = 1,        ///< Codec plays as slave
+    I2S_SLAVE_MODE          = 0,        ///< I2S is slave 
+    I2S_MASTER_MODE         = 1,        ///< I2S is master
 }I2sRole_e;
 
 typedef enum
@@ -169,6 +164,14 @@ typedef enum
     I2S_MODE                = 2,        ///< I2S mode
     PCM_MODE                = 3,        ///< PCM mode
 }I2sMode_e;
+
+typedef enum
+{
+    STOP_I2S                = 0,
+    ONLY_SEND               = 1,
+    ONLY_RECV               = 2,
+    SEND_RECV               = 3,
+}I2sCtrlMode_e;
 
 
 // General power states
@@ -190,6 +193,7 @@ typedef struct
     int32_t  (*ctrl)       (uint32_t control, uint32_t arg);                               // Control I2S Interface.
     uint32_t (*getTotalCnt)(void);
     uint32_t (*getTrunkCnt)(void);
+    uint32_t (*getCtrlReg) (void);
 } const I2sDrvInterface_t;
 
 typedef struct

@@ -47,6 +47,7 @@ typedef enum
     SERIAL_EF_BASEONLY = 0,
     SERIAL_EF_ATOS,   /* including pppos */
     SERIAL_EF_OPAQOS,
+    SERIAL_EF_AUDIOOS,
 
     SERIAL_EF_MAXNUM
 }SerialEntityFlags_e;
@@ -67,6 +68,15 @@ typedef struct
 
     void    *extras;     /* for user context. */
 }OpaqosEntity_t;
+
+typedef struct
+{
+    uint8_t  audioCid;    /* audio context Id between a certain app. */
+    uint8_t  rsvd[3];
+
+    void    *extras;     /* for user context. */
+}AudioosEntity_t;
+
 
 typedef struct
 {
@@ -110,6 +120,7 @@ typedef struct
     AtosEntity_t   at;
     PpposEntity_t *ppp;
     OpaqosEntity_t opaq;  /* union is more appropriate here, either at or opaq! */
+    AudioosEntity_t audio;
 }SerialEntity_t;
 
 /*----------------------------------------------------------------------------*
@@ -202,6 +213,29 @@ int32_t csioInitOpaqEntity(SerialEntity_t *serlEnt,
  * @return 0 succ; < 0 failure with errno.
  */
 int32_t csioDeinitOpaqEntity(SerialEntity_t *serlEnt);
+
+/**
+ * @brief csioInitAudioEntity(SerialEntity_t *serlEnt, chentStatusCallback statusCb, void *extras)
+ * @details create an audio entity
+ *
+ * @param serlEnt The entity to be created
+ * @param status_cb The handler of entity status
+ * @param extras The user's extra info/useful context
+ * @return 0 succ; < 0 failure with errno.
+ */
+int32_t csioInitAudioEntity(SerialEntity_t *serlEnt,
+                           chentStatusCallback statusCb,
+                           void *extras);
+
+/**
+ * @brief csioDeinitAudioEntity(SerialEntity_t *serlEnt)
+ * @details delete/reset an audio entity
+ *
+ * @param serlEnt The entity to be deleted
+ * @return 0 succ; < 0 failure with errno.
+ */
+int32_t csioDeinitAudioEntity(SerialEntity_t *serlEnt);
+
 
 /**
  * @brief csioSetUpChannel(SerialEntity_t *serlEnt)

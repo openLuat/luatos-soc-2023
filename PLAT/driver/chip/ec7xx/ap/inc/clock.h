@@ -521,6 +521,7 @@ void CLOCK_setMclkDiv(MclkId_e id, uint8_t div);
 /** \} */
 
 void CLOCK_bclkEnable(BclkId_e id);
+void CLOCK_bclkDisable(BclkId_e id);
 
 
 /**
@@ -554,6 +555,7 @@ extern void GPR_fracDivOutClkDisable(FracDivOutClkId_e id);
 extern void GPR_setFracDivOutClkDiv(FracDivOutClkId_e id, uint8_t div);
 
 extern void GPR_bclkEnable(BclkId_e id);
+extern void GPR_bclkDisable(BclkId_e id);
 extern void GPR_setBclkSrc(BclkId_e id, BclkSrc_e src);
 extern void GPR_setBclkDiv(BclkId_e id, uint8_t div);
 

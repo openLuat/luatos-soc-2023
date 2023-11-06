@@ -61,6 +61,7 @@ typedef enum usart_port
     PORT_USART_0,                           /**< USART port 0. */
     PORT_USART_1,                           /**< USART port 1. */
     PORT_USART_2,                           /**< USART port 2. */
+    PORT_USART_3,                           /**< USART port 3. */
     PORT_USART_MAX,                         /**< The total number of USART ports (invalid UART port number). */
     PORT_USART_INVALID                     /**< USART invalid. */
 } usart_port_t;

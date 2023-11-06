@@ -34,10 +34,14 @@ extern "C" {
 /*----------------------------------------------------------------------------*
  *                    MACROS                                                  *
  *----------------------------------------------------------------------------*/
-    /* only one device for ctrl plane */
+
+/* only one device for ctrl plane */
 #define I2S_DEV_REAL_MAXNUM    1
 
+#define I2S_STOP_RECORD_CMD         0x1234bad9
+#define I2S_STOP_PLAY_CMD           0xace59876
 
+#define I2S_SEM_INTERNAL_TIMEOUT    3000
 
 /*----------------------------------------------------------------------------*
  *                   DATA TYPE DEFINITION                                     *
@@ -59,15 +63,28 @@ typedef struct
 {
     I2sDrvInterface_t  *drvHandler;
 
+    uint16_t  isTriggEn    :1;    
+    uint16_t  isThresEn    :1;    
+    uint16_t  isInputEn    :1;    
+    uint16_t  xbatchFsm    :2;
+
     uint16_t  xferCnt;
     uint16_t  readIdx;
     uint16_t  writeIdx;
-    uint16_t  lastRxCnt;
     uint16_t  cfgRecvSize;
-    uint16_t  lastWriteIdx;
     uint16_t  totalSize;
-    uint8_t  *rxBuffer;
+    uint8_t   *rxBuffer;
+    uint8_t   codecType;
 }I2sDevRxWrap_t;
+
+typedef struct
+{
+    uint8_t   voiceType;
+    uint8_t   sampleRate;
+    uint8_t   pcmBitWidth;
+    uint16_t  speechBufSize;
+    uint32_t  speechBufAddr;
+}I2sPlayParams_t;
 
 
 
@@ -83,10 +100,12 @@ typedef struct
  * @param radioConf The configuration about a radio device
  * @return 0 succ; < 0 failure with errno.
  */
-int32_t audioDrvInitFunc(uint8_t i2sIdx, I2sDevConf_t *i2sConf);
+int32_t i2sCreate(I2sDevConf_t *i2sConf);
 
-void audioStartRecordVoiceFunc(uint8_t type);
-
+int32_t i2sDevRecv(uint8_t type);
+int32_t i2sDevDeInit();
+int32_t i2sDevPlay(CcioDevice_t *chdev);
+int32_t i2sStopHandle(uint8_t stopType);
 
 
 #ifdef __cplusplus

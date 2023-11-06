@@ -556,6 +556,34 @@ static int32_t fotaNvmClosingDfu(FotaDefClosingDfu_t *clsDfu)
     return FOTA_EOK;
 }
 
+static int32_t fotaNvmAdjustZoneSize(FotaDefAdjZoneSize_t *adjZone)
+{
+    if(adjZone->zid >= FOTA_NVM_ZONE_MAXNUM)
+    {
+        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_ADJ_ZONESZ_1, P_ERROR, "adj zone: invalid zoneId(%d)! max(%d)\n", adjZone->zid, FOTA_NVM_ZONE_MAXNUM);
+        return FOTA_EARGS;
+    }
+
+    if(!(gFotaNvmZoneMan.bmZoneId & (1 << adjZone->zid)))
+    {
+        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_ADJ_ZONESZ_2, P_ERROR, "adj zone: no fota zone(%d)! bmZoneId(0x%x)\n", adjZone->zid, gFotaNvmZoneMan.bmZoneId);
+        return FOTA_EUNFOUND;
+    }
+
+    uint32_t orginSize = gFotaNvmZoneMan.zone[adjZone->zid].size;
+    gFotaNvmZoneMan.zone[adjZone->zid].size = FOTA_MAX(orginSize, adjZone->size);
+    if(orginSize != gFotaNvmZoneMan.zone[adjZone->zid].size)
+    {
+        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_ADJ_ZONESZ_3, P_INFO, "adj zone(%d): size %d --> %d\n", adjZone->zid, gFotaNvmZoneMan.bmZoneId);
+    }
+    else
+    {
+        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_ADJ_ZONESZ_4, P_INFO, "adj zone(%d): no need change!\n", adjZone->zid);
+    }
+
+    return FOTA_EOK;
+}
+
 static int32_t fotaResetParhHashField(CustFotaParHdr_t *parh, int32_t buflen)
 {
     if(buflen < sizeof(CustFotaParHdr_t)) return FOTA_EARGS;
@@ -1107,6 +1135,8 @@ int32_t fotaNvmDoExtension(uint32_t flags, void *args)
         case FOTA_DEF_CLOSING_DFU:
             retCode = fotaNvmClosingDfu((FotaDefClosingDfu_t*)args);
             break;
+        case FOTA_DEF_ADJ_ZONE_SIZE:
+            retCode = fotaNvmAdjustZoneSize((FotaDefAdjZoneSize_t*)args);
 
         default:
             break;
@@ -1114,5 +1144,4 @@ int32_t fotaNvmDoExtension(uint32_t flags, void *args)
 
     return retCode;
 }
-
 

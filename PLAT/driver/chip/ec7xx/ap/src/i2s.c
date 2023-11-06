@@ -60,8 +60,8 @@ const uint32_t i2sSampleRateTbl[][4] =
 {
     {SAMPLE_RATE_8K,    256, 0,        0x32},   // 256fs, 8k
     {SAMPLE_RATE_16K,   256, 0,        0x19},   // 256fs, 16k
-    {SAMPLE_RATE_32K,   256, 0x800000, 0x0C},   // 256fs, 32k
     {SAMPLE_RATE_22_05K,256, 0x23fdad, 0x12},   // 256fs, 22.05k
+    {SAMPLE_RATE_32K,   256, 0x800000, 0x0C},   // 256fs, 32k
     {SAMPLE_RATE_44_1K, 256, 0x11eb85, 0x09},   // 256fs, 44.1k
     {SAMPLE_RATE_48K,   256, 0x555555, 0x08},   // 256fs, 48k
     {SAMPLE_RATE_96K,   256, 0x2aaaaa, 0x04},   // 256fs, 96k
@@ -103,7 +103,7 @@ I2sBclkFsCtrl_t i2sBclkFsCtrl =
 // I2S Control 
 I2sCtrl_t i2sCtrl = 
 {
-	.i2sMode                = 1,    // 0: disable; 1: Only send; 2: Only receive; 3: Send and Receive
+	.i2sMode                = 0,    // 0: disable; 1: Only send; 2: Only receive; 3: Send and Receive
 };
 
 // I2S INT Control 
@@ -128,7 +128,7 @@ I2sIntCtrl_t i2sIntCtrl =
 // DMA Control
 I2sDmaCtrl_t i2sDmaCtrl = 
 {
-    .rxDmaReqEn             = 0,    // rx dma enable
+    .rxDmaReqEn             = 1,    // rx dma enable
     .txDmaReqEn             = 1,    // tx dma enable
     .rxDmaTimeOutEn         = 0,    // rx dma timeout enable
     .dmaWorkWaitCycle       = 31,   // dma wait cycle number
@@ -515,8 +515,7 @@ int32_t i2sPowerCtrl(I2sPowerState_e state, I2sResources_t *i2s)
 
             // Disable I2S fclk and pclk
             CLOCK_clockDisable(i2sClk[instance*2]);
-            CLOCK_clockDisable(i2sClk[instance*2+1]);
-           
+            CLOCK_clockDisable(i2sClk[instance*2+1]);            
             break;
 
         case I2S_POWER_FULL:
@@ -653,6 +652,7 @@ static int32_t i2sSetSampleRate(uint32_t bps, I2sResources_t *i2s, I2sRole_e i2s
                 // Fracdiv clk selects 408M and set frac and integer clk
                 FracDivConfig_t fracdivCfg;
                 memset(&fracdivCfg, 0, sizeof(FracDivConfig_t));
+                fracdivCfg.fracdivSel = FRACDIV_1;
                 fracdivCfg.source = FRACDIC_ROOT_CLK_612M;
                 fracdivCfg.fracDiv1DivRatioInteger = i2sSampleRateTbl[sampleRateIdx][3];
                 fracdivCfg.fracDiv1DivRatioFrac = i2sSampleRateTbl[sampleRateIdx][2];
@@ -671,7 +671,7 @@ static int32_t i2sSetSampleRate(uint32_t bps, I2sResources_t *i2s, I2sRole_e i2s
     if (instance == 0)
     {
         // I2S master mode need to genetate LRCLK by MCU
-        if (i2sRole == CODEC_SLAVE_MODE) // I2S controller act as master, codec is slave
+        if (i2sRole == I2S_MASTER_MODE) // I2S controller act as master, codec is slave
         {       
             CLOCK_fracDivOutCLkEnable(FRACDIV0_OUT1); // Enable fracdiv0 out1
             CLOCK_setBclkSrc(BCLK0, BCLK_SRC_FRACDIV0_OUT1); // Use fracdiv0 out1 to generate bclk
@@ -683,7 +683,7 @@ static int32_t i2sSetSampleRate(uint32_t bps, I2sResources_t *i2s, I2sRole_e i2s
     else
     {
         // I2S master mode need to genetate LRCLK by MCU
-        if (i2sRole == CODEC_SLAVE_MODE) // I2S controller act as master, codec is slave
+        if (i2sRole == I2S_MASTER_MODE) // I2S controller act as master, codec is slave
         {       
             CLOCK_fracDivOutCLkEnable(FRACDIV1_OUT1); // Enable fracdiv1 out1
             CLOCK_setBclkSrc(BCLK1, BCLK_SRC_FRACDIV1_OUT1); // Use fracdiv1 out1 to generate bclk
@@ -732,7 +732,7 @@ int32_t i2sControl(uint32_t control, uint32_t arg, I2sResources_t *i2s)
         // Set Bus Speed in bps; arg = value
         case I2S_CTRL_SAMPLE_RATE_SLAVE:
         {
-            if(i2sSetSampleRate(arg, i2s, CODEC_MASTER_MODE) != ARM_DRIVER_OK)
+            if(i2sSetSampleRate(arg, i2s, I2S_SLAVE_MODE) != ARM_DRIVER_OK)
             {
                 return ARM_DRIVER_ERROR;
             }
@@ -741,7 +741,7 @@ int32_t i2sControl(uint32_t control, uint32_t arg, I2sResources_t *i2s)
 
         case I2S_CTRL_SAMPLE_RATE_MASTER:
         {
-            if(i2sSetSampleRate(arg, i2s, CODEC_SLAVE_MODE) != ARM_DRIVER_OK)
+            if(i2sSetSampleRate(arg, i2s, I2S_MASTER_MODE) != ARM_DRIVER_OK)
             {
                 return ARM_DRIVER_ERROR;
             }
@@ -766,14 +766,6 @@ int32_t i2sControl(uint32_t control, uint32_t arg, I2sResources_t *i2s)
         case I2S_CTRL_DMA_CTRL:
         {
             memcpy((void*)&(i2sInstance[instance]->DMACTL), &i2sDmaCtrl, sizeof(I2sDmaCtrl_t));
-            break;
-        }
-
-        // Set I2S Control
-        case I2S_CTRL_I2SCTL:
-        {
-            i2sInstance[instance]->TFIFO = 0;
-            memcpy((void*)&(i2sInstance[instance]->I2SCTL), &i2sCtrl, sizeof(I2sCtrl_t));
             break;
         }
 
@@ -881,6 +873,10 @@ uint32_t i2sGetTrunkCnt(I2sResources_t *i2s)
 	return i2s->info->trunkNum;
 }
 
+uint32_t i2sGetCtrlReg(I2sResources_t *i2s)
+{
+	return i2s->reg->I2SCTL;
+}
 
 
 #if (RTE_I2S0)
@@ -933,6 +929,10 @@ uint32_t i2s0GetTrunkCnt(void)
 	return i2sGetTrunkCnt(&i2s0Res);
 }
 
+uint32_t i2s0GetCtrlReg()
+{
+    return i2sGetCtrlReg(&i2s0Res);
+}
 
 // I2S0 Driver Control Block
 I2sDrvInterface_t i2sDrvInterface0 = 
@@ -945,6 +945,7 @@ I2sDrvInterface_t i2sDrvInterface0 =
     i2s0Ctrl,
     i2s0GetTotalCnt,
     i2s0GetTrunkCnt,
+    i2s0GetCtrlReg,
 };
 #endif
 
@@ -998,6 +999,11 @@ void i2s1DmaTxEvent(uint32_t event)
     i2sDmaTxEvent(event, &i2s1Res);
 }
 
+uint32_t i2s1GetCtrlReg()
+{
+    return i2sGetCtrlReg(&i2s1Res);
+}
+
 // I2S1 Driver Control Block
 I2sDrvInterface_t i2sDrvInterface1 = 
 {
@@ -1009,6 +1015,7 @@ I2sDrvInterface_t i2sDrvInterface1 =
     i2s1Ctrl,
 	i2s1GetTotalCnt,
     i2s1GetTrunkCnt,
+    i2s1GetCtrlReg,
 };
 #endif
 

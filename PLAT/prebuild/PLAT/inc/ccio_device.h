@@ -65,6 +65,11 @@ typedef enum _EPAT_CcioDevExecFlagsTag
     CCIO_DEF_GET_CTS_SIGNAL,
     CCIO_DEF_ENABLE_DTR_SIGNAL,
     CCIO_DEF_CHK_CTS_TO_SEND,
+    
+    CCIO_DEF_AUDIO_START_SEND,
+    CCIO_DEF_AUDIO_STOP_SEND,
+    CCIO_DEF_AUDIO_START_REC,
+    CCIO_DEF_AUDIO_STOP_REC,
 
     CCIO_DEF_CUST_RSVD_BEGIN = 0x0DEFC000,
     /*
@@ -115,10 +120,11 @@ typedef struct
 {
     uint8_t   llsn;
     uint8_t   rsvd[3];
-    uint16_t  ahcbSize  :6;     /* Additional-Header-Control-Block */
-    uint16_t  alignVal  :3;
-    uint16_t  isThresEn :1;
-    uint16_t  rsvdBits  :6;
+    uint16_t  ahcbSize      :6;     /* Additional-Header-Control-Block */
+    uint16_t  alignVal      :3;
+    uint16_t  isThresEn     :1;
+    uint16_t  isInitHw      :1;
+    uint16_t  rsvdBits      :5;
     uint16_t  cctSize;
     uint16_t  avlbThres;
     uint16_t  writeIdx;
@@ -521,6 +527,34 @@ typedef struct
 {
     struct CcioDevice *chdev;
 }CcioDsaRiDone_t;
+
+/* CCIO_VOLTE_STOP_REC */
+typedef struct
+{
+    struct CcioDevice *chdev;
+}CcioDsaVolteStopRec_t;
+
+/* CCIO_VOLTE_START_REC */
+typedef struct
+{
+    struct CcioDevice *chdev;
+}CcioDsaVolteStartRec_t;
+
+
+/* CCIO_VOLTE_STOP_PLAY */
+typedef struct
+{
+    struct CcioDevice *chdev;
+}CcioDsaVolteStopPlay_t;
+
+
+/* CCIO_VOLTE_START_PLAY */
+typedef struct
+{
+    struct CcioDevice *chdev;
+}CcioDsaVolteStartPlay_t;
+
+
 
 
 typedef int32_t (*chdevPostHandleFunc)(CcioDevice_t *chdev, void *extras);

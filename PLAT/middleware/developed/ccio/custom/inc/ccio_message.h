@@ -83,6 +83,10 @@ typedef enum _EPAT_CcioChanMsgIdTag
     CCIO_CHAN_ULFC_MEM_EVENT,
     CCIO_CHAN_DLFC_MEM_EVENT,
     CCIO_CHAN_TFC_POLICY_ENABLE,
+    CCIO_CHAN_START_REC,
+    CCIO_CHAN_START_PLAY,
+    CCIO_CHAN_STOP_REC,
+    CCIO_CHAN_STOP_PLAY,
     CCIO_CHAN_CMSG_MAXID,
     CCIO_CHAN_CMSG_END = (CCIO_CHAN_CMSG_FLAG | CCIO_CHAN_MSG_CODE_MASK),
 
@@ -94,6 +98,7 @@ typedef enum _EPAT_CcioChanMsgIdTag
     CCIO_CHAN_RNDIS,
     CCIO_CHAN_DIAG,
     CCIO_CHAN_OPAQ,
+    CCIO_CHAN_AUDIO,
     CCIO_CHAN_CCID,
 
     CCIO_CHAN_DMSG_MAXID,
@@ -169,7 +174,10 @@ int32_t ccioBuildMsgDataModeHSReq(CcioChanMessage_t *chmsg, CcioChanMessageId_e 
 int32_t ccioBuildMsgDevInXfer(CcioChanMessage_t *chmsg, CcioChanMessageId_e msgId, CcioDevInXfer_t *inXfer);
 int32_t ccioBuildMsgDevOutXfer(CcioChanMessage_t *chmsg, CcioChanMessageId_e msgId, CcioDevOutXfer_t *outXfer);
 int32_t ccioBuildMsgRxStatus(CcioChanMessage_t *chmsg, CcioChanMessageId_e msgId, CcioDsaRxStatus_t *dsaRxStatus);
-
+int32_t ccioBuildMsgVolteStopRec(CcioChanMessage_t *chmsg, CcioChanMessageId_e msgId, CcioDsaVolteStopRec_t *stopRec);
+int32_t ccioBuildMsgVolteStopPlay(CcioChanMessage_t *chmsg, CcioChanMessageId_e msgId, CcioDsaVolteStopPlay_t *stopPlay);
+int32_t ccioBuildMsgVolteStartRec(CcioChanMessage_t *chmsg, CcioChanMessageId_e msgId, CcioDsaVolteStartRec_t *startRec);
+int32_t ccioBuildMsgVolteStartPlay(CcioChanMessage_t *chmsg, CcioChanMessageId_e msgId, CcioDsaVolteStartPlay_t *startPlay);
 
 #ifdef __cplusplus
 }

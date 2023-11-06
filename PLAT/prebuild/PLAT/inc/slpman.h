@@ -1069,6 +1069,14 @@ void slpManDCXOOutputEn(bool en);
                 false disable cp sleep
 */
 void slpManSetCPSleepEnable(bool en);
+/**
+* @brief void void slpManSetHibAreaNotAvaliable(bool noPmuArea)
+* @details  set hibernate area not avaliable, if you need use this area
+* @param    noPmuArea: true, sdk do not use FLASH_HIB_BACKUP area, and will not enter hibernate
+                       false, FLASH_HIB_BACKUP avaliable and hibernate enabled
+*/
+void slpManSetHibAreaNotAvaliable(bool noPmuArea);
+
 /** \} */
 
 

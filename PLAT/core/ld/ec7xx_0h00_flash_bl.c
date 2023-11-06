@@ -131,11 +131,11 @@ SECTIONS
   _fota_mux_buf_start = MSMB_FOTA_MUXMEM_BASE_ADDR;
   _fota_mux_buf_end = MSMB_FOTA_MUXMEM_END_ADDR;
 
-  _compress_buf_start = MSMB_FOTA_MUXMEM_BASE_ADDR+0x43200;
-  _compress_buf_end = MSMB_FOTA_MUXMEM_END_ADDR;
+  _compress_buf_start = MSMB_COMPR_MEM_BASE_ADDR;
+  _compress_buf_end = MSMB_COMPR_MEM_END_ADDR;
   
-  _decompress_buf_start = MSMB_FOTA_MUXMEM_BASE_ADDR+ 0x43200;
-  _decompress_buf_end = MSMB_FOTA_MUXMEM_BASE_ADDR+0x7FE00;
+  _decompress_buf_start = MSMB_DECOMPR_MEM_BASE_ADDR;
+  _decompress_buf_end = MSMB_DECOMPR_MEM_END_ADDR;
  
 #if HEAP_EXIST
   _heap_memory_start = HEAP_START_ADDR;

@@ -445,6 +445,12 @@ void CLOCK_bclkEnable(BclkId_e id)
     GPR_bclkEnable(id);
 }
 
+void CLOCK_bclkDisable(BclkId_e id)
+{
+    GPR_bclkDisable(id);
+}
+
+
 
 void CLOCK_fracDivOutCLkEnable(FracDivOutClkId_e id)
 {
