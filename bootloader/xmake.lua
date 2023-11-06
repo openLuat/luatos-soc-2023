@@ -8,7 +8,7 @@ BL_LIB_BASE = BL_LIB_BASE .. "$(projectdir)/PLAT/libs/"..CHIP_TARGET.."/bootload
 BL_LIB_BASE = BL_LIB_BASE .. "$(projectdir)/PLAT/libs/"..CHIP_TARGET.."/bootloader/liblzma.a "
 
 if CHIP_TARGET == "ec718p" then
---BL_LIB_BASE = BL_LIB_BASE .. "$(projectdir)/lib/libffota.a "
+BL_LIB_BASE = BL_LIB_BASE .. "$(projectdir)/lib/libffota.a "
 end
 
 local LIB_PS_PLAT = "full"
@@ -170,7 +170,7 @@ target("ap_bootloader.elf")
     -- add_linkgroups("startup","core_airm2m","middleware_ec","lzma", {whole = true,group = true})
     -- add_linkgroups("osa","middleware_ec_private","ccio","fota","deltapatch2","driver_private_bl","bootloader","usbbl_priv", {whole = true,group = true})
 
-    add_ldflags("-T$(projectdir)/PLAT/core/ld/ec7xx_0h00_flash_bl.ld","-Wl,-Map,$(buildir)/ap_bootloader/ap_bootloader_$(mode).map",{force = true})
+    add_ldflags("--specs=nano.specs","-T$(projectdir)/PLAT/core/ld/ec7xx_0h00_flash_bl.ld","-Wl,-Map,$(buildir)/ap_bootloader/ap_bootloader_$(mode).map",{force = true})
     add_ldflags("-Wl,--whole-archive -Wl,--start-group " .. BL_LIB_BASE .. " -Wl,--end-group -Wl,--no-whole-archive ", {force=true})
     local toolchains = nil
     local ld_parameter = nil 
