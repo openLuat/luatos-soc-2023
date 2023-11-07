@@ -295,6 +295,7 @@ target(USER_PROJECT_NAME..".elf")
             LUATOS_ROOT.."/luat/vfs/luat_vfs.c")
     
     add_files(LUATOS_ROOT.."/components/minmea/minmea.c")
+	add_files(LUATOS_ROOT.."/components/mobile/luat_mobile_common.c")
     local toolchains = nil
     local out_path = nil
     local ld_parameter = nil 

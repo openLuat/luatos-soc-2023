@@ -42,12 +42,14 @@ static void mobile_event_cb(LUAT_MOBILE_EVENT_E event, uint8_t index, uint8_t st
 {
 	luat_mobile_cell_info_t cell_info;
 	luat_mobile_signal_strength_info_t signal_info;
-	uint8_t csq, i;
+	uint16_t mcc;
+	uint8_t csq, i, mnc;
 	char imsi[20];
 	char iccid[24] = {0};
 	char apn[32] = {0};
 	ip_addr_t ipv4;
 	ip_addr_t ipv6;
+	int result;
 	switch(event)
 	{
 	case LUAT_MOBILE_EVENT_CFUN:
@@ -66,6 +68,30 @@ static void mobile_event_cb(LUAT_MOBILE_EVENT_E event, uint8_t index, uint8_t st
 			LUAT_DEBUG_PRINT("ICCID %s", iccid);
 			luat_mobile_get_imsi(index, imsi, sizeof(imsi));
 			LUAT_DEBUG_PRINT("IMSI %s", imsi);
+			luat_mobile_get_plmn_from_imsi(imsi, &mcc, &mnc);
+			result = luat_mobile_get_isp_from_plmn(mcc, mnc);
+			switch(result)
+			{
+
+			case LUAT_MOBILE_ISP_CMCC:
+				LUAT_DEBUG_PRINT("中国移动卡");
+				break;
+			case LUAT_MOBILE_ISP_CTCC:
+				LUAT_DEBUG_PRINT("中国电信卡");
+				break;
+			case LUAT_MOBILE_ISP_CUCC:
+				LUAT_DEBUG_PRINT("中国联通卡");
+				break;
+			case LUAT_MOBILE_ISP_CRCC:
+				LUAT_DEBUG_PRINT("中国广电卡");
+				break;
+			case LUAT_MOBILE_ISP_UNKNOW:
+				LUAT_DEBUG_PRINT("未知运营商");
+				break;
+			default:
+				LUAT_DEBUG_PRINT("非中国卡");
+				break;
+			}
 			break;
 		case LUAT_MOBILE_NO_SIM:
 			LUAT_DEBUG_PRINT("SIM卡不存在");
