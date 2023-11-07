@@ -47,6 +47,7 @@ target("ap_bootloader.elf")
                 "USB_DRV_SMALL_IMAGE=1",
                 "FEATURE_BOOTLOADER_PROJECT_ENABLE",
                 "__BL_MODE__",
+				"FEATURE_FOTA_HLS_ENABLE",
                 "DEBUG_LOG_HEADER_FILE=\"debug_log_dummy.h\""
                 )
     add_cxflags("-flto",
