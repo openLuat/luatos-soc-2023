@@ -591,6 +591,7 @@ void BytesPutDoubleToBuf(Buffer_Struct *Buf, double v);
 
 extern uint64_t GetSysTickMS();
 
+
 //void *__wrap_malloc(size_t Size);
 //void *__wrap_zalloc(size_t Size);
 //void *__wrap_calloc(size_t count, size_t eltsize);
@@ -604,4 +605,22 @@ extern uint64_t GetSysTickMS();
 #define ASSERT( x )
 #endif
 #endif
+
+typedef struct
+{
+	uint64_t WPoint;
+	uint64_t RPoint;
+	uint64_t Mask;
+	uint32_t Size;
+	uint8_t *Data;
+}BSP_FifoStruct;
+int OS_InitFifo(BSP_FifoStruct *Fifo, uint8_t *StaticBuf, uint32_t SizePower);
+uint32_t OS_WriteFifo(BSP_FifoStruct *Fifo, uint8_t *Buf, uint32_t Size);
+uint32_t OS_ReadFifo(BSP_FifoStruct *Fifo, uint8_t *Buf, uint32_t Size);
+uint32_t OS_QueryFifo(BSP_FifoStruct *Fifo, uint8_t *Buf, uint32_t Size);
+uint32_t OS_CheckFifoUsedSpace(BSP_FifoStruct *Fifo);
+void OS_DeleteFifo(BSP_FifoStruct *Fifo, uint32_t Size);
+
 #endif
+
+
