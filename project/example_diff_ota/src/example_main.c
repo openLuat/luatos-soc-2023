@@ -126,14 +126,14 @@ static void luat_ymodem_cb(uint8_t *data, uint32_t data_len)
         所以需要对firmware字段做一点小小的操作，将PROJECT_VERSION加入字段中来区分基础版本不同的差分包
 
         添加字段前的fireware字段
-                从1.0.0升级到3.0.0生成的firmware字段为TEST_FOTA_CSDK_EC618
-                从2.0.0升级到3.0.0生成的firmware字段为TEST_FOTA_CSDK_EC618
+                从1.0.0升级到3.0.0生成的firmware字段为TEST_FOTA_CSDK_EC7XX
+                从2.0.0升级到3.0.0生成的firmware字段为TEST_FOTA_CSDK_EC7XX
 
         添加字段后的fireware字段
-                从1.0.0升级到3.0.0生成的firmware字段为1.0.0_TEST_FOTA_CSDK_EC618
-                从2.0.0升级到3.0.0生成的firmware字段为2.0.0_TEST_FOTA_CSDK_EC618
+                从1.0.0升级到3.0.0生成的firmware字段为1.0.0_TEST_FOTA_CSDK_EC7XX
+                从2.0.0升级到3.0.0生成的firmware字段为2.0.0_TEST_FOTA_CSDK_EC7XX
 
-        这样操作后，当两个升级包放上去，1.0.0就算被放进了2.0.0_TEST_FOTA_CSDK_EC618的升级列表里，也会因为自身上报的字段和所在升级列表的固件名称不一致而被服务器拒绝升级
+        这样操作后，当两个升级包放上去，1.0.0就算被放进了2.0.0_TEST_FOTA_CSDK_EC7XX的升级列表里，也会因为自身上报的字段和所在升级列表的固件名称不一致而被服务器拒绝升级
 */
 
 
@@ -150,8 +150,8 @@ static void luat_ymodem_cb(uint8_t *data, uint32_t data_len)
 
         合宙IOT通过firmware来区分不同版本固件，只要请求时firmware相同，版本号比设备运行的要高，就会下发升级文件
         
-        从1.0.0升级到3.0.0生成的firmware字段为TEST_FOTA_CSDK_EC618
-        从2.0.0升级到3.0.0生成的firmware字段为TEST_FOTA_CSDK_EC618
+        从1.0.0升级到3.0.0生成的firmware字段为TEST_FOTA_CSDK_EC7XX
+        从2.0.0升级到3.0.0生成的firmware字段为TEST_FOTA_CSDK_EC7XX
 
         如果将运行1.0.0的设备imei放进了2.0.0-3.0.0的升级列表中，因为设备上报的firmware字段相同，服务器也会将2.0.0-3.0.0的差分软件下发给运行1.0.0软件的设备
         所以用户必须自身做好设备版本区分，否则会一直请求错误的差分包，导致流量损耗
@@ -322,10 +322,10 @@ static void luat_test_task(void *param)
 	char imei[16] = {0};
 	luat_mobile_get_imei(0, imei, 15);
 	// 第一种升级方式
-	snprintf(remote_domain, 200, "%s/api/site/firmware_upgrade?project_key=%s&imei=%s&device_key=&firmware_name=%s_%s_%s_%s&version=%s", OTA_URL, PROJECT_KEY, imei, PROJECT_VERSION, PROJECT_NAME, soc_get_sdk_type(), "EC718", PROJECT_VERSION);
+	snprintf(remote_domain, 200, "%s/api/site/firmware_upgrade?project_key=%s&imei=%s&device_key=&firmware_name=%s_%s_%s_%s&version=%s", OTA_URL, PROJECT_KEY, imei, PROJECT_VERSION, PROJECT_NAME, soc_get_sdk_type(), "EC7XX", PROJECT_VERSION);
 
 	// 第二种升级方式
- 	// snprintf(remote_domain, 200, "%s/api/site/firmware_upgrade?project_key=%s&imei=%s&device_key=&firmware_name=%s_%s_%s&version=%s", OTA_URL, PROJECT_KEY, imei, PROJECT_NAME, soc_get_sdk_type(), "EC718", PROJECT_VERSION);
+ 	// snprintf(remote_domain, 200, "%s/api/site/firmware_upgrade?project_key=%s&imei=%s&device_key=&firmware_name=%s_%s_%s&version=%s", OTA_URL, PROJECT_KEY, imei, PROJECT_NAME, soc_get_sdk_type(), "EC7XX", PROJECT_VERSION);
 #endif
 
 #ifdef OTA_BY_HTTP
