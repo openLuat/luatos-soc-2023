@@ -11,7 +11,6 @@ target(TARGET_NAME)
     add_includedirs("./inc",{public = true})
     add_files("./src/*.c",{public = true})
 
-    add_defines("LUAT_USE_TLS",{public = true})
 	--ymodem
     add_includedirs(LUATOS_ROOT .. "/components/ymodem")
     add_files(LUATOS_ROOT .. "/components/ymodem/luat_ymodem.c")

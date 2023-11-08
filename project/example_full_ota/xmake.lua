@@ -19,8 +19,6 @@ target(TARGET_NAME)
 	--ymodem
     add_includedirs(LUATOS_ROOT .. "/components/ymodem")
     add_files(LUATOS_ROOT .. "/components/ymodem/luat_ymodem.c")
-
-    add_defines("LUAT_USE_TLS",{public = true})
     --http
     add_includedirs(LUATOS_ROOT.."/components/network/libhttp", {public = true})
     add_includedirs(LUATOS_ROOT.."/components/network/http_parser", {public = true})
