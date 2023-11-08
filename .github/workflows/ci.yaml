@@ -1,6 +1,8 @@
-name: Github Actions
+name: EC7xx
 run-name: GoGoGo 🚀
-on: [push]
+on: 
+  push:
+  workflow_call:
 
 jobs:
   EC7xx:
