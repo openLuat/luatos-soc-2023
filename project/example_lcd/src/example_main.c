@@ -29,7 +29,7 @@
 #define LCD_SPI	1
 
 luat_rtos_task_handle lcd_task_handle;
-extern const luat_lcd_opts_t lcd_opts_st7735;
+extern const luat_lcd_opts_t lcd_opts_st7789;
 static void task_test_lcd(void *param)
 {
     luat_spi_t spi_conf = {
@@ -40,7 +40,7 @@ static void task_test_lcd(void *param)
         .bit_dict = 0,
         .master = 1,
         .mode = 1,             // mode设置为1，全双工
-        .bandrate = 25600000,
+        .bandrate = 51000000,
         .cs = 12
     };
 
@@ -50,13 +50,13 @@ static void task_test_lcd(void *param)
     lcd_conf.port = LCD_SPI;
     lcd_conf.auto_flush = 1;
 
-    lcd_conf.opts = &lcd_opts_st7735;
+    lcd_conf.opts = &lcd_opts_st7789;
     lcd_conf.pin_dc = 14;
     lcd_conf.pin_rst = 3;
     lcd_conf.pin_pwr = 255;
     lcd_conf.direction = 0;
-    lcd_conf.w = 128;
-    lcd_conf.h = 160;
+    lcd_conf.w = 240;
+    lcd_conf.h = 320;
     lcd_conf.xoffset = 0;
     lcd_conf.yoffset = 0;
 	luat_rtos_task_sleep(2000);
