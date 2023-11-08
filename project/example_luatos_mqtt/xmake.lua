@@ -18,5 +18,4 @@ target(TARGET_NAME)
     add_files(LUATOS_ROOT.."/components/network/libemqtt/*.c")
     remove_files(LUATOS_ROOT.."/components/network/libemqtt/luat_lib_mqtt.c")
 
-    add_linkgroups(TARGET_NAME, {group = true, whole = true})
 target_end()

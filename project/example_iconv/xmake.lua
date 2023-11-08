@@ -14,5 +14,4 @@ target(TARGET_NAME)
     add_includedirs("./inc",{public = true})
     add_files("./src/*.c",{public = true})
 
-    add_linkgroups(TARGET_NAME, {group = true, whole = true})
 target_end()

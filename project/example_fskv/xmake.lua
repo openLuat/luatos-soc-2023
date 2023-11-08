@@ -14,5 +14,4 @@ target(TARGET_NAME)
     add_files(LUATOS_ROOT.."/components/fskv/*.c")
     remove_files(LUATOS_ROOT.."/components/fskv/luat_lib_fskv.c")
 
-    add_linkgroups(TARGET_NAME, {group = true, whole = true})
 target_end()

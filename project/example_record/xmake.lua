@@ -22,5 +22,4 @@ target(TARGET_NAME)
     -- **.c会递归所有子文件夹下的文件
     add_files(LUATOS_ROOT .. "/components/multimedia/amr_decode/**.c",{public = true})
 
-    add_linkgroups(TARGET_NAME, {group = true, whole = true})
 target_end()

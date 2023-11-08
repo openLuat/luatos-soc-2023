@@ -20,5 +20,4 @@ target(TARGET_NAME)
     remove_files(LUATOS_ROOT.."/components/network/libhttp/luat_lib_http.c")
     add_files(LUATOS_ROOT.."/components/network/http_parser/*.c")
     
-    add_linkgroups(TARGET_NAME, {group = true, whole = true})
 target_end()

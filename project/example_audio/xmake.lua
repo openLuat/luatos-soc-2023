@@ -22,14 +22,14 @@ target(TARGET_NAME)
     -- **.c会递归所有子文件夹下的文件
     add_files(LUATOS_ROOT .. "/components/multimedia/amr_decode/**.c",{public = true})
 
-	add_linkgroups(TARGET_NAME,"mp3", {group = true, whole = true})
-    add_linkdirs("$(projectdir)/PLAT/core/lib")
-    add_linkgroups("aisound50_16K", {group = true, whole = true})
+    add_files("$(projectdir)/lib/libmp3.a")
+
+    add_files("$(projectdir)/PLAT/core/lib/libaisound50_16K.a")
     --8K版本用下面的库，注释掉16K的库
-    -- add_linkgroups("aisound50_8K", {group = true, whole = true})
+    -- add_files("$(projectdir)/PLAT/core/lib/libaisound50_8K.a")
     --8K英文版本用下面的库，注释掉16K的库
-    -- add_linkgroups("aisound50_8K_eng", {group = true, whole = true})
+    -- add_files("$(projectdir)/PLAT/core/lib/libaisound50_8K_eng.a")
     --16K英文版本用下面的库，注释掉16K的库
-    -- add_linkgroups("aisound50_16K_eng", {group = true, whole = true})
+    -- add_files("$(projectdir)/PLAT/core/lib/libaisound50_16K_eng.a")
 
 target_end()

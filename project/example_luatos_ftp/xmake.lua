@@ -17,5 +17,4 @@ target(TARGET_NAME)
     add_files(LUATOS_ROOT.."/components/network/libftp/*.c")
     remove_files(LUATOS_ROOT.."/components/network/libftp/luat_lib_ftp.c")
 
-    add_linkgroups(TARGET_NAME, {group = true, whole = true})
 target_end()

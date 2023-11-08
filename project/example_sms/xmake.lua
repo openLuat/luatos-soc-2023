@@ -24,6 +24,4 @@ target(TARGET_NAME)
     -- add_includedirs("$(projectdir)/project/" .. TARGET_NAME .. "/inc",{public = true})
     -- add_files("$(projectdir)/project/" .. TARGET_NAME .. "/src/*.c",{public = true})
 
-    add_linkgroups(TARGET_NAME, {group = true, whole = true})
-
 target_end()
