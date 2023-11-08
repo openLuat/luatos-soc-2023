@@ -33,6 +33,7 @@ jobs:
           - example_uart
           - example_lbsLoc
           - example_gnss
+          - example_lcd
         csdk_chip:
           - ec718p
           - ec718s

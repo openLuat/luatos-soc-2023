@@ -23,4 +23,3 @@ jobs:
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         branch: ${{ github.ref }}
-    - uses: ./.github/workflows/ci.yaml
