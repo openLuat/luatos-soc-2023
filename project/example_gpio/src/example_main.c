@@ -5,12 +5,18 @@
 #include "platform_define.h"
 #include "pad.h"
 
+#ifndef CHIP_EC716
+#define GPIO_LED_PIN HAL_GPIO_27
+#else
+#define GPIO_LED_PIN HAL_GPIO_20
+#endif
+
 /********************************************GPIO 点亮led GPIO27 start*******************************************/
 void net_led_init(void)
 {
     luat_gpio_cfg_t Net_led_struct;
     luat_gpio_set_default_cfg(&Net_led_struct);
-    Net_led_struct.pin=HAL_GPIO_27;
+    Net_led_struct.pin=GPIO_LED_PIN;
     Net_led_struct.pull=Luat_GPIO_PULLDOWN;
     Net_led_struct.mode=Luat_GPIO_OUTPUT;
     Net_led_struct.output_level=Luat_GPIO_LOW;
@@ -22,9 +28,9 @@ static void net_led_task(void *param)
     net_led_init();
     while (1)
     {
-        luat_gpio_set(HAL_GPIO_27,0);
+        luat_gpio_set(GPIO_LED_PIN,0);
         luat_rtos_task_sleep(500);
-        luat_gpio_set(HAL_GPIO_27,1);
+        luat_gpio_set(GPIO_LED_PIN,1);
         luat_rtos_task_sleep(500);
     }
     
@@ -78,7 +84,7 @@ static void gpio_fun_task(void *param)
 void gpio_fun_demo(void)
 {
     luat_rtos_task_handle gpio_fun_task_handler;
-    luat_rtos_task_create(&gpio_fun_task_handler,2*1024,50,"gpio_fun_task",gpio_fun_task,NULL,0);
+    luat_rtos_task_create(&gpio_fun_task_handler,4*1024,50,"gpio_fun_task",gpio_fun_task,NULL,0);
 }
 
 /********************************************GPIO 复用 功能演示 end *******************************************/

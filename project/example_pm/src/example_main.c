@@ -58,7 +58,9 @@ static void task1(void *args)
         gpio_cfg.pull = LUAT_GPIO_PULLUP;
         luat_gpio_open(&gpio_cfg);
         luat_gpio_close(HAL_WAKEUP_PWRKEY);	//如果powerkey接地了，还需要再关闭powerkey上拉功能
+        #ifndef CHIP_EC716
         luat_gpio_close(HAL_GPIO_23);	//关闭能省0.5uA
+        #endif
         luat_rtos_task_sleep(30000);
     }
 }

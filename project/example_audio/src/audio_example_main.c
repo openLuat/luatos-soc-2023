@@ -17,8 +17,13 @@
 //AIR780P音频开发板配置
 #define CODEC_PWR_PIN HAL_GPIO_16
 #define CODEC_PWR_PIN_ALT_FUN	4
+#ifndef CHIP_EC716
 #define PA_PWR_PIN HAL_GPIO_25
 #define PA_PWR_PIN_ALT_FUN	0
+#else
+#define PA_PWR_PIN HAL_GPIO_20
+#define PA_PWR_PIN_ALT_FUN	0
+#endif
 
 #define ES8311  0
 #define TM8211	1
