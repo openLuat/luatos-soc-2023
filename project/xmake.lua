@@ -193,21 +193,6 @@ else
     end
 end
 
-after_load(function (target)
-    for _, sourcebatch in pairs(target:sourcebatches()) do
-        if sourcebatch.sourcekind == "as" then -- only asm files
-            for idx, objectfile in ipairs(sourcebatch.objectfiles) do
-                sourcebatch.objectfiles[idx] = objectfile:gsub("%.S%.o", ".o")
-            end
-        end
-        if sourcebatch.sourcekind == "cc" then -- only c files
-            for idx, objectfile in ipairs(sourcebatch.objectfiles) do
-                sourcebatch.objectfiles[idx] = objectfile:gsub("%.c%.o", ".o")
-            end
-        end
-    end
-end)
-
 includes(USER_PROJECT_NAME)
 
 target("driver")

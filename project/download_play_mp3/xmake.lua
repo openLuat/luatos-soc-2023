@@ -8,7 +8,5 @@ target(TARGET_NAME)
     --加入代码和头文件
     add_includedirs("./include",{public = true})
     add_files("./src/*.c",{public = true})
-	
-    add_linkgroups(TARGET_NAME, {group = true, whole = true})
-    
+
 target_end()
