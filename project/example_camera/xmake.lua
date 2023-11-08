@@ -15,9 +15,5 @@ target(TARGET_NAME)
     -- add_includedirs("$(projectdir)/project/" .. TARGET_NAME .. "/inc",{public = true})
     -- add_files("$(projectdir)/project/" .. TARGET_NAME .. "/src/*.c",{public = true})
 
-    --可以继续增加add_includedirs和add_files
-    --自动链接
-    LIB_USER = LIB_USER .. "$(projectdir)/" .. LIB_DIR .. LIB_NAME .. " "
-	LIB_USER = LIB_USER .. "$(projectdir)/lib/image_decoder_0.a "
-    --甚至可以加入自己的库
+    add_linkgroups(TARGET_NAME,"image_decoder_0", {group = true, whole = true})
 target_end()

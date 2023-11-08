@@ -9,6 +9,6 @@ target(TARGET_NAME)
     add_includedirs("./include",{public = true})
     add_files("./src/*.c",{public = true})
 	
-
-    LIB_USER = LIB_USER .. "$(projectdir)/" .. LIB_DIR .. LIB_NAME .. " "
+    add_linkgroups(TARGET_NAME, {group = true, whole = true})
+    
 target_end()

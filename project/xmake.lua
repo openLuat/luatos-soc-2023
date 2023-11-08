@@ -179,17 +179,6 @@ add_includedirs(LUATOS_ROOT .. "/luat/include",
 				"$(projectdir)/interface/include",
                 {public = true})
 
-local LIB_BASE = "$(projectdir)/PLAT/libs/"..CHIP_TARGET.."/libstartup.a "
-LIB_BASE = LIB_BASE .. "$(projectdir)/PLAT/libs/"..CHIP_TARGET.."/libcore_airm2m.a "
-LIB_BASE = LIB_BASE .. "$(projectdir)/PLAT/libs/"..CHIP_TARGET.."/libfreertos.a "
-LIB_BASE = LIB_BASE .. "$(projectdir)/PLAT/libs/"..CHIP_TARGET.."/libpsnv.a "
-LIB_BASE = LIB_BASE .. "$(projectdir)/PLAT/libs/"..CHIP_TARGET.."/libtcpipmgr.a "
-LIB_BASE = LIB_BASE .. "$(projectdir)/PLAT/libs/"..CHIP_TARGET.."/libyrcompress.a "
-LIB_BASE = LIB_BASE .. "$(projectdir)/PLAT/libs/"..CHIP_TARGET.."/libmiddleware_ec.a "
-LIB_BASE = LIB_BASE .. "$(projectdir)/PLAT/libs/"..CHIP_TARGET.."/liblwip.a "
-
-LIB_BASE = LIB_BASE .. "$(projectdir)/PLAT/libs/"..CHIP_TARGET.."/liblzma.a "
-
 local LIB_PS_PLAT = "full"
 local LIB_FW = "oc"
 if is_lspd then
@@ -203,22 +192,6 @@ else
         LIB_FW = "wifi"
     end
 end
-
-LIB_PS_PRE = "$(projectdir)/PLAT/prebuild/PS/lib/gcc/"..CHIP_TARGET.."/"..LIB_PS_PLAT
-LIB_PLAT_PRE = "$(projectdir)/PLAT/prebuild/PLAT/lib/gcc/"..CHIP_TARGET.."/"..LIB_PS_PLAT
-
-LIB_BASE = LIB_BASE .. LIB_PS_PRE .. "/libps.a "
-LIB_BASE = LIB_BASE .. LIB_PS_PRE .. "/libpsl1.a "
-LIB_BASE = LIB_BASE .. LIB_PS_PRE .. "/libpsif.a "
-
-LIB_BASE = LIB_BASE .. LIB_PLAT_PRE .. "/libosa.a "
-LIB_BASE = LIB_BASE .. LIB_PLAT_PRE .. "/libmiddleware_ec_private.a "
-LIB_BASE = LIB_BASE .. LIB_PLAT_PRE .. "/libccio.a "
-LIB_BASE = LIB_BASE .. LIB_PLAT_PRE .. "/libdeltapatch.a "
-LIB_BASE = LIB_BASE .. LIB_PLAT_PRE .. "/libfota.a "
-LIB_BASE = LIB_BASE .. LIB_PLAT_PRE .. "/libdriver_private.a "
-LIB_BASE = LIB_BASE .. LIB_PLAT_PRE .. "/libusb_private.a "
-LIB_USER = ""
 
 after_load(function (target)
     for _, sourcebatch in pairs(target:sourcebatches()) do
@@ -256,7 +229,6 @@ target("driver")
                 )
 
     set_targetdir("$(buildir)/libdriver_" .. USER_PROJECT_NAME)
-    -- add_linkgroups("driver", {group = true})
 target_end()
 
 target(USER_PROJECT_NAME..".elf")
@@ -271,9 +243,8 @@ target(USER_PROJECT_NAME..".elf")
     add_linkdirs("$(projectdir)/PLAT/prebuild/PLAT/lib/gcc/"..CHIP_TARGET.."/"..LIB_PS_PLAT)
     add_linkdirs("$(projectdir)/PLAT/libs/"..CHIP_TARGET)
 
-    -- add_linkgroups("startup","core_airm2m","freertos","psnv","tcpipmgr","yrcompress","middleware_ec","lwip","lzma", {whole = true,group = true})
-    -- add_linkgroups("ps","psl1","psif", {whole = true,group = true})
-    -- add_linkgroups("osa","middleware_ec_private","ccio","deltapatch","fota","driver_private","usb_private", {whole = true,group = true})
+    add_linkgroups("startup","core_airm2m","freertos","psnv","tcpipmgr","yrcompress","middleware_ec","lwip","lzma",
+                    "ps","psl1","psif","osa","middleware_ec_private","ccio","deltapatch","fota","driver_private","usb_private","driver", {whole = true,group = true})
 
     -- interface
     add_files("$(projectdir)/interface/src/*.c")
@@ -301,9 +272,7 @@ target(USER_PROJECT_NAME..".elf")
     local ld_parameter = nil 
     
     add_ldflags("-T$(projectdir)/PLAT/core/ld/ec7xx_0h00_flash.ld","-Wl,-Map,$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME.."_$(mode).map",{force = true})
-    --linkflags
-    add_ldflags("-Wl,--whole-archive -Wl,--start-group " .. LIB_BASE .. LIB_USER .. " -Wl,--end-group -Wl,--no-whole-archive -ldriver ", {force=true})
-	
+
     before_link(function(target)
         out_path = SDK_PATH .. "/out/" ..USER_PROJECT_NAME
 		if not os.exists(out_path) then

@@ -21,8 +21,5 @@ target(TARGET_NAME)
     add_files(LUATOS_ROOT.."/components/network/libhttp/*.c")
     remove_files(LUATOS_ROOT.."/components/network/libhttp/luat_lib_http.c")
     add_files(LUATOS_ROOT.."/components/network/http_parser/*.c")
-    --可以继续增加add_includedirs和add_files
-    --自动链接
-    LIB_USER = LIB_USER .. "$(projectdir)/" .. LIB_DIR .. LIB_NAME .. " "
-    --甚至可以加入自己的库
+    add_linkgroups(TARGET_NAME, {group = true, whole = true})
 target_end()

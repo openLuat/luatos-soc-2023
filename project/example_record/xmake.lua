@@ -22,9 +22,5 @@ target(TARGET_NAME)
     -- **.c会递归所有子文件夹下的文件
     add_files(LUATOS_ROOT .. "/components/multimedia/amr_decode/**.c",{public = true})
 
-    --可以继续增加add_includedirs和add_files
-    --自动链接
-    LIB_USER = LIB_USER .. "$(projectdir)/" .. LIB_DIR .. LIB_NAME .. " "
-    --加入MP3解码库
-	LIB_USER = LIB_USER .. "$(projectdir)" .. "/lib/libmp3.a "
+    add_linkgroups(TARGET_NAME, {group = true, whole = true})
 target_end()
