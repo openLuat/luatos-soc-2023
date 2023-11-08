@@ -14,6 +14,14 @@ target(TARGET_NAME)
     --     add_defines("AP_PKGIMG_LIMIT_SIZE=0x1b3000",{public = true})
     -- end
 
+    add_includedirs(LUATOS_ROOT.."/components/u8g2", {public = true})
+    -- add_files(LUATOS_ROOT.."/components/u8g2/*.c")
+    -- remove_files(LUATOS_ROOT.."/components/u8g2/luat_lib_lcd.c",LUATOS_ROOT.."/components/u8g2/luat_lib_disp.c")
+
+    add_includedirs(LUATOS_ROOT.."/components/lcd", {public = true})
+    add_files(LUATOS_ROOT.."/components/lcd/*.c")
+    remove_files(LUATOS_ROOT.."/components/lcd/luat_lib_lcd.c")
+
     --加入代码和头文件
     add_includedirs("./inc",{public = true})
     add_files("./src/*.c",{public = true})

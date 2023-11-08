@@ -8,7 +8,6 @@ target(TARGET_NAME)
     set_targetdir(LIB_DIR)
     set_warnings("error")
 
-    -- set_basename(TARGET_NAME)
     -- 程序区缩小到1b3000，剩余2b3000 - 1b3000 = 100000 1MB空间为用户区
     -- if CHIP_TARGET == "ec718p" then
     --     add_defines("AP_FLASH_LOAD_SIZE=0x1b3000",{public = true})
