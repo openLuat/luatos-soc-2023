@@ -244,7 +244,7 @@ target(USER_PROJECT_NAME..".elf")
     add_linkdirs("$(projectdir)/PLAT/libs/"..CHIP_TARGET)
 
     add_linkgroups("startup","core_airm2m","freertos","psnv","tcpipmgr","yrcompress","middleware_ec","lwip","lzma",
-                    "ps","psl1","psif","osa","middleware_ec_private","ccio","deltapatch","fota","driver_private","usb_private","driver", {whole = true,group = true})
+                    "ps","psl1","psif","osa","middleware_ec_private","ccio","deltapatch","fota","driver_private","usb_private","driver",USER_PROJECT_NAME, {whole = true,group = true})
 
     -- interface
     add_files("$(projectdir)/interface/src/*.c")
