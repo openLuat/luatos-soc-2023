@@ -55,16 +55,21 @@ static void send_alarm_data_from_task_callback(int result, uint32_t callback_par
 static void locrpt_task_proc(void *arg)
 {
 	int result;
-	uint8_t data[100] = {0};
+	uint8_t data[200] = {0};
 	uint16_t len;
-
+    uint8_t i=0;
 	while (1)
 	{
 		if (network_service_is_connect() == 1)
 		{
-			if (gpsx.gpssta == 1) //&& locinfo_upload_enable == 1 && device_is_stop == 0)
+			if (gpsx.gpssta == 1 && locinfo_upload_enable == 1 && device_is_stop == 0)
 			{
-				protocol_jt_pack_gps_msg(&gpsx, data, &len, 100, 0, 0);
+				i++;
+				protocol_jt_pack_gps_msg(&gpsx, data, &len, 200, 0, i);
+				if (i==3)
+				{
+					i=0;
+				}
 				result = socket_service_send_data(data, len, send_data_from_task_callback, 0);
 				if (0 == result)
 				{
@@ -207,8 +212,9 @@ static void luat_da213b_monitor_task(void *args)
 	uint8_t *tmp = NULL;
 	size_t count = 0;
 	int result;
-	uint8_t data[100] = {0};
+	uint8_t data[200] = {0};
 	uint16_t len;
+	uint8_t i=0;
 	while (1)
 	{
 		//luat_lbs_task_init();
@@ -232,7 +238,13 @@ static void luat_da213b_monitor_task(void *args)
 					count = 0;
 					device_is_stop = 1;
 					LUAT_DEBUG_PRINT("震动报警！！！");
-					protocol_jt_pack_gps_msg(&gpsx, data, &len, 100, 1, 0);
+					i++;
+					protocol_jt_pack_gps_msg(&gpsx, data, &len, 200, 0, i);
+
+					if (i == 3)
+					{
+						i = 0;
+					}
 					result = socket_service_send_data(data, len, send_alarm_data_from_task_callback, 0);
 					if (0 == result)
 					{
@@ -269,11 +281,12 @@ static void create_data_file()
 
 static void history_data_trans_task()
 {
+	uint8_t i=0;
 	while (1)
 	{
 		if (network_service_is_connect() == 0)
 		{
-			if (gpsx.gpssta == 1 )//&& locinfo_upload_enable == 1 && device_is_stop == 0)
+			if (gpsx.gpssta == 1 && locinfo_upload_enable == 1 && device_is_stop == 0)
 			{
 				if (luat_fs_fexist(HISTORY_DATA_PATH) == 0)
 				{
@@ -321,7 +334,7 @@ static void history_data_trans_task()
 			if (size > 0)
 			{
 				int result;
-				uint8_t pdata[100] = {0};
+				uint8_t pdata[200] = {0};
 				uint16_t len;
 				char *data = malloc(size);
 				FILE *fp = luat_fs_fopen(HISTORY_DATA_PATH, "r");
@@ -332,7 +345,13 @@ static void history_data_trans_task()
 				for (size_t count = 0; count < size; count += sizeof(nmea_msg))
 				{
 					memcpy(&gps_data, data + count, sizeof(nmea_msg));
-					protocol_jt_pack_gps_msg(&gps_data, pdata, &len, 100, 0, 0);
+					i++;
+					protocol_jt_pack_gps_msg(&gpsx, data, &len, 200, 0, i);
+
+					if (i == 3)
+					{
+						i = 0;
+					}
 					result = socket_service_send_data(pdata, len, send_history_data_from_task_callback, 0);
 					if (0 == result)
 					{
@@ -404,9 +423,9 @@ static void luat_send_data_task_proc(void *arg)
 	// BSP_SetPlatConfigItemValue(0, 0); // 死机不重启而是打印信息
 	// BSP_SetPlatConfigItemValue(PLAT_CONFIG_ITEM_LOG_PORT_SEL, 1);
 	int result;
-	uint8_t data[100] = {0};
+	uint8_t data[200] = {0};
 	uint16_t len;
-
+	uint8_t i=0;
 	luat_rtos_semaphore_create(&g_s_send_data_from_task_semaphore_handle, 1);
 	luat_rtos_semaphore_create(&g_s_send_history_data_from_task_semaphore_handle, 1);
 	luat_rtos_semaphore_create(&g_s_send_heart_data_from_task_semaphore_handle, 1);
@@ -491,15 +510,20 @@ static void luat_send_data_task_proc(void *arg)
 	luat_rtos_task_sleep(60000);
 	if (gpsx.gpssta != 1)
 	{
-		protocol_jt_pack_gps_msg(&gpsx, data, &len, 100, 0, 1);
-		result = socket_service_send_data(data, len, send_data_from_task_callback, 0);
-		if (0 == result)
+		i++;
+		for (size_t i = 1; i < 4; i++)
 		{
-			luat_rtos_semaphore_take(g_s_send_data_from_task_semaphore_handle, LUAT_WAIT_FOREVER);
-		}
-		else
-		{
-			LUAT_DEBUG_PRINT("sync result %d", result);
+			protocol_jt_pack_gps_msg(&gpsx, data, &len, 200, 0, i);
+			result = socket_service_send_data(data, len, send_data_from_task_callback, 0);
+			if (0 == result)
+			{
+				luat_rtos_semaphore_take(g_s_send_data_from_task_semaphore_handle, LUAT_WAIT_FOREVER);
+			}
+			else
+			{
+				LUAT_DEBUG_PRINT("sync result %d", result);
+			}
+			luat_rtos_task_sleep(2000);
 		}
 	}
 	luat_rtos_task_delete(send_data_task_handle);

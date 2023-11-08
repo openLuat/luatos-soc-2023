@@ -288,11 +288,51 @@ int config_gps_get(void)
 int config_vbat_get(void)
 {
     int val, val2;
-    luat_adc_open(11, NULL);
-    luat_adc_read(11, &val, &val2);
+    luat_adc_open(LUAT_ADC_CH_VBAT, NULL);
+    luat_adc_read(LUAT_ADC_CH_VBAT, &val, &val2);
     LUAT_DEBUG_PRINT("vbat: %d %d\n",val, val2);
-    luat_adc_close(11);
+    luat_adc_close(LUAT_ADC_CH_VBAT);
     return val2;
+}
+
+int change_vbat_volt(void)
+{
+    uint8_t vbat = 0;
+    int input_volt = config_vbat_get();
+    LUAT_DEBUG_PRINT("电池电量:%d",input_volt);
+    if(input_volt>=4000)
+    {
+        vbat = floor((input_volt-4000)*10/(4200-4000))+90;
+    }
+    else if(input_volt>=3890)
+    {
+        vbat = floor((input_volt-3890)*10/(4000-3890))+80;
+    }
+    else if(input_volt>=3797)
+    {
+        vbat = floor((input_volt-3797)*10/(3890-3797))+70;
+    }
+    else if(input_volt>=3730)
+    {
+        vbat = floor((input_volt-3730)*10/(3797-3730))+60;
+    }
+    else if(input_volt>=3660)
+    {
+        vbat = floor((input_volt-3660)*10/(3730-3660))+50;
+    }
+    else if(input_volt>=3629)
+    {
+        vbat = floor((input_volt-3629)*10/(3660-3629))+40;
+    }
+    else if(input_volt>=3555)
+    {
+        vbat = floor((input_volt-3555)*10/(3629-3555))+20;
+    }
+    else
+    {
+        vbat = floor((input_volt-3400)*10/(3555-3400))+0;
+    }
+    return vbat;
 }
 
 int config_input_volt_get(void)
