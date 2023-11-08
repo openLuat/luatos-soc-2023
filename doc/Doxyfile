@@ -918,7 +918,21 @@ INPUT                  = F:/Air780EP_EF/LuatOS/luat/include/luat_adc.h \
                          ../../LuatOS/luat/include/luat_debug.h \
                          ../../LuatOS/components/fskv/luat_fskv.h \
                          ../../LuatOS/components/iconv/luat_iconv.h \
-                         ../../LuatOS/luat/include/luat_wifiscan.h
+                         ../../LuatOS/luat/include/luat_wifiscan.h \
+                         ../../LuatOS/luat/include/luat_fota.h \
+                         ../../LuatOS/luat/include/luat_fs.h \
+                         ../../LuatOS/luat/include/luat_pwm.h \
+                         ../../LuatOS/luat/include/luat_rtc.h \
+                         ../../LuatOS/components/mobile/luat_mobile.h \
+                         ../../LuatOS/components/camera/luat_camera.h \
+                         ../../LuatOS/luat/include/luat_flash.h \
+                         ../../LuatOS/luat/include/luat_uart.h \
+                         ../../LuatOS/luat/include/luat_spi.h \
+                         ../../LuatOS/components/sms/luat_sms.h \
+                         ../../LuatOS/luat/include/luat_rtos.h \
+                         ../../LuatOS/components/wlan/luat_wlan.h \
+                         ../../LuatOS/components/network/libemqtt/luat_mqtt.h \
+                         ../../LuatOS/components/network/libhttp/luat_http.h
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
