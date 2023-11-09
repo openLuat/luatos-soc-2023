@@ -30,24 +30,26 @@
 
 luat_rtos_task_handle lcd_task_handle;
 extern const luat_lcd_opts_t lcd_opts_st7789;
+
+static luat_spi_device_t lcd_spi_dev = {
+    .bus_id = LCD_SPI,
+    .spi_config.CPHA = 0,
+    .spi_config.CPOL = 0,
+    .spi_config.dataw = 8,
+    .spi_config.bit_dict = 0,
+    .spi_config.master = 1,
+    .spi_config.mode = 1,             // mode设置为1，全双工
+    .spi_config.bandrate = 51000000,
+    .spi_config.cs = 12
+};
+
 static void task_test_lcd(void *param)
 {
-    luat_spi_t spi_conf = {
-        .id = LCD_SPI,
-        .CPHA = 0,
-        .CPOL = 0,
-        .dataw = 8,
-        .bit_dict = 0,
-        .master = 1,
-        .mode = 1,             // mode设置为1，全双工
-        .bandrate = 51000000,
-        .cs = 12
-    };
-
-    luat_spi_setup(&spi_conf);
+    luat_spi_device_setup(&lcd_spi_dev);
 
 	luat_lcd_conf_t lcd_conf = {0};
-    lcd_conf.port = LCD_SPI;
+    lcd_conf.port = LUAT_LCD_SPI_DEVICE;
+    lcd_conf.lcd_spi_device = &lcd_spi_dev;
     lcd_conf.auto_flush = 1;
 
     lcd_conf.opts = &lcd_opts_st7789;
@@ -59,7 +61,7 @@ static void task_test_lcd(void *param)
     lcd_conf.h = 320;
     lcd_conf.xoffset = 0;
     lcd_conf.yoffset = 0;
-	luat_rtos_task_sleep(2000);
+
     luat_lcd_init(&lcd_conf);
     luat_lcd_clear(&lcd_conf,WHITE);
 

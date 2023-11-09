@@ -148,10 +148,6 @@ target(USER_PROJECT_NAME..".elf")
                     "psif","osa","middleware_ec_private","ccio","deltapatch","fota","driver_private",
                     "usb_private","driver","core_airm2m","freertos","startup",USER_PROJECT_NAME, {whole = true})
 
-    -- add_linkgroups("startup","core_airm2m","freertos","psnv","tcpipmgr","yrcompress","middleware_ec","lwip","lzma",
-    --                 "ps","psl1","psif","osa","middleware_ec_private","ccio","deltapatch","fota","driver_private",
-    --                 "usb_private","driver",USER_PROJECT_NAME, {whole = true,group = true})
-
     -- interface
     add_files("$(projectdir)/interface/src/*.c")
     -- network
