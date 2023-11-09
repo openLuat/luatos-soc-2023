@@ -64,7 +64,7 @@ end
 set_plat("cross")
 set_arch("arm")
 set_languages("gnu11", "cxx11")
-set_warnings("everything")
+set_warnings("all")
 set_optimize("smallest")
 
 CHIP = "ec718"
