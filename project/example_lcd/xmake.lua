@@ -8,15 +8,7 @@ target(TARGET_NAME)
     set_targetdir(LIB_DIR)
     set_warnings("error")
 
-    -- 程序区缩小到1b3000，剩余2b3000 - 1b3000 = 100000 1MB空间为用户区
-    -- if CHIP_TARGET == "ec718p" then
-    --     add_defines("AP_FLASH_LOAD_SIZE=0x1b3000",{public = true})
-    --     add_defines("AP_PKGIMG_LIMIT_SIZE=0x1b3000",{public = true})
-    -- end
-
     add_includedirs(LUATOS_ROOT.."/components/u8g2", {public = true})
-    -- add_files(LUATOS_ROOT.."/components/u8g2/*.c")
-    -- remove_files(LUATOS_ROOT.."/components/u8g2/luat_lib_lcd.c",LUATOS_ROOT.."/components/u8g2/luat_lib_disp.c")
 
     add_includedirs(LUATOS_ROOT.."/components/lcd", {public = true})
     add_files(LUATOS_ROOT.."/components/lcd/*.c")

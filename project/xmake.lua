@@ -1,7 +1,8 @@
 local SDK_PATH = os.projectdir()
 local CHIP_TARGET = CHIP_TARGET
-local USER_PROJECT_NAME = USER_PROJECT_NAME
 local CHIP = CHIP
+local USER_PROJECT_NAME = USER_PROJECT_NAME
+
 -- 若启用is_lspd, 加上额外的宏
 if is_lspd == true then
     add_defines("OPEN_CPU_MODE")
@@ -43,12 +44,10 @@ add_defines("EC_ASSERT_FLAG",
             "LUAT_USE_STD_STRING",
             "LUAT_LOG_NO_NEWLINE",
             "DHCPD_ENABLE_DEFINE=1",
-            "DEBUG_LOG_HEADER_FILE=\"debug_log_ap.h\"",
-            {public = true})
+            "DEBUG_LOG_HEADER_FILE=\"debug_log_ap.h\"")
 add_defines("sprintf=sprintf_",
             "snprintf=snprintf_",
-            "vsnprintf=vsnprintf_",
-            {public = true})
+            "vsnprintf=vsnprintf_")
 add_cxflags("-fno-inline",
             "-mslow-flash-data",
             "-fstack-usage",
@@ -77,88 +76,9 @@ add_ldflags("-Wl,--wrap=_malloc_r",
 -- ==============================
 -- === includes =====
 -- SDK相关头文件引用
-add_includedirs("$(projectdir)/PLAT/device/target/board/common/ARMCM3/inc",
-                "$(projectdir)/PLAT/device/target/board/ec7xx_0h00/common/inc",
-                "$(projectdir)/PLAT/device/target/board/ec7xx_0h00/common/pkginc",
-                "$(projectdir)/PLAT/device/target/board/ec7xx_0h00/ap/gcc",
-                "$(projectdir)/PLAT/device/target/board/ec7xx_0h00/ap/inc",
-                "$(projectdir)/PLAT/driver/board/ec7xx_0h00/inc",
-                "$(projectdir)/PLAT/driver/board/ec7xx_0h00/inc/eeprom",
-                "$(projectdir)/PLAT/driver/board/ec7xx_0h00/inc/camera",
-                "$(projectdir)/PLAT/driver/board/ec7xx_0h00/inc/camera/sp0A39",
-                "$(projectdir)/PLAT/driver/board/ec7xx_0h00/inc/camera/sp0821",
-                "$(projectdir)/PLAT/driver/board/ec7xx_0h00/inc/camera/gc6123",
-                "$(projectdir)/PLAT/driver/board/ec7xx_0h00/inc/camera/gc6153",
-                "$(projectdir)/PLAT/driver/board/ec7xx_0h00/inc/camera/gc032A",
-                "$(projectdir)/PLAT/driver/board/ec7xx_0h00/inc/camera/bf30a2",
-                "$(projectdir)/PLAT/driver/board/ec7xx_0h00/inc/audio",
-                "$(projectdir)/PLAT/driver/board/ec7xx_0h00/inc/audio/codec",
-                "$(projectdir)/PLAT/driver/board/ec7xx_0h00/inc/audio/codec/es8388",
-                "$(projectdir)/PLAT/driver/board/ec7xx_0h00/inc/audio/codec/es8311",
-                "$(projectdir)/PLAT/driver/board/ec7xx_0h00/inc/lcd/lcdDev",
-                "$(projectdir)/PLAT/driver/board/ec7xx_0h00/inc/lcd",
-                "$(projectdir)/PLAT/driver/board/ec7xx_0h00/inc/ntc",
-                "$(projectdir)/PLAT/driver/board/ec7xx_0h00/inc/exstorage",
-                "$(projectdir)/PLAT/driver/hal/common/inc",
-                "$(projectdir)/PLAT/driver/hal/ec7xx/ap/inc",
-                "$(projectdir)/PLAT/driver/hal/ec7xx/ap/inc/"..CHIP,
-                "$(projectdir)/PLAT/driver/chip/ec7xx/ap/inc",
-                "$(projectdir)/PLAT/driver/chip/ec7xx/ap/inc/"..CHIP,
-                "$(projectdir)/PLAT/driver/chip/ec7xx/ap/inc_cmsis",
-                "$(projectdir)/PLAT/os/freertos/inc",
-                "$(projectdir)/PLAT/os/freertos/CMSIS/common/inc",
-                "$(projectdir)/PLAT/os/freertos/CMSIS/ap/inc",
-                "$(projectdir)/PLAT/os/freertos/portable/mem/tlsf",
-                "$(projectdir)/PLAT/os/freertos/portable/gcc",
-                "$(projectdir)/PLAT/middleware/developed/nvram/ec7xx/inc",
-                "$(projectdir)/PLAT/middleware/developed/nvram/inc",
-                "$(projectdir)/PLAT/middleware/developed/cms/psdial/inc",
-                "$(projectdir)/PLAT/middleware/developed/cms/cms/inc",
-                "$(projectdir)/PLAT/middleware/developed/cms/psil/inc",
-                "$(projectdir)/PLAT/middleware/developed/cms/psstk/inc",
-                "$(projectdir)/PLAT/middleware/developed/cms/sockmgr/inc",
-                "$(projectdir)/PLAT/middleware/developed/cms/cmsnetlight/inc",
-                "$(projectdir)/PLAT/middleware/developed/ecapi/aal/inc",
-                "$(projectdir)/PLAT/middleware/developed/ecapi/appmwapi/inc",
-                "$(projectdir)/PLAT/middleware/developed/ecapi/psapi/inc",
-                "$(projectdir)/PLAT/middleware/developed/common/inc",
-                "$(projectdir)/PLAT/middleware/developed/psnv/inc",
-                "$(projectdir)/PLAT/os/freertos/portable/gcc",
-                "$(projectdir)/PLAT/middleware/developed/tcpipmgr/app/inc",
-                "$(projectdir)/PLAT/middleware/developed/tcpipmgr/common/inc",
-                "$(projectdir)/PLAT/os/freertos/inc",
-                "$(projectdir)/PLAT/middleware/developed/yrcompress",
-                "$(projectdir)/PLAT/prebuild/PS/inc",
-                "$(projectdir)/PLAT/middleware/thirdparty/lwip/src/include",
-                "$(projectdir)/PLAT/middleware/thirdparty/lwip/src/include/lwip",
-                "$(projectdir)/PLAT/middleware/developed/ccio/pub",
-                "$(projectdir)/PLAT/middleware/developed/ccio/device/inc",
-                "$(projectdir)/PLAT/middleware/developed/ccio/service/inc",
-                "$(projectdir)/PLAT/middleware/developed/ccio/custom/inc",
-                "$(projectdir)/PLAT/middleware/developed/fota/pub",
-                "$(projectdir)/PLAT/middleware/developed/fota/custom/inc",
-                "$(projectdir)/PLAT/middleware/thirdparty/lwip/src/include",
-                "$(projectdir)/PLAT/middleware/thirdparty/lwip/src/include/posix",
-                "$(projectdir)/PLAT/middleware/developed/at/atdecoder/inc",
-                "$(projectdir)/PLAT/middleware/developed/at/atps/inc",
-                "$(projectdir)/PLAT/middleware/developed/at/atps/inc/cnfind",
-                "$(projectdir)/PLAT/middleware/developed/at/atcust/inc",
-                "$(projectdir)/PLAT/middleware/developed/at/atcust/inc/cnfind",
-                "$(projectdir)/PLAT/middleware/developed/at/atentity/inc",
-                "$(projectdir)/PLAT/middleware/developed/at/atreply/inc",
-                "$(projectdir)/PLAT/middleware/developed/at/atref/inc",
-                "$(projectdir)/PLAT/middleware/developed/at/atref/inc/cnfind",
-                "$(projectdir)/PLAT/tools/"..CHIP_TARGET,
-                "$(projectdir)/PLAT/core/driver/include",
-                "$(projectdir)/PLAT/core/common/include",
-                "$(projectdir)/PLAT/core/multimedia/include",
-                "$(projectdir)/PLAT/core/tts/include",
-				"$(projectdir)/PLAT/core/include",
-                "$(projectdir)/PLAT/prebuild/PS/inc",
-                "$(projectdir)/PLAT/prebuild/PLAT/inc",
+add_includedirs("$(projectdir)/PLAT/tools/"..CHIP_TARGET,
                 "$(projectdir)/thirdparty/littlefs",
-                "$(projectdir)/thirdparty/littlefs/port",
-                {public = true})
+                "$(projectdir)/thirdparty/littlefs/port")
             
 -- CSDK 宏定义
 add_defines("LUAT_USE_FS_VFS","MBEDTLS_CONFIG_FILE=\"mbedtls_ec7xx_config.h\"")
@@ -176,8 +96,7 @@ add_includedirs(LUATOS_ROOT .. "/luat/include",
 				LUATOS_ROOT .. "/components/wlan",
                 LUATOS_ROOT .. "/components/minmea",
                 LUATOS_ROOT .. "/components/sms",
-				"$(projectdir)/interface/include",
-                {public = true})
+				"$(projectdir)/interface/include")
 
 local LIB_PS_PLAT = "full"
 local LIB_FW = "oc"
@@ -205,13 +124,10 @@ target("driver")
             "$(projectdir)/PLAT/driver/chip/ec7xx/ap/src/"..CHIP.."/adc.c",
             "$(projectdir)/PLAT/driver/chip/ec7xx/ap/src/*.c",
             "$(projectdir)/PLAT/driver/chip/ec7xx/ap/src/usb/open/*.c",
-            "$(projectdir)/PLAT/driver/chip/ec7xx/common/gcc/memcpy-armv7m.S",
-            {public = true})
+            "$(projectdir)/PLAT/driver/chip/ec7xx/common/gcc/memcpy-armv7m.S")
 
-	remove_files(
-                "$(projectdir)/PLAT/driver/chip/ec7xx/ap/src/cspi.c",
-                "$(projectdir)/PLAT/driver/chip/ec7xx/ap/src/swdio.c"
-                )
+	remove_files("$(projectdir)/PLAT/driver/chip/ec7xx/ap/src/cspi.c",
+                "$(projectdir)/PLAT/driver/chip/ec7xx/ap/src/swdio.c")
 
     set_targetdir("$(buildir)/libdriver_" .. USER_PROJECT_NAME)
 target_end()
@@ -228,9 +144,13 @@ target(USER_PROJECT_NAME..".elf")
     add_linkdirs("$(projectdir)/PLAT/prebuild/PLAT/lib/gcc/"..CHIP_TARGET.."/"..LIB_PS_PLAT)
     add_linkdirs("$(projectdir)/PLAT/libs/"..CHIP_TARGET)
 
-    add_linkgroups("startup","core_airm2m","freertos","psnv","tcpipmgr","yrcompress","middleware_ec","lwip","lzma",
-                    "ps","psl1","psif","osa","middleware_ec_private","ccio","deltapatch","fota","driver_private",
-                    "usb_private","driver",USER_PROJECT_NAME, {whole = true,group = true})
+    add_linkgroups("psnv","tcpipmgr","yrcompress","middleware_ec","lwip","lzma","ps","psl1",
+                    "psif","osa","middleware_ec_private","ccio","deltapatch","fota","driver_private",
+                    "usb_private","driver","core_airm2m","freertos","startup",USER_PROJECT_NAME, {whole = true})
+
+    -- add_linkgroups("startup","core_airm2m","freertos","psnv","tcpipmgr","yrcompress","middleware_ec","lwip","lzma",
+    --                 "ps","psl1","psif","osa","middleware_ec_private","ccio","deltapatch","fota","driver_private",
+    --                 "usb_private","driver",USER_PROJECT_NAME, {whole = true,group = true})
 
     -- interface
     add_files("$(projectdir)/interface/src/*.c")
@@ -240,7 +160,7 @@ target(USER_PROJECT_NAME..".elf")
             )
 
     -- mbedtls
-    add_files(LUATOS_ROOT .."/components/mbedtls/library/*.c",{public = true})
+    add_files(LUATOS_ROOT .."/components/mbedtls/library/*.c")
     -- printf
     add_files(LUATOS_ROOT.."/components/printf/*.c")
     -- weak
