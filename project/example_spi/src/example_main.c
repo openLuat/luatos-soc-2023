@@ -3,7 +3,7 @@
 #include "luat_debug.h"
 #include "luat_spi.h"
 
-#define TEST_SPI_ID   SPI_ID1
+#define TEST_SPI_ID   1
 
 
 luat_rtos_task_handle spi_task_handle;
