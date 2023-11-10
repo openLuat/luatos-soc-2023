@@ -3949,16 +3949,7 @@ extern uint32_t luat_get_utc(uint32_t *tamp);
 
 /* \} name SECTION: Customisation configuration options */
 
-#ifdef CHIP_EC716
-
-// 禁用SHA512,节省10k
-// #undef MBEDTLS_SHA512_C
-
-// 禁用MBEDTLS_GCM_C, 节省2.5k
-// #undef MBEDTLS_GCM_C
-
-// 禁用MBEDTLS_DHM_C,节省0.5k
-// #undef MBEDTLS_DHM_C
+#if defined(TYPE_EC716S) || defined(TYPE_EC718S)
 
 // 禁用全部椭圆算法, 节省10k
 #undef MBEDTLS_ECP_C
