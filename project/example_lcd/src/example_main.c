@@ -72,7 +72,7 @@ static void task_test_lcd(void *param)
     luat_spi_device_setup(&lcd_spi_dev);
 
     luat_lcd_init(&lcd_conf);
-    luat_lcd_clear(&lcd_conf,WHITE);
+    luat_lcd_clear(&lcd_conf,LCD_WHITE);
 
     luat_lcd_draw_line(&lcd_conf,20,35,140,35,0x001F);
     luat_lcd_draw_rectangle(&lcd_conf,20,40,120,70,0xF800);
