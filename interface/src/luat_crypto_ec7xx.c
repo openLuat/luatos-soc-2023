@@ -127,3 +127,12 @@ int luat_crypto_trng(char* buff, size_t len) {
     }
     return 0;
 }
+
+// 有API调用了这个函数,需要补回去
+#ifdef MBEDTLS_DEPRECATED_REMOVED
+void mbedtls_md5( const unsigned char *input,
+                                     size_t ilen,
+                                     unsigned char output[16] ) {
+    mbedtls_md5_ret( input, ilen, output );
+}
+#endif
