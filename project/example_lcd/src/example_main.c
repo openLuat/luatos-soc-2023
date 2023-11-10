@@ -26,7 +26,11 @@
 #include "luat_spi.h"
 #include "luat_lcd.h"
 
+#if defined(TYPE_EC716S)
+#define LCD_SPI	    SPI_ID0
+#else
 #define LCD_SPI	    SPI_ID1
+#endif
 #define LCD_SPI_CS	12
 #define LCD_DC	    14
 #define LCD_RST	    3
