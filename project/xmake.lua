@@ -114,9 +114,22 @@ end
 
 includes(USER_PROJECT_NAME)
 
-target("driver")
-    set_kind("static")
+target(USER_PROJECT_NAME..".elf")
+	set_kind("binary")
+    set_targetdir("$(buildir)/"..USER_PROJECT_NAME)
     add_deps(USER_PROJECT_NAME)
+
+    add_linkdirs("$(projectdir)/lib")
+    add_linkdirs("$(projectdir)/PLAT/device/target/board/ec7xx_0h00/ap/gcc/")
+    add_linkdirs("$(projectdir)/PLAT/prebuild/PS/lib/gcc/"..CHIP_TARGET.."/"..LIB_PS_PLAT)
+    add_linkdirs("$(projectdir)/PLAT/prebuild/PLAT/lib/gcc/"..CHIP_TARGET.."/"..LIB_PS_PLAT)
+    add_linkdirs("$(projectdir)/PLAT/libs/"..CHIP_TARGET)
+    add_links("freertos","startup","core_airm2m","lzma","yrcompress","deltapatch","fota")
+    add_linkgroups("ps","psl1","psif","psnv","tcpipmgr","lwip","osa","ccio",
+                    "middleware_ec","middleware_ec_private","driver_private",
+                    "usb_private",{whole = true})
+    add_linkgroups(USER_PROJECT_NAME, {whole = true})
+
     --driver
 	add_files("$(projectdir)/PLAT/core/code/*.c",
             "$(projectdir)/PLAT/driver/board/ec7xx_0h00/src/*c",
@@ -128,25 +141,6 @@ target("driver")
 
 	remove_files("$(projectdir)/PLAT/driver/chip/ec7xx/ap/src/cspi.c",
                 "$(projectdir)/PLAT/driver/chip/ec7xx/ap/src/swdio.c")
-
-    set_targetdir("$(buildir)/libdriver_" .. USER_PROJECT_NAME)
-target_end()
-
-target(USER_PROJECT_NAME..".elf")
-	set_kind("binary")
-    set_targetdir("$(buildir)/"..USER_PROJECT_NAME)
-    add_deps(USER_PROJECT_NAME)
-    add_deps("driver")
-
-    add_linkdirs("$(projectdir)/lib")
-    add_linkdirs("$(projectdir)/PLAT/device/target/board/ec7xx_0h00/ap/gcc/")
-    add_linkdirs("$(projectdir)/PLAT/prebuild/PS/lib/gcc/"..CHIP_TARGET.."/"..LIB_PS_PLAT)
-    add_linkdirs("$(projectdir)/PLAT/prebuild/PLAT/lib/gcc/"..CHIP_TARGET.."/"..LIB_PS_PLAT)
-    add_linkdirs("$(projectdir)/PLAT/libs/"..CHIP_TARGET)
-
-    add_linkgroups("psnv","tcpipmgr","yrcompress","middleware_ec","lwip","lzma","ps","psl1",
-                    "psif","osa","middleware_ec_private","ccio","deltapatch","fota","driver_private",
-                    "usb_private","driver","core_airm2m","freertos","startup",USER_PROJECT_NAME, {whole = true})
 
     -- interface
     add_files("$(projectdir)/interface/src/*.c")
