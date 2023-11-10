@@ -114,30 +114,10 @@ end
 
 includes(USER_PROJECT_NAME)
 
-target("driver")
-    set_kind("static")
-    add_deps(USER_PROJECT_NAME)
-    --driver
-	add_files("$(projectdir)/PLAT/core/code/*.c",
-            "$(projectdir)/PLAT/driver/board/ec7xx_0h00/src/*c",
-            "$(projectdir)/PLAT/driver/board/ec7xx_0h00/src/lcd/**c",
-            "$(projectdir)/PLAT/driver/hal/**.c",
-            "$(projectdir)/PLAT/driver/chip/ec7xx/ap/src/"..CHIP.."/adc.c",
-            "$(projectdir)/PLAT/driver/chip/ec7xx/ap/src/*.c",
-            "$(projectdir)/PLAT/driver/chip/ec7xx/ap/src/usb/open/*.c",
-            "$(projectdir)/PLAT/driver/chip/ec7xx/common/gcc/memcpy-armv7m.S")
-
-	remove_files("$(projectdir)/PLAT/driver/chip/ec7xx/ap/src/cspi.c",
-                "$(projectdir)/PLAT/driver/chip/ec7xx/ap/src/swdio.c")
-
-    set_targetdir("$(buildir)/libdriver_" .. USER_PROJECT_NAME)
-target_end()
-
 target(USER_PROJECT_NAME..".elf")
 	set_kind("binary")
     set_targetdir("$(buildir)/"..USER_PROJECT_NAME)
     add_deps(USER_PROJECT_NAME)
-    add_deps("driver")
 
     add_linkdirs("$(projectdir)/lib")
     add_linkdirs("$(projectdir)/PLAT/device/target/board/ec7xx_0h00/ap/gcc/")
@@ -147,8 +127,21 @@ target(USER_PROJECT_NAME..".elf")
     add_links("freertos","startup","core_airm2m","lzma","yrcompress","deltapatch","fota")
     add_linkgroups("ps","psl1","psif","psnv","tcpipmgr","lwip","osa","ccio",
                     "middleware_ec","middleware_ec_private","driver_private",
-                    "usb_private","driver",{whole = true})
+                    "usb_private",{whole = true})
     add_linkgroups(USER_PROJECT_NAME, {whole = true})
+
+    --driver
+	add_files("$(projectdir)/PLAT/core/code/*.c",
+            "$(projectdir)/PLAT/driver/board/ec7xx_0h00/src/*c",
+            "$(projectdir)/PLAT/driver/hal/**.c",
+            "$(projectdir)/PLAT/driver/chip/ec7xx/ap/src/"..CHIP.."/adc.c",
+            "$(projectdir)/PLAT/driver/chip/ec7xx/ap/src/*.c",
+            "$(projectdir)/PLAT/driver/chip/ec7xx/ap/src/usb/open/*.c",
+            "$(projectdir)/PLAT/driver/chip/ec7xx/common/gcc/memcpy-armv7m.S")
+
+	remove_files("$(projectdir)/PLAT/driver/chip/ec7xx/ap/src/cspi.c",
+                "$(projectdir)/PLAT/driver/chip/ec7xx/ap/src/swdio.c")
+
     -- interface
     add_files("$(projectdir)/interface/src/*.c")
     -- network
