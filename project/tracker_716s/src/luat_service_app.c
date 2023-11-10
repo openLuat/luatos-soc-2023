@@ -136,7 +136,7 @@ int gpio_irq(int pin, void *args)
 			g_s_acc_status = 1;
 		luat_rtos_message_send(acc_monitor_task_handle, 0, NULL);
 	}
-	else if (pin == HAL_GPIO_11)
+	else if (pin == HAL_GPIO_9)
 	{
 		if (luat_gpio_get(pin) == 1)
 			g_s_accelerated_speed_status = 0;
