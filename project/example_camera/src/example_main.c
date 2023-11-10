@@ -740,7 +740,7 @@ static camera_reg_t g_s_gc032a_reg_table[] =
 };
 
 #ifdef LCD_ENABLE
-
+#if 0
 #define SPI_LCD_BUS_ID	0
 #define SPI_LCD_SPEED	25600000
 //#define SPI_LCD_CS_PIN	HAL_GPIO_24
@@ -774,10 +774,6 @@ static spi_lcd_ctrl_t g_s_spi_lcd =
 		SPI_LCD_Y_OFFSET
 };
 
-#endif
-
-
-#ifdef LCD_ENABLE
 static int luat_spi_lcd_init(uint8_t *data, uint32_t len)
 {
 
@@ -818,6 +814,8 @@ static int luat_spi_lcd_init(uint8_t *data, uint32_t len)
 
 	spi_lcd_init_gc9306x(&g_s_spi_lcd);
 }
+
+#endif
 #endif
 
 #ifdef USB_UART_ENABLE
@@ -1157,7 +1155,9 @@ static void luat_camera_task(void *param)
 	uint32_t all,now_free_block,min_free_block;
 	luat_debug_set_fault_mode(LUAT_DEBUG_FAULT_HANG);
 #ifdef LCD_ENABLE
+#if 0
 	luat_lcd_run_user_api(luat_spi_lcd_init, NULL, 0, 0);
+#endif
 #endif
 #ifdef USB_UART_ENABLE
     luat_uart_t uart = {
@@ -1229,7 +1229,9 @@ static void luat_camera_task(void *param)
 static void camera_demo_init(void)
 {
 #ifdef LCD_ENABLE
+#if 0
 	luat_lcd_service_init(90);
+#endif
 #endif
 	luat_gpio_cfg_t gpio_cfg;
 	luat_gpio_set_default_cfg(&gpio_cfg);
