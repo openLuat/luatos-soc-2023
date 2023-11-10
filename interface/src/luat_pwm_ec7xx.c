@@ -206,13 +206,13 @@ int luat_pwm_open(int channel, size_t freq,  size_t pulse, int pnum) {
         	    GPIO_IomuxEC7XX(22, 3, 1, 0);
         	    break;
         	case 1:
-        	    GPIO_IomuxEC7XX(23, 5, 1, 0);
+        	    GPIO_IomuxEC7XX(23, 3, 1, 0);
         	    break;
         	case 2:
-        	    GPIO_IomuxEC7XX(24, 5, 1, 0);
+        	    GPIO_IomuxEC7XX(24, 3, 1, 0);
         	    break;
         	case 4:
-        	    GPIO_IomuxEC7XX(26, 5, 1, 0);
+        	    GPIO_IomuxEC7XX(26, 3, 1, 0);
         	    break;
         	default:
         	    break;
