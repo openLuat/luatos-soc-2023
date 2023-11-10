@@ -62,7 +62,7 @@ static luat_lcd_conf_t lcd_conf = {
     .h = LCD_H,
     .xoffset = 0,
     .yoffset = 0
-}
+};
 
 luat_rtos_task_handle lcd_task_handle;
 
