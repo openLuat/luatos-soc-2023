@@ -120,6 +120,7 @@ target("driver")
     --driver
 	add_files("$(projectdir)/PLAT/core/code/*.c",
             "$(projectdir)/PLAT/driver/board/ec7xx_0h00/src/*c",
+            "$(projectdir)/PLAT/driver/board/ec7xx_0h00/src/lcd/**c",
             "$(projectdir)/PLAT/driver/hal/**.c",
             "$(projectdir)/PLAT/driver/chip/ec7xx/ap/src/"..CHIP.."/adc.c",
             "$(projectdir)/PLAT/driver/chip/ec7xx/ap/src/*.c",
@@ -143,11 +144,11 @@ target(USER_PROJECT_NAME..".elf")
     add_linkdirs("$(projectdir)/PLAT/prebuild/PS/lib/gcc/"..CHIP_TARGET.."/"..LIB_PS_PLAT)
     add_linkdirs("$(projectdir)/PLAT/prebuild/PLAT/lib/gcc/"..CHIP_TARGET.."/"..LIB_PS_PLAT)
     add_linkdirs("$(projectdir)/PLAT/libs/"..CHIP_TARGET)
-
-    add_linkgroups("psnv","tcpipmgr","yrcompress","middleware_ec","lwip","lzma","ps","psl1",
-                    "psif","osa","middleware_ec_private","ccio","deltapatch","fota","driver_private",
-                    "usb_private","driver","core_airm2m","freertos","startup",USER_PROJECT_NAME, {whole = true})
-
+    add_links("freertos","startup","core_airm2m","lzma","yrcompress","deltapatch","fota")
+    add_linkgroups("ps","psl1","psif","psnv","tcpipmgr","lwip","osa","ccio",
+                    "middleware_ec","middleware_ec_private","driver_private",
+                    "usb_private","driver",{whole = true})
+    add_linkgroups(USER_PROJECT_NAME, {whole = true})
     -- interface
     add_files("$(projectdir)/interface/src/*.c")
     -- network
