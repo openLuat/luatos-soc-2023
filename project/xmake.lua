@@ -124,10 +124,10 @@ target(USER_PROJECT_NAME..".elf")
     add_linkdirs("$(projectdir)/PLAT/prebuild/PS/lib/gcc/"..CHIP_TARGET.."/"..LIB_PS_PLAT)
     add_linkdirs("$(projectdir)/PLAT/prebuild/PLAT/lib/gcc/"..CHIP_TARGET.."/"..LIB_PS_PLAT)
     add_linkdirs("$(projectdir)/PLAT/libs/"..CHIP_TARGET)
-    add_links("freertos","startup","core_airm2m","lzma","yrcompress","deltapatch","fota")
-    add_linkgroups("ps","psl1","psif","psnv","tcpipmgr","lwip","osa","ccio",
-                    "middleware_ec","middleware_ec_private","driver_private",
-                    "usb_private",{whole = true})
+
+    add_linkgroups("ps","psl1","psif","psnv","tcpipmgr","lwip","osa","ccio","yrcompress","deltapatch",
+                    "middleware_ec","middleware_ec_private","driver_private","usb_private",
+                    "freertos","startup","core_airm2m","lzma","fota",{whole = true})
     add_linkgroups(USER_PROJECT_NAME, {whole = true})
 
     --driver

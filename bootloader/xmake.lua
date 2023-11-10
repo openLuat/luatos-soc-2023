@@ -70,8 +70,9 @@ target("ap_bootloader.elf")
     add_linkdirs("$(projectdir)/PLAT/prebuild/PLAT/lib/gcc/"..CHIP_TARGET.."/"..LIB_PS_PLAT)
     add_linkdirs("$(projectdir)/PLAT/libs/"..CHIP_TARGET.."/bootloader")
     add_linkdirs("$(projectdir)/lib/")
-    add_links("startup","core_airm2m","lzma","driver_private_bl","bootloader","usbbl_priv")
-    add_linkgroups("osa","middleware_ec","middleware_ec_private","ccio","fota","deltapatch2", {whole = true})
+
+    add_linkgroups("startup","core_airm2m","lzma","driver_private_bl","bootloader","usbbl_priv",
+                    "osa","middleware_ec","middleware_ec_private","ccio","fota","deltapatch2", {whole = true})
     if CHIP_TARGET == "ec718p" then
         add_links("ffota")
     end
