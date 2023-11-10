@@ -328,8 +328,11 @@ int linksdk_mqtt_task(void *args)
 
 static void task_demo_init(void)
 {
+    // EC716空间不足以支持
+    #ifndef CHIP_EC716
     luat_mobile_event_register_handler(luatos_mobile_event_callback);
     luat_rtos_task_create(&g_linksdk_task_handle, 8 * 1024, 20, "linkSdkDemoTask", linksdk_mqtt_task, NULL, NULL);
+    #endif
 }
 
 INIT_TASK_EXPORT(task_demo_init, "1");

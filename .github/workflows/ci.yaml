@@ -35,6 +35,7 @@ jobs:
           - example_gnss
           - example_lcd
           - example_gnss
+          - example_linksdk
         csdk_chip:
           - ec718p
           - ec718s

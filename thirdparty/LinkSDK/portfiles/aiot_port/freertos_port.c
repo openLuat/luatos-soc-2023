@@ -39,6 +39,7 @@
 #include "aiot_state_api.h"
 #include "aiot_sysdep_api.h"
 #include "luat_debug.h"
+#include "luat_malloc.h"
 
 /* socket建联时间默认最大值 */
 #define CORE_SYSDEP_DEFAULT_CONNECT_TIMEOUT_MS (10 * 1000)
