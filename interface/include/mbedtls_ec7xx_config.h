@@ -28,6 +28,7 @@
 #define MBEDTLS_CONFIG_H
 #include "luat_rtc.h"
 #include <stdlib.h>
+#include "printf.h"
 extern uint32_t luat_get_utc(uint32_t *tamp);
 #if defined(_MSC_VER) && !defined(_CRT_SECURE_NO_DEPRECATE)
 #define _CRT_SECURE_NO_DEPRECATE 1
@@ -255,7 +256,7 @@ extern uint32_t luat_get_utc(uint32_t *tamp);
  *
  * Uncomment to get errors on using deprecated functions and features.
  */
-//#define MBEDTLS_DEPRECATED_REMOVED
+#define MBEDTLS_DEPRECATED_REMOVED
 
 /**
  * \def MBEDTLS_CHECK_PARAMS
@@ -1338,7 +1339,7 @@ extern uint32_t luat_get_utc(uint32_t *tamp);
  *
  * This enables support for RSAES-OAEP and RSASSA-PSS operations.
  */
-#define MBEDTLS_PKCS1_V21
+// #define MBEDTLS_PKCS1_V21
 
 /** \def MBEDTLS_PSA_CRYPTO_CLIENT
  *
@@ -2228,7 +2229,7 @@ extern uint32_t luat_get_utc(uint32_t *tamp);
  *
  * Comment this macro to disallow using RSASSA-PSS in certificates.
  */
-#define MBEDTLS_X509_RSASSA_PSS_SUPPORT
+// #define MBEDTLS_X509_RSASSA_PSS_SUPPORT
 
 /**
  * \def MBEDTLS_ZLIB_SUPPORT
@@ -2685,7 +2686,7 @@ extern uint32_t luat_get_utc(uint32_t *tamp);
  * \warning   DES is considered a weak cipher and its use constitutes a
  *            security risk. We recommend considering stronger ciphers instead.
  */
-#define MBEDTLS_DES_C
+// #define MBEDTLS_DES_C
 
 /**
  * \def MBEDTLS_DHM_C
@@ -2706,7 +2707,7 @@ extern uint32_t luat_get_utc(uint32_t *tamp);
  *             See dhm.h for more details.
  *
  */
-#define MBEDTLS_DHM_C
+// #define MBEDTLS_DHM_C
 
 /**
  * \def MBEDTLS_ECDH_C
@@ -2812,7 +2813,7 @@ extern uint32_t luat_get_utc(uint32_t *tamp);
  * This module enables the AES-GCM and CAMELLIA-GCM ciphersuites, if other
  * requisites are enabled as well.
  */
-#define MBEDTLS_GCM_C
+// #define MBEDTLS_GCM_C
 
 /**
  * \def MBEDTLS_HAVEGE_C
@@ -3316,7 +3317,7 @@ extern uint32_t luat_get_utc(uint32_t *tamp);
  *
  * This module adds support for SHA-384 and SHA-512.
  */
-#define MBEDTLS_SHA512_C
+// #define MBEDTLS_SHA512_C
 
 /**
  * \def MBEDTLS_SSL_CACHE_C
@@ -3947,6 +3948,39 @@ extern uint32_t luat_get_utc(uint32_t *tamp);
 //#define MBEDTLS_ECDH_VARIANT_EVEREST_ENABLED
 
 /* \} name SECTION: Customisation configuration options */
+
+#ifdef CHIP_EC716
+
+// 禁用SHA512,节省10k
+// #undef MBEDTLS_SHA512_C
+
+// 禁用MBEDTLS_GCM_C, 节省2.5k
+// #undef MBEDTLS_GCM_C
+
+// 禁用MBEDTLS_DHM_C,节省0.5k
+// #undef MBEDTLS_DHM_C
+
+// 禁用全部椭圆算法, 节省10k
+#undef MBEDTLS_ECP_C
+#undef MBEDTLS_ECDSA_C
+#undef MBEDTLS_ECDH_C
+#undef MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA_ENABLED
+#undef MBEDTLS_KEY_EXCHANGE_ECDHE_RSA_ENABLED
+#undef MBEDTLS_ECP_DP_SECP192R1_ENABLED
+#undef MBEDTLS_ECP_DP_SECP224R1_ENABLED
+#undef MBEDTLS_ECP_DP_SECP256R1_ENABLED
+#undef MBEDTLS_ECP_DP_SECP384R1_ENABLED
+#undef MBEDTLS_ECP_DP_SECP521R1_ENABLED
+#undef MBEDTLS_ECP_DP_SECP192K1_ENABLED
+#undef MBEDTLS_ECP_DP_SECP224K1_ENABLED
+#undef MBEDTLS_ECP_DP_SECP256K1_ENABLED
+#undef MBEDTLS_ECP_DP_BP256R1_ENABLED
+#undef MBEDTLS_ECP_DP_BP384R1_ENABLED
+#undef MBEDTLS_ECP_DP_BP512R1_ENABLED
+#undef MBEDTLS_ECP_DP_CURVE25519_ENABLED
+#undef MBEDTLS_ECP_DP_CURVE448_ENABLED
+
+#endif
 
 /* Target and application specific configurations
  *
