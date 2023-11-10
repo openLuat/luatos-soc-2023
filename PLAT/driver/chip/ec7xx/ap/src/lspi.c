@@ -423,12 +423,12 @@ static int32_t lspiSetBusSpeed(uint32_t bps, lspiRes_t *lspi)
     }
     else // usp2
     {
-        CLOCK_setClockDiv(FCLK_USP2, 1); // usp2 fclk div. 1 div means 26M itself
-        #if 0
+        // CLOCK_setClockDiv(FCLK_USP2, 1); // usp2 fclk div. 1 div means 26M itself
+        #if 1
         CLOCK_clockEnable(FCLK_USP2);
         GPR_setClockSrc(FCLK_USP2, FCLK_USP2_SEL_102M);
         GPR_clockEnable(CLK_HF102M);
-        *(uint32_t*)0x4f00007c = 2<< 16;
+        *(uint32_t*)0x4f00007c = 1 << 16;
         #endif
     }
 
