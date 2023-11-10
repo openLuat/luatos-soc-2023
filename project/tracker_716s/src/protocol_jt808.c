@@ -7,6 +7,8 @@
 #include "time.h"
 #include "luat_mobile.h"
 #include "luat_base.h"
+#include "luat_adc.h"
+
 #define PROTOCOL_HEADER_JT808 0x7e
 #define PROTOCOL_HEADER_ESCAPE 0x7d
 
@@ -95,23 +97,23 @@ static uint8_t appconverthextobin(uint8_t ptr1,uint8_t ptr2)
 
 /**
  * @brief 打包标识位、消息头(终端手机号、流水号、消息包封装项)
- * 
+ *
  * @param pdata 消息数据
  * @param idx  消息偏移量
  * @param len  消息长度
  * @param total 消息总包数
- * @param part_num 包序号  
+ * @param part_num 包序号
  */
 static void protocol_jt_pack_head(uint8_t *pdata, uint16_t *idx, uint16_t len, uint16_t total, uint16_t part_num )
 {
     uint8_t imei[20] = {0};
-	
+
     if((*idx) + 13 > len)
     {
         LUAT_DEBUG_PRINT("protocol_jt_pack_head assert(len(%d)) failed.", len);
         return;
     }
-    
+
     pdata[(*idx)++]=PROTOCOL_HEADER_JT808;  // 1 bytes
     (*idx) += 4;  //id 2  len 2   total 4 bytes
 
@@ -142,7 +144,7 @@ static void protocol_jt_pack_head(uint8_t *pdata, uint16_t *idx, uint16_t len, u
             LUAT_DEBUG_PRINT("protocol_jt_pack_head assert(len(%d)) failed.", len);
             return;
         }
-        
+
         pdata[(*idx)++] = BHIGH_BYTE(total);
         pdata[(*idx)++] = BLOW_BYTE(total);
         pdata[(*idx)++] = BHIGH_BYTE(part_num);
@@ -152,7 +154,7 @@ static void protocol_jt_pack_head(uint8_t *pdata, uint16_t *idx, uint16_t len, u
 
 /**
  * @brief 打包消息头(ID、属性)、校验码、标识位
- * 
+ *
  * @param pdata 消息数据
  * @param idx  消息偏移量
  * @param cmd  消息ID
@@ -172,7 +174,7 @@ static void protocol_jt_pack_id_len(uint8_t *pdata, uint16_t *idx, uint16_t cmd,
 
     if(depart)
     {
-        depart = 1; 
+        depart = 1;
     }
     else
     {
@@ -180,7 +182,7 @@ static void protocol_jt_pack_id_len(uint8_t *pdata, uint16_t *idx, uint16_t cmd,
     }
 
     // len 2 bytes
-    // 保留(15 14)  分包(13) 加密(12 11 10) 长度(9-0) 
+    // 保留(15 14)  分包(13) 加密(12 11 10) 长度(9-0)
     attribute = len & 0x3FF + (((uint16_t)depart) << 13) + (((uint16_t)(sec & 0x7)) << 10);
     pdata[3] = BHIGH_BYTE(attribute);
     pdata[4] = BLOW_BYTE(attribute);
@@ -196,7 +198,7 @@ static void protocol_jt_pack_id_len(uint8_t *pdata, uint16_t *idx, uint16_t cmd,
 
 /**
  * @brief 转义处理
- * 
+ *
  * @param src 数据
  * @param src_len  数据长度
  * @param dest  处理后数据
@@ -225,7 +227,7 @@ void protocol_jt_pack_escape(uint8_t *src, uint16_t src_len, uint8_t *dest, uint
                 LUAT_DEBUG_PRINT("protocol_jt_pack_escape assert(dest_len(%d) >= %d) failed.", *dest_len, j + 2);
                 return;
             }
-            
+
             dest[j++] = PROTOCOL_HEADER_ESCAPE;
             dest[j++] = 0x02;
         }
@@ -236,7 +238,7 @@ void protocol_jt_pack_escape(uint8_t *src, uint16_t src_len, uint8_t *dest, uint
                 LUAT_DEBUG_PRINT("protocol_jt_pack_escape assert(dest_len(%d) >= %d) failed.", *dest_len, j + 2);
                 return;
             }
-            
+
             dest[j++] = PROTOCOL_HEADER_ESCAPE;
             dest[j++] = 0x01;
         }
@@ -247,18 +249,18 @@ void protocol_jt_pack_escape(uint8_t *src, uint16_t src_len, uint8_t *dest, uint
                 LUAT_DEBUG_PRINT("protocol_jt_pack_escape assert(dest_len(%d) >= %d) failed.", *dest_len, j + 1);
                 return;
             }
-            
+
             dest[j++] = src[i];
         }
     }
-    
+
     dest[j++] = src[i++];  //last byte 0x7e
     (*dest_len) = j;
 }
 
 /**
  * @brief 反转义处理
- * 
+ *
  * @param src 数据
  * @param src_len  数据长度
  */
@@ -305,7 +307,7 @@ static int protocol_jt_pack_unescape(uint8_t *src, uint16_t *src_len)
 
 /**
  * @brief 打包终端通用应答数据消息体
- * 
+ *
  * @param pdata 数据
  * @param idx  数据长度
  * @param len  消息体长度
@@ -324,7 +326,7 @@ static void protocol_jt_pack_server_info(uint8_t *pdata, uint16_t *idx, uint16_t
 
 /**
  * @brief 打包终端通用应答数据
- * 
+ *
  * @param pdata 数据
  * @param idx  数据长度
  * @param len  消息体数据长度
@@ -340,7 +342,7 @@ void protocol_jt_pack_general_ack(uint8_t *pdata, uint16_t *idx, uint16_t len)
         LUAT_DEBUG_PRINT("protocol_jt_pack_general_ack assert(luat_heap_malloc(%d)) failed.",len);
 		return;
 	}
-    
+
     protocol_jt_pack_head(send, &send_len, len, 1, 0);  // 13bytes | 17bytes
     protocol_jt_pack_server_info(send, &send_len, len, &content_len);  //5 bytes
     if((send_len + 2) > len)
@@ -351,7 +353,7 @@ void protocol_jt_pack_general_ack(uint8_t *pdata, uint16_t *idx, uint16_t len)
     }
     protocol_jt_pack_id_len(send, &send_len, JT_CMD_TERM_ACK, content_len, 0, false);  // 2bytes
     *idx = len;
-    protocol_jt_pack_escape(send, send_len, pdata, idx);  
+    protocol_jt_pack_escape(send, send_len, pdata, idx);
 
     luat_heap_free(send);
     return;
@@ -359,7 +361,7 @@ void protocol_jt_pack_general_ack(uint8_t *pdata, uint16_t *idx, uint16_t len)
 
 /**
  * @brief 打包终端心跳数据
- * 
+ *
  * @param pdata 数据
  * @param idx  数据长度
  * @param len  消息体数据长度
@@ -375,7 +377,7 @@ void protocol_jt_pack_heartbeat_msg(uint8_t *pdata, uint16_t *idx, uint16_t len)
         LUAT_DEBUG_PRINT("protocol_jt_pack_heartbeat_msg assert(luat_heap_malloc(%d)) failed.", len);
 		return;
 	}
-    
+
     protocol_jt_pack_head(send, &send_len, len, 1, 0);  // 13bytes | 17bytes
     if((send_len + 2) > len)
     {
@@ -385,7 +387,7 @@ void protocol_jt_pack_heartbeat_msg(uint8_t *pdata, uint16_t *idx, uint16_t len)
     }
     protocol_jt_pack_id_len(send, &send_len, JT_CMD_HEART_BEAT, content_len, 0, false);  // 2bytes
     *idx = len;
-    protocol_jt_pack_escape(send, send_len, pdata, idx);  
+    protocol_jt_pack_escape(send, send_len, pdata, idx);
 
     luat_heap_free(send);
     return;
@@ -393,7 +395,7 @@ void protocol_jt_pack_heartbeat_msg(uint8_t *pdata, uint16_t *idx, uint16_t len)
 
 /**
  * @brief 打包注销数据
- * 
+ *
  * @param pdata 数据
  * @param idx  数据长度
  * @param len  消息体数据长度
@@ -409,7 +411,7 @@ void protocol_jt_pack_logout_msg(uint8_t *pdata, uint16_t *idx, uint16_t len)
         LUAT_DEBUG_PRINT("protocol_jt_pack_logout_msg assert(luat_heap_malloc(%d)) failed.", len);
 		return;
 	}
-    
+
 
     protocol_jt_pack_head(send, &send_len, len, 1, 0);  // 13bytes | 17bytes
     if((send_len + 2) > len)
@@ -420,7 +422,7 @@ void protocol_jt_pack_logout_msg(uint8_t *pdata, uint16_t *idx, uint16_t len)
     }
     protocol_jt_pack_id_len(send, &send_len, JT_CMD_UNREGISTER, content_len, 0, false);  // 2bytes
     *idx = len;
-    protocol_jt_pack_escape(send, send_len, pdata, idx);  
+    protocol_jt_pack_escape(send, send_len, pdata, idx);
 
     luat_heap_free(send);
     return;
@@ -428,7 +430,7 @@ void protocol_jt_pack_logout_msg(uint8_t *pdata, uint16_t *idx, uint16_t len)
 
 /**
  * @brief 打包终端注册数据消息体
- * 
+ *
  * @param pdata 数据
  * @param idx  数据长度
  * @param len  消息体长度
@@ -436,14 +438,14 @@ void protocol_jt_pack_logout_msg(uint8_t *pdata, uint16_t *idx, uint16_t len)
  */
 static void protocol_jt_pack_register_info(uint8_t *pdata, uint16_t *idx, uint16_t len, uint16_t *return_len)
 {
-    uint8_t value_u8; 
-    uint16_t value_u16; 
+    uint8_t value_u8;
+    uint16_t value_u16;
     uint8_t at_type;
     uint8_t copy_len;
     uint16_t orginal_idx = *idx;
-    uint8_t value_string[30]; 
+    uint8_t value_string[30];
 	uint8_t app_ver;
-    
+
     //省域ID=2byte
     config_service_get(CFG_JT_PROVINCE, TYPE_SHORT, &value_u16, sizeof(value_u16));
     pdata[(*idx)++] = BHIGH_BYTE(value_u16);
@@ -453,7 +455,7 @@ static void protocol_jt_pack_register_info(uint8_t *pdata, uint16_t *idx, uint16
     config_service_get(CFG_JT_CITY, TYPE_SHORT, &value_u16, sizeof(value_u16));
     pdata[(*idx)++] = BHIGH_BYTE(value_u16);
     pdata[(*idx)++] = BLOW_BYTE(value_u16);
-    
+
     //制造商ID=5byte
     copy_len = 5;
     memset(value_string, 0 , copy_len);
@@ -467,7 +469,7 @@ static void protocol_jt_pack_register_info(uint8_t *pdata, uint16_t *idx, uint16
     config_service_get(CFG_DEVICETYPE, TYPE_SHORT, &value_string, sizeof(value_string));
     memcpy(&pdata[(*idx)], value_string, copy_len);
     (*idx) += copy_len;
-    
+
 
     //终端ID=7byte
     copy_len = 7;
@@ -475,23 +477,23 @@ static void protocol_jt_pack_register_info(uint8_t *pdata, uint16_t *idx, uint16
     config_service_get(CFG_JT_DEVICE_ID, TYPE_STRING, value_string, sizeof(value_string));
     memcpy(&pdata[(*idx)], value_string, copy_len);
     (*idx) += copy_len;
-    
+
     //车身颜色
     config_service_get(CFG_JT_VEHICLE_COLOR, TYPE_BYTE, &value_u8, sizeof(value_u8));
     pdata[(*idx)++] = value_u8;
-    
-    
+
+
     //车牌号码=nbyte     //default 12bytes
     config_service_get(CFG_JT_VEHICLE_NUMBER, TYPE_STRING, value_string, sizeof(value_string));
     memcpy(&pdata[(*idx)], value_string, copy_len);
     (*idx) += copy_len;
-    
+
     *return_len = (*idx) - orginal_idx;
 }
 
 /**
  * @brief 打包终端注册数据
- * 
+ *
  * @param pdata 数据
  * @param idx  数据长度
  * @param len  消息体数据长度
@@ -507,7 +509,7 @@ void protocol_jt_pack_regist_msg(uint8_t *pdata, uint16_t *idx, uint16_t len)
         LUAT_DEBUG_PRINT("protocol_jt_pack_regist_msg assert(luat_heap_malloc(%d)) failed.", len);
 		return;
 	}
-    
+
 
     protocol_jt_pack_head(send, &send_len, len, 1, 0);  // 13bytes
     protocol_jt_pack_register_info(send, &send_len, len, &content_len);   // max 57 bytes; default 33
@@ -520,14 +522,14 @@ void protocol_jt_pack_regist_msg(uint8_t *pdata, uint16_t *idx, uint16_t len)
     protocol_jt_pack_id_len(send, &send_len, JT_CMD_REGISTER, content_len, 0, false);  // 2bytes
 
     *idx = len;
-    protocol_jt_pack_escape(send, send_len, pdata, idx);  
-	
+    protocol_jt_pack_escape(send, send_len, pdata, idx);
+
     luat_heap_free(send);
 }
 
 /**
  * @brief 打包终端ICCID上报数据消息体
- * 
+ *
  * @param pdata 数据
  * @param idx  数据长度
  * @param len  消息体长度
@@ -537,7 +539,7 @@ static void protocol_jt_pack_iccid(uint8_t *pdata, uint16_t *idx, uint16_t len, 
 {
     uint8_t iccid[24] = {0};
     uint16_t content_len = 0;
-    
+
     if (luat_mobile_get_iccid(0, iccid, sizeof(iccid)) <= 0)
     {
         LUAT_DEBUG_PRINT("protocol_jt_pack_iccid can not get iccid");
@@ -553,7 +555,7 @@ static void protocol_jt_pack_iccid(uint8_t *pdata, uint16_t *idx, uint16_t len, 
         LUAT_DEBUG_PRINT("protocol_jt_pack_iccid assert(len(%d)) failed.", content_len);
         return;
     }
-    
+
     memcpy(&pdata[*idx], &iccid[0], content_len);
     (*idx) += content_len;
     *return_len = content_len;
@@ -561,7 +563,7 @@ static void protocol_jt_pack_iccid(uint8_t *pdata, uint16_t *idx, uint16_t len, 
 
 /**
  * @brief 打包终端ICCID上报数据
- * 
+ *
  * @param pdata 数据
  * @param idx  数据长度
  * @param len  消息体数据长度
@@ -577,7 +579,7 @@ void protocol_jt_pack_iccid_msg(uint8_t *pdata, uint16_t *idx, uint16_t len)
         LUAT_DEBUG_PRINT("protocol_jt_pack_iccid_msg assert(luat_heap_malloc(%d)) failed.", len);
 		return;
 	}
-    
+
 
     protocol_jt_pack_head(send, &send_len, len, 1, 0);  // 13bytes | 17bytes
     protocol_jt_pack_iccid(send, &send_len, len, &content_len);  //20 bytes
@@ -589,7 +591,7 @@ void protocol_jt_pack_iccid_msg(uint8_t *pdata, uint16_t *idx, uint16_t len)
     }
     protocol_jt_pack_id_len(send, &send_len, JT_CMD_ICCID, content_len, 0, false);  // 2bytes
     *idx = len;
-    protocol_jt_pack_escape(send, send_len, pdata, idx);  
+    protocol_jt_pack_escape(send, send_len, pdata, idx);
 
     luat_heap_free(send);
     return;
@@ -597,7 +599,7 @@ void protocol_jt_pack_iccid_msg(uint8_t *pdata, uint16_t *idx, uint16_t len)
 
 /**
  * @brief 打包终端鉴权数据消息体
- * 
+ *
  * @param pdata 数据
  * @param idx  数据长度
  * @param len  消息体长度
@@ -618,13 +620,13 @@ static void protocol_jt_pack_auth_code(uint8_t *pdata, uint16_t *idx, uint16_t l
         auth_code[0] = 0;
         content_len = 0;
     }
-    
+
     if((*idx) + content_len > len)
     {
         LUAT_DEBUG_PRINT("protocol_jt_pack_auth_code assert(len(%d)) failed.", content_len);
         return;
     }
-    
+
     memcpy(&pdata[*idx], &auth_code[1], content_len);
     (*idx) += content_len;
 
@@ -633,7 +635,7 @@ static void protocol_jt_pack_auth_code(uint8_t *pdata, uint16_t *idx, uint16_t l
 
 /**
  * @brief 打包终端鉴权数据
- * 
+ *
  * @param pdata 数据
  * @param idx  数据长度
  * @param len  消息体数据长度
@@ -649,10 +651,10 @@ void protocol_jt_pack_auth_msg(uint8_t *pdata, uint16_t *idx, uint16_t len)
         LUAT_DEBUG_PRINT("protocol_jt_pack_auth_msg assert(luat_heap_malloc(%d)) failed.", len);
 		return;
 	}
-    
+
 
     protocol_jt_pack_head(send, &send_len, len, 1, 0);  // 13bytes | 17bytes
-    protocol_jt_pack_auth_code(send, &send_len, len, &content_len); 
+    protocol_jt_pack_auth_code(send, &send_len, len, &content_len);
     if((send_len + 2) > len)
     {
         LUAT_DEBUG_PRINT("protocol_jt_pack_auth_msg assert(len(%d)) failed.", len);
@@ -660,9 +662,9 @@ void protocol_jt_pack_auth_msg(uint8_t *pdata, uint16_t *idx, uint16_t len)
         return;
     }
     protocol_jt_pack_id_len(send, &send_len, JT_CMD_AUTH, content_len, 0, false);  // 2bytes
-    
+
     *idx = len;
-    protocol_jt_pack_escape(send, send_len, pdata, idx);  
+    protocol_jt_pack_escape(send, send_len, pdata, idx);
 
     luat_heap_free(send);
     return;
@@ -672,13 +674,13 @@ static void protocol_jt_pack_item_num(uint8_t *pdata, uint16_t *idx, uint32_t it
 {
     uint16_t value_u16;
     uint8_t value_u8;
-    
+
     pdata[(*idx)++] = BHIGH_BYTE(WHIGH_WORD(item));
     pdata[(*idx)++] = BLOW_BYTE(WHIGH_WORD(item));
     pdata[(*idx)++] = BHIGH_BYTE(WLOW_WORD(item));
     pdata[(*idx)++] = BLOW_BYTE(WLOW_WORD(item));
     pdata[(*idx)++] = item_len;
-    
+
     if(item_len == 4)
     {
         pdata[(*idx)++] = BHIGH_BYTE(WHIGH_WORD(value));
@@ -697,7 +699,7 @@ static void protocol_jt_pack_item_num(uint8_t *pdata, uint16_t *idx, uint32_t it
         value_u8 = value;
         pdata[(*idx)++] = value_u8;
     }
-    
+
     //(*idx) += item_len;
 }
 
@@ -708,14 +710,14 @@ static void protocol_jt_pack_item_string(uint8_t *pdata, uint16_t *idx, uint32_t
     pdata[(*idx)++] = BHIGH_BYTE(WLOW_WORD(item));
     pdata[(*idx)++] = BLOW_BYTE(WLOW_WORD(item));
     pdata[(*idx)++] = item_len;
-    
+
     memcpy(&pdata[(*idx)], pitem, item_len);
     (*idx) += item_len;
 }
 
 /**
  * @brief 打包查询终端参数应答数据消息体
- * 
+ *
  * @param pdata 数据
  * @param idx  数据长度
  * @param len  消息体长度
@@ -728,20 +730,20 @@ static void protocol_jt_pack_param_info(uint8_t *pdata, uint16_t *idx, uint16_t 
     uint8_t value_u8;
     uint8_t value_str[26];
     uint32_t value_u32 = 0;
-    
+
     pdata[(*idx)++] = BHIGH_BYTE(s_jt_msg_save.server_serial);
     pdata[(*idx)++] = BLOW_BYTE(s_jt_msg_save.server_serial);
     pdata[(*idx)++] = 40;  // total 40 items
 
     config_service_get(CFG_HEART_INTERVAL, TYPE_SHORT, &value_u16, sizeof(value_u16));
     protocol_jt_pack_item_num(pdata, idx, JT_PARAM_HEART_INTERVAL, value_u16, 4);
-    
+
     protocol_jt_pack_item_num(pdata, idx, 0x0002, 0, 4);
     protocol_jt_pack_item_num(pdata, idx, 0x0003, 0, 4);
     protocol_jt_pack_item_num(pdata, idx, 0x0004, 0, 4);
     protocol_jt_pack_item_num(pdata, idx, 0x0005, 0, 4);
 
-    
+
     protocol_jt_pack_item_num(pdata, idx, 0x0006, 0, 4);
     protocol_jt_pack_item_num(pdata, idx, 0x0007, 0, 4);
 
@@ -751,7 +753,7 @@ static void protocol_jt_pack_param_info(uint8_t *pdata, uint16_t *idx, uint16_t 
     protocol_jt_pack_item_string(pdata, idx, 0x0011, value_str, 0);
     protocol_jt_pack_item_string(pdata, idx, 0x0012, value_str, 0);
 
-    
+
     protocol_jt_pack_item_string(pdata, idx, 0x0013, value_str, 0);
     protocol_jt_pack_item_string(pdata, idx, 0x0014, value_str, 0);
     protocol_jt_pack_item_string(pdata, idx, 0x0015, value_str, 0);
@@ -787,7 +789,7 @@ static void protocol_jt_pack_param_info(uint8_t *pdata, uint16_t *idx, uint16_t 
     protocol_jt_pack_item_num(pdata, idx, 0x0059, 0, 4);
     protocol_jt_pack_item_num(pdata, idx, 0x005A, 0, 4);
 
-    
+
     protocol_jt_pack_item_num(pdata, idx, 0x0070, 0, 4);
     protocol_jt_pack_item_num(pdata, idx, 0x0071, 0, 4);
     protocol_jt_pack_item_num(pdata, idx, 0x0072, 0, 4);
@@ -808,13 +810,13 @@ static void protocol_jt_pack_param_info(uint8_t *pdata, uint16_t *idx, uint16_t 
 
     config_service_get(CFG_JT_VEHICLE_COLOR, TYPE_BYTE, &value_u8, sizeof(value_u8));
     protocol_jt_pack_item_num(pdata, idx, JT_PARAM_BRAND_COLOR, value_u8, 1);
-    
+
     *return_len = (*idx) - orginal_idx;
 }
 
 /**
  * @brief 打包查询终端参数应答数据
- * 
+ *
  * @param pdata 数据
  * @param idx  数据长度
  * @param len  消息体数据长度
@@ -830,7 +832,7 @@ void protocol_jt_pack_param_ack(uint8_t *pdata, uint16_t *idx, uint16_t len)
         LUAT_DEBUG_PRINT("protocol_jt_pack_general_ack assert(luat_heap_malloc(%d)) failed.", len);
 		return;
 	}
-    
+
 
     protocol_jt_pack_head(send, &send_len, len, 1, 0);  // 13bytes | 17bytes
     protocol_jt_pack_param_info(send, &send_len, len, &content_len);  //5 bytes
@@ -842,7 +844,7 @@ void protocol_jt_pack_param_ack(uint8_t *pdata, uint16_t *idx, uint16_t len)
     }
     protocol_jt_pack_id_len(send, &send_len, JT_CMD_GET_PARAM_ACK, content_len, 0, false);  // 2bytes
     *idx = len;
-    protocol_jt_pack_escape(send, send_len, pdata, idx);  
+    protocol_jt_pack_escape(send, send_len, pdata, idx);
 
     luat_heap_free(send);
     return;
@@ -852,7 +854,7 @@ static void protocol_jt_pack_alarm_status(uint8_t *pdata, uint16_t *idx, uint16_
 {
     uint32_t sys_state;
     uint32_t alarm_state = 0;
-    
+
     if((*idx) + 4 > len)
     {
         LUAT_DEBUG_PRINT("protocol_jt_pack_alarm_status assert(len(%d)) failed.", len);
@@ -862,7 +864,7 @@ static void protocol_jt_pack_alarm_status(uint8_t *pdata, uint16_t *idx, uint16_
 /*
     sys_state = system_state_get_status_bits();
 
-	
+
 	if(sys_state & SYSBIT_ALARM_SOS)
     {
         SET_BIT0(alarm_state);
@@ -871,7 +873,7 @@ static void protocol_jt_pack_alarm_status(uint8_t *pdata, uint16_t *idx, uint16_
     {
         SET_BIT1(alarm_state);
     }
-    
+
     if(sys_state & SYSBIT_ALARM_LOW_POWER)
     {
         SET_BIT7(alarm_state);
@@ -896,7 +898,7 @@ static void protocol_jt_pack_alarm_status(uint8_t *pdata, uint16_t *idx, uint16_
     {
         SET_BIT29(alarm_state);
     }
-    
+
     if(sys_state & SYSBIT_ALARM_SPEED_DOWN)
     {
         SET_BIT30(alarm_state);
@@ -906,7 +908,7 @@ static void protocol_jt_pack_alarm_status(uint8_t *pdata, uint16_t *idx, uint16_
     {
         SET_BIT31(alarm_state);
     }
-*/    
+*/
     pdata[(*idx)++] = BHIGH_BYTE(WHIGH_WORD(alarm_state));
     pdata[(*idx)++] = BLOW_BYTE(WHIGH_WORD(alarm_state));
     pdata[(*idx)++] = BHIGH_BYTE(WLOW_WORD(alarm_state));
@@ -928,19 +930,19 @@ static void protocol_jt_pack_device_status(uint8_t *pdata, uint16_t *idx, uint16
     {
         device_status |= (1 << 1);
     }
-    
+
     // 纬度
     if (gpsx->nshemi == 'S')
     {
         device_status |= (1 << 2);  //南纬
     }
-    
+
     // 经度
     if (gpsx->ewhemi == 'W')
     {
         device_status |= (1 << 3);  //西经
     }
-	
+
     if (config_relay_get())
     {
         device_status |= (1 << 10);
@@ -950,7 +952,7 @@ static void protocol_jt_pack_device_status(uint8_t *pdata, uint16_t *idx, uint16
     pdata[(*idx)++] = BLOW_BYTE(WHIGH_WORD(device_status));
     pdata[(*idx)++] = BHIGH_BYTE(WLOW_WORD(device_status));
     pdata[(*idx)++] = BLOW_BYTE(WLOW_WORD(device_status));
-    
+
     *return_len = 4;
 }
 
@@ -976,7 +978,7 @@ static void protocol_jt_pack_gps_info(uint8_t *pdata, uint16_t *idx, uint16_t le
     uint16_t gps_angle = 0;
     uint16_t gps_hightv = 0;
     uint8_t i;
-    
+
     latitudev = gpsx->latitude;
     longitudev = gpsx->longitude;
     gps_hightv = ((uint16_t)gpsx->altitude >= 8000 || (uint16_t)gpsx->altitude < 0) ? 0 : ((uint16_t)gpsx->altitude);
@@ -1024,7 +1026,7 @@ static void protocol_jt_pack_gps_info(uint8_t *pdata, uint16_t *idx, uint16_t le
 
 /**
  * @brief 打包位置信息汇报数据
- * 
+ *
  * @param pdata 数据
  * @param idx  数据长度
  * @param len  消息体数据长度
@@ -1052,11 +1054,24 @@ void protocol_jt_pack_gps_msg(nmea_msg *gpsx, uint8_t *pdata, uint16_t *idx, uin
     content_all += content_len;
     protocol_jt_pack_gps_info(send, &send_len, len, &content_len,gpsx);  //20 bytes
     content_all += content_len;
-    if(need_base_station_info)
+    LUAT_DEBUG_PRINT("need_base_station_info%d", need_base_station_info);
+    if(need_base_station_info==1)
     {
         protocol_jt_pack_base_station_info(send, &send_len, len, &content_len);
         content_all += content_len;
     }
+    else if (need_base_station_info==2)
+    {
+        protocol_jt_pack_gps_station_info(send, &send_len, len, &content_len);
+        content_all += content_len;
+    }
+    else if (need_base_station_info==3)
+    {
+        protocol_jt_pack_volt_station_info(send, &send_len, len, &content_len);
+        content_all += content_len;
+    }
+
+
 
     if((send_len + 2) > len)
     {
@@ -1064,58 +1079,102 @@ void protocol_jt_pack_gps_msg(nmea_msg *gpsx, uint8_t *pdata, uint16_t *idx, uin
         luat_heap_free(send);
         return;
     }
+        LUAT_DEBUG_PRINT("content_all %d",content_all);
     protocol_jt_pack_id_len(send, &send_len, JT_CMD_LOCATE, content_all, 0, false);  // 2bytes
+        LUAT_DEBUG_PRINT("content_all %d",content_all);
     *idx = len;
-    protocol_jt_pack_escape(send, send_len, pdata, idx);  
+    protocol_jt_pack_escape(send, send_len, pdata, idx);
 
     luat_heap_free(send);
-    
+
     return;
 }
 
 void protocol_jt_pack_base_station_info(uint8_t *pdata, uint16_t *idx, uint16_t len, uint16_t *return_len)
 {
-	luat_mobile_cell_info_t cell_info;
-    int ret = luat_mobile_get_cell_info(&cell_info);//同步方式获取cell_info
-    uint16_t mnc = cell_info.lte_service_info.mnc;
-    uint16_t mcc = cell_info.lte_service_info.mcc;
-    uint16_t tac = cell_info.lte_service_info.tac;
-    uint32_t rssi = cell_info.lte_service_info.rssi;
-    uint32_t cid = cell_info.lte_service_info.cid;
-    LUAT_DEBUG_PRINT("TEST CELL INFO %d, %d, %d, %d, %d", mnc, mcc, tac, cid, rssi);
-    pdata[(*idx)++] = 0x53;
-    pdata[(*idx)++] = 0x0b;
-    pdata[(*idx)++] = 0x01;
-    pdata[(*idx)++] = BHIGH_BYTE(mcc);
-    pdata[(*idx)++] = BLOW_BYTE(mcc);
-    pdata[(*idx)++] = mnc;
-    pdata[(*idx)++] = BHIGH_BYTE(tac);
-    pdata[(*idx)++] = BLOW_BYTE(tac);
+	// luat_mobile_cell_info_t cell_info;
+    // int ret = luat_mobile_get_cell_info(&cell_info);//同步方式获取cell_info
+    // uint16_t mnc = cell_info.lte_service_info.mnc;
+    // uint16_t mcc = cell_info.lte_service_info.mcc;
+    // uint16_t tac = cell_info.lte_service_info.tac;
+    // uint32_t rssi = cell_info.lte_service_info.rssi;
+    // uint32_t cid = cell_info.lte_service_info.cid;
+    // LUAT_DEBUG_PRINT("TEST CELL INFO %d, %d, %d, %d, %d", mnc, mcc, tac, cid, rssi);
+    // pdata[(*idx)++] = 0x53;
+    // pdata[(*idx)++] = 0x0b;
+    // pdata[(*idx)++] = 0x01;
+    // pdata[(*idx)++] = BHIGH_BYTE(mcc);
+    // pdata[(*idx)++] = BLOW_BYTE(mcc);
+    // pdata[(*idx)++] = mnc;
+    // pdata[(*idx)++] = BHIGH_BYTE(tac);
+    // pdata[(*idx)++] = BLOW_BYTE(tac);
 
-    pdata[(*idx)++] = BHIGH_BYTE(WHIGH_WORD(cid));
-    pdata[(*idx)++] = BLOW_BYTE(WHIGH_WORD(cid));
-    pdata[(*idx)++] = BHIGH_BYTE(WLOW_WORD(cid));
-    pdata[(*idx)++] = BLOW_BYTE(WLOW_WORD(cid));
-    uint8_t retRssi;
-    if (rssi <= -113)
+    // pdata[(*idx)++] = BHIGH_BYTE(WHIGH_WORD(cid));
+    // pdata[(*idx)++] = BLOW_BYTE(WHIGH_WORD(cid));
+    // pdata[(*idx)++] = BHIGH_BYTE(WLOW_WORD(cid));
+    // pdata[(*idx)++] = BLOW_BYTE(WLOW_WORD(cid));
+    // uint8_t retRssi;
+    // if (rssi <= -113)
+    // {
+    //     retRssi = 0;
+    // }
+    // else if (rssi < -52)
+    // {
+    //     retRssi = (rssi + 113) >> 1;
+    // }
+    // else
+    // {
+    //     retRssi = 31;
+    // }
+    // pdata[(*idx)++] = retRssi;
+    // *return_len = 13;
+
+
+    uint8_t csq = soc_mobile_get_csq();
+    if(csq >= 25)
     {
-        retRssi = 0;
+        csq = 100;
     }
-    else if (rssi < -52)
+    else if(15 < csq < 25)
     {
-        retRssi = (rssi + 113) >> 1;
+        csq = 60;
     }
     else
     {
-        retRssi = 31;
+        csq = 10;
     }
-    pdata[(*idx)++] = retRssi;
-    *return_len = 13;
+    pdata[(*idx)++] = 0x30;
+    pdata[(*idx)++] = BHIGH_BYTE(csq);
+    pdata[(*idx)++] = BLOW_BYTE(csq);
+    LUAT_DEBUG_PRINT("当前信号:%d",csq);
+    csq = 0;
+    *return_len = 3;
+}
+
+void protocol_jt_pack_gps_station_info(uint8_t *pdata, uint16_t *idx, uint16_t len, uint16_t *return_len)
+{
+    extern nmea_msg gpsx;
+    LUAT_DEBUG_PRINT("GPS个数:%d",gpsx.posslnum);
+    pdata[(*idx)++] = 0x31;
+    pdata[(*idx)++] = BHIGH_BYTE(gpsx.posslnum);
+    pdata[(*idx)++] = BLOW_BYTE(gpsx.posslnum);
+    *return_len = 3;
+}
+
+void protocol_jt_pack_volt_station_info(uint8_t *pdata, uint16_t *idx, uint16_t len, uint16_t *return_len)
+{
+    uint8_t vbat = change_vbat_volt();
+    pdata[(*idx)++] = 0x04;
+    pdata[(*idx)++] = BHIGH_BYTE(0);
+    pdata[(*idx)++] = BLOW_BYTE(0);
+    pdata[(*idx)++] = BHIGH_BYTE(vbat*258);
+    pdata[(*idx)++] = BLOW_BYTE(vbat*258);
+    *return_len = 5;
 }
 
 /**
  * @brief 打包终端文本数据
- * 
+ *
  * @param pdata 数据
  * @param idx  数据长度
  * @param len  消息体数据长度
@@ -1132,7 +1191,7 @@ void protocol_jt_pack_remote_ack(uint8_t *pdata, uint16_t *idx, uint16_t len, ui
         LUAT_DEBUG_PRINT("protocol_jt_pack_remote_ack assert(luat_heap_malloc send(%d)) failed.", len);
 		return;
 	}
-    
+
     protocol_jt_pack_head(send, &send_len, len, 1, 0);  // 13bytes | 17bytes
 
 	send[send_len] = 2;	//添加JT808协议, 文本信息编码方式, 默认编码 0:GBK; 1:UCS2; 2:UTF8
@@ -1149,7 +1208,7 @@ void protocol_jt_pack_remote_ack(uint8_t *pdata, uint16_t *idx, uint16_t len, ui
     }
     protocol_jt_pack_id_len(send, &send_len, JT_CMD_TEXT_RESULT, content_len, 0, false);  // 2bytes
     *idx = len;
-    protocol_jt_pack_escape(send, send_len, pdata, idx);  
+    protocol_jt_pack_escape(send, send_len, pdata, idx);
 
     luat_heap_free(send);
     return;
@@ -1165,9 +1224,9 @@ static void protocol_jt_parse_plat_ack(uint8_t* pdata, uint16_t len)
     uint16_t msg_id;
 
     msg_info = ((uint16_t)pdata[3]<<8)+pdata[4];
-    
-    // 保留(15 14)  分包(13) 加密(12 11 10) 长度(9-0) 
-    msg_len = msg_info & 0x3FF; 
+
+    // 保留(15 14)  分包(13) 加密(12 11 10) 长度(9-0)
+    msg_len = msg_info & 0x3FF;
     msg_depart =(msg_info & JT_DATA_DEPART_FLAG)?1:0;
     msg_sec = (msg_info & JT_DATA_SEC_FLAG) >> 10;
     data_start = msg_depart ? 17: 13;
@@ -1180,7 +1239,7 @@ static void protocol_jt_parse_plat_ack(uint8_t* pdata, uint16_t len)
         LUAT_DEBUG_PRINT("protocol_jt_parse_plat_ack assert(len(%d)).", len);
         return;
     }
-    
+
     msg_id =  ((uint16_t)pdata[data_start + 2]<<8)+pdata[data_start + 3];
     switch(msg_id)
     {
@@ -1223,8 +1282,8 @@ static void protocol_jt_parse_register_ack(uint8_t* pdata, uint16_t len)
     uint8_t value_u8;
 
     msg_info = ((uint16_t)pdata[3]<<8)+pdata[4];
-    
-    // 保留(15 14)  分包(13) 加密(12 11 10) 长度(9-0) 
+
+    // 保留(15 14)  分包(13) 加密(12 11 10) 长度(9-0)
     msg_len = msg_info & 0x3FF;
     msg_depart =(msg_info & JT_DATA_DEPART_FLAG)?1:0;
     msg_sec = (msg_info & JT_DATA_SEC_FLAG) >> 10;
@@ -1237,7 +1296,7 @@ static void protocol_jt_parse_register_ack(uint8_t* pdata, uint16_t len)
         LUAT_DEBUG_PRINT("protocol_jt_parse_register_ack assert(len(%d)).", len);
         return;
     }
-    
+
 
     //0 注册成功   3 终端 已注册
     if(pdata[data_start + 2] == 0 || pdata[data_start + 2] == 3)
@@ -1272,7 +1331,7 @@ static void protocol_jt_parse_set_param(uint8_t* pdata, uint16_t len)
     uint16_t msg_len = 0;
     uint8_t msg_depart = 0;
     uint8_t msg_sec = 0;
-    
+
     uint8_t data_start = 0;
     uint8_t data_count = 0;
     uint8_t para_idx = 0;
@@ -1283,12 +1342,12 @@ static void protocol_jt_parse_set_param(uint8_t* pdata, uint16_t len)
     uint8_t value_u8;
     uint32_t value_u32;
     uint64_t value_u64;
-    
+
     s_jt_msg_save.msg_id = ((uint16_t)pdata[1]<<8)+pdata[2];
     s_jt_msg_save.server_serial = ((uint16_t)pdata[11]<<8)+pdata[12];
     msg_info = ((uint16_t)pdata[3]<<8)+pdata[4];
-    
-    // 保留(15 14)  分包(13) 加密(12 11 10) 长度(9-0) 
+
+    // 保留(15 14)  分包(13) 加密(12 11 10) 长度(9-0)
     msg_len = msg_info & 0x3FF;
     msg_depart =(msg_info & JT_DATA_DEPART_FLAG)?1:0;
     msg_sec = (msg_info & JT_DATA_SEC_FLAG) >> 10;
@@ -1438,14 +1497,14 @@ static void protocol_jt_parse_set_param(uint8_t* pdata, uint16_t len)
 
         data_start += para_len;
     }
-    
+
     if(data_count > 0)
     {
         //config_service_save_to_local();
-        
-        //发送ack   
+
+        //发送ack
         //gps_service_after_server_req();
-        
+
         //gps_service_change_config();
     }
 }
@@ -1459,8 +1518,8 @@ static void protocol_jt_parse_get_param(uint8_t* pdata, uint16_t len)
     uint8_t data_start;
 
     msg_info = ((uint16_t)pdata[3]<<8)+pdata[4];
-    
-    // 保留(15 14)  分包(13) 加密(12 11 10) 长度(9-0) 
+
+    // 保留(15 14)  分包(13) 加密(12 11 10) 长度(9-0)
     msg_len = msg_info & 0x3FF;
     msg_depart =(msg_info & JT_DATA_DEPART_FLAG)?1:0;
     msg_sec = (msg_info & JT_DATA_SEC_FLAG) >> 10;
@@ -1472,7 +1531,7 @@ static void protocol_jt_parse_get_param(uint8_t* pdata, uint16_t len)
         LUAT_DEBUG_PRINT("protocol_jt_parse_get_param assert(len(%d)).", len);
         return;
     }
-    
+
     s_jt_msg_save.msg_id = ((uint16_t)pdata[1]<<8)+pdata[2];
     s_jt_msg_save.server_serial = ((uint16_t)pdata[11]<<8)+pdata[12];
 
@@ -1487,10 +1546,10 @@ static void protocol_jt_parse_terminal_control(uint8_t* pdata, uint16_t len)
     uint8_t msg_sec;
     uint8_t data_start;
 	int ret = 0;
-	
+
     msg_info = ((uint16_t)pdata[3]<<8)+pdata[4];
-    
-    // 保留(15 14)  分包(13) 加密(12 11 10) 长度(9-0) 
+
+    // 保留(15 14)  分包(13) 加密(12 11 10) 长度(9-0)
     msg_len = msg_info & 0x3FF;
     msg_depart =(msg_info & JT_DATA_DEPART_FLAG)?1:0;
     msg_sec = (msg_info & JT_DATA_SEC_FLAG) >> 10;
@@ -1502,7 +1561,7 @@ static void protocol_jt_parse_terminal_control(uint8_t* pdata, uint16_t len)
         LUAT_DEBUG_PRINT("protocol_jt_parse_terminal_control assert(len(%d)).", len);
         return;
     }
-    
+
     s_jt_msg_save.msg_id = ((uint16_t)pdata[1]<<8)+pdata[2];
     s_jt_msg_save.server_serial = ((uint16_t)pdata[11]<<8)+pdata[12];
 
@@ -1513,7 +1572,7 @@ static void protocol_jt_parse_terminal_control(uint8_t* pdata, uint16_t len)
             ret=0;
             LUAT_DEBUG_PRINT("protocol_jt_parse_terminal_control hard_ware_reboot.");
             break;
-        case 0x64: //断油电 
+        case 0x64: //断油电
             ret = config_relay_set(0);
             LUAT_DEBUG_PRINT("protocol_jt_parse_terminal_control hard_ware_set_relay broke.");
             break;
@@ -1522,7 +1581,7 @@ static void protocol_jt_parse_terminal_control(uint8_t* pdata, uint16_t len)
             LUAT_DEBUG_PRINT("protocol_jt_parse_terminal_control hard_ware_set_relay good.");
             break;
     }
-    
+
     if(0 == ret)
     {
         s_jt_msg_save.msg_result = 0;  //成功
@@ -1531,8 +1590,8 @@ static void protocol_jt_parse_terminal_control(uint8_t* pdata, uint16_t len)
     {
         s_jt_msg_save.msg_result = 1;  //失败
     }
-    
-    //发送ack   
+
+    //发送ack
     //gps_service_after_server_req();
 }
 
@@ -1545,8 +1604,8 @@ static void protocol_jt_parse_gps_req(uint8_t* pdata, uint16_t len)
     uint8_t data_start;
 
     msg_info = ((uint16_t)pdata[3]<<8)+pdata[4];
-    
-    // 保留(15 14)  分包(13) 加密(12 11 10) 长度(9-0) 
+
+    // 保留(15 14)  分包(13) 加密(12 11 10) 长度(9-0)
     msg_len = msg_info & 0x3FF;
     msg_depart =(msg_info & JT_DATA_DEPART_FLAG)?1:0;
     msg_sec = (msg_info & JT_DATA_SEC_FLAG) >> 10;
@@ -1558,12 +1617,12 @@ static void protocol_jt_parse_gps_req(uint8_t* pdata, uint16_t len)
         LUAT_DEBUG_PRINT("protocol_jt_parse_gps_req assert(len(%d)).", len);
         return;
     }
-    
+
     s_jt_msg_save.msg_id = ((uint16_t)pdata[1]<<8)+pdata[2];
     s_jt_msg_save.server_serial = ((uint16_t)pdata[11]<<8)+pdata[12];
     s_jt_msg_save.msg_result = 0;  //成功
 
-    
+
     //发送定位数据
     //gps_service_after_server_locate_req();
 }
@@ -1577,8 +1636,8 @@ static void protocol_jt_parse_general_msg(uint8_t* pdata, uint16_t len)
     uint8_t data_start;
 
     msg_info = ((uint16_t)pdata[3]<<8)+pdata[4];
-    
-    // 保留(15 14)  分包(13) 加密(12 11 10) 长度(9-0) 
+
+    // 保留(15 14)  分包(13) 加密(12 11 10) 长度(9-0)
     msg_len = msg_info & 0x3FF;
     msg_depart =(msg_info & JT_DATA_DEPART_FLAG)?1:0;
     msg_sec = (msg_info & JT_DATA_SEC_FLAG) >> 10;
@@ -1590,13 +1649,13 @@ static void protocol_jt_parse_general_msg(uint8_t* pdata, uint16_t len)
         LUAT_DEBUG_PRINT("protocol_jt_parse_general_msg assert(len(%d)).", len);
         return;
     }
-    
+
     s_jt_msg_save.msg_id = ((uint16_t)pdata[1]<<8)+pdata[2];
     s_jt_msg_save.server_serial = ((uint16_t)pdata[11]<<8)+pdata[12];
     s_jt_msg_save.msg_result = 0;  //成功
 
-    
-    //发送ack   
+
+    //发送ack
     //gps_service_after_server_req();
 }
 
@@ -1612,8 +1671,8 @@ static void protocol_jt_parse_text(uint8_t* pdata, uint16_t len)
     uint8_t data_start;
 
     msg_info = ((uint16_t)pdata[3]<<8)+pdata[4];
-    
-    // 保留(15 14)  分包(13) 加密(12 11 10) 长度(9-0) 
+
+    // 保留(15 14)  分包(13) 加密(12 11 10) 长度(9-0)
     msg_len = msg_info & 0x3FF;
     msg_depart =(msg_info & JT_DATA_DEPART_FLAG)?1:0;
     msg_sec = (msg_info & JT_DATA_SEC_FLAG) >> 10;
@@ -1625,7 +1684,7 @@ static void protocol_jt_parse_text(uint8_t* pdata, uint16_t len)
         LUAT_DEBUG_PRINT("protocol_jt_parse_text assert(len(%d)).", len);
         return;
     }
-    
+
     s_jt_msg_save.msg_id = ((uint16_t)pdata[1]<<8)+pdata[2];
     s_jt_msg_save.server_serial = ((uint16_t)pdata[11]<<8)+pdata[12];
     s_jt_msg_save.msg_result = 0;  //成功
@@ -1636,7 +1695,7 @@ static void protocol_jt_parse_text(uint8_t* pdata, uint16_t len)
         LUAT_DEBUG_PRINT("protocol_concox_parse_remote_msg assert(luat_heap_malloc(%d)) failed.", CMD_MAX_LEN + 1);
         return;
     }
-    
+
     memset(pOut, 0x00, CMD_MAX_LEN + 1);
 
     // flag(1) command(N)
@@ -1646,21 +1705,21 @@ static void protocol_jt_parse_text(uint8_t* pdata, uint16_t len)
     protocol_text_receive_data(&pdata[idx], msg_len - 1, pOut, ENGLISH);
 
     out_len = strlen((char *)pOut);
-    
+
     if (out_len > 0)
     {
         LUAT_DEBUG_PRINT("protocol_jt_parse_text data:%s", pOut);
         //gps_service_after_receive_remote_msg(pOut, out_len);
     }
-    
-    //发送ack   
+
+    //发送ack
     //gps_service_after_server_req();
     luat_heap_free(pOut);
 }
 
 /**
  * @brief 数据解析
- * 
+ *
  * @param pdata 数据
  * @param len  数据长度
  */
@@ -1693,43 +1752,43 @@ void protocol_jt_parse_msg(uint8_t *pdata, uint16_t len)
         case JT_CMD_PLAT_ACK:
             LUAT_DEBUG_PRINT("protocol_jt_parse_msg(JT_CMD_PLAT_ACK).");
             protocol_jt_parse_plat_ack(pdata,len);
-			
+
             break;
         case JT_CMD_REGISTER_ACK:
             LUAT_DEBUG_PRINT("protocol_jt_parse_msg(JT_CMD_REGISTER_ACK).");
             protocol_jt_parse_register_ack(pdata,len);
-			
+
             break;
         case JT_CMD_SET_PARAM:
             LUAT_DEBUG_PRINT("protocol_jt_parse_msg(JT_CMD_SET_PARAM).");
             protocol_jt_parse_set_param(pdata,len);
-			
+
             break;
         case JT_CMD_GET_PARAM:
             LUAT_DEBUG_PRINT("protocol_jt_parse_msg(JT_CMD_GET_PARAM).");
             protocol_jt_parse_get_param(pdata,len);
-			
+
             break;
         case JT_CMD_TERM_CTL:
             LUAT_DEBUG_PRINT("protocol_jt_parse_msg(JT_CMD_TERM_CTL).");
             protocol_jt_parse_terminal_control(pdata,len);
-			
+
             break;
         case JT_CMD_LOCATE_REQ:
             LUAT_DEBUG_PRINT("protocol_jt_parse_msg(JT_CMD_LOCATE_REQ).");
             protocol_jt_parse_gps_req(pdata,len);
-			
+
             break;
         case JT_CMD_TEXT:
             LUAT_DEBUG_PRINT("protocol_jt_parse_msg(JT_CMD_TEXT).");
             protocol_jt_parse_text(pdata,len);
-			
+
             break;
         default:
             LUAT_DEBUG_PRINT("protocol_jt_parse_msg(%04x).",cmd);
             //log_service_print_hex((const char *)pdata,len);
             protocol_jt_parse_general_msg(pdata,len);
-			
+
             break;
     }
 }

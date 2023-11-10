@@ -72,7 +72,10 @@ target("ap_bootloader.elf")
     add_linkdirs("$(projectdir)/lib/")
 
     add_linkgroups("core_airm2m","middleware_ec","lzma","osa","middleware_ec_private","ccio","fota",
-                    "deltapatch2","driver_private_bl","bootloader","usbbl_priv","startup","ffota", {whole = true})
+                    "deltapatch2","driver_private_bl","bootloader","usbbl_priv","startup", {whole = true})
+    if CHIP_TARGET == "ec718p" then
+        add_linkgroups("ffota", {whole = true})
+    end
 
     add_ldflags("-T$(projectdir)/PLAT/core/ld/ec7xx_0h00_flash_bl.ld","-Wl,-Map,$(buildir)/ap_bootloader/ap_bootloader_$(mode).map",{force = true})
     
