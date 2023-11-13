@@ -42,12 +42,12 @@ int luat_mcu_get_clk(void) {
 
 
 // 隐藏API, 头文件里没有
-uint8_t QSPI_FLASH_ReadUUID(uint8_t* uuid, uint32_t* validlen);
+uint8_t FLASH_readUUID(uint8_t* uuid, uint32_t* validlen);
 uint8_t unique_id[16];
 uint32_t unique_id_len;
 const char* luat_mcu_unique_id(size_t* t) {
     if (unique_id[0] == 0) {
-        QSPI_FLASH_ReadUUID(unique_id, &unique_id_len);
+        FLASH_readUUID(unique_id, &unique_id_len);
         if (unique_id_len == 16) {
             for (size_t i = 0; i < 6; i++)
             {
