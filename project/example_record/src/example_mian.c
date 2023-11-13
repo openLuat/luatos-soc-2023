@@ -245,7 +245,6 @@ void audio_event_cb(uint32_t event, void *param)
 		luat_rtos_timer_stop(g_s_delay_timer);
 		LUAT_DEBUG_PRINT("audio play done, result=%d!", luat_audio_play_get_last_error(0));
 		luat_gpio_set(PA_PWR_PIN, 0);
-		//luat_gpio_set(CODEC_PWR_PIN, 0);
 		break;
 	}
 }
@@ -278,10 +277,8 @@ static void es8311_demo_task(void *arg)
     luat_i2c_recv(1, 0x18, rx_buf + 1, 1);
 
 	luat_rtos_timer_create(&g_s_delay_timer);
-    luat_i2s_base_setup(I2S_ID0, I2S_MODE_I2S, I2S_FRAME_SIZE_16_16);
-    g_s_amr_encoder_handler = Encoder_Interface_init(0);
+    
     OS_InitBuffer(&g_s_amr_rom_file, RECORD_TIME * 1604 + 6);	//1秒最高音质的AMRNB编码是1600
-    OS_BufferWrite(&g_s_amr_rom_file, "#!AMR\n", 6);
     while(1)
     {
 		if (0x83 == rx_buf[0] && 0x11 == rx_buf[1])
@@ -292,21 +289,32 @@ static void es8311_demo_task(void *arg)
 			{
 				luat_i2c_send(I2C_ID1, i2c_address, (uint8_t *)&es8311_reg_table[i], 2, 1);
 			}
-			luat_i2s_start(I2S_ID0, 0, 8000, 1);
-			luat_i2s_no_block_rx(I2S_ID0, 320 * 10, record_cb, NULL);	//单声道8K的amr编码一次320字节，这里每200ms回调一次
-			tx_buf[0] = 0x00;
-			tx_buf[1] = 0x80|(1 << 6);
-			luat_i2c_send(I2C_ID1, i2c_address, tx_buf, 2, 1);
-			luat_meminfo_sys(&total, &used, &max_used);
-    	    LUAT_DEBUG_PRINT("meminfo total %d, used %d, max_used%d",total, used, max_used);
-			luat_rtos_task_sleep((RECORD_TIME + 1) * 1000);
-			tx_buf[0] = 0x00;
-			tx_buf[1] = 0x80|(0 << 6);
-			luat_i2c_send(I2C_ID1, i2c_address, tx_buf, 2, 1);
-			luat_i2s_base_setup(I2S_ID0, I2S_MODE_MSB, I2S_FRAME_SIZE_16_16);
-			info[0].address = (uint32_t)g_s_amr_rom_file.Data;
-			info[0].rom_data_len = g_s_amr_rom_file.Pos;
-			luat_audio_play_multi_files(0, info, 1);
+			while (1)
+			{
+				LUAT_DEBUG_PRINT("start record");
+				g_s_amr_encoder_handler = Encoder_Interface_init(0);
+				g_s_record_time = 0;
+				g_s_amr_rom_file.Pos = 0;
+				OS_BufferWrite(&g_s_amr_rom_file, "#!AMR\n", 6);
+				luat_i2s_base_setup(I2S_ID0, I2S_MODE_I2S, I2S_FRAME_SIZE_16_16);
+				luat_i2s_start(I2S_ID0, 0, 8000, 1);
+				luat_i2s_no_block_rx(I2S_ID0, 320 * 10, record_cb, NULL);	//单声道8K的amr编码一次320字节，这里每200ms回调一次
+				tx_buf[0] = 0x00;
+				tx_buf[1] = 0x80|(1 << 6);
+				luat_i2c_send(I2C_ID1, i2c_address, tx_buf, 2, 1);
+				luat_meminfo_sys(&total, &used, &max_used);
+    	    	LUAT_DEBUG_PRINT("meminfo total %d, used %d, max_used%d",total, used, max_used);
+				luat_rtos_task_sleep((RECORD_TIME + 1) * 1000);
+				tx_buf[0] = 0x00;
+				tx_buf[1] = 0x80|(0 << 6);
+				luat_i2c_send(I2C_ID1, i2c_address, tx_buf, 2, 1);
+				luat_i2s_base_setup(I2S_ID0, I2S_MODE_MSB, I2S_FRAME_SIZE_16_16);
+				info[0].address = (uint32_t)g_s_amr_rom_file.Data;
+				info[0].rom_data_len = g_s_amr_rom_file.Pos;
+				luat_audio_play_multi_files(0, info, 1);
+
+				luat_rtos_task_sleep(10000);
+			}
 			while(1)
 			{
 				luat_meminfo_sys(&total, &used, &max_used);
