@@ -53,6 +53,12 @@ int luat_i2s_start(uint8_t bus_id, uint8_t is_play, uint32_t sample, uint8_t cha
 	return I2S_Start(bus_id, is_play, sample, channel_num);
 }
 
+
+int luat_i2s_transfer_start(uint8_t bus_id, uint32_t sample, uint8_t channel_num, uint32_t byte_len, void *cb, void *param)
+{
+	return I2S_StartTransfer(bus_id, sample, channel_num, byte_len, cb, param);
+}
+
 void luat_i2s_no_block_tx(uint8_t bus_id, uint8_t* address, uint32_t byte_len, void* cb, void *param)
 {
 	I2S_Tx(bus_id, address, byte_len, cb, param);
@@ -87,4 +93,14 @@ int luat_i2s_tx_stat(uint8_t id, size_t *buffsize, size_t* remain) {
     (void)buffsize;
     (void)remain;
     return -1;
+}
+
+void luat_i2s_transfer(uint8_t bus_id, uint8_t* address, uint32_t byte_len)
+{
+	I2S_Transfer(bus_id, address, byte_len);
+}
+
+void luat_i2s_transfer_stop(uint8_t bus_id)
+{
+	I2S_Stop(bus_id);
 }

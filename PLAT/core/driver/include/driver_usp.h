@@ -30,6 +30,10 @@ void I2S_TxPause(uint8_t I2SID);
 void I2S_TxDebug(uint8_t I2SID);
 void I2S_RxDebug(uint8_t I2SID);
 
+int32_t I2S_StartTransfer(uint8_t I2SID, uint32_t SampleRate, uint8_t ChannelNum, uint32_t ByteLen, CBFuncEx_t cb, void *param);
+void I2S_Transfer(uint8_t I2SID, uint8_t* Data, uint32_t ByteLen);
+void I2S_Stop(uint8_t I2SID);
+
 int32_t CSPI_Setup(uint8_t ID, uint32_t BusSpeed, uint8_t SpiMode, uint8_t IsMSB, uint8_t Is2RxWire, uint8_t OnlyY, uint8_t SeqType, uint8_t rowScaleRatio, uint8_t colScaleRatio, uint8_t scaleBytes, uint8_t ddrMode, uint8_t dummyAllowed, uint8_t wordIdSeq);
 void CSPI_Rx(uint8_t ID, void *buf, uint16_t W, uint16_t H, CBFuncEx_t cb, void *param);
 void CSPI_RxContinue(uint8_t ID, void *buf);
@@ -37,11 +41,18 @@ void CSPI_RxStop(uint8_t ID);
 void CSPI_Stop(uint8_t ID);
 void CSPI_Pause(uint8_t ID, uint8_t OnOff);
 
-
-int LSPI_Setup(uint8_t ID, uint32_t BusSpeed, uint8_t Is2TxWire, CBFuncEx_t cb, void *param);
+enum
+{
+	LCD_IM_3_WIRE_9_BIT_INTERFACE_I = 5,
+	LCD_IM_4_WIRE_8_BIT_INTERFACE_I = 6,
+	LCD_IM_3_WIRE_9_BIT_INTERFACE_II = 13,
+	LCD_IM_4_WIRE_8_BIT_INTERFACE_II = 14,
+	LCD_IM_2_DATA_LANE = 16,
+};
+int LSPI_Setup(uint8_t ID, uint32_t BusSpeed, uint8_t InterfaceMode, CBFuncEx_t cb, void *param);
 int LSPI_Sleep(uint8_t ID, uint8_t Enable);
-void LSPI_SetOutput(uint8_t ID, uint16_t W, uint16_t H);
+void LSPI_SetImageRange(uint8_t ID, uint16_t W, uint16_t H);
 int LSPI_WriteCmd(uint8_t ID, uint8_t Cmd, uint8_t *Param, uint8_t ParamLen);
-int LSPI_ReadData(uint8_t ID, uint8_t Cmd, uint8_t DummyLen, uint8_t *Data, uint8_t DataLen);
-int LSPI_WriteImageData(uint8_t ID, uint8_t Cmd, uint8_t *Data, uint32_t DataLen);
+int LSPI_ReadData(uint8_t ID, uint8_t Cmd, uint8_t *Data, uint8_t DataLen, uint8_t DummyLen);
+int LSPI_WriteImageData(uint8_t ID, uint8_t Cmd, uint8_t *Data, uint32_t DataLen, uint8_t IsBlock);
 #endif
