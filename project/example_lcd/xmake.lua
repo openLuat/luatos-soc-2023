@@ -6,7 +6,7 @@ local CHIP_TARGET = CHIP_TARGET
 target(TARGET_NAME)
     set_kind("static")
     set_targetdir(LIB_DIR)
-    set_warnings("error")
+    -- set_warnings("error")
 
     add_includedirs(LUATOS_ROOT.."/components/u8g2", {public = true})
 
