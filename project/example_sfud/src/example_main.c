@@ -248,7 +248,7 @@ void exmaple_fs_lfs_dir(void)
     luat_fs_fclose(fp);
 }
 
-#define SFUD_SPI	    SPI_ID1
+#define SFUD_SPI	    SPI_ID0
 #define SFUD_SPI_CS	    12
 
 static luat_spi_device_t sfud_spi_dev = {
