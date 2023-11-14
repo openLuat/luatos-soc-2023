@@ -26,11 +26,8 @@
 #include "luat_spi.h"
 #include "luat_lcd.h"
 
-#if defined(TYPE_EC716S)
 #define LCD_SPI	    SPI_ID0
-#else
-#define LCD_SPI	    SPI_ID1
-#endif
+
 #define LCD_SPI_CS	12
 #define LCD_DC	    14
 #define LCD_RST	    3
@@ -48,7 +45,7 @@ static luat_spi_device_t lcd_spi_dev = {
     .spi_config.dataw = 8,
     .spi_config.bit_dict = 0,
     .spi_config.master = 1,
-    .spi_config.mode = 1,             // mode设置为1，全双工
+    .spi_config.mode = 0,
     .spi_config.bandrate = 51000000,
     .spi_config.cs = LCD_SPI_CS
 };
