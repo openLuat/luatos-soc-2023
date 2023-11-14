@@ -947,7 +947,10 @@ static void protocol_jt_pack_device_status(uint8_t *pdata, uint16_t *idx, uint16
     {
         device_status |= (1 << 10);
     }
-
+     device_status |= (1 << 18);
+    device_status |= (1 << 19);
+    device_status |= (1 << 20);
+    device_status |= (1 << 21);
     pdata[(*idx)++] = BHIGH_BYTE(WHIGH_WORD(device_status));
     pdata[(*idx)++] = BLOW_BYTE(WHIGH_WORD(device_status));
     pdata[(*idx)++] = BHIGH_BYTE(WLOW_WORD(device_status));

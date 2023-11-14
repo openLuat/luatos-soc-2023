@@ -173,6 +173,7 @@ static void update_eph(void)
     int result = luat_test_http_get_sync(EPH_HOST, headBuf, HTTP_HEAD_BUF_SIZE, bodyBuf, HTTP_RECV_BUF_SIZE, &headDataLen, &bodyDataLen);
     if (result == 0)
     {
+		LUAT_DEBUG_PRINT("星历更新完成");
         fp1 = luat_fs_fopen(EPH_DATA_FILE,"w+");
         fp2 = luat_fs_fopen(EPH_TIME_FILE,"w+");
         utc_timer_value_t *timeutc = OsaSystemTimeReadUtc();

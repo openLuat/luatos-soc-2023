@@ -3,7 +3,7 @@
 #include "luat_mobile.h"
 #include "luat_gpio.h"
 #include "platform_define.h"
-
+#include "gpio_dec.h"
 static uint8_t g_s_is_link_up;
 
 uint8_t network_service_is_ready(void)
@@ -78,11 +78,11 @@ static void mobile_event_cb(LUAT_MOBILE_EVENT_E event, uint8_t index, uint8_t st
 
 //控制NET指示灯闪烁
 static void task_net_led_run(void *param)
-{	
+{
 	luat_gpio_cfg_t gpio_cfg;
 	luat_gpio_set_default_cfg(&gpio_cfg);
 
-	gpio_cfg.pin = HAL_GPIO_14;
+	gpio_cfg.pin = Net_led_Pin;
 	luat_gpio_open(&gpio_cfg);
 	while(1)
 	{
@@ -91,9 +91,9 @@ static void task_net_led_run(void *param)
 		{
 			if(g_s_net_status != LUAT_MOBILE_STATUS_REGISTERED && g_s_net_status != LUAT_MOBILE_STATUS_REGISTERED_ROAMING)
 			{
-				luat_gpio_set(HAL_GPIO_14, 1);
+				luat_gpio_set(Net_led_Pin, 1);
 				luat_rtos_task_sleep(200);
-				luat_gpio_set(HAL_GPIO_14, 0);
+				luat_gpio_set(Net_led_Pin, 0);
 				luat_rtos_task_sleep(200);
 			}
 			else
@@ -102,36 +102,37 @@ static void task_net_led_run(void *param)
 				{
 					if (network_service_is_connect())
 					{
-						luat_gpio_set(HAL_GPIO_14, 1);
+						luat_gpio_set(Net_led_Pin, 1);
 						luat_rtos_task_sleep(1000);
 					}
 					else
 					{
-						luat_gpio_set(HAL_GPIO_14, 1);
+						luat_gpio_set(Net_led_Pin, 1);
 						luat_rtos_task_sleep(1000);
-						luat_gpio_set(HAL_GPIO_14, 0);
+						luat_gpio_set(Net_led_Pin, 0);
 						luat_rtos_task_sleep(1000);
 					}
 				}
 				else
 				{
-					luat_gpio_set(HAL_GPIO_14, 1);
+					luat_gpio_set(Net_led_Pin, 1);
 					luat_rtos_task_sleep(1000);
-					luat_gpio_set(HAL_GPIO_14, 0);
+					luat_gpio_set(Net_led_Pin, 0);
 					luat_rtos_task_sleep(1000);
 				}
 			}
 		}
 		else
 		{
-			luat_gpio_set(HAL_GPIO_14, 0);
+			luat_gpio_set(Net_led_Pin, 0);
 			luat_rtos_task_sleep(1000);
 		}
-	}	
+	}
 }
 
 void network_service_init(void)
 {
+
 	luat_mobile_event_register_handler(mobile_event_cb);
 
 	luat_rtos_task_handle task_net_led_handle;

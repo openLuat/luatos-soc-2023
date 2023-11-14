@@ -11,6 +11,7 @@
 #include "luat_fs.h"
 #include "bsp_common.h"
 //#include "luat_sms_app.h"
+#include "gpio_dec.h"
 #define SLEEP_TAG "sleep_main"
 luat_rtos_semaphore_t g_s_send_data_from_task_semaphore_handle;
 luat_rtos_semaphore_t g_s_send_history_data_from_task_semaphore_handle;
@@ -128,27 +129,27 @@ int config_speed_get(void)
 
 int gpio_irq(int pin, void *args)
 {
-	if (pin == HAL_GPIO_10)
+	if (pin == Acc_input_Pin)
 	{
+		LUAT_DEBUG_PRINT("enter acc input");
 		if (luat_gpio_get(pin) == 1)
 			g_s_acc_status = 0;
 		else
 			g_s_acc_status = 1;
 		luat_rtos_message_send(acc_monitor_task_handle, 0, NULL);
 	}
-	else if (pin == HAL_GPIO_9)
+	else if (pin == Motion_Sensor_Pin)
 	{
+		LUAT_DEBUG_PRINT("enter motion sensor input");
 		if (luat_gpio_get(pin) == 1)
 			g_s_accelerated_speed_status = 0;
 		else
 			g_s_accelerated_speed_status = 1;
-		// if (0 == g_s_acc_status)
 		luat_rtos_message_send(da213b_monitor_task_handle, 0, NULL);
 	}
-	// LUAT_DEBUG_PRINT("gpio_irq status:%d,%d", g_s_acc_status, g_s_accelerated_speed_status);
 }
 
-#define I2C_ID 1
+#define I2C_ID 0
 #define DA213B_ADDRESS 0x27
 
 static void i2c_task_proc(void *arg)
@@ -173,8 +174,8 @@ static void i2c_task_proc(void *arg)
 
 	// 配置计算器传感器震动中断引脚
 	luat_gpio_set_default_cfg(&gpio_cfg);
-	//中断使用GPIO9
-	gpio_cfg.pin = HAL_GPIO_9;
+	//中断使用GPIO12
+	gpio_cfg.pin = Motion_Sensor_Pin;
 	gpio_cfg.mode = LUAT_GPIO_IRQ;
 	gpio_cfg.irq_type = LUAT_GPIO_RISING_IRQ;
 	gpio_cfg.pull = LUAT_GPIO_PULLDOWN;
@@ -214,7 +215,6 @@ static void luat_da213b_monitor_task(void *args)
 	int result;
 	uint8_t data[200] = {0};
 	uint16_t len;
-	uint8_t i=0;
 	while (1)
 	{
 		//luat_lbs_task_init();
@@ -238,13 +238,7 @@ static void luat_da213b_monitor_task(void *args)
 					count = 0;
 					device_is_stop = 1;
 					LUAT_DEBUG_PRINT("震动报警！！！");
-					i++;
-					protocol_jt_pack_gps_msg(&gpsx, data, &len, 200, 0, i);
-
-					if (i == 3)
-					{
-						i = 0;
-					}
+					protocol_jt_pack_gps_msg(&gpsx, data, &len, 200, 1, 1);//函数的参数的第五位是震动报警信息，1，报警，0没有报警
 					result = socket_service_send_data(data, len, send_alarm_data_from_task_callback, 0);
 					if (0 == result)
 					{
@@ -378,6 +372,7 @@ static luat_rtos_timer_callback_t sleep_timer_callback(void *param)
 	LUAT_DEBUG_PRINT("entry sleep mode");
 	// locinfo_upload_enable = 0;
 	config_gps_set(0);
+	LUAT_DEBUG_PRINT("config_gps_set");
 	luat_pm_set_sleep_mode(LUAT_PM_SLEEP_MODE_LIGHT, SLEEP_TAG);
 }
 
@@ -387,7 +382,7 @@ static void luat_acc_monitor_task(void *args)
 	uint8_t *data = NULL;
 	if (0 == g_s_acc_status)
 	{
-		luat_rtos_timer_start(sleep_timer_handle, 300000, 0, sleep_timer_callback, NULL);
+		//luat_rtos_timer_start(sleep_timer_handle, 300000, 0, sleep_timer_callback, NULL);
 	}
 	else
 	{
@@ -408,11 +403,13 @@ static void luat_acc_monitor_task(void *args)
 				}
 				locinfo_upload_enable = 1;
 				config_gps_set(1);
-				luat_pm_set_sleep_mode(LUAT_PM_SLEEP_MODE_IDLE, SLEEP_TAG);
+				LUAT_DEBUG_PRINT("config_gps_set");
+				//luat_pm_set_sleep_mode(LUAT_PM_SLEEP_MODE_IDLE, SLEEP_TAG);
 			}
 			else
 			{
-				luat_rtos_timer_start(sleep_timer_handle, 300000, 0, sleep_timer_callback, NULL);
+				LUAT_DEBUG_PRINT("config_gps_set");
+				//luat_rtos_timer_start(sleep_timer_handle, 300000, 0, sleep_timer_callback, NULL);
 			}
 		}
 	}
@@ -420,8 +417,7 @@ static void luat_acc_monitor_task(void *args)
 
 static void luat_send_data_task_proc(void *arg)
 {
-	// BSP_SetPlatConfigItemValue(0, 0); // 死机不重启而是打印信息
-	// BSP_SetPlatConfigItemValue(PLAT_CONFIG_ITEM_LOG_PORT_SEL, 1);
+	
 	int result;
 	uint8_t data[200] = {0};
 	uint16_t len;
@@ -433,19 +429,19 @@ static void luat_send_data_task_proc(void *arg)
 	luat_gpio_cfg_t gpio_cfg;
 	// 配置acc接入中断引脚
 	luat_gpio_set_default_cfg(&gpio_cfg);
-	gpio_cfg.pin = HAL_GPIO_20;
+	gpio_cfg.pin = Acc_input_Pin;
 	gpio_cfg.mode = LUAT_GPIO_IRQ;
 	gpio_cfg.irq_type = LUAT_GPIO_BOTH_IRQ;
 	gpio_cfg.pull = LUAT_GPIO_PULLUP;
 	gpio_cfg.irq_cb = gpio_irq;
 	luat_gpio_open(&gpio_cfg);
-	if (luat_gpio_get(HAL_GPIO_20) == 1)
+	if (luat_gpio_get(Acc_input_Pin) == 1)
 		g_s_acc_status = 0;
 	else
 		g_s_acc_status = 1;
 	luat_rtos_timer_create(&sleep_timer_handle);
 	luat_rtos_task_create(&history_data_trans_task_handle, 2048, 20, "history data", history_data_trans_task, NULL, NULL);
-	// luat_rtos_task_create(&acc_monitor_task_handle, 2048, 20, "acc_monitor", luat_acc_monitor_task, NULL, 10);//DA213B没有用到此功能
+	luat_rtos_task_create(&acc_monitor_task_handle, 2048, 20, "acc_monitor", luat_acc_monitor_task, NULL, 10);
 	luat_rtos_task_create(&da213b_monitor_task_handle, 2048, 20, "da213b monitor", luat_da213b_monitor_task, NULL, 20);
 	luat_rtos_task_create(&i2c_task_handle, 2 * 1024, 20, "da213b_i2c", i2c_task_proc, NULL, NULL);
 

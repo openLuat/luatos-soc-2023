@@ -4,6 +4,7 @@
 #include "platform_define.h"
 #include "param_ctrl.h"
 #include "luat_fs.h"
+#include "gpio_dec.h"
 static int g_s_gps_status = 0;
 static int g_s_relay_status = 0;
 
@@ -14,7 +15,7 @@ Jt808Msg jt808_message = {
     .city = 00,
     .oemid = "xxx",
     .devicetype = "AD09",
-    .deviceid = "17527613057",
+    .deviceid = "19069055153",
     .vehiclecolor = 1,
     .vehiclenumber = "xxx",
     .uploadtime = 1,
@@ -265,15 +266,13 @@ int config_gps_set(int status)
     {
         luat_gpio_cfg_t gpio_cfg;
         luat_gpio_set_default_cfg(&gpio_cfg);
-
-        gpio_cfg.pin = HAL_GPIO_13;
+        gpio_cfg.pin = GPS_pwr_pin;
         gpio_cfg.mode = LUAT_GPIO_OUTPUT;
-        gpio_cfg.alt_fun = 4;
         luat_gpio_open(&gpio_cfg);
-        ret = luat_gpio_set(HAL_GPIO_13, status);
+        ret = luat_gpio_set(GPS_pwr_pin, status);
     }
     else
-        ret = luat_gpio_set(HAL_GPIO_13, status);
+        ret = luat_gpio_set(GPS_pwr_pin, status);
 
     g_s_gps_status = status;
 
