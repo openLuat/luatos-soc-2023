@@ -5,6 +5,9 @@
 #include "driver_gpio.h"
 #include "driver_uart.h"
 #include "cms_def.h"
+#ifdef __LUATOS__
+#include "luat_msgbus.h"
+#endif
 
 #define MAX_DEVICE_COUNT (UART_MAX+1)
 static luat_uart_ctrl_param_t uart_cb[MAX_DEVICE_COUNT]={0};
