@@ -254,20 +254,35 @@ target(USER_PROJECT_NAME..".elf")
         info_table["rom"]["file"] = USER_PROJECT_NAME..".binpkg"
 
         if USER_PROJECT_NAME == 'luatos' then
-            -- os.cp("$(projectdir)/project/luatos/pack", out_path)
-            -- import("core.base.json")
-            -- local info_table = json.loadfile(out_path.."/pack/info.json")
-            -- if VM_64BIT then
-            --     info_table["script"]["bitw"] = 64
-            -- end
-            -- if script_addr then
-            --     info_table["download"]["script_addr"] = script_addr
-            --     info_table["rom"]["fs"]["script"]["size"] = LUAT_SCRIPT_SIZE
-            --     io.gsub(out_path.."/pack/config_ec7xx_usb.ini", "filepath = .\\script.bin\nburnaddr = 0x(%g+)", "filepath = .\\script.bin\nburnaddr = 0x"..script_addr)
-            -- end
-            -- if full_addr then
-            --     info_table["fota"]["full_addr"] = full_addr
-            -- end
+            local conf_data = io.readfile("$(projectdir)/project/luatos/inc/luat_conf_bsp.h")
+            local LUAT_BSP_VERSION = conf_data:match("#define LUAT_BSP_VERSION \"(%w+)\"")
+            local VM_64BIT = conf_data:find("\r#define LUAT_CONF_VM_64bit") or conf_data:find("\n#define LUAT_CONF_VM_64bit")
+            local mem_map_data = io.readfile("$(buildir)/"..USER_PROJECT_NAME.."/mem_map.txt")
+            local FLASH_FOTA_REGION_START = tonumber(mem_map_data:match("#define FLASH_FOTA_REGION_START%s+%((%g+)%)"))
+            -- print("FLASH_FOTA_REGION_START",FLASH_FOTA_REGION_START)
+            local LUAT_SCRIPT_SIZE = tonumber(conf_data:match("\r#define LUAT_SCRIPT_SIZE (%d+)") or conf_data:match("\n#define LUAT_SCRIPT_SIZE (%d+)"))
+            local LUAT_SCRIPT_OTA_SIZE = tonumber(conf_data:match("\r#define LUAT_SCRIPT_OTA_SIZE (%d+)") or conf_data:match("\n#define LUAT_SCRIPT_OTA_SIZE (%d+)"))
+
+            print(string.format("script zone %d ota %d", LUAT_SCRIPT_SIZE, LUAT_SCRIPT_OTA_SIZE))
+            local LUA_SCRIPT_ADDR = FLASH_FOTA_REGION_START - (LUAT_SCRIPT_SIZE + LUAT_SCRIPT_OTA_SIZE) * 1024
+            local LUA_SCRIPT_OTA_ADDR = FLASH_FOTA_REGION_START - LUAT_SCRIPT_OTA_SIZE * 1024
+            local script_addr = string.format("%X", LUA_SCRIPT_ADDR)
+            local full_addr = string.format("%X", LUA_SCRIPT_OTA_ADDR)
+            -- print("LUA_SCRIPT_ADDR",LUA_SCRIPT_ADDR)
+            -- print("LUA_SCRIPT_OTA_ADDR",LUA_SCRIPT_OTA_ADDR)
+            -- print("script_addr",script_addr)
+            -- print("full_addr",full_addr)
+
+            if VM_64BIT then
+                info_table["script"]["bitw"] = 64
+            end
+            if script_addr then
+                info_table["download"]["script_addr"] = script_addr
+                info_table["rom"]["fs"]["script"]["size"] = LUAT_SCRIPT_SIZE
+            end
+            if full_addr then
+                info_table["fota"]["full_addr"] = full_addr
+            end
             json.savefile(out_path.."/pack/info.json", info_table)
             os.cp(out_path.."/"..USER_PROJECT_NAME..".binpkg", out_path.."/pack")
             os.cp(out_path.."/"..USER_PROJECT_NAME..".elf", out_path.."/pack")
@@ -276,7 +291,8 @@ target(USER_PROJECT_NAME..".elf")
             os.cp("$(projectdir)/project/luatos/inc/luat_conf_bsp.h", out_path.."/pack")
             local ret = archive.archive(out_path.."/"..USER_PROJECT_NAME..".7z", out_path.."/pack/*",options)
             if not ret then
-                print("pls install p7zip-full in linux/mac , or 7zip in windows.")
+                print("pls install p7zip-full in linux/mac.")
+                return
             end
             -- local ver = "_FULL"
             -- if os.getenv("LUAT_EC7XX_LITE_MODE") == "1" then
@@ -288,7 +304,13 @@ target(USER_PROJECT_NAME..".elf")
             --         ver = "_TTS_ONCHIP"
             --     end
             -- end
-            -- os.mv("LuatOS-SoC_"..USER_PROJECT_NAME_VERSION.."_EC7XX.7z", out_path.."/LuatOS-SoC_"..USER_PROJECT_NAME_VERSION.."_EC7XX"..ver..".soc")
+            -- os.mv("LuatOS-SoC_"..LUAT_BSP_VERSION.."_EC7XX.7z", out_path.."/LuatOS-SoC_"..LUAT_BSP_VERSION.."_EC7XX"..ver..".soc")
+            local ret = archive.archive(out_path.."/"..USER_PROJECT_NAME..".7z", out_path.."/pack/*",options)
+            if not ret then
+                print("pls install p7zip-full in linux/mac.")
+                return
+            end
+            os.mv(out_path.."/"..USER_PROJECT_NAME..".7z", out_path.."/LuatOS-SoC_"..LUAT_BSP_VERSION.."_EC7XX.soc")
             os.rm(out_path.."/pack")
         else 
             json.savefile(out_path.."/pack/info.json", info_table)
@@ -299,6 +321,7 @@ target(USER_PROJECT_NAME..".elf")
             local ret = archive.archive(out_path.."/"..USER_PROJECT_NAME..".7z", out_path.."/pack/*",options)
             if not ret then
                 print("pls install p7zip-full in linux/mac , or 7zip in windows.")
+                return
             end
             os.mv(out_path.."/"..USER_PROJECT_NAME..".7z", out_path.."/"..USER_PROJECT_NAME..".soc")
             os.rm(out_path.."/pack")

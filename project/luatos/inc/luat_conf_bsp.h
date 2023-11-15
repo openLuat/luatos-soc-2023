@@ -13,32 +13,32 @@
 // 外设,按需启用, 最起码启用uart和wdt库
 #define LUAT_USE_UART 1
 #define LUAT_USE_GPIO 1
-// #define LUAT_USE_I2C  1
-// #define LUAT_USE_SPI  1
-// #define LUAT_USE_ADC  1
-// #define LUAT_USE_PWM  1
-// #define LUAT_USE_WDT  1
-// #define LUAT_USE_PM  1
-// #define LUAT_USE_MCU  1
-// #define LUAT_USE_RTC 1
+#define LUAT_USE_I2C  1
+#define LUAT_USE_SPI  1
+#define LUAT_USE_ADC  1
+#define LUAT_USE_PWM  1
+#define LUAT_USE_WDT  1
+#define LUAT_USE_PM  1
+#define LUAT_USE_MCU  1
+#define LUAT_USE_RTC 1
 // #define LUAT_USE_OTP 1
 
 // #define LUAT_USE_HMETA 1
 
-// #define LUAT_USE_IOTAUTH 1
-// #define LUAT_USE_WEBSOCKET 1
+#define LUAT_USE_IOTAUTH 1
+#define LUAT_USE_WEBSOCKET 1
 
 // #define LUAT_USE_SOFT_UART 1
 //----------------------------
 // 常用工具库, 按需启用, cjson和pack是强烈推荐启用的
 // #define LUAT_USE_CRYPTO  1
-// #define LUAT_USE_CJSON  1
-// #define LUAT_USE_ZBUFF  1
-// #define LUAT_USE_PACK  1
+#define LUAT_USE_CJSON  1
+#define LUAT_USE_ZBUFF  1
+#define LUAT_USE_PACK  1
 // #define LUAT_USE_LIBGNSS  1
-// #define LUAT_USE_FS  1
-// #define LUAT_USE_SENSOR  1
-// #define LUAT_USE_SFUD  1
+#define LUAT_USE_FS  1
+#define LUAT_USE_SENSOR  1
+#define LUAT_USE_SFUD  1
 // #define LUAT_USE_SFD   1
 // #define LUAT_USE_STATEM 1
 // 性能测试

@@ -32,6 +32,14 @@ target(TARGET_NAME)
     -- sms
     add_files(LUATOS_ROOT.."/components/sms/*.c")
 
+    -- cjson
+    add_includedirs(LUATOS_ROOT.."/components/cjson",{public = true})
+    add_files(LUATOS_ROOT.."/components/cjson/*.c")
+
+    -- lua-cjson
+    add_includedirs(LUATOS_ROOT .. "/components/lua-cjson",{public = true})
+    add_files(LUATOS_ROOT .. "/components/lua-cjson/*.c")
+    
     -- vfs
     add_files(LUATOS_ROOT.."/luat/vfs/luat_fs_inline.c",
             LUATOS_ROOT.."/luat/vfs/luat_fs_luadb.c",
