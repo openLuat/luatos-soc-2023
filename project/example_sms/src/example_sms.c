@@ -65,7 +65,7 @@ static void demo_init_sms()
 	//等待注册网络
 	luat_rtos_task_sleep(15000);
 	//添加自己测试的手机号
-	int ret = luat_sms_send_msg(str, "13733176917", false, 0);
+	int ret = luat_sms_send_msg(str, "173XXXXXXXX", false, 0);
 	if (ret == 0)
 	{
 		luat_rtos_task_sleep(1000);
