@@ -97,6 +97,7 @@ add_includedirs(LUATOS_ROOT .. "/luat/include",
                 LUATOS_ROOT .. "/components/minmea",
                 LUATOS_ROOT .. "/components/sms",
 				LUATOS_ROOT .. "/components/lcd",
+				LUATOS_ROOT .. "/components/u8g2",
 				"$(projectdir)/interface/include")
 
 local LIB_PS_PLAT = "full"
