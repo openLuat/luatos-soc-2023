@@ -164,7 +164,7 @@ void luat_lcd_IF_init(luat_lcd_conf_t* conf)
 	GPIO_IomuxEC7XX(43, 1, 0, 0);
 	GPIO_IomuxEC7XX(44, 2, 0, 0);
 
-	LSPI_Setup(USP_ID2, 0, conf->interface_mode, NULL, 0);
+	LSPI_Setup(USP_ID2, 0, conf->opts->interface_mode, NULL, 0);
 	conf->opts->write_cmd_data = luat_lcd_IF_write_cmd_data;
 	conf->opts->read_cmd_data = luat_lcd_IF_read_cmd_data;
 	conf->opts->lcd_draw = luat_lcd_IF_draw;

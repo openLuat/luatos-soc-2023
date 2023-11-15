@@ -60,7 +60,6 @@ static luat_lcd_conf_t lcd_conf = {
     .h = LCD_H,
     .xoffset = 0,
     .yoffset = 0,
-    .interface_mode = LUAT_LCD_IM_4_WIRE_8_BIT_INTERFACE_I,
     .lcd_cs_pin = 0xff,	//注意不用的时候写0xff
 };
 #else
