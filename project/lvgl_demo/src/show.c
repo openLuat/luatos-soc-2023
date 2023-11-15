@@ -45,11 +45,9 @@ enum
 	LVGL_FLUSH_EVENT = 1,
 };
 
-static struct luat_lcd_opts lcd_opts;
-
 static luat_lcd_conf_t lcd_conf = {
     .port = LUAT_LCD_HW_INFERFACE_ID,
-    .opts = &lcd_opts,
+    .opts = &lcd_opts_gc9306x,
 	.pin_dc = 0xff,
     .pin_rst = SPI_LCD_RST_PIN,
     .pin_pwr = SPI_LCD_BL_PIN,
@@ -106,7 +104,6 @@ static void lvgl_flush_cb(struct _lv_disp_drv_t * disp_drv, const lv_area_t * ar
 
 static void lvgl_lcd_init(void)
 {
-	lcd_opts = lcd_opts_gc9306x;
     luat_lcd_IF_init(&lcd_conf);
     luat_lcd_init(&lcd_conf);
 }
