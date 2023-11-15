@@ -41,17 +41,12 @@
  */
 //#define LCD_USE_HW_IF
 
-
-extern const luat_lcd_opts_t lcd_opts_st7789;   //st7789
-extern const luat_lcd_opts_t lcd_opts_gc9306x;   //st7789
-
 #ifdef LCD_USE_HW_IF
-static luat_lcd_opts_t lcd_opts;
 static luat_lcd_conf_t lcd_conf = {
     .port = LUAT_LCD_HW_INFERFACE_ID,
     .lcd_spi_device = NULL,
     .auto_flush = 1,
-    .opts = &lcd_opts,
+    .opts = &lcd_opts_gc9306x,
     .pin_dc = 0xff,
     .pin_rst = LCD_RST,
     .pin_pwr = LCD_PWR,
@@ -96,7 +91,6 @@ luat_rtos_task_handle lcd_task_handle;
 static void task_test_lcd(void *param)
 {
 #ifdef LCD_USE_HW_IF
-	lcd_opts = lcd_opts_gc9306x;
 	luat_lcd_IF_init(&lcd_conf);
 #else
     luat_spi_device_setup(&lcd_spi_dev);
