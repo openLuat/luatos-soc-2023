@@ -39,7 +39,7 @@ LUAT_WEAK int luat_lcd_draw(luat_lcd_conf_t* conf, int16_t x1, int16_t y1, int16
 static void prvLCD_Task(void* params)
 {
 	OS_EVENT event;
-
+	uint32_t size;
 	CBDataFun_t callback;
 	lcd_service_draw_t *draw;
 	uint8_t *data;
@@ -73,10 +73,15 @@ static void prvLCD_Task(void* params)
 				luat_lcd_IF_draw(draw->conf, draw->x1, draw->y1, draw->x2, draw->y2, data);
 
 			}
+			size = draw->size;
 			free(draw);
 			if (!is_static_buf)
 			{
-				g_s_lcd.done_bytes += draw->size;
+				g_s_lcd.done_bytes += size;
+				if (g_s_lcd.done_bytes > g_s_lcd.wait_bytes)
+				{
+					g_s_lcd.done_bytes = g_s_lcd.wait_bytes;
+				}
 			}
 //			DBG("%llu,%llu",g_s_lcd.wait_bytes, g_s_lcd.done_bytes);
 			break;
@@ -138,6 +143,11 @@ int luat_lcd_service_draw(luat_lcd_conf_t* conf, int16_t x1, int16_t y1, int16_t
 uint32_t luat_lcd_service_cache_len(void)
 {
 	return (uint32_t)(g_s_lcd.wait_bytes - g_s_lcd.done_bytes);
+}
+
+uint32_t luat_lcd_service_debug(void)
+{
+	DBG("%llu, %llu", g_s_lcd.wait_bytes , g_s_lcd.done_bytes);
 }
 
 void luat_lcd_IF_init(luat_lcd_conf_t* conf)

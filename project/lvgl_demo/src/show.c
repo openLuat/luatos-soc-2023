@@ -15,7 +15,7 @@
 #include "lv_conf.h"
 #include "lvgl.h"
 #include "luat_lcd.h"
-
+extern void luat_lcd_service_debug(void);
 #define SPI_LCD_FPS		(33)
 
 //如果不使用低功耗，或者硬件上已经有配了上下拉电阻，可以不使用AONIO
@@ -87,10 +87,16 @@ static LUAT_RT_RET_TYPE lvgl_flush_timer_cb(LUAT_RT_CB_PARAM)
 static void lvgl_flush_cb(struct _lv_disp_drv_t * disp_drv, const lv_area_t * area, lv_color_t * color_p)
 {
 	uint32_t retry_cnt = 0;
-	while (luat_lcd_service_cache_len() >= SPI_LCD_RAM_CACHE_MAX)
+	while ((luat_lcd_service_cache_len() >= SPI_LCD_RAM_CACHE_MAX))
 	{
 		retry_cnt++;
 		luat_rtos_task_sleep(LVGL_FLUSH_WAIT_TIME);
+		if (retry_cnt > 20)
+		{
+			LUAT_DEBUG_PRINT("too much wait");
+			luat_lcd_service_debug();
+			return;
+		}
 	}
     if (luat_lcd_service_draw(&lcd_conf, area->x1, area->y1, area->x2,  area->y2, color_p, 0))
     {
