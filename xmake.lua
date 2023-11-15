@@ -55,7 +55,7 @@ if os.getenv("PROJECT_NAME") then
 end
 
 -- 是否启用低速模式, 内存更大
-if os.getenv("LSPD_MODE") == "enable" then
+if os.getenv("LSPD_MODE") == "enable" or USER_PROJECT_NAME == 'luatos' then
     is_lspd = true
 else
     is_lspd = false
