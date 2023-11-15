@@ -267,13 +267,16 @@ target(USER_PROJECT_NAME..".elf")
             -- if full_addr then
             --     info_table["fota"]["full_addr"] = full_addr
             -- end
-            -- json.savefile(out_path.."/pack/info.json", info_table)
-            -- os.cp(out_path.."/luatos.binpkg", out_path.."/pack")
-            -- os.cp(out_path.."/luatos.elf", out_path.."/pack")
-            -- os.cp("./PLAT/comdb.txt", out_path.."/pack")
-            -- os.cp("./PLAT/device/target/board/ec7xx_0h00/common/inc/mem_map.h", out_path .. "/pack")
-            -- os.cp("$(projectdir)/project/luatos/inc/luat_conf_bsp.h", out_path.."/pack")
-            -- os.exec(path7z.." a -mx9 LuatOS-SoC_"..USER_PROJECT_NAME_VERSION.."_EC7XX.7z "..out_path.."/pack/* -r")
+            json.savefile(out_path.."/pack/info.json", info_table)
+            os.cp(out_path.."/"..USER_PROJECT_NAME..".binpkg", out_path.."/pack")
+            os.cp(out_path.."/"..USER_PROJECT_NAME..".elf", out_path.."/pack")
+            os.cp("./PLAT/tools/"..CHIP_TARGET.."/comdb.txt", out_path.."/pack")
+            os.cp(out_path.."/".."mem_map.txt", out_path.."/pack")
+            os.cp("$(projectdir)/project/luatos/inc/luat_conf_bsp.h", out_path.."/pack")
+            local ret = archive.archive(out_path.."/"..USER_PROJECT_NAME..".7z", out_path.."/pack/*",options)
+            if not ret then
+                print("pls install p7zip-full in linux/mac , or 7zip in windows.")
+            end
             -- local ver = "_FULL"
             -- if os.getenv("LUAT_EC7XX_LITE_MODE") == "1" then
             --     ver = ""
@@ -285,7 +288,7 @@ target(USER_PROJECT_NAME..".elf")
             --     end
             -- end
             -- os.mv("LuatOS-SoC_"..USER_PROJECT_NAME_VERSION.."_EC7XX.7z", out_path.."/LuatOS-SoC_"..USER_PROJECT_NAME_VERSION.."_EC7XX"..ver..".soc")
-            -- os.rm(out_path.."/pack")
+            os.rm(out_path.."/pack")
         else 
             json.savefile(out_path.."/pack/info.json", info_table)
             os.cp(out_path.."/"..USER_PROJECT_NAME..".binpkg", out_path.."/pack")
