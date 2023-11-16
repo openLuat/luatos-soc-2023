@@ -312,10 +312,14 @@ void GosDumpSig(UINT16 dTaskId, SignalBuf *pSig);
 //void OsaSendSignalToFront(UINT16 taskId, SignalBuf **signal)
 #define     GosSendSignalToFront    OsaSendSignalToFront
 #ifdef WIN32
-#define     GosSendCustSignal       OsaSendDumpSignal
+#define     GosSendCustSignal           OsaSendDumpSignal
+#define     GosSendDumpInternalSignal   OsaSendDumpSignal
 #else
-#define     GosSendCustSignal       OsaSendCustSignal
+#define     GosSendCustSignal           OsaSendCustSignal
+#define     GosSendDumpInternalSignal   OsaSendDumpInternalSignal
 #endif
+
+
 
 //void GosDestroySignal(SignalBuf **signal);
 #define     GosDestroySignal    OsaDestroySignal

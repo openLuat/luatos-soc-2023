@@ -21,11 +21,13 @@
 #include "Driver_Common.h"
 #include "usbmst_top.h"
 #include "uldp.h"
-#if FEATURE_CCIO_ENABLE
+#ifdef FEATURE_CCIO_ENABLE
 #include "usb_device.h"
 #endif
 //#include "usbc_ctrl.h"
 #include "uart.h"
+#include "unilog.h"
+#include DEBUG_LOG_HEADER_FILE
 
 
 
@@ -77,6 +79,7 @@ extern int32_t ulog_vcom_chkdtr( void );
  */
 static uint32_t usbPollingRecv(uint32_t epNum, uint8_t *data, uint32_t num, uint32_t timeout_us)
 {
+#ifdef FEATURE_CCIO_ENABLE
     uint32_t rbIdx=0,avaSize=0;
     uint32_t rbAddr,rbLen;
 
@@ -116,7 +119,9 @@ static uint32_t usbPollingRecv(uint32_t epNum, uint8_t *data, uint32_t num, uint
         memcpy(data,(uint8_t *)rbAddr,num);// more data recv than expected
         return num;
     }
-
+#else
+    return 0;
+#endif
 }
 
 
@@ -128,6 +133,7 @@ static uint32_t usbPollingRecv(uint32_t epNum, uint8_t *data, uint32_t num, uint
 */
 static void usbUldpEehInit(uint32_t epNum)
 {
+#ifdef FEATURE_CCIO_ENABLE
     uint32_t rbLen;
     uint32_t addr;
 
@@ -148,6 +154,7 @@ static void usbUldpEehInit(uint32_t epNum)
 
     uldpCfgRxEpPara((UsbRxEpNum_e)epNum, 1,0,rbLen);
     usbDevCfgOutXfer(usbDevGetLogIfIdx());
+#endif
 
 }
 
@@ -176,9 +183,9 @@ void eehDumpMediaInit( void )
     {
         //usbTxRxFifoFlush();//to be added
 
-
+    #ifdef FEATURE_CCIO_ENABLE
         epNum = usbDevGetEpNumFromIf(usbDevGetLogIfIdx());
-
+    #endif
 
         extern void usbc_ctrl_diep_unmask(uint32_t epnum);
         usbc_ctrl_diep_unmask((uint32_t)((epNum>>4)&0xf));
@@ -331,7 +338,7 @@ void eehDumpMediaPollingEp0(uint32_t loopCnt, uint32_t loopInr)
 
 
         if((loopCnt%500 == 0)&&(uniLogGetPherType() == USB_FOR_UNILOG))//add log per 500ms to avoid host suspend
-        {        
+        {
             ECPLAT_PRINTF(UNILOG_CCIO, eehDumpMediaPollingEp0_1, P_INFO, "eehDumpMediaPollingEp0:avoid host suspend %d",loopCnt);
             uniLogForceOut(true);
         }
@@ -388,7 +395,7 @@ int32_t eehDumpMediaPollingRndisHalt(uint32_t loopCnt, uint32_t loopInr)
 
 
         if((loopCnt%500 == 0)&&(uniLogGetPherType() == USB_FOR_UNILOG))//add log per 500ms to avoid host suspend
-        {        
+        {
             ECPLAT_PRINTF(UNILOG_CCIO, eehDumpMediaPollingRndisHalt_0, P_INFO, "eehDumpMediaPollingRndisHalt0:avoid host suspend %d",loopCnt);
             uniLogForceOut(true);
         }
@@ -408,7 +415,7 @@ int32_t eehDumpMediaPollingRndisHalt(uint32_t loopCnt, uint32_t loopInr)
         delay_us(loopInr);
 
         if((loopCnt%500 == 0)&&(uniLogGetPherType() == USB_FOR_UNILOG))//add log per 500ms to avoid host suspend
-        {        
+        {
             ECPLAT_PRINTF(UNILOG_CCIO, eehDumpMediaPollingRndisHalt_1, P_INFO, "eehDumpMediaPollingRndisHalt1:avoid host suspend %d",loopCnt);
             uniLogForceOut(true);
         }

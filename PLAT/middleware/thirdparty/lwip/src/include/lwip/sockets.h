@@ -220,6 +220,7 @@ typedef enum sockimsdatatype
 #define SO_TYPE        0x1008 /* get socket type */
 #define SO_CONTIMEO    0x1009 /* Unimplemented: connect timeout */
 #define SO_NO_CHECK    0x100a /* don't create UDP checksum */
+
 #if PS_ENABLE_TCPIP_HIB_SLEEP2_MODE
 #define SO_HIB_SLEEP2    0x2001 /* set sock hib/sleep2 mode */
 #endif
@@ -230,6 +231,12 @@ typedef enum sockimsdatatype
 #define SO_TCP_REPORT_UL_TOTAL_STATUS 0x2005   /*set the tcp connection report the UL status(sent total length)*/
 #define SO_TCP_CLOSE_TIMEOUT_NEED_LOCAL_ABORT 0x2006/*whether enable tcp close local abort(seconds)*/
 #define SO_TCP_INIT_RETRY_TIME 0x2007 /*set the tcp connection init retry time value*/
+
+#define SO_TCP_CLOSE_COMPLETE_HANDLER 0x2008 /*set the udp socket as TCP CLOSE COMPLETE EVENT handle socket*/
+
+#define SO_TCP_REPORT_CLOSE_COMPLETE 0x2009   /*set the tcp connection report the close complete event*/
+
+
 #endif
 
 
@@ -554,7 +561,6 @@ int lwip_bind_cid(int s, u8_t cid);
 */
 int32_t lwip_alloc_server_port(u8_t type);
 
-
 //input :s the socket file description
 //out put: return the socket err number,if the socket with the file description is invalid, it will return EBADF
 int sock_get_errno(int s);
@@ -620,16 +626,12 @@ int ps_sendto(int s, const void *data, size_t size, int flags,
 int ps_send_with_ticks(int s, const void *data, size_t size, int flags, u8_t dataRai, bool exceptdata, struct sockticksinfo *tick_info);
 
 //the input parameter is only valid for UDP&RAW socket, it is invalid for TCP socket
-int
-ps_sendto_with_ticks(int s, const void *data, size_t size, int flags,
+int ps_sendto_with_ticks(int s, const void *data, size_t size, int flags,
        const struct sockaddr *to, socklen_t tolen, u8_t dataRai, bool exceptdata, struct sockticksinfo *tick_info);
-int
-ps_send_with_sequence(int s, const void *data, size_t size, int flags, u8_t dataRai, bool exceptdata, u8_t sequence);
+int ps_send_with_sequence(int s, const void *data, size_t size, int flags, u8_t dataRai, bool exceptdata, u8_t sequence);
 
-int
-ps_sendto_with_sequence(int s, const void *data, size_t size, int flags,
+int ps_sendto_with_sequence(int s, const void *data, size_t size, int flags,
        const struct sockaddr *to, socklen_t tolen, u8_t dataRai, bool exceptdata,u8_t sequence);
-
 /**
  * int ps_send_with_imsdataflag()
  * input: int       s,
@@ -641,7 +643,7 @@ ps_sendto_with_sequence(int s, const void *data, size_t size, int flags,
  * Note: UE will send data with some specail flag
  *       you can reference the data_flag define (sockimsdatatype_t)
 */
-int ps_send_with_imsdataflag(int s, const void *data, size_t size, int flags, sockimsdatatype_t data_flag);
+int ps_send_with_imsdataflag(int s, const void *data, size_t size, int flags, sockimsdatatype_t data_flag, struct sockticksinfo *tick_info);
 
 /**
  * int ps_sendto_with_imsdataflag()
@@ -652,40 +654,67 @@ int ps_send_with_imsdataflag(int s, const void *data, size_t size, int flags, so
  *        const struct sockaddr     *to,
  *        socklen_t     tolen,
  *        sockimsdatatype_t     data_flag
+ *        struct sockticksinfo *tick_info -->invalid with tcp socket connection
  * return: if fail, return -1; if success, return the sent length
  * Note: UE will send data with some specail ims flag.
  *       you can reference the data_flag define (sockimsdatatype_t)
 */
 int ps_sendto_with_imsdataflag(int s, const void *data, size_t size, int flags,
-       const struct sockaddr *to, socklen_t tolen, sockimsdatatype_t data_flag);
-
-
+       const struct sockaddr *to, socklen_t tolen, sockimsdatatype_t data_flag, struct sockticksinfo *tick_info);
 
 /**
-*lwip_socket_set_rohc_rtp_cfg
-*input: u8_t   cid,
-*       ip_addr_t *dstIp,
-*       u16_t srcPort,
-*       u16_t dstPort
-* return: if fail, return -1; if success , return 0
-*Note: you can set the rohc rtp stream configuration by this API
-*
+ *lwip_socket_set_rohc_rtp_cfg
+ *input: u8_t   cid,
+ *       ip_addr_t *dstIp,
+ *       u16_t srcPort,
+ *       u16_t dstPort
+ * return: if fail, return -1; if success , return 0
+ *Note: you can set the rohc rtp stream configuration by this API
 **/
 int lwip_socket_set_rohc_rtp_cfg(u8_t cid, ip_addr_t *dstIp, u16_t srcPort, u16_t dstPort);
 
 /**
-*lwip_socket_clean_rohc_rtp_cfg
-*input: u8_t   cid,
-* return: if fail, return -1; if success , return 0
-*Note: you can clean the rohc rtp stream configuration by this API
-*
+ *lwip_socket_clean_rohc_rtp_cfg
+ *input: u8_t   cid,
+ * return: if fail, return -1; if success , return 0
+ *Note: you can clean the rohc rtp stream configuration by this API
+ *
 **/
 int lwip_socket_clean_rohc_rtp_cfg(u8_t cid);
 
-
-
-
+/**
+*/
 int lwip_get_tcp_send_buffer_size(int s);
+
+/**
+ * UDP data sendto local socket (bind local IP: IPADDR_LOOPBACK(127.0.0.1)).
+ * return: if succ, return 0, fail < 0
+*/
+int lwip_udp_local_sendto(const void *data, int size, u16_t toPort, u16_t fromPort);
+
+/**
+ * UDP data sendto local socket (bind local IP: IPADDR_LOOPBACK(127.0.0.1)).
+ * return: if succ, return 0, fail < 0
+*/
+int lwip_udp_socket_local_sendto(int s, const void *data, int size, u16_t toPort);
+
+
+/**
+ * UDP data sendto local socket (bind local IP: IPADDR_LOOPBACK(127.0.0.1)), which could called in ISR
+ * if failed, "*data" will be freed via: lwip_free_mem_callback()
+*/
+//#define lwip_free_mem_callback      tcpip_free_mem_callback
+typedef void (*lwip_free_mem_callback)(void *ptr);
+void lwip_udp_local_sendto_isr(void *data, u16_t size, u16_t toPort, lwip_free_mem_callback freefunc);
+
+/**
+ * int value (< 4 bytes) sendto local socket (bind local IP: IPADDR_LOOPBACK(127.0.0.1)), which could called in ISR
+ * Used in some special case, if socket data is in range of "INT32"
+*/
+void lwip_udp_local_int_sendto_isr(int value, u16_t size, u16_t toPort);
+
+int lwip_erecvfrom(int s, void **mem, size_t len, int flags,
+              struct sockaddr *from, socklen_t *fromlen);
 
 
 #endif
@@ -725,6 +754,11 @@ int lwip_get_tcp_send_buffer_size(int s);
 #define select(maxfdp1,readset,writeset,exceptset,timeout)     lwip_select(maxfdp1,readset,writeset,exceptset,timeout)
 /** @ingroup socket */
 #define ioctlsocket(s,cmd,argp)                   lwip_ioctl(s,cmd,argp)
+
+#if ENABLE_PSIF
+#define erecvfrom(s,mem,len,flags,from,fromlen)    lwip_erecvfrom(s,mem,len,flags,from,fromlen)
+#endif
+
 
 #if ENABLE_PSIF
 void sockaddr_to_ipaddr_port(const struct sockaddr* sockaddr, ip_addr_t* ipaddr, u16_t* port);

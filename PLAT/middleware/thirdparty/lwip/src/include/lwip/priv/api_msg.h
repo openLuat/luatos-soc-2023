@@ -99,6 +99,12 @@ struct api_msg {
       u8_t reserved;
 #endif
     } bc;
+    /*set socket id*/
+#if ENABLE_PSIF
+    struct {
+       u32_t socketid;
+    } ss;
+#endif
         /** used for lwip_netconn_alloc_server_port*/
     struct {
       u8_t type;
@@ -275,8 +281,18 @@ typedef struct NetconnCleanRohcRtpCfg_Tag{
     u8_t rsvd1;
 }NetconnCleanRohcRtpCfg;
 
+/*
+ * const void *data, size_t size, u16_t toPort, u16_t fromPort
+*/
+typedef struct
+{
+    struct tcpip_api_call_data call;
 
-
+    const void  *data;
+    int         size;
+    u16_t       toPort;
+    u16_t       fromPort;
+}NetConnUdpLocalSendApiInfo;    //24 bytes
 
 
 #endif
@@ -291,6 +307,7 @@ void lwip_netconn_do_bind            (void *m);
 
 #if ENABLE_PSIF
 void lwip_netconn_do_bind_cid        (void *m);
+void lwip_netconn_do_set_socketid        (void *m);
 void lwip_netconn_alloc_server_port(void *m);
 #endif
 
@@ -361,6 +378,7 @@ err_t lwip_netconn_set_rohc_rtp_cfg(struct tcpip_api_call_data *arg);
 ******************************************************************************/
 err_t lwip_netconn_clean_rohc_rtp_cfg(struct tcpip_api_call_data *arg);
 
+err_t lwip_netconn_udp_local_sendto(struct tcpip_api_call_data *arg);
 #endif
 
 #if LWIP_SUSPEND_UP_DATA_ENABLE

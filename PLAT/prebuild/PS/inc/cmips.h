@@ -24,6 +24,7 @@ History:        - 08/09/2020, Originated by Jason
 #define CMI_PDN_MAX_NW_ADDR_NUM     4
 #define CMI_PS_MAX_BEARER_NUM       11
 #define CMI_PCSCF_MAX_NW_ADDR_NUM      6
+#define CMI_PS_LAST_ESM_CAUSE_NUM      3    //For easy, should same with CCM_MAX_ESM_LAST_REJ_CAUSE_NUM
 
 #define CMI_PS_CHECK_CID_VALID(cid) ((UINT32)(cid) <= CMI_PS_MAX_VALID_CID)
 
@@ -288,8 +289,8 @@ typedef enum _EPAT_CMI_PS_PRIM_ID_TAG
 
     //AT+CABTSR / AT+CABTRDP, -TBD
 
-    CMI_PS_GET_CEER_REQ ,                           //CmiPsGetCeerReq, AT+CEER
-    CMI_PS_GET_CEER_CNF,                            //CmiPsGetCeerCnf
+    //CMI_PS_GET_CEER_REQ ,                           //CmiPsGetCeerReq, AT+CEER
+    //CMI_PS_GET_CEER_CNF,                            //CmiPsGetCeerCnf
 
     CMI_PS_GET_DATA_COUNTER_REQ,                    //CmiPsGetDataCounterReq
     CMI_PS_GET_DATA_COUNTER_CNF,                    //CmiPsGetDataCounterCnf
@@ -317,6 +318,7 @@ typedef enum _EPAT_CMI_PS_PRIM_ID_TAG
     CMI_PS_GET_UE_VOICE_DOMAIN_PREFERENCE_REQ,      //CmiPsGetUeVoiceDomainPreferenceReq
     CMI_PS_GET_UE_VOICE_DOMAIN_PREFERENCE_CNF,      //CmiPsGetUeVoiceDomainPreferenceCnf
 
+#if 0
     CMI_PS_SEND_RRC_CONN_EST_REQ,                   //CmiPsSendRrcConnEstReq
     CMI_PS_SEND_RRC_CONN_EST_CNF,                   //CmiPsSendRrcConnEstCnf
 
@@ -326,13 +328,12 @@ typedef enum _EPAT_CMI_PS_PRIM_ID_TAG
     CMI_PS_L2_CONGEST_REPORT_IND    = 0xf0,         //CmiPsL2CongestReportInd
     CMI_PS_L2_ROHC_CONFIG_IND,                      //CmiPsL2RohcConfigInd
     CMI_PS_ROHC_ERROR_REPORT_IND,                   //CmiPsRohcErrorReportInd
+#endif
 
-    CMI_PS_GET_ECMMER_REQ ,                         //CmiPsGetEcmmerReq, AT+ECMMER
-    CMI_PS_GET_ECMMER_CNF,                          //CmiPsGetEcmmerCnf
-    
 	CMI_PS_GET_ECSMER_REQ ,                           //CmiPsGetEcsmerReq, AT+ECSMER
     CMI_PS_GET_ECSMER_CNF,                            //CmiPsGetEcsmerCnf
-
+    CMI_PS_DEL_ECSMER_REQ,                          //CmiPsDelEcsmerReq
+    CMI_PS_DEL_ECSMER_CNF,                          //CmiPsDelEcsmerCnf
     CMI_PS_PRIM_END = 0x0fff
 }CMI_PS_PRIM_ID;
 
@@ -1466,7 +1467,7 @@ typedef enum CmiMmCeregModeEnum_TAG
     CMI_PS_CEREG_LOC_PSM_INFO_EMM_CAUSE = 5
 }CmiPsCeregModeEnum;
 
-typedef enum CmiCeregStateEnum_Tag
+typedef enum _EPAT_CmiCeregStateEnum_Tag
 {
     CMI_PS_NOT_REG = 0,
     CMI_PS_REG_HOME = 1,
@@ -2155,7 +2156,7 @@ typedef struct CmiPsGetDefineAuthCtxCnf_Tag
     UINT8   authPassword[CMI_PS_MAX_AUTH_STR_LEN +1];//auth password string
 }CmiPsGetDefineAuthCtxCnf;
 
-
+#if 0
 typedef enum CmiEmmCauseTag
 {
     CMI_EMM_CAUSE_IMSI_UNKNOWN_IN_HSS                                  = 0x02,
@@ -2284,6 +2285,8 @@ typedef struct CmiPsGetCeerCnf_Tag
     UINT16     esmCause;
  }
 CmiPsGetCeerCnf;
+
+#endif
 
 /*
  * CMI_PS_SET_UE_OPERATION_MODE_REQ,
@@ -2745,32 +2748,40 @@ typedef struct CmiPsCnecErrorCodeReportInd_Tag
 }CmiPsCnecErrorCodeReportInd;
 
 /*
- * CMI_PS_GET_ECMMER_REQ,
+ * CMI_PS_GET_ECSMER_REQ
+ * Request to get last esm cause
 */
-typedef CamCmiEmptySig CmiPsGetEcmmerReq;
-
-/*
- * CMI_PS_GET_ECMMER_CNF,
-*/
-typedef struct CmiPsGetEcmmerCnf_Tag
+typedef struct CmiPsGetEcsmerReq_Tag
 {
-    BOOL        bCausePresent;
-    UINT8       rsvd;
-    UINT16      emmCause;        /* CmiEmmCause */
-}CmiPsGetEcmmerCnf;
-/*
- * CMI_PS_GET_ECSMER_REQ,
-*/
-typedef CamCmiEmptySig CmiPsGetEcsmerReq;
+    BOOL        getAll;
+    UINT8       cid;
+    UINT16      rsvd;
+}CmiPsGetEcsmerReq;
 
 /*
  * CMI_PS_GET_ECSMER_CNF,
 */
 typedef struct CmiPsGetEcsmerCnf_Tag
 {
-    BOOL       bEsmCausePresent;
-    UINT8      rsdv;
-    UINT16     esmCause; //EsmCause
- }CmiPsGetEcsmerCnf;
+    struct {
+        BOOL        valid;
+        UINT8       cid;
+        UINT16      esmCause; //EsmCause
+    } lastCause[CMI_PS_LAST_ESM_CAUSE_NUM];
+
+ }CmiPsGetEcsmerCnf;// 12 bytes
+
+ /*
+ * CMI_PS_DEL_ECSMER_REQ
+ * Request to get last esm cause
+*/
+typedef struct CmiPsDelEcsmerReq_Tag
+{
+    UINT8       cid;
+    UINT8       rsvd0;
+    UINT16      rsvd1;
+}CmiPsDelEcsmerReq;
+
+typedef CamCmiEmptySig CmiPsDelEcsmerCnf;
 #endif
 

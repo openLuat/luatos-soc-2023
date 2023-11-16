@@ -14,28 +14,26 @@ else
     end
 end
 
-target("ap_bootloader.elf")
-    set_kind("binary")
-    set_targetdir("$(buildir)/ap_bootloader")
-
-    add_defines("LTO_FEATURE_MODE",
-                "DHCPD_ENABLE_DEFINE=0",
-                "FEATURE_FOTA_ENABLE",
-                "MIDDLEWARE_FOTA_ENABLE",
-                "FEATURE_FOTA_CORE2_ENABLE",
-                "USBC_USBMST_MGR_FEATURE_DISABLE=1",
-                "USB_DRV_SMALL_IMAGE=1",
-                "FEATURE_BOOTLOADER_PROJECT_ENABLE",
-                "__BL_MODE__",
-				"FEATURE_FOTA_HLS_ENABLE",
-                "DEBUG_LOG_HEADER_FILE=\"debug_log_dummy.h\""
-                )
-    add_cxflags("-flto",
-                "-fuse-linker-plugin",
-                "-ffat-lto-objects",
-                "-Wno-lto-type-mismatch",
-                {force=true})
+add_defines("LTO_FEATURE_MODE",
+            "DHCPD_ENABLE_DEFINE=0",
+            "FEATURE_FOTA_ENABLE",
+            "MIDDLEWARE_FOTA_ENABLE",
+            "FEATURE_FOTA_CORE2_ENABLE",
+            "USBC_USBMST_MGR_FEATURE_DISABLE=1",
+            "USB_DRV_SMALL_IMAGE=1",
+            "FEATURE_BOOTLOADER_PROJECT_ENABLE",
+            "__BL_MODE__",
+            "FEATURE_FOTA_HLS_ENABLE",
+            "DEBUG_LOG_HEADER_FILE=\"debug_log_dummy.h\""
+            )
+add_cxflags("-flto",
+            "-fuse-linker-plugin",
+            "-ffat-lto-objects",
+            "-Wno-lto-type-mismatch",
+            {force=true})
                 
+target("driver")
+    set_kind("static")
     add_includedirs("$(projectdir)/PLAT/middleware/developed/debug/inc",
                     "$(projectdir)/PLAT/project/ec7xx_0h00/ap/apps/bootloader/code/include",
                     "$(projectdir)/PLAT/project/ec7xx_0h00/ap/apps/bootloader/code/include/common",
@@ -66,12 +64,18 @@ target("ap_bootloader.elf")
                 "$(projectdir)/PLAT/project/ec7xx_0h00/ap/apps/bootloader/code/common/image/image.c",
                 "$(projectdir)/PLAT/project/ec7xx_0h00/ap/apps/bootloader/code/common/secure/ecc/src/*.c"
                 )
+    set_targetdir("$(buildir)/bootloader_libdriver")
+target_end()
 
+target("ap_bootloader.elf")
+    set_kind("binary")
+    set_targetdir("$(buildir)/ap_bootloader")
+    add_deps("driver")
     add_linkdirs("$(projectdir)/PLAT/prebuild/PLAT/lib/gcc/"..CHIP_TARGET.."/"..LIB_PS_PLAT)
     add_linkdirs("$(projectdir)/PLAT/libs/"..CHIP_TARGET.."/bootloader")
     add_linkdirs("$(projectdir)/lib/")
 
-    add_linkgroups("startup","core_airm2m","lzma","driver_private_bl","bootloader","usbbl_priv",
+    add_linkgroups("driver","startup","core_airm2m","lzma","driver_private_bl","bootloader","usbbl_priv",
                     "osa","middleware_ec","middleware_ec_private","ccio","fota","deltapatch2", {whole = true})
     if CHIP_TARGET == "ec718p" then
         add_linkgroups("ffota", {whole = true})
@@ -106,6 +110,15 @@ target("ap_bootloader.elf")
         os.exec(toolchains .. "/arm-none-eabi-objcopy -O binary $(buildir)/ap_bootloader/ap_bootloader.elf $(buildir)/ap_bootloader/ap_bootloader.bin")
         os.iorun(toolchains .. "/arm-none-eabi-size $(buildir)/ap_bootloader/ap_bootloader.elf")
         os.cp("$(buildir)/ap_bootloader/ap_bootloader.bin", "$(buildir)/ap_bootloader/ap_bootloader_unZip.bin")
+        io.writefile("$(buildir)/ap_bootloader/ap_bootloader.size", os.iorun(toolchains .. "/arm-none-eabi-objdump -h $(buildir)/ap_bootloader/ap_bootloader.elf"))
+        local size_file = io.open("$(buildir)/ap_bootloader/ap_bootloader.size", "a")
+        size_file:write(os.iorun(toolchains .. "/arm-none-eabi-size -G $(buildir)/ap_bootloader/ap_bootloader.elf"))
+        if CHIP_TARGET == "ec718p" then size_file:write(os.iorun(toolchains .. "/arm-none-eabi-size -t -G $(projectdir)/lib/libffota.a")) end
+        size_file:write(os.iorun(toolchains .. "/arm-none-eabi-size -t -G $(buildir)/bootloader_libdriver/libdriver.a"))
+        for _, filepath in ipairs(os.files("$(projectdir)/PLAT/libs/"..CHIP_TARGET.."/bootloader/*.a")) do
+            size_file:write(os.iorun(toolchains .. "/arm-none-eabi-size -t -G " .. filepath))
+        end
+        size_file:close()
         os.exec((is_plat("windows") and "./PLAT/tools/fcelf.exe " or "./PLAT/tools/fcelf ").."-C -bin ".."$(buildir)/ap_bootloader/ap_bootloader_unZip.bin".. " -cfg ".. "$(projectdir)/PLAT/project/ec7xx_0h00/ap/apps/bootloader/GCC/sectionInfo_"..CHIP_TARGET..".json".. " -map ".."$(buildir)/ap_bootloader/ap_bootloader_debug.map".." -out ".."$(buildir)/ap_bootloader/ap_bootloader.bin")
     end)
 target_end()

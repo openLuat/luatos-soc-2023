@@ -116,22 +116,10 @@ end
 
 includes(USER_PROJECT_NAME)
 
-target(USER_PROJECT_NAME..".elf")
-	set_kind("binary")
-    set_targetdir("$(buildir)/"..USER_PROJECT_NAME)
+target("csdk")
+    set_kind("static")
+    set_targetdir("$(buildir)/csdk")
     add_deps(USER_PROJECT_NAME)
-
-    add_linkdirs("$(projectdir)/lib")
-    add_linkdirs("$(projectdir)/PLAT/device/target/board/ec7xx_0h00/ap/gcc/")
-    add_linkdirs("$(projectdir)/PLAT/prebuild/PS/lib/gcc/"..CHIP_TARGET.."/"..LIB_PS_PLAT)
-    add_linkdirs("$(projectdir)/PLAT/prebuild/PLAT/lib/gcc/"..CHIP_TARGET.."/"..LIB_PS_PLAT)
-    add_linkdirs("$(projectdir)/PLAT/libs/"..CHIP_TARGET)
-
-    add_linkgroups("ps","psl1","psif","psnv","tcpipmgr","lwip","osa","ccio","yrcompress","deltapatch",
-                    "middleware_ec","middleware_ec_private","driver_private","usb_private",
-                    "freertos","startup","core_airm2m","lzma","fota",{whole = true})
-    add_linkgroups(USER_PROJECT_NAME, {whole = true})
-
     --driver
 	add_files("$(projectdir)/PLAT/core/code/*.c",
             "$(projectdir)/PLAT/driver/board/ec7xx_0h00/src/*c",
@@ -165,6 +153,26 @@ target(USER_PROJECT_NAME..".elf")
     
     add_files(LUATOS_ROOT.."/components/minmea/minmea.c")
 	add_files(LUATOS_ROOT.."/components/mobile/luat_mobile_common.c")
+
+target_end()
+
+target(USER_PROJECT_NAME..".elf")
+	set_kind("binary")
+    set_targetdir("$(buildir)/"..USER_PROJECT_NAME)
+    add_deps("csdk")
+    add_deps(USER_PROJECT_NAME)
+
+    add_linkdirs("$(projectdir)/lib")
+    add_linkdirs("$(projectdir)/PLAT/device/target/board/ec7xx_0h00/ap/gcc/")
+    add_linkdirs("$(projectdir)/PLAT/prebuild/PS/lib/gcc/"..CHIP_TARGET.."/"..LIB_PS_PLAT)
+    add_linkdirs("$(projectdir)/PLAT/prebuild/PLAT/lib/gcc/"..CHIP_TARGET.."/"..LIB_PS_PLAT)
+    add_linkdirs("$(projectdir)/PLAT/libs/"..CHIP_TARGET)
+
+    add_linkgroups("ps","psl1","psif","psnv","tcpipmgr","lwip","osa","ccio","yrcompress","deltapatch",
+                    "middleware_ec","middleware_ec_private","driver_private","usb_private",
+                    "freertos","startup","core_airm2m","lzma","fota","csdk",{whole = true})
+    add_linkgroups(USER_PROJECT_NAME, {whole = true})
+
     local toolchains = nil
     local out_path = nil
     local ld_parameter = nil 
@@ -216,6 +224,17 @@ target(USER_PROJECT_NAME..".elf")
 		os.exec(toolchains .. "/arm-none-eabi-objcopy -O binary $(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".elf $(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".bin")
 		os.exec(toolchains .."/arm-none-eabi-size $(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".elf")
         os.cp("$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".bin", "$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME.."_unZip.bin")
+
+        io.writefile("$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".size", os.iorun(toolchains .. "/arm-none-eabi-objdump -h $(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".elf"))
+        local size_file = io.open("$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".size", "a")
+        size_file:write(os.iorun(toolchains .. "/arm-none-eabi-size -G $(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".elf"))
+        size_file:write(os.iorun(toolchains .. "/arm-none-eabi-size -t -G $(buildir)/csdk/libcsdk.a"))
+        for _, filepath in ipairs(os.files("$(projectdir)/PLAT/libs/"..CHIP_TARGET.."/*.a")) do
+            size_file:write(os.iorun(toolchains .. "/arm-none-eabi-size -t -G " .. filepath))
+        end
+        size_file:close()
+
+
         os.exec((is_plat("windows") and "./PLAT/tools/fcelf.exe " or "./PLAT/tools/fcelf ").."-C -bin ".."$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME.."_unZip.bin".. " -cfg ".. SDK_PATH .. "/PLAT/device/target/board/ec7xx_0h00/ap/gcc/sectionInfo_"..CHIP_TARGET..".json".. " -map ".."$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME.. "_debug.map".." -out ".."$(buildir)/"..USER_PROJECT_NAME.."/" .. USER_PROJECT_NAME .. ".bin")
 
         os.cp("$(buildir)/"..USER_PROJECT_NAME.."/*.bin", out_path)

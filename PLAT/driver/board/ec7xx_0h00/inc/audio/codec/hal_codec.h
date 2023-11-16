@@ -41,7 +41,8 @@ extern "C" {
 /*----------------------------------------------------------------------------*
  *                    MACROS                                                  *
  *----------------------------------------------------------------------------*/
-#define HAL_CODEC_VOL_DEFAULT 70
+#define HAL_CODEC_VOL_PLAY_DEFAULT 65
+#define HAL_CODEC_VOL_MIC_DEFAULT  75
 
 // Codec I2C address
 #define ES8388_IICADDR                      0x11
@@ -193,6 +194,15 @@ typedef struct
     HalCodecIface_t codecIface;     // set I2S interface configuration 
     bool            enablePA;
 }HalCodecCfg_t;
+
+typedef enum
+{
+    CODEC_NONE          = 0,
+    CODEC_START         = 1,
+    CODEC_STANDBY       = 2,
+    CODEC_RESUME        = 3,
+    CODEC_POWER_DOWN    = 4    
+}HalCodecState_e;
 
 // HAL codec func list
 typedef struct 

@@ -202,7 +202,7 @@
 #define NM_PDN_TYPE_MAX_DNS_NUM     2
 #define NM_MAX_DNS_NUM              4
 
-#ifdef  FEATURE_HIMS_ENABLE
+#ifdef  FEATURE_IMS_ENABLE
 #define LWIP_IPSEC_ENABLE 1
 #else
 #define LWIP_IPSEC_ENABLE 0

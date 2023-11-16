@@ -80,10 +80,10 @@ uint32_t HAL_ADC_CalibrateRawCode(uint32_t input)
     // Resulotion is 12-bits
     input &= 0xFFFU;
 
-    // sign extension
+    // convert to complement code
     if(efuseCalcodePtr->offset & 0x800)
     {
-        temp = efuseCalcodePtr->offset | 0xFFFFF000;
+        temp = ~(efuseCalcodePtr->offset & 0x7FF) + 1;
     }
     else
     {
@@ -157,7 +157,7 @@ int32_t HAL_ADC_ConvertThermalRawCodeToTemperatureHighAccuracy(uint32_t input)
 #ifdef CHIP_EC718
     gain = -529 * efuseCalcodePtr->gain;
 #elif defined CHIP_EC716
-    gain = -575 * efuseCalcodePtr->gain;
+    gain = -602 * efuseCalcodePtr->gain;
 #endif
     temp = gain * (int32_t)(input - efuseT0CodePtr->codet0) + (int32_t)(efuseT0CodePtr->t0 * 1024000);
 

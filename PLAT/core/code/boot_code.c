@@ -49,7 +49,7 @@ extern uint32_t ShareInfoAPGetCPFlashXIPLimit(void);
 
 #endif
 
-PLAT_BL_UNCOMP_FLASH_TEXT void decompressRamCodeGetAddrInfo(void)
+PLAT_BL_UNCOMP_FLASH_TEXT void decompressGetAddrInfo(void)
 {
     unsigned int pFlashXIPAddr = 0;
 

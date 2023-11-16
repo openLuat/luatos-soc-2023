@@ -43,6 +43,7 @@ CmsRetId mmSetTriggerTau(UINT32 atHandle, UINT8 epsUpdateType);
 BOOL OperatorStringToNumericPlmn(const UINT8 *pPlmnStr, CmiNumericPlmn *pOutPlmn);
 CmsRetId mmSetOosPlmnInterval(UINT32 atHandle, CmiMmSetOosPlmnIntervalReq *pSetOosPlmnIntervalReq);
 CmsRetId mmGetOosPlmnInterval(UINT32 atHandle);
+CmsRetId mmGetECMMER(UINT32 atHandle);
 
 
 #endif

@@ -2,7 +2,7 @@
 #include "string.h"
 
 #include "uart.h"
-#if FEATURE_CCIO_ENABLE
+#ifdef FEATURE_CCIO_ENABLE
 #include "usb_device.h"
 #endif
 #include DEBUG_LOG_HEADER_FILE
@@ -48,13 +48,13 @@ extern void usbc_trace_disable(void);
 int excepDelay(uint32_t maxDelay)
 {
     int i=0;
-    int j=0;    
-    
+    int j=0;
+
     for(i=0; i<maxDelay; i++)
     {
         if(i==0xfff)
         {
-            j = maxDelay+2;    
+            j = maxDelay+2;
         }
     }
     return j;
@@ -64,14 +64,14 @@ uint32_t EcDumpCheckIfNeedRetry(uint32_t cmdType, PtrDumpReqWrap dumpReqWrap, Pt
 {
     ReadDataReqCell * ptrReadDataReqCell;
     ReadDataReqCell * ptrReadDataReqCellTemp;
-    
+
     switch(cmdType)
     {
         case DUMP_RETRY_CMD_COUNT:
             *excepStep = (*excepStep | 0x10000000);
             ptrReadDataReqCell = (ReadDataReqCell*)(&(dumpReqWrap->Data[0]));
             ptrReadDataReqCellTemp = (ReadDataReqCell*)(&(dumpReqWrapTemp->Data[0]));
-            
+
             if(ptrReadDataReqCell->ReadDataAddr == ptrReadDataReqCellTemp->ReadDataAddr)
             {
                 dumpRetryReadCount++;
@@ -82,7 +82,7 @@ uint32_t EcDumpCheckIfNeedRetry(uint32_t cmdType, PtrDumpReqWrap dumpReqWrap, Pt
                 memcpy(dumpReqWrapTemp, dumpReqWrap, sizeof(DumpReqWrap));
             }
             break;
-            
+
         case DUMP_RETRY_CMD_RESEND:
             *excepStep = (*excepStep | 0x20000000);
             if(dumpRetryReadCount >= DUMP_RETRY_COUNT_MAX)
@@ -134,27 +134,28 @@ uint32_t EcDumpWaitSync(void)
     uint8_t idx = 0;
     uint8_t RecChar[DUMP_RECV_FIFO_LEN];
     uint8_t RetValue = 0;
-    uint8_t  epNum = 0xff;
     uint32_t instance;
     uint32_t instanceTemp;
-    
+
     if(uniLogGetPherType() == UART_0_FOR_UNILOG)
     {
         instance = DUMP_UART_INSTANCE;
         instanceTemp = instance;
         eehDumpMediaFlush(UART_0_FOR_UNILOG);//flush RX FIFO is better to avoid left hdsk data, only for UART
     }
+#ifdef FEATURE_CCIO_ENABLE
     else
     {
         instance = (uint32_t)usbDevGetLogIfIdx();
-        epNum = usbDevGetEpNumFromIf(usbDevGetLogIfIdx());
+        uint8_t epNum = usbDevGetEpNumFromIf(usbDevGetLogIfIdx());
         instanceTemp = (epNum&0xf);
         extern void  usbc_ctrl_full_flush_txfifo (uint32_t num );
         usbc_ctrl_full_flush_txfifo((epNum>>4)&0xf);
-    }    
-    
+    }
+#endif
+
     delay_us(400000);//wait and let EPAT change its baudrate
-    
+
     for (idx = 0; idx < PREAMBLE_CNT; idx++)
     {
         RetValue = eehDumpMediaSend(instance, (uint8_t *)&PreambleDumpString[0], PREAMBLE_STRING_LEN, 1000);
@@ -165,7 +166,7 @@ uint32_t EcDumpWaitSync(void)
             return 1;
         }
     }
-    
+
     //Host send Preamble twice
     RetValue = eehDumpMediaRecv(instanceTemp, &RecChar[0], PREAMBLE_CNT*PREAMBLE_STRING_LEN-2 + PREAMBLE_WITH_NULL, WaitPeriod_1s);
 
@@ -194,21 +195,22 @@ uint32_t EcDumpWaitSync(void)
 uint32_t EcDumpWaitCmd(PtrDumpReqWrap ptrDumpReqWrap)
 {
     uint32_t RetValue = 0;
-    uint8_t  epNum;
     uint32_t instance;
     uint32_t instanceTemp;
-    
+
     if(uniLogGetPherType() == UART_0_FOR_UNILOG)
     {
         instance = DUMP_UART_INSTANCE;
         instanceTemp = instance;
     }
+#ifdef FEATURE_CCIO_ENABLE
     else
     {
         instance = (uint32_t)usbDevGetLogIfIdx();
-        epNum = usbDevGetEpNumFromIf(usbDevGetLogIfIdx());
+        uint8_t epNum = usbDevGetEpNumFromIf(usbDevGetLogIfIdx());
         instanceTemp = (epNum&0xf);
     }
+#endif
 
     RetValue = eehDumpMediaRecv(instanceTemp, (uint8_t *)ptrDumpReqWrap, CMD_FIX_LEN, WaitPeriod_1s);
     if (RetValue != CMD_FIX_LEN)
@@ -278,18 +280,20 @@ uint32_t EcDumpHandleGetData(PtrDumpReqWrap ptrDumpReqWrap)
     uint32_t sendDataLen;
     uint32_t sendDataLastFlag = 0;
     uint8_t dataAndCrcBuf[READ_ONECE_DATA_LEN+CMD_FCS_LEN] = {0};
-    
+
     if(uniLogGetPherType() == UART_0_FOR_UNILOG)
     {
         instance = DUMP_UART_INSTANCE;
         EcDumpCheckIfNeedRetry(DUMP_RETRY_CMD_RESEND, ptrDumpReqWrap, NULL);
     }
+#ifdef FEATURE_CCIO_ENABLE
     else
     {
         instance = (uint32_t)usbDevGetLogIfIdx();
         EcDumpCheckIfNeedRetry(DUMP_RETRY_CMD_RESEND, ptrDumpReqWrap, NULL);
     }
-    
+#endif
+
     ptrReadDataReqCell = (ReadDataReqCell*)(&ptrDumpReqWrap->Data[0]);
     tDumpRspWrap.Command = ptrDumpReqWrap->Command;
     tDumpRspWrap.Sequence = ptrDumpReqWrap->Sequence;
@@ -316,7 +320,7 @@ uint32_t EcDumpHandleGetData(PtrDumpReqWrap ptrDumpReqWrap)
         return 1;
     }
     Sum = EcDumpCRC16(Sum, &tDumpRspWrap.Command,PROTOCOL_RSP_FIX_LEN);
-    
+
     for (Idx = 0; Idx < ptrReadDataReqCell->ReadLen;)
     {
         (DataBuff) =  (uint32_t *)(ptrReadDataReqCell->ReadDataAddr + Idx);
@@ -332,7 +336,7 @@ uint32_t EcDumpHandleGetData(PtrDumpReqWrap ptrDumpReqWrap)
         }
 
         Sum = EcDumpCRC16(Sum, (uint8_t*)(DataBuff), sendDataLen);
-        
+
         Idx = Idx + sendDataLen;
     }
     tDumpRspWrap.FCS = Sum;
@@ -363,7 +367,7 @@ uint32_t EcDumpHandleGetData(PtrDumpReqWrap ptrDumpReqWrap)
         {
             memcpy(dataAndCrcBuf, (uint8_t*)(DataBuff), READ_ONECE_DATA_LEN);
             memcpy(&dataAndCrcBuf[READ_ONECE_DATA_LEN], (uint8_t *)(&tDumpRspWrap.FCS), CMD_FCS_LEN);
-            
+
             RetValue = eehDumpMediaSend(instance, (uint8_t*)(dataAndCrcBuf), (READ_ONECE_DATA_LEN+CMD_FCS_LEN), 5000);
         }
         //excepDelay(1000);
@@ -373,7 +377,7 @@ uint32_t EcDumpHandleGetData(PtrDumpReqWrap ptrDumpReqWrap)
             *excepStep = (*excepStep | 0x40000);
             return 1;
         }
-        
+
         Idx = Idx + sendDataLen;
     }
 
@@ -390,15 +394,17 @@ uint32_t EcDumpHandleGetInfo(PtrDumpReqWrap ptrDumpReqWrap)
     char infoCmdBuf[96] = {0};
     uint32_t infoCellLen = sizeof(tDataInfoCell);
 
-    
+
     if(uniLogGetPherType() == UART_0_FOR_UNILOG)
     {
         instance = DUMP_UART_INSTANCE;
     }
+#ifdef FEATURE_CCIO_ENABLE
     else
     {
         instance = (uint32_t)usbDevGetLogIfIdx();
     }
+#endif
 
     tDumpRspWrap.Command = ptrDumpReqWrap->Command;
     tDumpRspWrap.Sequence = ptrDumpReqWrap->Sequence;
@@ -409,7 +415,7 @@ uint32_t EcDumpHandleGetInfo(PtrDumpReqWrap ptrDumpReqWrap)
     tDumpRspWrap.Length = sizeof(tDataInfoCell);
 
     memcpy(infoCmdBuf, &tDumpRspWrap.Command, PROTOCOL_RSP_FIX_LEN);
-    
+
     Sum = EcDumpCRC16(Sum, &tDumpRspWrap.Command,PROTOCOL_RSP_FIX_LEN);
     memcpy(&infoCmdBuf[PROTOCOL_RSP_FIX_LEN], (uint8_t *)&tDataInfoCell, sizeof(tDataInfoCell));
 
@@ -490,16 +496,16 @@ uint32_t EcDumpDataFlow(void)
                 *excepStep = (*excepStep | 0x8000);
                 EcDumpHandleGetData(&tDumpReqWrap);
                 break;
-                
+
             case GetInfoCmd:
                 *excepStep = (*excepStep | 0x200000);
                 EcDumpHandleGetInfo(&tDumpReqWrap);
                 break;
-                
+
             case FinishCmd:
                 excepDumpEndFlag = DUMP_END_FLAG_SUCC;
                 return 0;
-                
+
             default:
                 break;
 
@@ -514,24 +520,25 @@ uint32_t EcDumpHandshakeProc(uint32_t SyncPeriod)
     uint32_t SyncCnt = 0;
     uint32_t RetValue = 0;
     uint32_t idx;
-    uint8_t  epNum;
     uint32_t instance;
     uint32_t retryCnt = 0;
     uint32_t instanceTemp;
-        
+
     if(uniLogGetPherType() == UART_0_FOR_UNILOG)
     {
         instance = DUMP_UART_INSTANCE;
         retryCnt = dumpHandshakeRetryCnt;
         instanceTemp = instance;
     }
+#ifdef FEATURE_CCIO_ENABLE
     else
-    {    
+    {
         retryCnt = dumpHandshakeRetryCnt;
         instance = (uint32_t)usbDevGetLogIfIdx();
-        epNum = usbDevGetEpNumFromIf(usbDevGetLogIfIdx());
+        uint8_t epNum = usbDevGetEpNumFromIf(usbDevGetLogIfIdx());
         instanceTemp = (epNum&0xf);
     }
+#endif
 
     //eehDumpMediaPurgeRx(instance); only valid for UART and no need to reset RX FIFO again
 
@@ -541,9 +548,9 @@ uint32_t EcDumpHandshakeProc(uint32_t SyncPeriod)
     {
         uniLogFlushOut();
         if(uniLogGetPherType() == UART_0_FOR_UNILOG)
-        {   
+        {
             ECPLAT_PRINTF(UNILOG_PLA_INTERNAL_CMD, ecDumpHandshakeProc, P_ERROR, "enter dump handshake mode");
-            
+
             uniLogFlushOut();
         }
         else
@@ -552,7 +559,7 @@ uint32_t EcDumpHandshakeProc(uint32_t SyncPeriod)
             uniLogFlushOut();
         }
         RetValue = eehDumpMediaRecv(instanceTemp, recv_buffer, DUMP_SYNC_RSP_LEN, WaitPeriod_1s/2);
-        
+
         if (RetValue >= 2)
         {
             if(RetValue < (DUMP_SYNC_RSP_LEN - 2))
@@ -568,7 +575,7 @@ uint32_t EcDumpHandshakeProc(uint32_t SyncPeriod)
                         *excepStep = (*excepStep | 0x2);
                         return 0;
                     }
-                }				
+                }
             }
         }
         else
@@ -592,15 +599,17 @@ uint32_t EcDumpTopFlow(void)
     {
         instance = DUMP_UART_INSTANCE;
     }
+#ifdef FEATURE_CCIO_ENABLE
     else
     {
         usbc_trace_disable();
         eehDumpMediaInit();
         instance = (uint32_t)usbDevGetLogIfIdx();
     }
+#endif
 
-	/* Delay 2ms to make sure uniLog data flushed out 
-	   from FIFO, to avoiding uniLog data loss. 
+	/* Delay 2ms to make sure uniLog data flushed out
+	   from FIFO, to avoiding uniLog data loss.
 	*/
 	delay_us(2000);
     *excepStep = (*excepStep | 0x1);
@@ -620,7 +629,7 @@ uint32_t EcDumpTopFlow(void)
     if ((RetValue == 1)&&((excepCfgOption == EXCEP_OPTION_DUMP_FLASH_EPAT_LOOP_AND_UART_HELP_DUMP)||(excepCfgOption == EXCEP_OPTION_DUMP_FLASH_EPAT_RESET_AND_UART_HELP_DUMP)))
     {
         RetValue = EcDumpHandshakeProcUart(WaitPeriod_1s>>1);
-        
+
         if (RetValue == 0)
         {
             RetValue = EcDumpDataFlowUart();
@@ -646,7 +655,7 @@ uint32_t EcDumpHandshakeProcUart(uint32_t SyncPeriod)
     uint8_t uartDumpModeBuff[EC_UART_HELP_DUMP_BUFF_LEN] = {0};
     int i;
 
-    *excepStepDump = 0;   
+    *excepStepDump = 0;
 
     uniLogSetPherType(UART_0_FOR_UNILOG);
 
@@ -680,13 +689,13 @@ uint32_t EcDumpHandshakeProcUart(uint32_t SyncPeriod)
     while(SyncCnt++ < retryCnt)
     {
         if(uniLogGetPherType() == UART_0_FOR_UNILOG)
-        {   
+        {
             //ECPLAT_PRINTF(UNILOG_EXCEP_PRINT, ecDumpHandshakeProc, P_ERROR, "enter dump handshake mode");
-            UART_send(DUMP_UART_INSTANCE, (const uint8_t *)uartDumpModeBuff, EC_UART_HELP_DUMP_BUFF_LEN, 10000);            
+            UART_send(DUMP_UART_INSTANCE, (const uint8_t *)uartDumpModeBuff, EC_UART_HELP_DUMP_BUFF_LEN, 10000);
         }
 
         RetValue = eehDumpMediaRecv(instanceTemp, recv_buffer, DUMP_SYNC_RSP_LEN, WaitPeriod_1s);
-        
+
         if (RetValue >= 2)
         {
             for (idx = 0; idx < DUMP_SYNC_RSP_LEN - 2; idx++)
@@ -767,16 +776,16 @@ uint32_t EcDumpDataFlowUart(void)
                 *excepStepDump = (*excepStepDump | 0x8000);
                 EcDumpHandleGetData(&tDumpReqWrap);
                 break;
-                
+
             case GetInfoCmd:
                 *excepStepDump = (*excepStepDump | 0x200000);
                 EcDumpHandleGetInfo(&tDumpReqWrap);
                 break;
-                
+
             case FinishCmd:
                 excepDumpEndFlag = DUMP_END_FLAG_SUCC;
                 return 0;
-                
+
             default:
                 break;
         }

@@ -87,6 +87,9 @@ typedef void  (*udp_process_error_fn)(void *arg, err_t error);
 void udp_error(struct udp_pcb *pcb, udp_process_error_fn errf, void *err_arg);
 
 int udp_send_ul_state_ind(u32_t bitmap[8], int socket_id, int status);
+
+int udp_send_tcp_close_complete_ind(int32_t socket_id);
+
 #endif
 
 
@@ -249,15 +252,18 @@ struct udp_pcb *get_udp_list(void);
 #endif
 
 #if ENABLE_PSIF
+err_t udp_set_sockid(struct udp_pcb *pcb, u32_t socketid);
 void udp_netif_enter_oos_state(const ip_addr_t *address);
 void udp_netif_exit_oos_state(const ip_addr_t *address);
 struct udp_pcb *get_global_sequence_handler_pcb(void);
 void set_global_sequence_handler_pcb(struct udp_pcb *handler_pcb);
+struct udp_pcb *get_global_tcp_close_complete_handler_pcb(void);
+void set_global_tcp_close_complete_handler_pcb(struct udp_pcb *handler_pcb);
 int udp_send_ul_state_ind(u32_t bitmap[8], int socket_id, int status);
 int udp_send_dns_resolve_result(u8_t source, u8_t result, const ip_addr_t *addr_info, const char *url);
 int udp_send_ul_total_length_status(int32_t socket_id, u32_t ul_total_length);
 int udp_send_pkg_to_pcb(u16_t body_len, void *body);
-
+int udp_local_input(const void *data, int size, u16_t toPort, u16_t fromPort);
 #endif
 
 

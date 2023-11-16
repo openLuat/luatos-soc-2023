@@ -186,7 +186,8 @@ void OsaReceiveSignal(UINT16 taskId, SignalBuf **signal); // if no signal receiv
 BOOL OsaSendNoLogNoAssertSignal(UINT16 taskId, SignalBuf **signal); /*no signal & no assert record*/
 void OsaSendNoLogSignal(UINT16 taskId, SignalBuf **signal); /*no signal record*/
 void OsaSendDumpSignal(UINT16 taskId, SignalBuf **signal);  /*dump signal entity*/
-void OsaSendNoDumpSignal(UINT16 taskId, SignalBuf **signal);    /*not dump the signal, only record the signalId/destTaskId*/
+void OsaSendNoDumpSignal(UINT16 taskId, SignalBuf **signal);        /*not dump the signal, only record the signalId/destTaskId*/
+void OsaSendDumpInternalSignal(UINT16 taskId, SignalBuf **signal);  /*Dump internal signal*/
 
 void OsaSendCustNoLogSignal(osMessageQueueId_t mq_id, SignalBuf **signal);
 void OsaSendCustSignal(osMessageQueueId_t mq_id, SignalBuf **signal);

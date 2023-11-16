@@ -63,7 +63,7 @@ typedef enum UniLogPs1ModIdType_enum
 
     UNILOG_LTE_RRC_BCCH_BCH_DUMP,
     UNILOG_LTE_RRC_BCCH_DL_SCH_DUMP,
-    UNILOG_LTE_RRC_BCCH_DL_SCH_BR_DUMP,
+    UNILOG_LTE_RRC_BCCH_DL_SCH_BR_DUMP  = 10,
     UNILOG_LTE_RRC_DL_CCCH_DUMP,
     UNILOG_LTE_RRC_DL_DCCH_DUMP,
     UNILOG_LTE_RRC_DL_PCCH_DUMP,
@@ -73,7 +73,11 @@ typedef enum UniLogPs1ModIdType_enum
     UNILOG_LTE_RRC_VAR_MEASCONFIG_DUMP,
 
     UNILOG_EPS_SECURITY_DUMP,
-    UNILOG_EPS_PLAIN_DUMP,
+    UNILOG_EPS_PLAIN_DUMP   = 19,
+
+    /*
+     * [25:29] rsvd for IMS
+    */
 
     UNILOG_PS = 30,
     UNILOG_PS_SIG_DUMP,
@@ -115,13 +119,25 @@ typedef enum UniLogPs1ModIdType_enum
 
 
 #ifndef WIN32
+
+#define PS_INTERNAL_TRACE_ENABLE   1
+#if PS_INTERNAL_TRACE_ENABLE
+#define psSwLogInternalPrintf       swLogInternalPrintf
+#define psSwLogInternalDump         swLogInternalDump
+#define psSwLogInternalDumpPolling      swLogInternalDumpPolling
+#else
+#define psSwLogInternalPrintf       swLogPrintf
+#define psSwLogInternalDump         swLogDump
+#define psSwLogInternalDumpPolling      swLogDumpPolling
+#endif
+
 /*
  * used to compate: ECOMM_TRACE()
 */
 #define ECPS_TRACE(moduleId, subId, debugLevel, argLen, format,  ...)           \
 do                                                                              \
 {                                                                               \
-    swLogPrintf(UNILOG_PS1##__##moduleId##__##subId, debugLevel, ##__VA_ARGS__);    \
+    psSwLogInternalPrintf(UNILOG_PS1##__##moduleId##__##subId, debugLevel, ##__VA_ARGS__);    \
     {(void)format;}                                                             \
 }while(0)
 
@@ -131,7 +147,7 @@ do                                                                              
 #define ECPS_PRINTF(moduleId, subId, debugLevel, format, ...)                   \
 do                                                                              \
 {                                                                               \
-    swLogPrintf(UNILOG_PS1##__##moduleId##__##subId, debugLevel, ##__VA_ARGS__);   \
+    psSwLogInternalPrintf(UNILOG_PS1##__##moduleId##__##subId, debugLevel, ##__VA_ARGS__);   \
     {(void)format;}                                                             \
 }while(0)
 
@@ -141,7 +157,7 @@ do                                                                              
 #define ECPS_DUMP(moduleId, subId, debugLevel, format, dumpLen, dump)           \
 do                                                                              \
 {                                                                               \
-    swLogDump(UNILOG_PS1##__##moduleId##__##subId, debugLevel, dumpLen, dump);  \
+    psSwLogInternalDump(UNILOG_PS1##__##moduleId##__##subId, debugLevel, dumpLen, dump);  \
     {(void)format;}                                                             \
 }while(0)
 
@@ -149,6 +165,45 @@ do                                                                              
  * #define ECOMM_DUMP_POLLING(moduleID, subID, debugLevel, format, dumpLen, dump)
 */
 #define ECPS_DUMP_POLLING(moduleId, subId, debugLevel, format, dumpLen, dump)   \
+do                                                                              \
+{                                                                               \
+    psSwLogInternalDumpPolling(UNILOG_PS1##__##moduleId##__##subId, debugLevel, dumpLen, dump);  \
+    {(void)format;}                                                             \
+}while(0)
+
+/*
+ * New API:ECPS_TRACE_X(),external trace, used to compate: ECOMM_TRACE()
+*/
+#define ECPS_TRACE_X(moduleId, subId, debugLevel, argLen, format,  ...)           \
+{                                                                               \
+    swLogPrintf(UNILOG_PS1##__##moduleId##__##subId, debugLevel, ##__VA_ARGS__);    \
+    {(void)format;}                                                             \
+}while(0)
+
+/*
+ * New API: ECPS_PRINTF_X(), external log, could print atmost: 8 parameters, and support string print
+*/
+#define ECPS_PRINTF_X(moduleId, subId, debugLevel, format, ...)                   \
+do                                                                              \
+{                                                                               \
+    swLogPrintf(UNILOG_PS1##__##moduleId##__##subId, debugLevel, ##__VA_ARGS__);   \
+    {(void)format;}                                                             \
+}while(0)
+
+/*
+ * #define ECOMM_DUMP_X(moduleId, subId, debugLevel, format, dumpLen, dump), external LOG
+*/
+#define ECPS_DUMP_X(moduleId, subId, debugLevel, format, dumpLen, dump)           \
+do                                                                              \
+{                                                                               \
+    swLogDump(UNILOG_PS1##__##moduleId##__##subId, debugLevel, dumpLen, dump);  \
+    {(void)format;}                                                             \
+}while(0)
+
+/*
+ * #define ECOMM_DUMP_POLLING(moduleID, subID, debugLevel, format, dumpLen, dump), external LOG
+*/
+#define ECPS_DUMP_POLLING_X(moduleId, subId, debugLevel, format, dumpLen, dump)   \
 do                                                                              \
 {                                                                               \
     swLogDumpPolling(UNILOG_PS1##__##moduleId##__##subId, debugLevel, dumpLen, dump);  \

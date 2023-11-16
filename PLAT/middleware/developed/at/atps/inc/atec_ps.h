@@ -315,6 +315,14 @@
 #define ATC_CNEC_0_STATE_VAL_MAX                       127
 #define ATC_CNEC_0_STATE_VAL_DEFAULT                   0  /* disable indication */
 
+/* AT+ECSMER */
+#define ATC_ECSMER_0_CID_VAL_MIN                       ATC_CID_VAL_MIN
+#define ATC_ECSMER_0_CID_VAL_MAX                       ATC_CID_VAL_MAX
+#define ATC_ECSMER_0_CID_VAL_DEFAULT                   ATC_CID_VAL_DEFAULT
+#define ATC_ECSMER_1_DEL_CAUSE_VAL_MIN                 0
+#define ATC_ECSMER_1_DEL_CAUSE_VAL_MAX                 1
+#define ATC_ECSMER_1_DEL_CAUSE_VAL_DEFAULT             0
+
 /*
  * +CGEREP=[<mode>[,<bfr>]]
  * <mode>: integer type
@@ -373,7 +381,7 @@ CmsRetId  psECCIOTPLANE(const AtCmdInputContext *pAtCmdReq);
 //CmsRetId  psECNBIOTRAI(const AtCmdInputContext *pAtCmdReq);
 CmsRetId  psCGPADDR(const AtCmdInputContext *pAtCmdReq);
 //CmsRetId  psCNMPSD(const AtCmdInputContext *pAtCmdReq);
-CmsRetId  psCEER(const AtCmdInputContext *pAtCmdReq);
+//CmsRetId  psCEER(const AtCmdInputContext *pAtCmdReq);
 CmsRetId  psCEMODE(const AtCmdInputContext *pAtCmdReq);
 CmsRetId  psCEVDP(const AtCmdInputContext *pAtCmdReq);
 CmsRetId  psCGTFTRDP(const AtCmdInputContext *pAtCmdReq);
@@ -384,7 +392,6 @@ CmsRetId  psECAUGDCNT(const AtCmdInputContext *pAtCmdReq);
 CmsRetId  psECSCLKEX(const AtCmdInputContext *pAtCmdReq);
 CmsRetId  psECEMCATT(const AtCmdInputContext *pAtCmdReq);
 CmsRetId  psCNEC(const AtCmdInputContext *pAtCmdReq);
-CmsRetId  psECMMER(const AtCmdInputContext *pAtCmdReq);
 CmsRetId  psECSMER(const AtCmdInputContext *pAtCmdReq);
 
 

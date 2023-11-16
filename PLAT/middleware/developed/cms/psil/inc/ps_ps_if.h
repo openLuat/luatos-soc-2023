@@ -92,7 +92,7 @@ CmsRetId psSetECCIOTPLANE(UINT32 atHandle,INT32 plane);
 CmsRetId psGetPDPAddr(UINT32 atHandle, INT32 cid, BOOL bGetAll);
 CmsRetId psGetCSCON(UINT32 atHandle);
 CmsRetId psSendNoMorePsDataReq(UINT32 atHandle);
-CmsRetId psGetCEER(UINT32 atHandle);
+//CmsRetId psGetCEER(UINT32 atHandle);
 CmsRetId psSetCemode(UINT32 atHandle, UINT8 ceMode);
 CmsRetId psGetCemode(UINT32 atHandle);
 CmsRetId psSetCevdp(UINT32 atHandle, UINT8 cevdp);
@@ -249,9 +249,9 @@ CmiRcCode psSetSCLKEXSync(const CmiPsSetTrafficIdleMonitorReq *pSetTrafficIdleMo
 CmiRcCode psGetEMCATTSync(UINT8 *pPsState);
 
 CmsRetId psSetEmcAttachState (UINT32 atHandle, BOOL bAttached);
-CmsRetId psGetECSMER(UINT32 atHandle);
+CmsRetId psDelECSMER(UINT32 atHandle, UINT8 cid);
+CmsRetId psGetECSMER(UINT32 atHandle,UINT8 cid, BOOL getAll);
 
-CmsRetId psGetECMMER(UINT32 atHandle);
 
 #endif
 

@@ -58,7 +58,9 @@
 //  <o>Total heap size [bytes] <0-0xFFFFFFFF>
 //  <i> Heap memory size in bytes.
 //  <i> Default: 8192
-#ifdef FEATURE_AMR_CP_ENABLE
+#if (defined FEATURE_AMR_CP_ENABLE) && (defined FEATURE_VEM_CP_ENABLE)
+#define configTOTAL_HEAP_SIZE                   ((size_t)1024*56)
+#elif (defined FEATURE_AMR_CP_ENABLE)
 #define configTOTAL_HEAP_SIZE                   ((size_t)1024*28)
 #else
 #define configTOTAL_HEAP_SIZE                   ((size_t)1024*24)

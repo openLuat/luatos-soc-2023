@@ -69,6 +69,10 @@ typedef void (*tcpip_init_done_fn)(void *arg);
 /** Function prototype for functions passed to tcpip_callback() */
 typedef void (*tcpip_callback_fn)(void *ctx);
 
+typedef void (*tcpip_free_mem_callback)(void *ptr);
+
+
+
 /* Forward declarations */
 struct tcpip_callback_msg;
 
@@ -101,6 +105,11 @@ err_t  mem_free_callback(void *m);
 err_t  tcpip_timeout(u32_t msecs, sys_timeout_handler h, void *arg);
 err_t  tcpip_untimeout(sys_timeout_handler h, void *arg);
 #endif /* LWIP_TCPIP_TIMEOUT && LWIP_TIMERS */
+
+#if ENABLE_PSIF
+err_t tcpip_udp_local_sendto(void *data, u16_t size, u16_t toPort, tcpip_free_mem_callback freefunc);
+err_t tcpip_udp_int_local_sendto(int value, u16_t size, u16_t toPort);
+#endif
 
 #ifdef __cplusplus
 }

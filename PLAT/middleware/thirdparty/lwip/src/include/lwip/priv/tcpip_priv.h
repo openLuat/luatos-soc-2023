@@ -116,6 +116,8 @@ enum tcpip_msg_type {
 #if ENABLE_PSIF
   TCPIP_MSG_PS_INPKT,
   TCPIP_MSG_PS_PENDING_INPKT,
+  UDP_LOCAL_SENDTO,     //udp_lcoal_sendto
+  UDP_LOCAL_INT_SENDTO, //udp_lcoal_int_sendto
 #endif
   TCPIP_MSG_LAN_INPUT,
 #if LWIP_TCPIP_TIMEOUT && LWIP_TIMERS
@@ -126,6 +128,9 @@ enum tcpip_msg_type {
   TCPIP_MSG_CALLBACK_STATIC
 };
 
+/**
+ * Note: union better limited in 12 bytes
+*/
 struct tcpip_msg {
   enum tcpip_msg_type type;
   union {
@@ -153,6 +158,17 @@ struct tcpip_msg {
       u8_t cid;
       psif_pending_input_fn ps_pending_input_fn;
     } ps_pending_inp;
+    struct {
+      void  *data;
+      u16_t size;
+      u16_t toPort;
+      tcpip_free_mem_callback   memfreefunc;
+    } udp_lcoal_sendto;
+    struct {
+      int   value;
+      u16_t valSize;    //must <= 4
+      u16_t toPort;
+    } udp_lcoal_int_sendto;
 #endif
     struct {
         u8_t lan_type;

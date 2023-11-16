@@ -414,6 +414,7 @@ int32_t i2sInit(i2sCbEvent_fn txCbEvent, i2sCbEvent_fn rxCbEvent, I2sResources_t
     // Initialize I2S run-time resources
     i2s->info->txCbEvent     = txCbEvent;
     i2s->info->rxCbEvent     = rxCbEvent;
+    i2s->info->isEnableFracdiv = true;
 
     // Configure DMA if necessary
     if (i2s->dma)
@@ -612,7 +613,7 @@ static int32_t i2sSetSampleRate(uint32_t bps, I2sResources_t *i2s, I2sRole_e i2s
     {
         CLOCK_fracDivOutCLkEnable(FRACDIV0_OUT0); // Fracdiv0 out0 enable
         CLOCK_setMclkSrc(MCLK0, MCLK_SRC_FRACDIV0_OUT0); // Choose Fracdiv0 out0 as MClk source
-        CLOCK_mclkEnable(MCLK0); // Mclk enable
+        //CLOCK_mclkEnable(MCLK0); // Mclk enable
         CLOCK_setFracDivOutClkDiv(FRACDIV0_OUT0, 6); // First step to generate MClk clock. 6 div
 
         // need to add gpr api for fracdiv
@@ -665,8 +666,12 @@ static int32_t i2sSetSampleRate(uint32_t bps, I2sResources_t *i2s, I2sRole_e i2s
         }
     }
 
-    CLOCK_setClockSrc(CLK_FRACDIV, CLK_FRACDIV_SEL_612M);
-    CLOCK_clockEnable(CLK_FRACDIV);
+    if (i2s->info->isEnableFracdiv)
+    {
+        CLOCK_setClockSrc(CLK_FRACDIV, CLK_FRACDIV_SEL_612M);
+        CLOCK_clockEnable(CLK_FRACDIV);
+        i2s->info->isEnableFracdiv = false;
+    }
 
     if (instance == 0)
     {

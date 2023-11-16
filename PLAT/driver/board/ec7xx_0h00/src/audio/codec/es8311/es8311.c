@@ -159,7 +159,18 @@ static uint8_t dacVolBak, adcVolBak;
 
 static int32_t es8311WriteReg(uint8_t regAddr, uint16_t data)
 {
-    return codecI2cWrite(ES8311_IICADDR, regAddr, data);
+    int32_t ret = 0;
+    ret = codecI2cWrite(ES8311_IICADDR, regAddr, data);
+
+#if 0
+#ifdef FEATURE_OS_ENABLE        
+    DEBUG_PRINT(UNILOG_PLA_DRIVER, es8311WriteReg_1, P_DEBUG, "reg write: reg=%x, data=%x", regAddr, data);
+#else      
+    printf("reg write: reg=%02x, data=%02x\n", regAddr, data);
+#endif
+#endif
+
+    return ret;
 }
 
 static uint8_t es8311ReadReg(uint8_t regAddr)
@@ -179,21 +190,8 @@ static int getCoeff(uint32_t mclk, uint32_t rate)
 // set es8311 dac mute or not. mute = 0, dac un-mute; mute = 1, dac mute
 static void es8311Mute(int mute)
 {
-    uint8_t regv;
     DEBUG_PRINT(UNILOG_PLA_DRIVER, es8311setmute_0, P_DEBUG, "Enter into es8311Mute(), mute = %d\n", mute);
-    regv = es8311ReadReg(ES8311_DAC_REG31) & 0x9f;
-    if (mute) 
-    {
-        es8311WriteReg(ES8311_SYSTEM_REG12,     0x02);
-        es8311WriteReg(ES8311_DAC_REG31,    regv | 0x60);
-        es8311WriteReg(ES8311_DAC_REG32,        0x00);
-        es8311WriteReg(ES8311_DAC_REG37,        0x08);
-    } 
-    else 
-    {
-        es8311WriteReg(ES8311_DAC_REG31,        regv);
-        es8311WriteReg(ES8311_SYSTEM_REG12,     0x00);
-    }
+    es8311SetVolume(0);
 }
 
 // set es8311 into suspend mode
@@ -213,6 +211,40 @@ static void es8311Standby(uint8_t* dacVolB, uint8_t* adcVolB)
     es8311WriteReg(ES8311_GP_REG45,     0x01);
 }
 
+#if 0
+// set es8311 ADC into suspend mode
+static void es8311AdcStandby(uint8_t* adcVolB)
+{
+    DEBUG_PRINT(UNILOG_PLA_DRIVER, es8311suspend_1, P_DEBUG, "Enter into es8311 adc suspend");
+    *adcVolB = es8311ReadReg(ES8311_ADC_REG17);
+    es8311WriteReg(ES8311_ADC_REG17,            0x00);
+    es8311WriteReg(ES8311_SDPOUT_REG0A,         0x40);
+    es8311WriteReg(ES8311_SYSTEM_REG0E,         0x7f);
+    es8311WriteReg(ES8311_SYSTEM_REG14,         0x00);
+    es8311WriteReg(ES8311_SYSTEM_REG0D,         0x31);
+    es8311WriteReg(ES8311_ADC_REG15,            0x00);
+    es8311WriteReg(ES8311_DAC_REG37,            0x08);
+    es8311WriteReg(ES8311_RESET_REG00,          0x82);
+    es8311WriteReg(ES8311_CLK_MANAGER_REG01,    0x35);
+}
+
+// set es8311 DAC into suspend mode
+static void es8311DacStandby(uint8_t* dacVolB)
+{
+    DEBUG_PRINT(UNILOG_PLA_DRIVER, es8311suspend_2, P_DEBUG, "Enter into es8311 dac suspend");
+    *dacVolB = es8311ReadReg(ES8311_DAC_REG32);
+    es8311WriteReg(ES8311_DAC_REG32,            0x00);
+    es8311WriteReg(ES8311_SYSTEM_REG0E,         0x0F);
+    es8311WriteReg(ES8311_SYSTEM_REG12,         0x02);
+    es8311WriteReg(ES8311_SYSTEM_REG0D,         0x09);
+    es8311WriteReg(ES8311_ADC_REG15,            0x00);
+    es8311WriteReg(ES8311_DAC_REG37,            0x08);
+    es8311WriteReg(ES8311_RESET_REG00,          0x81);
+    es8311WriteReg(ES8311_CLK_MANAGER_REG01,    0x3a);
+}
+#endif
+
+
 // set es8311 into resume mode
 static HalCodecSts_e es8311Resume(HalCodecModule_e mode)
 {
@@ -226,7 +258,7 @@ static HalCodecSts_e es8311Resume(HalCodecModule_e mode)
     es8311WriteReg(ES8311_CLK_MANAGER_REG02,    0x00);
     es8311WriteReg(ES8311_DAC_REG37,            0x08);
     es8311WriteReg(ES8311_ADC_REG15,            0x40);
-    es8311WriteReg(ES8311_SYSTEM_REG14,         0x10);
+    es8311WriteReg(ES8311_SYSTEM_REG14,         0x18);
     es8311WriteReg(ES8311_SYSTEM_REG12,         0x00);
     es8311WriteReg(ES8311_SYSTEM_REG0E,         0x00);
     es8311WriteReg(ES8311_DAC_REG32,            dacVolBak);
@@ -234,6 +266,45 @@ static HalCodecSts_e es8311Resume(HalCodecModule_e mode)
     
     return CODEC_EOK;
 }
+
+#if 0
+// set es8311 adc into resume mode
+static HalCodecSts_e es8311AdcResume(HalCodecModule_e mode)
+{
+    DEBUG_PRINT(UNILOG_PLA_DRIVER, es8311Resume_1, P_DEBUG, "Enter into es8311 adc resume");
+    es8311WriteReg(ES8311_SYSTEM_REG0D,         0x01);
+    es8311WriteReg(ES8311_CLK_MANAGER_REG01,    0x3F);
+    es8311WriteReg(ES8311_RESET_REG00,          0x80);
+    delay_us(1000);
+    es8311WriteReg(ES8311_SYSTEM_REG0D,         0x01);
+    es8311WriteReg(ES8311_DAC_REG37,            0x08);
+    es8311WriteReg(ES8311_ADC_REG15,            0x00);
+    es8311WriteReg(ES8311_SYSTEM_REG14,         0x18);
+    es8311WriteReg(ES8311_SYSTEM_REG0E,         0x02);
+    es8311WriteReg(ES8311_ADC_REG17,            adcVolBak);
+    delay_us(50*1000);
+    es8311WriteReg(ES8311_SDPOUT_REG0A,         0x00);
+    return CODEC_EOK;
+}
+
+// set es8311 dac into resume mode
+static HalCodecSts_e es8311DacResume(HalCodecModule_e mode)
+{
+    DEBUG_PRINT(UNILOG_PLA_DRIVER, es8311Resume_2, P_DEBUG, "Enter into es8311 dac resume");
+    es8311WriteReg(ES8311_SYSTEM_REG0D,         0x01);
+    es8311WriteReg(ES8311_CLK_MANAGER_REG01,    0x3F);
+    es8311WriteReg(ES8311_RESET_REG00,          0x80);
+    delay_us(1000);
+    es8311WriteReg(ES8311_SYSTEM_REG0D,         0x01);
+    es8311WriteReg(ES8311_DAC_REG37,            0x08);
+    es8311WriteReg(ES8311_ADC_REG15,            0x00);
+    es8311WriteReg(ES8311_SYSTEM_REG0E,         0x02);
+    es8311WriteReg(ES8311_DAC_REG32,            dacVolBak);
+    
+    return CODEC_EOK;
+}
+#endif
+
 
 // set es8311 into powerdown mode
 static HalCodecSts_e es8311PwrDown(HalCodecModule_e mode)
@@ -249,8 +320,10 @@ static HalCodecSts_e es8311PwrDown(HalCodecModule_e mode)
     es8311WriteReg(ES8311_DAC_REG37,            0x08);
     es8311WriteReg(ES8311_CLK_MANAGER_REG02,    0x10);
     es8311WriteReg(ES8311_RESET_REG00,          0x00);
+    delay_us(1000);
     es8311WriteReg(ES8311_RESET_REG00,          0x1f);
-    es8311WriteReg(ES8311_CLK_MANAGER_REG01,    0x30);
+    es8311WriteReg(ES8311_CLK_MANAGER_REG01,    0x30);    
+    delay_us(1000);
     es8311WriteReg(ES8311_CLK_MANAGER_REG01,    0x00);
     es8311WriteReg(ES8311_GP_REG45,             0x00);
     es8311WriteReg(ES8311_SYSTEM_REG0D,         0xfc);
@@ -274,50 +347,64 @@ HalCodecSts_e es8311Init(HalCodecCfg_t *codecCfg)
     uint8_t datmp, regv;
     int coeff;
     HalCodecSts_e ret = CODEC_EOK;
+    getCoeff(0,0);
     
     codecI2cInit();
 
-    ret |= es8311WriteReg(ES8311_CLK_MANAGER_REG01, 0x30);
-    ret |= es8311WriteReg(ES8311_CLK_MANAGER_REG02, 0x00);
-    ret |= es8311WriteReg(ES8311_CLK_MANAGER_REG03, 0x10);
-    ret |= es8311WriteReg(ES8311_ADC_REG16,         0x24);
-    ret |= es8311WriteReg(ES8311_CLK_MANAGER_REG04, 0x10);
-    ret |= es8311WriteReg(ES8311_CLK_MANAGER_REG05, 0x00);
-    ret |= es8311WriteReg(ES8311_SYSTEM_REG0B,      0x00);
-    ret |= es8311WriteReg(ES8311_SYSTEM_REG0C,      0x00);
-    ret |= es8311WriteReg(ES8311_SYSTEM_REG10,      0x03/*0x1F*/);
-    ret |= es8311WriteReg(ES8311_SYSTEM_REG11,      0x7F);
+    #if 0
+    es8311WriteReg(ES8311_GP_REG45,             0x00);
+    es8311WriteReg(ES8311_CLK_MANAGER_REG01,    0x30);
+    es8311WriteReg(ES8311_CLK_MANAGER_REG02,    0x10);
 
-    // clr ram
-    regv = es8311ReadReg(ES8311_DAC_REG31);
-    regv |= 1<<3;
-    ret |= es8311WriteReg(ES8311_DAC_REG31,         regv);
-    delay_us(10);
-    regv &= ~(1<<3);
-    ret |= es8311WriteReg(ES8311_DAC_REG31,         regv);
-    delay_us(10);
+    // 256
+    es8311WriteReg(ES8311_CLK_MANAGER_REG02,    0x00);
+    es8311WriteReg(ES8311_CLK_MANAGER_REG03,    0x10);
+    es8311WriteReg(ES8311_ADC_REG16,            0x21);
+    es8311WriteReg(ES8311_CLK_MANAGER_REG04,    0x19);
+    es8311WriteReg(ES8311_CLK_MANAGER_REG05,    0x00);
+
+    // clk
+    es8311WriteReg(ES8311_CLK_MANAGER_REG06,    (0<<5) + 4 -1);
+    es8311WriteReg(ES8311_CLK_MANAGER_REG07,    0x00);
+    es8311WriteReg(ES8311_CLK_MANAGER_REG08,    0xff);
+
+    // sdp
+    es8311WriteReg(ES8311_SDPIN_REG09,          (0<<7) + 0x00 + (0x00<<2));
+    es8311WriteReg(ES8311_SDPOUT_REG0A,         0x00 + (0x00<<2));
+
+    // system
+    es8311WriteReg(ES8311_SYSTEM_REG0B,         0x00);
+    es8311WriteReg(ES8311_SYSTEM_REG0C,         0x00);
+
+    es8311WriteReg(ES8311_SYSTEM_REG10,         (0x1C*0) + (0x60*0x00) + 0x03);
+    es8311WriteReg(ES8311_SYSTEM_REG11,         0x7F);
+    es8311WriteReg(ES8311_RESET_REG00,          0x80);
+    es8311WriteReg(ES8311_SYSTEM_REG0D,         0x01);
+    es8311WriteReg(ES8311_CLK_MANAGER_REG01,    0x3F + (0x00<<7));
+    es8311WriteReg(ES8311_SYSTEM_REG14,         0x18);
+    es8311WriteReg(ES8311_SYSTEM_REG12,         0x28);
+    es8311WriteReg(ES8311_SYSTEM_REG13,         0x00 + (0<<4));
+    es8311WriteReg(ES8311_SYSTEM_REG0E,         0x02);
+    es8311WriteReg(ES8311_SYSTEM_REG0F,         0x44);
+
+    // adc
+    es8311WriteReg(ES8311_ADC_REG15,            0x00);
+    es8311WriteReg(ES8311_ADC_REG1B,            0x0a);
+    es8311WriteReg(ES8311_ADC_REG1C,            0x6a);
+
+    // dac
+    es8311WriteReg(ES8311_DAC_REG37,            0x48);
+
+    // gpio
+    es8311WriteReg(ES8311_GPIO_REG44,           (0 <<7));
+
     
-    ret |= es8311WriteReg(ES8311_RESET_REG00,       0x80);
+    es8311WriteReg(ES8311_ADC_REG17,            0x88);
+    es8311WriteReg(ES8311_DAC_REG32,            0xf6);
     
-    // Set Codec into Master or Slave mode
-    regv = es8311ReadReg(ES8311_RESET_REG00);
     
-    // Set master/slave audio interface
-    HalCodecIface_t *i2sCfg = &(codecCfg->codecIface);
-    switch (i2sCfg->mode) 
-    {
-        case CODEC_MODE_MASTER:
-            DEBUG_PRINT(UNILOG_PLA_DRIVER, es8311init_0, P_DEBUG, "es8311 in master mode");
-            regv |= 0x40;
-            break;
-        case CODEC_MODE_SLAVE:
-            DEBUG_PRINT(UNILOG_PLA_DRIVER, es8311init_1, P_DEBUG, "es8311 in slave mode");
-            regv &= 0xBF;
-            break;
-        default:
-            regv &= 0xBF;
-    }
-    ret |= es8311WriteReg(ES8311_RESET_REG00, regv);
+   #else
+   HalCodecIface_t *i2sCfg = &(codecCfg->codecIface);
     ret |= es8311WriteReg(ES8311_CLK_MANAGER_REG01, 0x3F);
 
     // Select clock source for internal mclk
@@ -325,6 +412,7 @@ HalCodecSts_e es8311Init(HalCodecCfg_t *codecCfg)
     regv &= 0x7F;
     ret |= es8311WriteReg(ES8311_CLK_MANAGER_REG01, regv);
 
+    // Set clock parammeters
     int sampleFre = 0;
     int mclkFre = 0;
     switch (i2sCfg->samples) 
@@ -359,7 +447,6 @@ HalCodecSts_e es8311Init(HalCodecCfg_t *codecCfg)
         return CODEC_INIT_ERR;
     }
     
-    // Set clock parammeters
     if (coeff >= 0) 
     {
         regv = es8311ReadReg(ES8311_CLK_MANAGER_REG02) & 0x07;
@@ -420,16 +507,27 @@ HalCodecSts_e es8311Init(HalCodecCfg_t *codecCfg)
         ret |= es8311WriteReg(ES8311_CLK_MANAGER_REG06, regv);
     }
 
-    // mclk
-    regv = es8311ReadReg(ES8311_CLK_MANAGER_REG01);
-    regv &= ~(0x40);
-    ret |= es8311WriteReg(ES8311_CLK_MANAGER_REG01, regv);
+    ret |= es8311WriteReg(ES8311_RESET_REG00,       0x80);
     
-    // sclk
-    regv = es8311ReadReg(ES8311_CLK_MANAGER_REG06);
-    regv &= ~(0x20);
-    ret |= es8311WriteReg(ES8311_CLK_MANAGER_REG06, regv);
-
+    // Set Codec into Master or Slave mode
+    regv = es8311ReadReg(ES8311_RESET_REG00);
+    
+    // Set master/slave audio interface
+    switch (i2sCfg->mode) 
+    {
+        case CODEC_MODE_MASTER:
+            DEBUG_PRINT(UNILOG_PLA_DRIVER, es8311init_0, P_DEBUG, "es8311 in master mode");
+            regv |= 0x40;
+            break;
+        case CODEC_MODE_SLAVE:
+            DEBUG_PRINT(UNILOG_PLA_DRIVER, es8311init_1, P_DEBUG, "es8311 in slave mode");
+            regv &= 0xBF;
+            break;
+        default:
+            regv &= 0xBF;
+    }
+    ret |= es8311WriteReg(ES8311_RESET_REG00, regv);
+   
     ret |= es8311WriteReg(ES8311_SYSTEM_REG13, 0x00/*0x10*/);
     ret |= es8311WriteReg(ES8311_ADC_REG1B, 0x0A);
     ret |= es8311WriteReg(ES8311_ADC_REG1C, 0x6A);
@@ -437,6 +535,7 @@ HalCodecSts_e es8311Init(HalCodecCfg_t *codecCfg)
     {
         DEBUG_PRINT(UNILOG_PLA_DRIVER, es8311init_4, P_DEBUG, "es8311 initialize failed");
     }
+    #endif
 
     if (codecCfg->enablePA)
     {       
@@ -451,7 +550,7 @@ HalCodecSts_e es8311Init(HalCodecCfg_t *codecCfg)
         
         // CODEC_PA pin config
         pinConfig.pinDirection = GPIO_DIRECTION_OUTPUT;
-        pinConfig.misc.initOutput = 1;  // when codec has been init, PA should open   
+        pinConfig.misc.initOutput = 0;  // when codec has been init, PA should open   
         GPIO_pinConfig(CODEC_PA_GPIO_INSTANCE, CODEC_PA_GPIO_PIN, &pinConfig);
         
         // enable pa power
@@ -463,8 +562,8 @@ HalCodecSts_e es8311Init(HalCodecCfg_t *codecCfg)
 
 void es8311DeInit()
 {
+    //es8311PwrDown(0);
     codecI2cDeInit();
-    es8311PwrDown(0);
 }
 
 HalCodecSts_e es8311ConfigFmt(HalCodecIfaceFormat_e fmt)
@@ -668,7 +767,7 @@ HalCodecSts_e es8311SetVolume(int volume)
 
     if (volume <= 0)
     {
-        return es8311SetMute(1);
+        //return es8311SetMute(1);
     }
 
     if (volume >= 100)
@@ -736,15 +835,27 @@ HalCodecSts_e es8311SetMicVolume(int micVolume)
 
 void es8311ReadAll()
 {
+#ifdef FEATURE_OS_ENABLE        
+    DEBUG_PRINT(UNILOG_PLA_DRIVER, es8311ReadAll_1, P_DEBUG, "now read 8311 all");
+#else      
+    printf("now read 8311 all\n");
+#endif
+
     for (int i = 0; i < 0x4A; i++) 
     {
         uint8_t reg = es8311ReadReg(i);
 #ifdef FEATURE_OS_ENABLE        
-        DEBUG_PRINT(UNILOG_PLA_DRIVER, es8311ReadAll_1, P_DEBUG, "REG:%x, %x", reg, i);
+        DEBUG_PRINT(UNILOG_PLA_DRIVER, es8311ReadAll_2, P_DEBUG, "REG:%x, %x", reg, i);
 #else      
         printf("reg = 0x%02x, val = 0x%02x\n", i, reg);
 #endif
     }
+
+#ifdef FEATURE_OS_ENABLE        
+    DEBUG_PRINT(UNILOG_PLA_DRIVER, es8311ReadAll_3, P_DEBUG, "now read 8311 all end");
+#else      
+    printf("now read 8311 all end\n");
+#endif
 }
 
 HalCodecCfg_t es8311GetDefaultCfg()

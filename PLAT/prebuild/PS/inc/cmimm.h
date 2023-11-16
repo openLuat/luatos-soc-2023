@@ -110,12 +110,6 @@ typedef enum _EPAT_CMI_MM_PRIM_ID_TAG
 
     CMI_MM_NW_EMC_NUM_IND,                          //CmiMmNwEmcNumInd,     +CEN1: [,<mcc>,<mnc>]
 
-    CMI_MM_IGNORE_TIMER_REQ,                        //CmiMmIgnoreTimerReq
-    CMI_MM_IGNORE_TIMER_CNF,                        //CmiMmIgnoreTimerCnf
-
-    CMI_MM_GET_TIMER_LENGTH_REQ = 80,               //CmiMmGetTimerLengthReq
-    CMI_MM_GET_TIMER_LENGTH_CNF,                    //CmiMmGetTimerLengthCnf
-
     CMI_MM_IMS_SSAC_CHANGE_IND,                     //CmiMmSsacChangeInd
     CMI_MM_RRC_STATE_IND,                           //CmiMmRrcStateInd
     CMI_MM_CDRX_CFG_IND,                            //CmiMmCdrxCfgInd
@@ -124,6 +118,9 @@ typedef enum _EPAT_CMI_MM_PRIM_ID_TAG
     CMI_MM_SET_OOS_PLMN_INTERVAL_CNF,               //CmiMmSetOosPlmnIntervalCnf
     CMI_MM_GET_OOS_PLMN_INTERVAL_REQ,               //CmiMmGetOosPlmnIntervalReq
     CMI_MM_GET_OOS_PLMN_INTERVAL_CNF,               //CmiMmGetOosPlmnIntervalCnf
+
+    CMI_MM_GET_ECMMER_REQ,                          //CmiMmGetEcmmerReq
+    CMI_MM_GET_ECMMER_CNF,                          //CmiMmGetEcmmerCnf
 
     CMI_MM_PRIM_END = 0x0fff
 }CMI_MM_PRIM_ID;
@@ -1470,55 +1467,6 @@ typedef struct CmiMmGetNwEmcNumCnf_Tag
 ******************************************************************************/
 typedef CmiMmGetNwEmcNumCnf CmiMmNwEmcNumInd;
 
-
-typedef enum CmiMmEmmTimerId_Tag
-{
-    CMI_MM_EMM_T3402 = 0,
-    CMI_MM_EMM_T3411 = 1,
-    //.....
-    CMI_MM_EMM_TIMER_END
-}CmiMmEmmTimerId;
-
-/******************************************************************************
- * CMI_MM_IGNORE_TIMER_REQ
- * Request to ignore EMM timer(one time request ignore one timer)
-******************************************************************************/
-typedef struct CmiMmIgnoreTimerReq_Tag
-{
-    UINT8       timerId;        /* CmiMmEmmTimerId */
-    UINT8       ignoreTimer;    /* 0:not ignore; 1:ignore */
-    UINT16      rsvd1;
-}CmiMmIgnoreTimerReq;
-
-/******************************************************************************
- * CMI_MM_IGNORE_TIMER_CNF
- * Ignore EMM timer confirm
-******************************************************************************/
-typedef CamCmiEmptySig  CmiMmIgnoreTimerCnf;
-
-/******************************************************************************
- * CMI_MM_GET_TIMER_LENGTH_REQ
- * Get EMM timer length(one time get one timer length)
-******************************************************************************/
-typedef struct CmiMmGetTimerLengthReq_Tag
-{
-    UINT8       timerId;    /* CmiMmEmmTimerId */
-    UINT8       rsvd0;
-    UINT16      rsvd1;
-}CmiMmGetTimerLengthReq;
-
-/******************************************************************************
- * CMI_MM_GET_TIMER_LENGTH_CNF
- * Get EMM timer length confirm
-******************************************************************************/
-typedef struct CmiMmGetTimerLengthCnf_Tag
-{
-    UINT8       timerId;    /* CmiMmEmmTimerId */
-    UINT8       rsvd0;
-    UINT16      rsvd1;
-    UINT32      timeLen;    /* seconds */
-}CmiMmGetTimerLengthCnf;
-
 /******************************************************************************
  * CMI_MM_IMS_SSAC_CHANGE_IND
  * According to 36.3331, 5.3.3.10, Handling of SSAC related parameters
@@ -1703,6 +1651,21 @@ typedef struct CmiMmGetOosPlmnIntervalCnf_Tag
     UINT16  interval1[CMI_MM_PLMN_SEARCH_POWER_LEVEL_NUM];          //interval1 of level[0-4] in unit of seconds
     UINT16  interval2[CMI_MM_PLMN_SEARCH_POWER_LEVEL_NUM];          //interval2 of level[0-4] in unit of seconds
 }CmiMmGetOosPlmnIntervalCnf;
+
+/*
+ * CMI_MM_GET_ECMMER_REQ,
+*/
+typedef CamCmiEmptySig CmiMmGetEcmmerReq;
+
+/*
+ * CMI_MM_GET_ECMMER_CNF,
+*/
+typedef struct CmiMmGetEcmmerCnf_Tag
+{
+    BOOL        bCausePresent;
+    UINT8       rsvd;
+    UINT16      emmCause;        /* CmiEmmCause */
+}CmiMmGetEcmmerCnf;
 
 #endif
 

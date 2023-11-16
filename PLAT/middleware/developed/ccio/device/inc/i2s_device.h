@@ -75,6 +75,7 @@ typedef struct
     uint16_t  totalSize;
     uint8_t   *rxBuffer;
     uint8_t   codecType;
+    bool      needPlayTone;
 }I2sDevRxWrap_t;
 
 typedef struct

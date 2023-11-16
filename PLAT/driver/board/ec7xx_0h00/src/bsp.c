@@ -16,7 +16,7 @@
 #include DEBUG_LOG_HEADER_FILE
 #include "ec_string.h"
 #include "mem_map.h"
-#if FEATURE_CCIO_ENABLE
+#ifdef FEATURE_CCIO_ENABLE
 #include "uart_device.h"
 #endif
 #include "dbversion.h"
@@ -39,7 +39,7 @@ BSP_BSS_SECTION ARM_DRIVER_USART *UsartUnilogHandle = NULL;
 BSP_BSS_SECTION ARM_DRIVER_USART *UsartAtCmdHandle = NULL;
 
 BSP_BSS_SECTION static uint8_t OSState = 0;     // OSState = 0 os not start, OSState = 1 os started
-#ifdef __USER_CODE__	//ä¸éœ€è¦
+#ifdef __USER_CODE__	//²»ĞèÒª
 #else
 BSP_BSS_SECTION static uint32_t gUartBaudrate[3]; // a copy for uart baud rate
 #endif
@@ -197,7 +197,7 @@ uint8_t* getDebugDVersion(void)
 {
     return (uint8_t*)DB_VERSION_UNIQ_ID;
 }
-#ifdef __USER_CODE__	//ä¸éœ€è¦ï¼Œæ”¾åœ¨å…¶ä»–åœ°æ–¹
+#ifdef __USER_CODE__	//²»ĞèÒª£¬·ÅÔÚÆäËûµØ·½
 #else
 void setUartBaudRate(uint8_t idx, uint32_t baudRate)
 {
@@ -269,7 +269,7 @@ void logToolCommandHandle(uint32_t event, uint8_t *cmd_buffer, uint32_t len)
 
 }
 
-#ifdef __USER_CODE__	//ä¸éœ€è¦ï¼Œæ”¾åœ¨å…¶ä»–åœ°æ–¹
+#ifdef __USER_CODE__	//²»ĞèÒª£¬·ÅÔÚÆäËûµØ·½
 #else
 /**
  * unilog entity is removed for the reason of BSP small image.

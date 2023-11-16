@@ -369,6 +369,7 @@ struct tcp_pcb {
    u8_t bind_ded_cid;//bind with dedicated cid
    u8_t tcp_max_retry_times;
    u8_t tcp_need_report_ul_total_status; //report ul total status
+   u8_t tcp_need_report_close_complete; //report close complete event
    u16_t tcp_max_total_retry_time; //(seconds)
    u16_t close_local_abort_time; //(s)
 #endif
@@ -484,10 +485,12 @@ const char* tcp_debug_state_str(enum tcp_state s);
 #define tcp_new_ip6() tcp_new_ip_type(IPADDR_TYPE_V6)
 
 #if ENABLE_PSIF
+err_t tcp_set_sockid(struct tcp_pcb *pcb, u32_t socketid);
 u8_t IsAnyActiveTcpConn(void);
 u8_t is_any_tcp_pcb_pending_ul_data(void);
 void tcp_netif_enter_oos_state(const ip_addr_t * address);
 void tcp_netif_exit_oos_state(const ip_addr_t * address);
+void tcp_report_close_complete_event(struct tcp_pcb *pcb);
 #endif
 
 #if PS_ENABLE_TCPIP_HIB_SLEEP2_MODE

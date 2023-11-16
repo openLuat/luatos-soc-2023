@@ -346,9 +346,8 @@ err_t   netconn_bind(struct netconn *conn, const ip_addr_t *addr, u16_t port);
 
 #if ENABLE_PSIF
 err_t   netconn_bind_cid(struct netconn *conn, u8_t cid);
-err_t
-netconn_alloca_server_port(u8_t type, int32_t *server_port);
-
+err_t netconn_set_sockid(struct netconn *conn, int32_t socketid);
+err_t netconn_alloca_server_port(u8_t type, int32_t *server_port);
 #endif
 
 err_t   netconn_connect(struct netconn *conn, const ip_addr_t *addr, u16_t port);
@@ -476,9 +475,8 @@ err_t netconn_get_tcp_send_buffer_size(struct netconn *conn, uint16_t *buffer_si
 err_t netconn_get_sock_info_by_pcb(int socket_type, void *pcb, ip_addr_t *local_ip, ip_addr_t *remote_ip, u16_t *local_port, u16_t *remote_port);
 
 err_t netconn_set_rohc_rtp_cfg(u8_t cid, ip_addr_t *dstIp, u16_t srcPort, u16_t dstPort);
-
 err_t netconn_clean_rohc_rtp_cfg(u8_t cid);
-
+err_t netconn_udp_local_sendto(const void *data, int size, u16_t toPort, u16_t fromPort);
 #endif
 
 #ifdef __cplusplus

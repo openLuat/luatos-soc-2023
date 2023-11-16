@@ -139,6 +139,7 @@ typedef struct
     uint32_t                bps;
     uint32_t                txDmaDescNum;
     uint32_t                rxDmaDescNum;
+    bool                    isEnableFracdiv;
 } I2sInfo_t;
 
 

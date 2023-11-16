@@ -262,6 +262,7 @@ AtcCopsInfo  *mmGetCopsInfo(void);
 CmsRetId  mmGetPlmnNumericStr(UINT8 plmnFormat, UINT8 *plmnName, UINT8 *plmnNumericStr);
 CmsRetId  mmECPLMNINTERVAL(const AtCmdInputContext *pAtCmdReq);
 CmsRetId  mmECCONNREL(const AtCmdInputContext *pAtCmdReq);
+CmsRetId  mmECMMER(const AtCmdInputContext *pAtCmdReq);
 
 #endif
 

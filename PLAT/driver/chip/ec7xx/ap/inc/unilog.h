@@ -81,6 +81,10 @@ void unilogSetDMAReactive(void);
 void uniLogSetBusy(bool isBusy);
 uint32_t uniLogReadWaterMark(void);
 
+void swLogInternalPrintf(uint32_t swLogID, uint8_t debugLevel, ...);
+void swLogInternalDump(uint32_t swLogID, uint8_t debugLevel, uint32_t dumpLen, const uint8_t*pDump);
+void swLogInternalDumpPolling(uint32_t swLogID, uint8_t debugLevel, uint32_t dumpLen, const uint8_t*pDump);
+
 #ifdef __cplusplus
 }
 #endif

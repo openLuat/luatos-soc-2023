@@ -217,14 +217,35 @@ do  \
     {(void)format;} \
 }while(0)
 
-
-
-#define ECOMM_PRINTF(ownerId, moduleId, subId, debugLevel, format, ...) \
+#ifdef CHIP_EC618
+#define ECOMM_HEX_DUMP_I  ECOMM_HEX_DUMP
+#else
+#define ECOMM_HEX_DUMP_I(owenerID, moduleID, subID, debugLevel, format, dumpLen, dump)    \
 do  \
 {   \
-    swLogPrintf(ownerId##__##moduleId##__##subId, debugLevel, ##__VA_ARGS__); \
+    swLogInternalDump(owenerID##__##moduleID##__##subID, debugLevel, dumpLen, dump);    \
     {(void)format;} \
 }while(0)
+#endif
+
+#define ECOMM_PRINTF(ownerId, moduleId, subId, debugLevel, format, ...)     \
+do  \
+{   \
+    swLogPrintf(ownerId##__##moduleId##__##subId, debugLevel, ##__VA_ARGS__);   \
+    {(void)format;}     \
+}while(0)
+
+
+#ifdef CHIP_EC618
+#define ECOMM_PRINTF_I  ECOMM_PRINTF
+#else
+#define ECOMM_PRINTF_I(ownerId, moduleId, subId, debugLevel, format, ...)   \
+do  \
+{   \
+    swLogInternalPrintf(ownerId##__##moduleId##__##subId, debugLevel, ##__VA_ARGS__);   \
+    {(void)format;} \
+}while(0)
+#endif
 
 
 /*
@@ -233,16 +254,22 @@ do  \
 #define ECOMM_TRACE(moduleId, subId, debugLevel, argLen, format,  ...)  \
     ECOMM_PRINTF(UNILOG_PLAT_AP, moduleId, subId, debugLevel, format, ##__VA_ARGS__)
 
+#define ECOMM_TRACE_I(moduleId, subId, debugLevel, argLen, format,  ...)  \
+    ECOMM_PRINTF_I(UNILOG_PLAT_AP, moduleId, subId, debugLevel, format, ##__VA_ARGS__)
+
 /*
  * compat with old API, not suggest to use it anymore
 */
 #define ECOMM_DUMP(moduleID, subID, debugLevel, format, dumpLen, dump)  \
     ECOMM_HEX_DUMP(UNILOG_PLAT_AP, moduleID, subID, debugLevel, format, dumpLen, dump)
 
+#define ECOMM_DUMP_I(moduleID, subID, debugLevel, format, dumpLen, dump)  \
+    ECOMM_HEX_DUMP_I(UNILOG_PLAT_AP, moduleID, subID, debugLevel, format, dumpLen, dump)
+
+
 /*
  * excep print API, suggest to use it
 */
-
 #define EXCEP_PRINTF(ownerId, moduleId, subId, debugLevel, format, ...) \
         do  \
         {   \
@@ -272,6 +299,15 @@ do  \
     ECOMM_PRINTF(UNILOG_PLAT_AP, moduleId, subId, debugLevel, format, ##__VA_ARGS__)
 #endif
 
+#ifdef CORE_IS_CP
+#define ECPLAT_PRINTF_I(moduleId, subId, debugLevel, format, ...)    \
+    ECOMM_PRINTF_I(UNILOG_PLAT_CP, moduleId, subId, debugLevel, format, ##__VA_ARGS__)
+#else
+#define ECPLAT_PRINTF_I(moduleId, subId, debugLevel, format, ...)    \
+    ECOMM_PRINTF_I(UNILOG_PLAT_AP, moduleId, subId, debugLevel, format, ##__VA_ARGS__)
+#endif
+
+
 /*
  * PLAT dump API, suggest to use it
 */
@@ -282,6 +318,15 @@ do  \
 #define ECPLAT_DUMP(moduleID, subID, debugLevel, format, dumpLen, dump)  \
     ECOMM_HEX_DUMP(UNILOG_PLAT_AP, moduleID, subID, debugLevel, format, dumpLen, dump)
 #endif
+
+#ifdef CORE_IS_CP
+#define ECPLAT_DUMP_I(moduleID, subID, debugLevel, format, dumpLen, dump)  \
+    ECOMM_HEX_DUMP_I(UNILOG_PLAT_CP, moduleID, subID, debugLevel, format, dumpLen, dump)
+#else
+#define ECPLAT_DUMP_I(moduleID, subID, debugLevel, format, dumpLen, dump)  \
+    ECOMM_HEX_DUMP_I(UNILOG_PLAT_AP, moduleID, subID, debugLevel, format, dumpLen, dump)
+#endif
+
 
 /*
  * !!! used for customer SDK print !!!
