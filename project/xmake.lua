@@ -229,6 +229,7 @@ target(USER_PROJECT_NAME..".elf")
         local size_file = io.open("$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".size", "a")
         size_file:write(os.iorun(toolchains .. "/arm-none-eabi-size -G $(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".elf"))
         size_file:write(os.iorun(toolchains .. "/arm-none-eabi-size -t -G $(buildir)/csdk/libcsdk.a"))
+        size_file:write(os.iorun(toolchains .. "/arm-none-eabi-size -t -G $(buildir)/"..USER_PROJECT_NAME.."/lib"..USER_PROJECT_NAME..".a"))
         for _, filepath in ipairs(os.files("$(projectdir)/PLAT/libs/"..CHIP_TARGET.."/*.a")) do
             size_file:write(os.iorun(toolchains .. "/arm-none-eabi-size -t -G " .. filepath))
         end
