@@ -48,15 +48,15 @@
 // #define LUAT_USE_FDB 1
 // fskv提供与fdb兼容的API,旨在替代fdb库
 // #define LUAT_USE_FSKV 1
-// #define LUAT_USE_I2CTOOLS 1
-// #define LUAT_USE_LORA 1
+#define LUAT_USE_I2CTOOLS 1
+#define LUAT_USE_LORA 1
 // #define LUAT_USE_LORA2 1
 // #define LUAT_USE_MAX30102 1
 // #define LUAT_USE_MLX90640 1
 // zlib压缩,更快更小的实现
-// #define LUAT_USE_MINIZ 1
+#define LUAT_USE_MINIZ 1
 // #define LUAT_USE_FASTLZ 1
-// #define LUAT_USE_FTP 1
+#define LUAT_USE_FTP 1
 // #define LUAT_USE_HTTPSRV 1
 //32bitluavm对64bit数据的额外支持
 // #define LUAT_USE_BIT64 1
@@ -71,7 +71,7 @@
 // #define LUAT_USE_MQTTCORE 1
 // #define LUAT_USE_LIBCOAP 1
 
-// #define LUAT_USE_YMODEM 1
+#define LUAT_USE_YMODEM 1
 
 //----------------------------
 // 高通字体, 需配合芯片使用
@@ -80,12 +80,12 @@
 
 //----------------------------
 // 高级功能
-// #define LUAT_USE_REPL 1
+#define LUAT_USE_REPL 1
 // 多虚拟机支持,实验性,一般不启用
 // #define LUAT_USE_VMX 1
 // #define LUAT_USE_NES 1
-// #define LUAT_USE_PROTOBUF 1
-// #define LUAT_USE_RSA      1
+#define LUAT_USE_PROTOBUF 1
+#define LUAT_USE_RSA      1
 
 // 编码转换,需要大概40k空间,并非完整的GBK映射默认关闭
 // #define LUAT_USE_ICONV 1
@@ -116,22 +116,22 @@
 //---------------------
 // UI
 // LCD  是彩屏, 若使用LVGL就必须启用LCD
-// #define LUAT_USE_LCD
-// #define LUAT_USE_TJPGD
+#define LUAT_USE_LCD
+#define LUAT_USE_TJPGD
 // EINK 是墨水屏
-// #define LUAT_USE_EINK
+#define LUAT_USE_EINK
 
 //---------------------
 // U8G2
 // 单色屏, 支持i2c/spi
-// #define LUAT_USE_DISP
-// #define LUAT_USE_U8G2
+#define LUAT_USE_DISP
+#define LUAT_USE_U8G2
 
 /**************FONT*****************/
-// #define LUAT_USE_FONTS
+#define LUAT_USE_FONTS
 /**********U8G2&LCD&EINK FONT*************/
 // OPPOSANS
-// #define USE_U8G2_OPPOSANSM_ENGLISH 1
+#define USE_U8G2_OPPOSANSM_ENGLISH 1
 // #define USE_U8G2_OPPOSANSM8_CHINESE
 // #define USE_U8G2_OPPOSANSM10_CHINESE
 // #define USE_U8G2_OPPOSANSM12_CHINESE
