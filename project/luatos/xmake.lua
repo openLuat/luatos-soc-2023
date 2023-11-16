@@ -29,6 +29,12 @@ target(TARGET_NAME)
     add_files(LUATOS_ROOT.."/components/mobile/luat_lib_mobile.c")
     -- sms
     add_files(LUATOS_ROOT.."/components/sms/*.c")
+    -- hmeta
+    add_includedirs(LUATOS_ROOT.."/components/hmeta",{public = true})
+    add_files(LUATOS_ROOT.."/components/hmeta/*.c")
+    -- profiler
+    add_includedirs(LUATOS_ROOT.."/components/mempool/profiler/include",{public = true})
+    add_files(LUATOS_ROOT.."/components/mempool/profiler/**.c")
     -- rsa
     add_files(LUATOS_ROOT.."/components/rsa/**.c")
     -- cjson
@@ -91,6 +97,18 @@ target(TARGET_NAME)
     -- wlan
     add_includedirs(LUATOS_ROOT.."/components/wlan",{public = true})
     add_files(LUATOS_ROOT.."/components/wlan/*.c")
+    -- audio
+    add_includedirs(LUATOS_ROOT.."/components/multimedia/",{public = true})
+    add_includedirs(LUATOS_ROOT.."/components/multimedia/mp3_decode",{public = true})
+    add_includedirs(LUATOS_ROOT.."/components/multimedia/amr_decode/amr_common/dec/include",{public = true})
+    add_includedirs(LUATOS_ROOT.."/components/multimedia/amr_decode/amr_nb/common/include",{public = true})
+    add_includedirs(LUATOS_ROOT.."/components/multimedia/amr_decode/amr_nb/dec/include",{public = true})
+    add_includedirs(LUATOS_ROOT.."/components/multimedia/amr_decode/amr_wb/dec/include",{public = true})
+    add_includedirs(LUATOS_ROOT.."/components/multimedia/amr_decode/opencore-amrnb",{public = true})
+    add_includedirs(LUATOS_ROOT.."/components/multimedia/amr_decode/opencore-amrwb",{public = true})
+    add_includedirs(LUATOS_ROOT.."/components/multimedia/amr_decode/oscl",{public = true})
+    add_includedirs(LUATOS_ROOT.."/components/multimedia/amr_decode/amr_nb/enc/src",{public = true})
+    add_files(LUATOS_ROOT.."/components/multimedia/**.c")
     -- network
     add_includedirs(LUATOS_ROOT .. "/components/ethernet/w5500", {public = true})
     add_files(LUATOS_ROOT .. "/components/ethernet/**.c")
