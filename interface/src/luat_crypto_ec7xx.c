@@ -35,36 +35,6 @@
 #include "mbedtls/aes.h"
 #include "mbedtls/rsa.h"
 
-/**
- * @brief BASE64加密
- * @param dst buffer
- * @param dlen buffer长度
- * @param olen 写入的字节数
- * @param src 加密密钥
- * @param slen 加密密钥长度
- * @return 0成功
- */
-int luat_crypto_base64_encode( unsigned char *dst, size_t dlen, size_t *olen, const unsigned char *src, size_t slen )
-{
-    mbedtls_base64_encode(dst, dlen, olen, src, slen);
-    return 0;
-}
-
-/**
- * @brief BASE64解密
- * @param dst buffer
- * @param dlen buffer长度
- * @param olen 写入的字节数
- * @param src 密钥
- * @param slen 密钥长度
- * @return 0成功
- */
-int luat_crypto_base64_decode( unsigned char *dst, size_t dlen, size_t *olen, const unsigned char *src, size_t slen )
-{
-    mbedtls_base64_decode(dst, dlen, olen, src, slen);
-    return 0;
-}
-
 int luat_crypto_trng(char* buff, size_t len) {
     uint8_t tmp[24];
     for (size_t i = 0; i < len; i+=24)
