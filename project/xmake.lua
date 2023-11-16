@@ -141,6 +141,8 @@ target("csdk")
 
     -- mbedtls
     add_files(LUATOS_ROOT .."/components/mbedtls/library/*.c")
+    -- crypto
+    add_files(LUATOS_ROOT.."/components/crypto/*.c")
     -- printf
     add_files(LUATOS_ROOT.."/components/printf/*.c")
     -- weak

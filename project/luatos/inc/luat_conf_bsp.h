@@ -31,7 +31,7 @@
 // #define LUAT_USE_SOFT_UART 1
 //----------------------------
 // 常用工具库, 按需启用, cjson和pack是强烈推荐启用的
-// #define LUAT_USE_CRYPTO  1
+#define LUAT_USE_CRYPTO  1
 #define LUAT_USE_CJSON  1
 #define LUAT_USE_ZBUFF  1
 #define LUAT_USE_PACK  1
