@@ -18,6 +18,10 @@
 #define PA_PWR_PIN HAL_GPIO_25
 #define PA_PWR_PIN_ALT_FUN	0
 #define RECORD_TIME	(5)	//设置5秒录音，只要ram够，当然可以更长
+#define TEST_I2C_ID I2C_ID1
+#define TEST_I2S_ID I2S_ID0
+#define ES8311_I2C_ADDR	0x18
+
 static HANDLE g_s_delay_timer;
 static HANDLE g_s_amr_encoder_handler;
 static uint32_t g_s_record_time;
@@ -206,7 +210,7 @@ static int32_t record_cb(void *pdata, void *param)
 		g_s_record_time++;
 		if (g_s_record_time >= (RECORD_TIME * 5))	//15秒
 		{
-			luat_i2s_rx_stop(I2S_ID0);
+			luat_i2s_rx_stop(TEST_I2S_ID);
 			soc_call_function_in_audio(record_stop_encode_amr, 0, 0, LUAT_WAIT_FOREVER);
 		}
 
@@ -261,20 +265,19 @@ static void es8311_demo_task(void *arg)
 {
 	size_t total, used, max_used;
 	uint32_t i;
-	uint16_t i2c_address = 0x18;
 	uint8_t tx_buf[2];
 	uint8_t rx_buf[2];
 	luat_audio_play_info_t info[1] = {0};
     luat_audio_play_global_init(audio_event_cb, audio_data_cb, luat_audio_play_file_default_fun, NULL, NULL);
-	luat_i2c_setup(I2C_ID1, 0);
+	luat_i2c_setup(TEST_I2C_ID, 0);
 
     tx_buf[0] = 0xfd;
-    luat_i2c_send(1, 0x18, tx_buf, 1, 1);
-    luat_i2c_recv(1, 0x18, rx_buf, 1);
+    luat_i2c_send(TEST_I2C_ID, 0x18, tx_buf, 1, 1);
+    luat_i2c_recv(TEST_I2C_ID, 0x18, rx_buf, 1);
 
     tx_buf[0] = 0xfe;
-    luat_i2c_send(1, 0x18, tx_buf, 1, 1);
-    luat_i2c_recv(1, 0x18, rx_buf + 1, 1);
+    luat_i2c_send(TEST_I2C_ID, 0x18, tx_buf, 1, 1);
+    luat_i2c_recv(TEST_I2C_ID, 0x18, rx_buf + 1, 1);
 
 	luat_rtos_timer_create(&g_s_delay_timer);
     
@@ -287,7 +290,7 @@ static void es8311_demo_task(void *arg)
 			//如果有休眠操作，且控制codec的电源的IO不是AONGPIO，又没有外部上拉保持IO电平，则在唤醒时必须重新初始化codec
 			for(i = 0; i < sizeof(es8311_reg_table)/sizeof(i2c_reg_t);i++)
 			{
-				luat_i2c_send(I2C_ID1, i2c_address, (uint8_t *)&es8311_reg_table[i], 2, 1);
+				luat_i2c_send(TEST_I2C_ID, ES8311_I2C_ADDR, (uint8_t *)&es8311_reg_table[i], 2, 1);
 			}
 			while (1)
 			{
@@ -296,19 +299,19 @@ static void es8311_demo_task(void *arg)
 				g_s_record_time = 0;
 				g_s_amr_rom_file.Pos = 0;
 				OS_BufferWrite(&g_s_amr_rom_file, "#!AMR\n", 6);
-				luat_i2s_base_setup(I2S_ID0, I2S_MODE_I2S, I2S_FRAME_SIZE_16_16);
-				luat_i2s_start(I2S_ID0, 0, 8000, 1);
-				luat_i2s_no_block_rx(I2S_ID0, 320 * 10, record_cb, NULL);	//单声道8K的amr编码一次320字节，这里每200ms回调一次
+				luat_i2s_base_setup(TEST_I2S_ID, I2S_MODE_I2S, I2S_FRAME_SIZE_16_16);
+				luat_i2s_start(TEST_I2S_ID, 0, 8000, 1);
+				luat_i2s_no_block_rx(TEST_I2S_ID, 320 * 10, record_cb, NULL);	//单声道8K的amr编码一次320字节，这里每200ms回调一次
 				tx_buf[0] = 0x00;
 				tx_buf[1] = 0x80|(1 << 6);
-				luat_i2c_send(I2C_ID1, i2c_address, tx_buf, 2, 1);
+				luat_i2c_send(TEST_I2C_ID, ES8311_I2C_ADDR, tx_buf, 2, 1);
 				luat_meminfo_sys(&total, &used, &max_used);
     	    	LUAT_DEBUG_PRINT("meminfo total %d, used %d, max_used%d",total, used, max_used);
 				luat_rtos_task_sleep((RECORD_TIME + 1) * 1000);
 				tx_buf[0] = 0x00;
 				tx_buf[1] = 0x80|(0 << 6);
-				luat_i2c_send(I2C_ID1, i2c_address, tx_buf, 2, 1);
-				luat_i2s_base_setup(I2S_ID0, I2S_MODE_MSB, I2S_FRAME_SIZE_16_16);
+				luat_i2c_send(TEST_I2C_ID, ES8311_I2C_ADDR, tx_buf, 2, 1);
+				luat_i2s_base_setup(TEST_I2S_ID, I2S_MODE_MSB, I2S_FRAME_SIZE_16_16);
 				info[0].address = (uint32_t)g_s_amr_rom_file.Data;
 				info[0].rom_data_len = g_s_amr_rom_file.Pos;
 				luat_audio_play_multi_files(0, info, 1);
