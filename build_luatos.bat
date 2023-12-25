@@ -1,0 +1,2 @@
+build.bat luatos
+pause
