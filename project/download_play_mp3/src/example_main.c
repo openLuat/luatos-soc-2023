@@ -14,11 +14,16 @@
 #include "luat_network_adapter.h"
 #include "networkmgr.h"
 #include "luat_http.h"
-//AIR780E+TM8211开发板配置
-#define CODEC_PWR_PIN HAL_GPIO_12
+
+#define CODEC_PWR_PIN HAL_GPIO_16
 #define CODEC_PWR_PIN_ALT_FUN	4
+#ifndef CHIP_EC716
 #define PA_PWR_PIN HAL_GPIO_25
 #define PA_PWR_PIN_ALT_FUN	0
+#else
+#define PA_PWR_PIN HAL_GPIO_20
+#define PA_PWR_PIN_ALT_FUN	0
+#endif
 #define MP3_BUFFER_LEN_MIN	(10 * 1024)	//MP3数据必须大于10KB才开始解码，需要根据实际情况确定
 #define MP3_BUFFER_LEN_LOW	(30 * 1024)
 #define MP3_BUFFER_LEN_HIGH	(40 * 1024)
@@ -309,13 +314,13 @@ static void luat_test_task(void *param)
 
     g_s_http_client = luat_http_client_create(luatos_http_cb, luat_rtos_get_current_handle(), -1);
 	const char remote_domain[] = "http://www.air32.cn/test_44K.mp3";
-    //const char remote_domain[] = "https://cloridge-hardware.oss-cn-shanghai.aliyuncs.com/music/test1.mp3";
+    //const char remote_domain[] = "http://airtest.openluat.com:2900/download/niansahodeni.mp3";
 	uint8_t *mp3_data;
 	uint32_t start, i;
 	uint8_t get_mp3_head = 0;
 	uint8_t is_error;
 	uint8_t mp3_head_data[12];
-	uint8_t mp3_head_len;
+	uint8_t mp3_head_len=0;
 	luat_http_client_base_config(g_s_http_client, 5000, 0, 3);
 	//https下载额外打开ssl配置
 	//luat_http_client_ssl_config(g_s_http_client, 0, NULL, 0, NULL, 0, NULL, 0, NULL, 0);
