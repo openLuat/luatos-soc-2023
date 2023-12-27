@@ -247,7 +247,13 @@
 #endif
 // // 一般无需修改. 若不需要使用SSL/TLS/TTS,可适当增加,但不应该超过256k
 #ifndef LUAT_HEAP_SIZE
-#define LUAT_HEAP_SIZE (256*1024)
+#define LUAT_HEAP_SIZE (250*1024)
+#endif
+
+#if defined (FEATURE_AMR_CP_ENABLE) || defined (FEATURE_VEM_CP_ENABLE)
+#if LUAT_HEAP_SIZE > (160*1024)
+#define LUAT_HEAP_SIZE (160*1024)
+#endif
 #endif
 
 //-----------------------------
