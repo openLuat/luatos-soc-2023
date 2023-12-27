@@ -7,6 +7,8 @@ local USER_PROJECT_DIR = USER_PROJECT_DIR
 local use_lto = false
 if CHIP_TARGET == "ec716s" or CHIP_TARGET == "ec718s" then 
     use_lto = true
+elseif CHIP_TARGET == "ec718pv" and USER_PROJECT_NAME == 'luatos' then 
+    use_lto = true
 elseif os.getenv("LTO_FEATURE_MODE") == "enable" then 
     use_lto = true
 end
@@ -169,7 +171,7 @@ target("csdk")
             "$(projectdir)/PLAT/driver/chip/ec7xx/ap/src/usb/open/*.c",
             "$(projectdir)/PLAT/driver/chip/ec7xx/common/gcc/memcpy-armv7m.S")
 
-	-- remove_files("$(projectdir)/PLAT/driver/hal/ec7xx/ap/src/hal_voice_eng_mem.c")
+	remove_files("$(projectdir)/PLAT/driver/hal/ec7xx/ap/src/hal_voice_eng_mem.c")
 
 	remove_files("$(projectdir)/PLAT/driver/chip/ec7xx/ap/src/cspi.c",
                 "$(projectdir)/PLAT/driver/chip/ec7xx/ap/src/swdio.c")
