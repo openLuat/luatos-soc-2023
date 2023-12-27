@@ -92,7 +92,7 @@ add_ldflags("-Wl,--wrap=_malloc_r",
 -- ==============================
 -- === includes =====
 -- SDK相关头文件引用
-add_includedirs("$(projectdir)/PLAT/tools/"..(CHIP_TARGET=="ec718e"and"ec718p"or CHIP_TARGET):sub(1,6),
+add_includedirs("$(projectdir)/PLAT/tools/"..(CHIP_TARGET=="ec718e"and"ec718p"or CHIP_TARGET),
                 "$(projectdir)/thirdparty/littlefs",
                 "$(projectdir)/thirdparty/littlefs/port")
             
@@ -115,6 +115,7 @@ add_includedirs(LUATOS_ROOT .. "/luat/include",
 				LUATOS_ROOT .. "/components/lcd",
 				LUATOS_ROOT .. "/components/u8g2",
                 LUATOS_ROOT .. "/components/cjson",
+                LUATOS_ROOT .. "/components/multimedia",
 				"$(projectdir)/interface/include")
 
 local LIB_PS_PLAT = "full"
@@ -168,7 +169,7 @@ target("csdk")
             "$(projectdir)/PLAT/driver/chip/ec7xx/ap/src/usb/open/*.c",
             "$(projectdir)/PLAT/driver/chip/ec7xx/common/gcc/memcpy-armv7m.S")
 
-	remove_files("$(projectdir)/PLAT/driver/hal/ec7xx/ap/src/hal_voice_eng_mem.c")
+	-- remove_files("$(projectdir)/PLAT/driver/hal/ec7xx/ap/src/hal_voice_eng_mem.c")
 
 	remove_files("$(projectdir)/PLAT/driver/chip/ec7xx/ap/src/cspi.c",
                 "$(projectdir)/PLAT/driver/chip/ec7xx/ap/src/swdio.c")

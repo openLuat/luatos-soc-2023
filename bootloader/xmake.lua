@@ -50,7 +50,8 @@ target("driver")
     set_kind("static")
     add_includedirs("$(projectdir)/PLAT/prebuild/PLAT/inc/usb_bl")
 
-    add_includedirs("$(projectdir)/PLAT/project/ec7xx_0h00/ap/apps/bootloader/code/include",
+    add_includedirs("$(projectdir)/PLAT/middleware/developed/debug/inc",
+                    "$(projectdir)/PLAT/project/ec7xx_0h00/ap/apps/bootloader/code/include",
                     "$(projectdir)/PLAT/project/ec7xx_0h00/ap/apps/bootloader/code/include/common",
                     "$(projectdir)/PLAT/project/ec7xx_0h00/ap/apps/bootloader/code/common/secure/hash/inc")
     -- wrapper
