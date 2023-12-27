@@ -2,7 +2,9 @@
 
 [![Github Actions](https://github.com/openLuat/luatos-soc-2023/actions/workflows/ci.yaml/badge.svg)](https://github.com/openLuat/luatos-soc-2023/actions/workflows/ci.yaml)
 
-# 注意：使用前请详细阅读readme的每一句话，不要跳过！！！
+**注意：使用前请详细阅读readme的每一句话，不要跳过！！！**
+
+**本代码库在2023.12.27执行过重置histroy的操作,如果无法pull,请重新clone本代码库**
 
 ## 使用前须知！！！
 
