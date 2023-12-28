@@ -28,12 +28,18 @@
 #include "luat_i2c.h"
 #include "luat_i2s.h"
 #include "luat_rtos.h"
+#include "luat_debug.h"
+#include "luat_mem.h"
 
 //demo 配置带ES8311硬件的云喇叭开发板
-#define CODEC_PIN	HAL_GPIO_16
-#define PA_PIN	HAL_GPIO_25
-#define I2C_ID	0
+#define CODEC_PWR_PIN HAL_GPIO_16
+#define CODEC_PWR_PIN_ALT_FUN	4
+#define PA_PWR_PIN HAL_GPIO_25
+#define PA_PWR_PIN_ALT_FUN	0
+#define I2C_ID	1
 #define I2S_ID	0
+
+#define CODEC_CTRL	//如果云喇叭开发板上的CODEC因为电压波动工作不正常，可以去掉这个宏，但是去掉后会有爆破音
 
 extern uint8_t callAlertRing16k[];
 extern uint8_t tone450_8k[];
@@ -330,19 +336,14 @@ static HalCodecSts_e es8311PwrDown()
     return CODEC_EOK;
 }
 
-
 /*----------------------------------------------------------------------------*
  *                      GLOBAL FUNCTIONS                                      *
  *----------------------------------------------------------------------------*/
 
 // enable pa power
-void es8311EnablePA(bool enable)
-{
-	GPIO_Output(PA_PIN, enable);
 
-}
 
-HalCodecSts_e es8311Init(void)
+static HalCodecSts_e es8311_init(void)
 {
     uint8_t datmp, regv;
     int coeff;
@@ -447,11 +448,10 @@ HalCodecSts_e es8311Init(void)
     {
     	ES8311_DBG("es8311 initialize failed");
     }
-    #endif
     return CODEC_EOK;
 }
 
-HalCodecSts_e es8311ConfigFmt(void)
+static HalCodecSts_e es8311_config_fmt(void)
 {
     HalCodecSts_e ret = CODEC_EOK;
     uint8_t adcIface = 0, dacIface = 0;
@@ -466,7 +466,7 @@ HalCodecSts_e es8311ConfigFmt(void)
     return ret;
 }
 
-HalCodecSts_e es8311SetBitsPerSample(void)
+static HalCodecSts_e es8311_set_bits(void)
 {
     HalCodecSts_e ret = CODEC_EOK;
     uint8_t adc_iface = 0, dac_iface = 0;
@@ -480,17 +480,17 @@ HalCodecSts_e es8311SetBitsPerSample(void)
     return ret;
 }
 
-HalCodecSts_e es8311Config(void)
+static HalCodecSts_e es8311_config(void)
 {
     int ret = CODEC_EOK;
-    ret |= es8311SetBitsPerSample();
-    ret |= es8311ConfigFmt();
+    ret |= es8311_set_bits();
+    ret |= es8311_config_fmt();
     return ret;
 }
 
 
 
-HalCodecSts_e es8311Start(void)
+static HalCodecSts_e es8311_start(void)
 {
     HalCodecSts_e ret = CODEC_EOK;
     uint8_t adcIface = 0, dacIface = 0;
@@ -535,7 +535,7 @@ HalCodecSts_e es8311Start(void)
     return ret;
 }
 
-HalCodecSts_e es8311Stop(void)
+static HalCodecSts_e es8311_stop(void)
 {
     HalCodecSts_e ret = CODEC_EOK;
     es8311Standby(&dacVolBak, &adcVolBak);
@@ -594,7 +594,6 @@ HalCodecSts_e es8311GetVoiceMute(int *mute)
     *mute = reg;
     return res;
 }
-
 HalCodecSts_e es8311SetMicVolume(uint8_t micGain, int micVolume)
 {
     HalCodecSts_e res = CODEC_EOK;
@@ -618,37 +617,14 @@ HalCodecSts_e es8311SetMicVolume(uint8_t micGain, int micVolume)
     return res;
 }
 
-void es8311ReadAll()
-{
-    ES8311_DBG("now read 8311 all\n");
-    for (int i = 0; i < 0x4A; i++)
-    {
-        uint8_t reg = es8311ReadReg(i);
-        ES8311_DBG("reg = 0x%02x, val = 0x%02x\n", i, reg);
-
-    }
-    ES8311_DBG("now read 8311 all end\n");
-
-}
-
-HalCodecCfg_t es8311GetDefaultCfg()
-{
-    HalCodecCfg_t codecCfg = ES8311_DEFAULT_CONFIG();
-
-    return codecCfg;
-}
-
-
-
 static void codecInit()
 {
 
-    es8311Init();
-    es8311Config();
-    es8311Start();
+    es8311_init();
+    es8311_config();
+    es8311_start();
     es8311SetVolume(HAL_CODEC_VOL_PLAY_DEFAULT);
     es8311SetMicVolume(HAL_CODEC_MIC_GAIN_DEFAULT, HAL_CODEC_VOL_MIC_DEFAULT);
-    es8311EnablePA(true);
 
 }
 
@@ -665,11 +641,14 @@ static uint8_t g_s_ring_cnt;
 static uint8_t g_s_codec_is_on;
 static uint8_t g_s_record_type;
 static uint8_t g_s_play_type;
+static HANDLE g_s_delay_timer;
 enum
 {
 	VOLTE_EVENT_PLAY_TONE = 1,
-	VOLTE_EVENT_RECORD_VOICE,
+	VOLTE_EVENT_RECORD_VOICE_START,
+	VOLTE_EVENT_RECORD_VOICE_UPLOAD,
 	VOLTE_EVENT_PLAY_VOICE,
+	VOLTE_EVENT_HANGUP,
 };
 
 static luat_rtos_task_handle g_s_task_handle;
@@ -681,13 +660,13 @@ static int32_t play_tone_cb(void *pdata, void *param)
 		g_s_tone_off_cnt++;
 		if (g_s_tone_off_cnt < g_s_tone_off_total)
 		{
-			I2S_TransferLoop(I2S_ID, NULL, 1600, 2, 1);
+			luat_i2s_transfer_loop(I2S_ID, NULL, 1600, 2, 1);
 		}
 		else
 		{
 			g_s_tone_on_cnt = 0;
 			g_s_tone_play_type = 0;
-			I2S_TransferLoop(I2S_ID, g_s_tone_src, 160, 2, 1);
+			luat_i2s_transfer_loop(I2S_ID, g_s_tone_src, 160, 2, 1);
 		}
 	}
 	else
@@ -695,13 +674,13 @@ static int32_t play_tone_cb(void *pdata, void *param)
 		g_s_tone_on_cnt++;
 		if (g_s_tone_on_cnt < g_s_tone_on_total)
 		{
-			I2S_TransferLoop(I2S_ID, g_s_tone_src, 160, 2, 1);
+			luat_i2s_transfer_loop(I2S_ID, g_s_tone_src, 160, 2, 1);
 		}
 		else
 		{
 			g_s_tone_off_cnt = 0;
 			g_s_tone_play_type = 1;
-			I2S_TransferLoop(I2S_ID, NULL, 1600, 2, 1);
+			luat_i2s_transfer_loop(I2S_ID, NULL, 1600, 2, 1);
 		}
 	}
 	return 0;
@@ -717,15 +696,12 @@ static void play_tone(uint8_t param)
 		if (g_s_codec_is_on)
 		{
 			g_s_codec_is_on = 0;
-			es8311Stop();
+#ifdef CODEC_CTRL
+			es8311_stop();
+#endif
 		}
 
 		return;
-	}
-	else
-	{
-		g_s_codec_is_on = 1;
-		es8311AllResume();
 	}
 	if (param != LUAT_MOBILE_CC_PLAY_CALL_INCOMINGCALL_RINGING)
 	{
@@ -774,13 +750,15 @@ static void play_tone(uint8_t param)
 		luat_i2s_start(I2S_ID, 1, 16000, 1);
 		luat_i2s_transfer_loop(I2S_ID, callAlertRing16k, 4872, 12, 0);
 	}
-
+	g_s_codec_is_on = 1;
+#ifdef CODEC_CTRL
+	es8311AllResume();
+#endif
 }
 
 static void start_speech(uint8_t *data, uint32_t param)
 {
-	g_s_codec_is_on = 1;
-	es8311AllResume();
+
 
 }
 
@@ -791,16 +769,16 @@ static void mobile_event_cb(uint8_t event, uint8_t index, uint8_t status)
 	switch (event)
 	{
 	case LUAT_MOBILE_EVENT_IMS_REGISTER_STATUS:
-		DBG("ims reg state %d", status);
+		LUAT_DEBUG_PRINT("ims reg state %d", status);
 		break;
 	case LUAT_MOBILE_EVENT_CC:
 		switch(status)
 		{
 		case LUAT_MOBILE_CC_READY:
-			DBG("volte ready!");
+			LUAT_DEBUG_PRINT("volte ready!");
 			break;
 		case LUAT_MOBILE_CC_INCOMINGCALL:
-			DBG("ring!");
+			LUAT_DEBUG_PRINT("ring!");
 			g_s_ring_cnt++;
 			if (g_s_ring_cnt >= 2)
 			{
@@ -810,44 +788,44 @@ static void mobile_event_cb(uint8_t event, uint8_t index, uint8_t status)
 			break;
 		case LUAT_MOBILE_CC_CALL_NUMBER:
 			luat_mobile_get_last_call_num(number, sizeof(number));
-			DBG("incoming call %s", number);
+			LUAT_DEBUG_PRINT("incoming call %s", number);
 			break;
 		case LUAT_MOBILE_CC_CONNECTED_NUMBER:
 			luat_mobile_get_last_call_num(number, sizeof(number));
-			DBG("connected call %s", number);
+			LUAT_DEBUG_PRINT("connected call %s", number);
 			break;
 		case LUAT_MOBILE_CC_CONNECTED:
-			DBG("call connected");
+			LUAT_DEBUG_PRINT("call connected");
 			break;
 		case LUAT_MOBILE_CC_DISCONNECTED:
-			DBG("call disconnected");
+			LUAT_DEBUG_PRINT("call disconnected");
+			luat_rtos_timer_stop(g_s_delay_timer);
 			break;
 		case LUAT_MOBILE_CC_SPEECH_START:
-			DBG("now speech");
-			g_s_record_type = index; //1 = 8K 2 = 16K
-			luat_rtos_event_send(g_s_task_handle, VOLTE_EVENT_RECORD_VOICE, 0, 0, 0, 0);
+			LUAT_DEBUG_PRINT("now speech type %d", index);
+			luat_rtos_event_send(g_s_task_handle, VOLTE_EVENT_RECORD_VOICE_START, index + 1, 0, 0, 0);
 			break;
 		case LUAT_MOBILE_CC_MAKE_CALL_OK:
-			DBG("call OK");
+			LUAT_DEBUG_PRINT("call OK");
 			break;
 		case LUAT_MOBILE_CC_MAKE_CALL_FAILED:
-			DBG("call FAILED, result %d", index);
+			LUAT_DEBUG_PRINT("call FAILED, result %d", index);
 			break;
 		case LUAT_MOBILE_CC_ANSWER_CALL_DONE:
-			DBG("answer call result %d", index);
+			LUAT_DEBUG_PRINT("answer call result %d", index);
 			break;
 		case LUAT_MOBILE_CC_HANGUP_CALL_DONE:
-			DBG("hangup call result %d", index);
+			LUAT_DEBUG_PRINT("hangup call result %d", index);
 			break;
 		case LUAT_MOBILE_CC_LIST_CALL_RESULT:
 			break;
 		case LUAT_MOBILE_CC_PLAY:
-			DBG("play %d", index);
+			LUAT_DEBUG_PRINT("play %d", index);
 			luat_rtos_event_send(g_s_task_handle, VOLTE_EVENT_PLAY_TONE, index, 0, 0, 0);
 		}
 		break;
 	default:
-		DBG("event %d, index %d status %d", event, index, status);
+		LUAT_DEBUG_PRINT("event %d, index %d status %d", event, index, status);
 		break;
 	}
 
@@ -855,96 +833,156 @@ static void mobile_event_cb(uint8_t event, uint8_t index, uint8_t status)
 
 void mobile_voice_data_input(uint8_t *input, uint32_t len, uint32_t sample_rate, uint8_t bits)
 {
-	g_s_play_type = sample_rate; //1 = 8K 2 = 16K
-	luat_rtos_event_send(g_s_task_handle, VOLTE_EVENT_PLAY_VOICE, input, len, bits, 0);
+
+	luat_rtos_event_send(g_s_task_handle, VOLTE_EVENT_PLAY_VOICE, (uint32_t)input, len, sample_rate, 0);
 
 }
 
 __CORE_FUNC_IN_RAM__ int32_t record_cb(void *pdata, void *param)
 {
+	Buffer_Struct *buffer = (Buffer_Struct *)pdata;
+	if (buffer)
+	{
+		luat_rtos_event_send(g_s_task_handle, VOLTE_EVENT_RECORD_VOICE_UPLOAD, (uint32_t)buffer->Data, buffer->Pos, 0, 0);
+	}
 	return 0;
+}
+
+static LUAT_RT_RET_TYPE hangup_delay(LUAT_RT_CB_PARAM)
+{
+	luat_rtos_event_send(g_s_task_handle, VOLTE_EVENT_HANGUP, 0, 0, 0, 0);
 }
 
 
 static void volte_task(void *param)
 {
 	luat_debug_set_fault_mode(LUAT_DEBUG_FAULT_HANG);
-
-////	DBG("%u", GetcallAlertRing16KLen());//58464
-	uint32_t total, alloc, peak;
-	GPIO_Config(PA_PIN, 0, 1);
-	GPIO_IomuxEC7XX(GPIO_ToPadEC7XX(CODEC_PIN, 4), 4, 0, 0);
-	GPIO_Config(CODEC_PIN, 0, 1);
-	//i2c0
-	GPIO_IomuxEC7XX(13, 2, 1, 0);
-	GPIO_IomuxEC7XX(14, 2, 1, 0);
-	I2C_MasterSetup(I2C_ID, 400000);
-	I2C_UsePollingMode(I2C_ID, 1);
-	vTaskDelay(500);
-
+	luat_rtos_timer_create(&g_s_delay_timer);
+	luat_i2c_setup(I2C_ID, 0);
+	luat_i2c_set_polling_mode(I2C_ID, 1);
+	luat_i2s_base_setup(I2S_ID, I2S_MODE_LSB, I2S_FRAME_SIZE_16_16);	//ES8311就是这个配置
+	size_t total, alloc, peak;
+	luat_rtos_task_sleep(50);
+	luat_gpio_set(CODEC_PWR_PIN, 1);
+	luat_rtos_task_sleep(100);
+	luat_gpio_set(PA_PWR_PIN, 1);
+	luat_event_t event;
 	uint8_t tx_buf[2];
 	uint8_t rx_buf[2];
 	tx_buf[0] = 0xfd;
-	I2C_BlockRead(I2C_ID, ES8311_IICADDR, tx_buf, 1, rx_buf, 1, 100, NULL, NULL);
+	luat_i2c_transfer(I2C_ID, ES8311_IICADDR, tx_buf, 1, rx_buf, 1);
 	tx_buf[0] = 0xfe;
-	I2C_BlockRead(I2C_ID, ES8311_IICADDR, tx_buf, 1, rx_buf + 1, 1, 100, NULL, NULL);
+	luat_i2c_transfer(I2C_ID, ES8311_IICADDR, tx_buf, 1, rx_buf + 1, 1);
 //
 	if (0x83 == rx_buf[0] && 0x11 == rx_buf[1])
 	{
-		DBG("find es8311");
+		LUAT_DEBUG_PRINT("find es8311");
 		codecInit();
-		es8311EnablePA(1);
-		es8311Stop(CODEC_MODE_BOTH);
-//		for(int i = 0; i < sizeof(es8311_reg_table)/sizeof(i2c_reg_t); i++)
-//		{
-//			I2C_BlockWrite(I2C_ID, ES8311_IICADDR, (uint8_t *)&es8311_reg_table[i], 2, 50, NULL, NULL);
-//		}
-		//i2s0
-		GPIO_IomuxEC7XX(35, 1, 0, 0);
-		GPIO_IomuxEC7XX(36, 1, 0, 0);
-		GPIO_IomuxEC7XX(37, 1, 0, 0);
-		GPIO_IomuxEC7XX(38, 1, 0, 0);
-		GPIO_IomuxEC7XX(39, 1, 0, 0);
-		I2S_BaseConfig(I2S_ID, I2S_MODE_LSB, I2S_FRAME_SIZE_16_16);
-//		I2sDataFmt_t DataFmt;
-//		I2sSlotCtrl_t  SlotCtrl;
-//		I2sBclkFsCtrl_t BclkFsCtrl;
-//		I2sDmaCtrl_t DmaCtrl;
-//		I2S_GetConfig(I2S_ID, &DataFmt, &SlotCtrl, &BclkFsCtrl, &DmaCtrl);
-//		BclkFsCtrl.bclkPolarity = 1;
-//		I2S_FullConfig(I2S_ID, DataFmt, SlotCtrl,  BclkFsCtrl,  DmaCtrl);
-		//I2S_Start(I2S_ID, 1, 16000, 1);
-//		I2S_StartTransfer(I2S_ID, 16000, 1, 0, record_cb, NULL);
-//		I2S_TransferLoop(I2S_ID, callAlertRing16k, 4872, 12, 0);
-//
+
+#ifdef CODEC_CTRL
+		es8311_stop();
+#endif
+
 	}
 	else
 	{
-		DBG("no es8311");
+		LUAT_DEBUG_PRINT("no es8311");
+		while (1)
+		{
+			luat_rtos_event_recv(g_s_task_handle, 0, &event, NULL, LUAT_WAIT_FOREVER);
+		}
+
 	}
-	GetSRAMHeapInfo(&total, &alloc, &peak);
-	DBG("%u,%u,%u", total, alloc, peak);
-	GetPSRAMHeapInfo(&total, &alloc, &peak);
-	DBG("%u,%u,%u", total, alloc, peak);
-//	vTaskDelay(10000);
-//	soc_mobile_make_call(0, "15068398077", 11);
+	luat_meminfo_opt_sys(LUAT_HEAP_PSRAM, &total, &alloc, &peak);
+	LUAT_DEBUG_PRINT("psram total %u, used %u, max used %u", total, alloc, peak);
+	luat_meminfo_opt_sys(LUAT_HEAP_SRAM, &total, &alloc, &peak);
+	LUAT_DEBUG_PRINT("sram total %u, used %u, max used %u", total, alloc, peak);
 
-	while(1)
+	while (1)
 	{
-		vTaskDelay(5000);
-		GetSRAMHeapInfo(&total, &alloc, &peak);
-		DBG("%u,%u,%u", total, alloc, peak);
-		GetPSRAMHeapInfo(&total, &alloc, &peak);
-		DBG("%u,%u,%u", total, alloc, peak);
-
+		luat_rtos_event_recv(g_s_task_handle, 0, &event, NULL, LUAT_WAIT_FOREVER);
+		switch(event.id)
+		{
+		case VOLTE_EVENT_PLAY_TONE:
+			play_tone(event.param1);
+			luat_meminfo_opt_sys(LUAT_HEAP_PSRAM, &total, &alloc, &peak);
+			LUAT_DEBUG_PRINT("psram total %u, used %u, max used %u", total, alloc, peak);
+			luat_meminfo_opt_sys(LUAT_HEAP_SRAM, &total, &alloc, &peak);
+			LUAT_DEBUG_PRINT("sram total %u, used %u, max used %u", total, alloc, peak);
+			break;
+		case VOLTE_EVENT_RECORD_VOICE_START:
+			g_s_codec_is_on = 1;
+			g_s_record_type = event.param1;
+			luat_i2s_stop(I2S_ID);
+			luat_rtos_task_sleep(1);
+			luat_i2s_transfer_start(I2S_ID, g_s_record_type * 8000, 1, 320 * g_s_record_type, record_cb, NULL);
+			luat_i2s_transfer_loop(I2S_ID, NULL, 3200, 2, 0);	//address传入空地址就是播放空白音
+#ifdef CODEC_CTRL
+			es8311AllResume();
+#endif
+			break;
+		case VOLTE_EVENT_RECORD_VOICE_UPLOAD:
+			luat_mobile_speech_upload((uint8_t *)event.param1, event.param2);
+			break;
+		case VOLTE_EVENT_PLAY_VOICE:
+			g_s_play_type = event.param3; //1 = 8K 2 = 16K
+			if (!g_s_record_type)
+			{
+				LUAT_DEBUG_PRINT("对方没接电话，直接挂断了, 5秒后自动断开");
+				luat_rtos_timer_start(g_s_delay_timer, 5000, 0, hangup_delay, NULL);
+				luat_i2s_stop(I2S_ID);
+				luat_i2s_start(I2S_ID, 1, g_s_play_type * 8000, 1);
+				if (2 == g_s_play_type)
+				{
+					luat_i2s_transfer_loop(I2S_ID, (uint8_t *)event.param1, event.param2/3, 3, 0);
+				}
+				else
+				{
+					luat_i2s_transfer_loop(I2S_ID, (uint8_t *)event.param1, event.param2/6, 6, 0);
+				}
+#ifdef CODEC_CTRL
+				es8311AllResume();
+#endif
+			}
+			else
+			{
+				LUAT_DEBUG_PRINT("%x,%d", event.param1, event.param2);
+				if (2 == g_s_record_type)
+				{
+					luat_i2s_transfer_loop(I2S_ID, (uint8_t *)event.param1, event.param2/3, 3, 0);
+				}
+				else
+				{
+					luat_i2s_transfer_loop(I2S_ID, (uint8_t *)event.param1, event.param2/6, 6, 0);
+				}
+			}
+			break;
+		case VOLTE_EVENT_HANGUP:
+			luat_mobile_hangup_call(0);
+			break;
+		}
 	}
 }
 
 static void task_demo_init(void)
 {
+	luat_gpio_cfg_t gpio_cfg;
+	luat_gpio_set_default_cfg(&gpio_cfg);
+	luat_rtos_task_handle task_handle;
+	gpio_cfg.output_level = 0;
+	// pa power ctrl init
+	gpio_cfg.pin = PA_PWR_PIN;
+	gpio_cfg.alt_fun = PA_PWR_PIN_ALT_FUN;
+	luat_gpio_open(&gpio_cfg);
+
+	// codec power ctrl init
+	gpio_cfg.pin = CODEC_PWR_PIN;
+	gpio_cfg.alt_fun = CODEC_PWR_PIN_ALT_FUN;
+	luat_gpio_open(&gpio_cfg);
+
 	luat_mobile_event_register_handler(mobile_event_cb);
 	luat_mobile_speech_init(mobile_voice_data_input);
-	luat_rtos_task_create(&g_s_task_handle, 4096, 90, "volte", volte_task, NULL, 64);
+	luat_rtos_task_create(&g_s_task_handle, 4096, 100, "volte", volte_task, NULL, 64);
 }
 
 INIT_TASK_EXPORT(task_demo_init, "1");

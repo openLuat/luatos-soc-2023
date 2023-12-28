@@ -170,9 +170,9 @@ target("csdk")
             "$(projectdir)/PLAT/driver/chip/ec7xx/ap/src/*.c",
             "$(projectdir)/PLAT/driver/chip/ec7xx/ap/src/usb/open/*.c",
             "$(projectdir)/PLAT/driver/chip/ec7xx/common/gcc/memcpy-armv7m.S")
-
-	remove_files("$(projectdir)/PLAT/driver/hal/ec7xx/ap/src/hal_voice_eng_mem.c")
-
+	if CHIP_TARGET ~= "ec718pv" then
+		remove_files("$(projectdir)/PLAT/driver/hal/ec7xx/ap/src/hal_voice_eng_mem.c")
+	end
 	remove_files("$(projectdir)/PLAT/driver/chip/ec7xx/ap/src/cspi.c",
                 "$(projectdir)/PLAT/driver/chip/ec7xx/ap/src/swdio.c")
 

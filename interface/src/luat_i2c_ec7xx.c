@@ -26,7 +26,7 @@
 #include "driver_gpio.h"
 #include "luat_mcu.h"
 #include "gpr_common.h"
-static uint32_t luat_i2c_global_timeout = 50;
+static uint32_t luat_i2c_global_timeout = 100;
 //static uint8_t luat_i2c_iomux[I2C_MAX];
 
 int luat_i2c_exist(int id) {

@@ -26,7 +26,7 @@ target(TARGET_NAME)
         -- print("script_addr",script_addr)
         target:add("defines","AP_FLASH_LOAD_SIZE=0x"..script_addr.."-0x0007e000",{public = true})
         target:add("defines","AP_PKGIMG_LIMIT_SIZE=0x"..script_addr.."-0x0007e000",{public = true})
-
+		target:add("files","$(projectdir)/PLAT/core/lib/libtts_res.a")
         local LUAT_USE_TTS_8K = conf_data:find("\r#define LUAT_USE_TTS_8K") or conf_data:find("\n#define LUAT_USE_TTS_8K")
         if LUAT_USE_TTS_8K then
             target:add("files","$(projectdir)/PLAT/core/lib/libaisound50_8K.a")
