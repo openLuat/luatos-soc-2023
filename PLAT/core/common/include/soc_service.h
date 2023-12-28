@@ -9,6 +9,7 @@
 #define CORE_INCLUDE_SOC_SERVICE_H_
 #include "common_api.h"
 #define RNDIS_CID	5
+#define IMS_CID	15
 typedef enum SOC_MISC_EVENT
 {
 	SOC_MISC_VBUS_OFF,
@@ -35,6 +36,8 @@ typedef enum SOC_MOBILE_EVENT
 	SOC_MOBILE_EVENT_BEARER,
 	SOC_MOBILE_EVENT_SMS,
 	SOC_MOBILE_EVENT_NAS_ERROR,
+	SOC_MOBILE_EVENT_IMS_REGISTER_STATUS,
+	SOC_MOBILE_EVENT_CC,
 	SOC_MOBILE_EVENT_FATAL_ERROR = 0xff,
 }SOC_MOBILE_EVENT_E;
 
@@ -114,6 +117,50 @@ typedef enum SOC_MOBILE_SMS_STATUS
 	SOC_MOBILE_SMS_ACK,
 }SOC_MOBILE_SMS_STATUS_E;
 
+
+typedef enum SOC_MOBILE_IMS_REGISTER_STATUS
+{
+	SOC_MOBILE_IMS_READY = 0,
+}SOC_MOBILE_IMS_REGISTER_STATUS_E;
+
+typedef enum SOC_MOBILE_CC_STATUS
+{
+	SOC_MOBILE_CC_READY = 0,
+	SOC_MOBILE_CC_INCOMINGCALL,
+	SOC_MOBILE_CC_CALL_NUMBER,
+	SOC_MOBILE_CC_CONNECTED_NUMBER,
+	SOC_MOBILE_CC_CONNECTED,
+	SOC_MOBILE_CC_DISCONNECTED,
+	SOC_MOBILE_CC_SPEECH_START,
+	SOC_MOBILE_CC_MAKE_CALL_OK,
+	SOC_MOBILE_CC_MAKE_CALL_FAILED,
+	SOC_MOBILE_CC_ANSWER_CALL_DONE,
+	SOC_MOBILE_CC_HANGUP_CALL_DONE,
+	SOC_MOBILE_CC_LIST_CALL_RESULT,
+	SOC_MOBILE_CC_PLAY,
+}SOC_MOBILE_CC_STATUS_E;
+
+typedef enum OC_MOBILE_CC_MAKE_CALL_RESULT
+{
+	SOC_MOBILE_CC_MAKE_CALL_RESULT_OK = 0,
+	SOC_MOBILE_CC_MAKE_CALL_RESULT_NO_CARRIER,
+	SOC_MOBILE_CC_MAKE_CALL_RESULT_BUSY,
+	SOC_MOBILE_CC_MAKE_CALL_RESULT_ERROR,
+}SOC_MOBILE_CC_MAKE_CALL_RESULT_E;
+
+typedef enum OC_MOBILE_CC_PLAY_IND
+{
+	SOC_MOBILE_CC_PLAY_STOP,
+	SOC_MOBILE_CC_PLAY_DIAL_TONE,
+	SOC_MOBILE_CC_PLAY_RINGING_TONE,
+	SOC_MOBILE_CC_PLAY_CONGESTION_TONE,
+	SOC_MOBILE_CC_PLAY_BUSY_TONE,
+	SOC_MOBILE_CC_PLAY_CALL_WAITING_TONE,
+	SOC_MOBILE_CC_PLAY_MULTI_CALL_PROMPT_TONE,
+	SOC_MOBILE_CC_PLAY_CALL_INCOMINGCALL_RINGING,
+}OC_MOBILE_CC_PLAY_IND_E;
+
+
 enum
 {
 	SOC_SYS_CTRL_PSRAM,
@@ -124,6 +171,7 @@ enum
 	SOC_SYS_CTRL_USER = 16,
 	SOC_SYS_CTRL_MAX = 32,
 };
+typedef void (* mobile_voice_data_input_fn)(uint8_t *input, uint32_t len, uint32_t sample_rate, uint8_t bits);
 
 void soc_vsprintf(const char * format, va_list ap);
 
@@ -141,8 +189,13 @@ int soc_get_muid(char *muid, uint32_t size);
 void soc_mobile_event_register_handler(void *handle);
 void soc_misc_event_register_handler(void *handle);
 
+int soc_mobile_make_call(uint8_t sim_id, char *number, uint8_t len);
+void soc_mobile_hangup_call(uint8_t sim_id);
+int soc_mobile_answer_call(uint8_t sim_id);
+int soc_mobile_list_call(uint8_t sim_id);
 
-
+void soc_mobile_speech_init(mobile_voice_data_input_fn callback);
+int soc_mobile_speech_upload(uint8_t *data, uint32_t len);
 #if 0
 void soc_mobile_get_iccid(uint8_t sim_id, uint8_t *buf);
 void soc_mobile_get_imsi(uint8_t sim_id, uint8_t *buf);
@@ -183,6 +236,7 @@ uint8_t soc_rndis_is_enable(void);
 uint32_t soc_rndis_host_ip(void);
 void soc_psram_speed_init(void);
 void soc_psram_dma_on_off(uint32_t mask_bit, uint8_t on_off);
+void soc_flash_dma_on_off(uint32_t mask_bit, uint8_t on_off);
 void soc_cp_force_wakeup_on_off(uint32_t mask_bit, uint8_t on_off);
 void soc_sys_force_wakeup_on_off(uint32_t mask_bit, uint8_t on_off);
 #endif /* CORE_INCLUDE_SOC_SERVICE_H_ */

@@ -9,10 +9,6 @@
 #include "hal_voice_eng_mem.h"
 #include "osasys.h"
 
-#ifdef __USER_CODE__
-
-#else
-
 typedef struct
 {
     UINT32      bPlayPcmBufInit : 1;
@@ -521,5 +517,5 @@ void halVECheckAmrEnFrameBuf(const void *pOrigBuf)
 
     return;
 }
-#endif
+
 

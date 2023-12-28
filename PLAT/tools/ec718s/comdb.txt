@@ -1,8 +1,8 @@
 DbVersion
-1322024225,100
+1933513395,100
 <end>
 BuildInfo
-The current data file was built by the Application Ver. 2.2.77.207, Thu Dec 21 15:28:26 2023
+The current data file was built by the Application Ver. 2.2.77.207, Thu Dec 28 09:40:10 2023
 <end>
 EnumVals
 0,2048,0,0,PHY_ONLINE,PHY_ICS_MODULE,PhyIcsMeasMainEntrance_0,P_INFO,swLogPrintf("ICS MEAS of euArfcn %d will be started ");
@@ -8263,12 +8263,12 @@ c6109984ce8416196aa1872d9dcaaf2de7605d769ab24c0981046c6a78482f21b3ae22c8aebaedc3
 6ced1555cdc2283500e45e48c642cad363d4065d17554adc64ed1d5716291720bc07638fadda63e45a9acf76e2d6d6b8038a3a177cb41288e5450d91cb746206d9df680a5b11d46ecab1dbb4f4dffa5c5b9e5f63bc1ad2c9bc5c6c1f2a6cbdbfb08402acc598ad109476f4cb4f7c5fccf988ffe1bc3f5bdb9a4cf9c29be4ff1dc563cbe0264b2105ed251161efcb431dc624eec996b7114f83b023ca163ce1e8
 40d242b7148d489b2ff1d9df60ec4da3105836c0ee9f1e317d89d6b7c7dd844bb3ae22c8aebaedc3e1736e322aa07e11b28ffc8fa87f7f5124d430625bf019b6f3e134cde0cbe0862ea1c163fae684774458ea2b8889f02bb917f727c9611db0c250f96c1d46ed1553bd7018acd17072de8d3caae8ccf49ab5086991b860b9db11921e95e4b4dea8b23eb976dc831b879a5bd316e80f1e8db982642b99361e02a82ff3e57460509aab629af613a564e6a14d748f8bafbbf94a5fe2ef38dd548fb49500c77331017603f5dca399dcf47fc624eec996b7114f83b023ca163ce1e8
 73830607bc653f0e65737a1f244deb51e7605d769ab24c0981046c6a78482f21bc07638fadda63e45a9acf76e2d6d6b8cfcbebfbde026db723291b4b9c72585567512579714c060aba5f3afe11aff32042cf8edf1628ec648d52947b785d30d3316541403d1d8a8eda7ae6ab28a2f3a7e1571f37792b22b474e673d24a0fa44a02f952c4649d66e6c6a39dda3ad688df1e2dbe3cfb60e57e6d86dbeee2ecc23d22b3ac2110a15476bbf6bd331d8e92bfae0d911657956e982fa832d1a29d048a73188ce7054808dd07d9eff2c02f435b
-786432,1610615296,0,0,CUSTOMER,LUATOS,airm2m_service_1,P_INFO,swLogPrintf("cnf %d , %d , %d ");
-786432,1610617344,0,0,CUSTOMER,LUATOS,airm2m_service_2,P_INFO,swLogPrintf("ind %d , %d , %d ");
-786432,1610618881,0,0,CUSTOMER,LUATOS,airm2m_service_3,P_INFO,swLogPrintf("nst result %s ");
-786432,1610620928,0,0,CUSTOMER,LUATOS,airm2m_service_4,P_ERROR,swLogPrintf("param len %d ");
-786432,1610622977,0,0,CUSTOMER,LUATOS,airm2m_service_6,P_INFO,swLogPrintf("find %s ");
-786432,1610627071,0,0,CUSTOMER,LUATOS,airm2m_service_5,P_ERROR,swLogPrintf("find at , but no end ");
+786432,1610615296,0,0,CUSTOMER,LUATOS,airm2m_service_1,P_SIG,swLogPrintf("cnf %d , %d , %d ");
+786432,1610617344,0,0,CUSTOMER,LUATOS,airm2m_service_2,P_SIG,swLogPrintf("ind %d , %d , %d ");
+786432,1610618881,0,0,CUSTOMER,LUATOS,airm2m_service_5,P_SIG,swLogPrintf("nst result %s ");
+786432,1610620928,0,0,CUSTOMER,LUATOS,airm2m_service_6,P_ERROR,swLogPrintf("param len %d ");
+786432,1610622977,0,0,CUSTOMER,LUATOS,airm2m_service_7,P_SIG,swLogPrintf("find %s ");
+786432,1610627071,0,0,CUSTOMER,LUATOS,airm2m_service_8,P_ERROR,swLogPrintf("find at , but no end ");
 786432,1610627073,0,0,CUSTOMER,LUATOS,debug,P_ERROR,swLogPrintf("%s ");
 786432,1610629376,0,0,CUSTOMER,LUATOS,uart_rx_2,P_INFO,swLogPrintf("uart%d , rx buffer len %d ");
 786432,1610631936,0,0,CUSTOMER,LUATOS,uart_rx_1,P_INFO,swLogPrintf("uart%d , rx%dbyte , buffer %dbyte , %dbyte ");
@@ -8516,5 +8516,5 @@ MW_INFO_PHY_EDRX_PARAM,midWareNvmInfoPhyEdrxParam
 plat_config,plat_config_fs_t
 <end>
 OptionalSegment
-optional_sk_01,7CFFE62B26FE81F52874147801F487AEEEEEDAB49CEBAC890F9F0F31467F10E3
+optional_sk_01,5BF3A163BAFC6992BF05A7E6BFA3B8C4529956727C4573D2A1C9C88FA05FC29D
 <end>

@@ -1,8 +1,8 @@
 DbVersion
-1127309215,100
+684202737,100
 <end>
 BuildInfo
-The current data file was built by the Application Ver. 2.2.77.207, Thu Dec 21 15:26:54 2023
+The current data file was built by the Application Ver. 2.2.77.207, Thu Dec 28 09:38:03 2023
 <end>
 EnumVals
 0,2048,0,0,PHY_ONLINE,PHY_ICS_MODULE,PhyIcsMeasMainEntrance_0,P_INFO,swLogPrintf("ICS MEAS of euArfcn %d will be started ");
@@ -1397,6 +1397,13 @@ f4cd1cb4097b19f78b630924f40d36e734b252a85b42aaa8492f7b40ff9be0c9785d835c8948e0b8
 266240,545615872,0,0,PLAT_AP,PLA_HAL,halVoiceEngProcRet_2,P_ERROR,swLogPrintf("unknown voice engine ( CP ) return msgId %d ");
 266240,545618432,0,0,PLAT_AP,PLA_HAL,halSetVoiceCallRecordMemory_1,P_VALUE,swLogPrintf("Set voice record memory , pUlAmrBuf %x , pDlAmrBuf %x , pDlPcmBuf %x ");
 266240,545619968,0,0,PLAT_AP,PLA_HAL,halSetVoiceCallRecordNotifyCallback_1,P_VALUE,swLogPrintf("Set voice record notify callback %x ");
+266240,545622272,0,0,PLAT_AP,PLA_HAL,halVEAllocPlayPcmBuf_e_1,P_ERROR,swLogPrintf("HAL , alloc play PCM buffer , invalid input : 0x%lx / 0x%lx , fail ");
+266240,545624064,0,0,PLAT_AP,PLA_HAL,halVEAllocPlayPcmBuf_w_1,P_WARNING,swLogPrintf("HAL , alloc play PCM buffer , PCM type : %d , seems not support ");
+266240,545626368,0,0,PLAT_AP,PLA_HAL,halVEAllocPlayPcmBuf_w_2,P_WARNING,swLogPrintf("HAL , play PCM buffer already alloc to caller : %d , here need re-alloc to caller : %d ");
+266240,545628416,0,0,PLAT_AP,PLA_HAL,halVEFreePlayPcmBuf_1,P_ERROR,swLogPrintf("HAL , free plat PCM buff : 0x%x , buff not right , should : 0x%x ");
+266240,545630464,0,0,PLAT_AP,PLA_HAL,halVEFreePlayPcmBuf_2,P_ERROR,swLogPrintf("HAL , free plat PCM buff : 0x%x , owner : %d , but play PCM buff not init , abnormal ");
+266240,545632512,0,0,PLAT_AP,PLA_HAL,halVEAllocEncodeAmrFrameBuf_1,P_ERROR,swLogPrintf("HAL , alloc AMR frame buf , invalid input : 0x%lx / 0x%lx , fail ");
+266240,545634304,0,0,PLAT_AP,PLA_HAL,halVEAllocEncodeAmrFrameBuf_w_1,P_WARNING,swLogPrintf("HAL , alloc AMR frame buf , no left , fail , callerId : %d ");
 267264,547358720,0,0,PLAT_AP,EXCEP_PRINT,ResetReasonWriteCP_0,P_VALUE,swLogPrintf("Write CP Reset Flag = 0x%x ");
 267264,547360768,0,0,PLAT_AP,EXCEP_PRINT,cpNVIC_SystemReset_0,P_VALUE,swLogPrintf("CP NVIC Reset , CFG = 0x%x ");
 267264,547363072,0,0,PLAT_AP,EXCEP_PRINT,ResetSetSWResetReason_1,P_WARNING,swLogPrintf("Old Reset reason = %e<ResetReason_e> exist , write reason = %e<ResetReason_e> failed ");
@@ -9001,12 +9008,12 @@ cd62631729d88ceb3e9689b17edc08198915a8c74c44b8f9239492a132c532577be64b50613c52a9
 cd62631729d88ceb3e9689b17edc0819dc9d7d1cc33fd645c2deabb6ba8514837be64b50613c52a9da02d8a785eb45c67b5ed60ba25b4896129b6aa58c56dcd72bd9adea90dd31153bc473d51f12fe8904359bbcae46c7a7af778971c130b313b2e3f499c38cfb3e5e2c3f5713c460b7d503b695c289771197e8a32fa7b2c6e109836ae42274a6fc49f8c6dcbdfabe24cc5658fefff52ca5472903565c802a9a491a03cebb1d24ad0c1c95ed860cfb64
 cad1be53b20f0e4f5f0414b716064f649301ebd57728e8ed01247c322efd3954677cf77974050714f369d7518970829184317bd700528383ad399d95f86169eccca838dc34e9f0d3bddf1ac610037e96cd58076bfa39bfb62679281045082b76eba7ab31b4cd15579905a65010503023643ff797aa9ba9bee72b2cabe2793943da1ff52881f3649a971fb73d223daf6900a849e6727512aba7cff5af910bf43dd739bc44b19e75ef6e10d1bf33af501da6505ee4eb8b4b93515590e094592bc8
 ee675eea17a5d1e06d33a35c51fd5a69da4b5b74bf5730603dd8f781a23705442c6ceb96884ef4addd42b6c88fb0e31435badd8d7655694570de385611c574743996613b6e1c3dcf4a98afba81506c66c983e8a6f309732df2741fea04a0a3b368d2bff16c9f836e09e8b52f12d6f91ef2e0c32469789ad5fd6f43e8ce9356b05a17f36e6e38405d0a82040647ede29c00af8f643dee5edda6ca831050485544d7f6c23263a7f1f9e553966a9786413dc624eec996b7114f83b023ca163ce1e8
-786432,1610615296,0,0,CUSTOMER,LUATOS,airm2m_service_1,P_INFO,swLogPrintf("cnf %d , %d , %d ");
-786432,1610617344,0,0,CUSTOMER,LUATOS,airm2m_service_2,P_INFO,swLogPrintf("ind %d , %d , %d ");
-786432,1610618881,0,0,CUSTOMER,LUATOS,airm2m_service_3,P_INFO,swLogPrintf("nst result %s ");
-786432,1610620928,0,0,CUSTOMER,LUATOS,airm2m_service_4,P_ERROR,swLogPrintf("param len %d ");
-786432,1610622977,0,0,CUSTOMER,LUATOS,airm2m_service_6,P_INFO,swLogPrintf("find %s ");
-786432,1610627071,0,0,CUSTOMER,LUATOS,airm2m_service_5,P_ERROR,swLogPrintf("find at , but no end ");
+786432,1610615296,0,0,CUSTOMER,LUATOS,airm2m_service_1,P_SIG,swLogPrintf("cnf %d , %d , %d ");
+786432,1610617344,0,0,CUSTOMER,LUATOS,airm2m_service_2,P_SIG,swLogPrintf("ind %d , %d , %d ");
+786432,1610618881,0,0,CUSTOMER,LUATOS,airm2m_service_5,P_SIG,swLogPrintf("nst result %s ");
+786432,1610620928,0,0,CUSTOMER,LUATOS,airm2m_service_6,P_ERROR,swLogPrintf("param len %d ");
+786432,1610622977,0,0,CUSTOMER,LUATOS,airm2m_service_7,P_SIG,swLogPrintf("find %s ");
+786432,1610627071,0,0,CUSTOMER,LUATOS,airm2m_service_8,P_ERROR,swLogPrintf("find at , but no end ");
 786432,1610627073,0,0,CUSTOMER,LUATOS,debug,P_ERROR,swLogPrintf("%s ");
 786432,1610629376,0,0,CUSTOMER,LUATOS,uart_rx_2,P_INFO,swLogPrintf("uart%d , rx buffer len %d ");
 786432,1610631936,0,0,CUSTOMER,LUATOS,uart_rx_1,P_INFO,swLogPrintf("uart%d , rx%dbyte , buffer %dbyte , %dbyte ");
@@ -9256,5 +9263,5 @@ MW_INFO_PHY_EDRX_PARAM,midWareNvmInfoPhyEdrxParam
 plat_config,plat_config_fs_t
 <end>
 OptionalSegment
-optional_sk_01,FF154FA45D5ECA6AAE251FB935534E6E4A53D7D8328DB931DA7BC3C169708B09
+optional_sk_01,409D94EC35EE12705FCB34D397ED9867D7FDE13C48E1A159FD36DD4EF5B31A05
 <end>

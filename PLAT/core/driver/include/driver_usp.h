@@ -19,6 +19,7 @@ enum
 	CSPI_FRAME_SUCC,
 	CSPI_FRAME_ERROR,
 };
+void I2S_GetConfig(uint8_t I2SID, I2sDataFmt_t *DataFmt, I2sSlotCtrl_t *SlotCtrl, I2sBclkFsCtrl_t *BclkFsCtrl, I2sDmaCtrl_t *DmaCtrl);
 void I2S_FullConfig(uint8_t I2SID, I2sDataFmt_t DataFmt, I2sSlotCtrl_t SlotCtrl, I2sBclkFsCtrl_t BclkFsCtrl, I2sDmaCtrl_t DmaCtrl);
 void I2S_BaseConfig(uint8_t I2SID, uint8_t Mode, uint8_t FrameSize);
 int32_t I2S_Start(uint8_t I2SID, uint8_t IsPlay, uint32_t SampleRate, uint8_t ChannelNum);
@@ -32,7 +33,9 @@ void I2S_RxDebug(uint8_t I2SID);
 
 int32_t I2S_StartTransfer(uint8_t I2SID, uint32_t SampleRate, uint8_t ChannelNum, uint32_t ByteLen, CBFuncEx_t cb, void *param);
 void I2S_Transfer(uint8_t I2SID, uint8_t* Data, uint32_t ByteLen);
+void I2S_TransferLoop(uint8_t I2SID, uint8_t* Data, uint32_t OneTrunkByteLen, uint32_t TotalTrunkCnt, uint8_t NeedIrq);
 void I2S_Stop(uint8_t I2SID);
+uint8_t I2S_IsWorking(uint8_t I2SID);
 
 int32_t CSPI_Setup(uint8_t ID, uint32_t BusSpeed, uint8_t SpiMode, uint8_t IsMSB, uint8_t Is2RxWire, uint8_t OnlyY, uint8_t SeqType, uint8_t rowScaleRatio, uint8_t colScaleRatio, uint8_t scaleBytes, uint8_t ddrMode, uint8_t dummyAllowed, uint8_t wordIdSeq);
 void CSPI_Rx(uint8_t ID, void *buf, uint16_t W, uint16_t H, CBFuncEx_t cb, void *param);

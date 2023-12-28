@@ -377,11 +377,19 @@ flash xip address(from both ap/cp view): 0x00800000---0x00c00000
 
 #ifdef OPEN_CPU_MODE
 #if FEATURE_IMS_ENABLE
+#ifdef __USER_CODE__
+#ifdef FEATURE_IMS_USE_PSRAM_ENABLE
+#define min_heap_size_threshold 0x3E800//ims heap(150KB) will also use heap
+#else
+#define min_heap_size_threshold 0x46000//ims heap(180KB) will also use heap
+#endif
+#else
 #ifdef FEATURE_IMS_USE_PSRAM_ENABLE
 #define min_heap_size_threshold 0x57800//ims heap(250KB) will also use heap
 #else
 #define min_heap_size_threshold 0x5F000//ims heap(280KB) will also use heap
 #endif
+#endif //__USER_CODE__
 #if FEATURE_SUPPORT_APP_PCM_MEM_POOL//hal app mem pool 640*3+8��align to 2K
 #define up_buf_start 0x4b2800  // should be 4 byte align
 #else
