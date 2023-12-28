@@ -12,7 +12,11 @@ target(TARGET_NAME)
     on_load(function(target)
         assert (CHIP_TARGET == "ec718p" or CHIP_TARGET == "ec718pv" or CHIP_TARGET == "ec718e" ,"luatos only support ec718p/ec718pv/ec718e")
         local conf_data = io.readfile("$(projectdir)/project/luatos/inc/luat_conf_bsp.h")
-        local FLASH_FOTA_REGION_START = 0x340000 -- ec718p FLASH_FOTA_REGION_START
+        local ap_load_add
+        if CHIP_TARGET == "ec718p" then ap_load_add = "0x0007e000"  -- ec718p AP_FLASH_LOAD_ADDR
+        elseif CHIP_TARGET == "ec718pv" then ap_load_add = "0x000Ba000" -- ec718pv AP_FLASH_LOAD_ADDR
+        end
+        local FLASH_FOTA_REGION_START = 0x340000 -- ec718p/ec718pv FLASH_FOTA_REGION_START
         -- print("FLASH_FOTA_REGION_START",FLASH_FOTA_REGION_START)
         local LUAT_SCRIPT_SIZE = tonumber(conf_data:match("\r#define LUAT_SCRIPT_SIZE (%d+)") or conf_data:match("\n#define LUAT_SCRIPT_SIZE (%d+)"))
         local LUAT_SCRIPT_OTA_SIZE = tonumber(conf_data:match("\r#define LUAT_SCRIPT_OTA_SIZE (%d+)") or conf_data:match("\n#define LUAT_SCRIPT_OTA_SIZE (%d+)"))
@@ -24,8 +28,8 @@ target(TARGET_NAME)
         -- print("LUA_SCRIPT_ADDR",LUA_SCRIPT_ADDR)
         -- print("LUA_SCRIPT_OTA_ADDR",LUA_SCRIPT_OTA_ADDR)
         -- print("script_addr",script_addr)
-        target:add("defines","AP_FLASH_LOAD_SIZE=0x"..script_addr.."-0x0007e000",{public = true})
-        target:add("defines","AP_PKGIMG_LIMIT_SIZE=0x"..script_addr.."-0x0007e000",{public = true})
+        target:add("defines","AP_FLASH_LOAD_SIZE=0x"..script_addr.."-"..ap_load_add,{public = true})
+        target:add("defines","AP_PKGIMG_LIMIT_SIZE=0x"..script_addr.."-"..ap_load_add,{public = true})
 		target:add("files","$(projectdir)/PLAT/core/lib/libtts_res.a")
         local LUAT_USE_TTS_8K = conf_data:find("\r#define LUAT_USE_TTS_8K") or conf_data:find("\n#define LUAT_USE_TTS_8K")
         if LUAT_USE_TTS_8K then
