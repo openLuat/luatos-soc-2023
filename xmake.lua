@@ -208,11 +208,6 @@ local CHIP_TARGET = CHIP_TARGET
 on_load(function (target)
     assert (CHIP_TARGET == "ec718e" or CHIP_TARGET == "ec718p" or CHIP_TARGET == "ec718pv" or CHIP_TARGET == "ec718s" or CHIP_TARGET == "ec716s" ,"target only support ec718e/ec718p/ec718pv/ec718s/ec716s")
 
-    -- import("utils.archive")
-    -- if os.exists("$(projectdir)/PLAT/libs/"..(CHIP_TARGET=="ec718e"and"ec718p"or CHIP_TARGET)) then
-    --     os.rmdir("$(projectdir)/PLAT/libs/"..(CHIP_TARGET=="ec718e"and"ec718p"or CHIP_TARGET))
-    -- end
-    -- archive.extract("./PLAT/libs/"..(CHIP_TARGET=="ec718e"and"ec718p"or CHIP_TARGET)..".7z", "./PLAT/libs")
     for _, filepath in ipairs(os.files("$(projectdir)/project/"..USER_PROJECT_NAME.."/**/mem_map_7xx.h")) do
         if path.filename(filepath) == "mem_map_7xx.h" then
             target:add("defines", "__USER_MAP_CONF_FILE__=\"mem_map_7xx.h\"")

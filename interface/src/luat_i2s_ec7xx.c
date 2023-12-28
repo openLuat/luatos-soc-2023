@@ -22,12 +22,12 @@
 #include "luat_i2s.h"
 #include "driver_usp.h"
 #include "driver_gpio.h"
-void luat_i2s_init(void)
+int luat_i2s_init(void)
 {
 
 }
 
-void luat_i2s_base_setup(uint8_t bus_id, uint8_t mode,  uint8_t frame_size)
+int luat_i2s_base_setup(uint8_t bus_id, uint8_t mode,  uint8_t frame_size)
 {
 	int pad;
 	I2S_BaseConfig(bus_id, mode, frame_size);
@@ -48,7 +48,7 @@ void luat_i2s_base_setup(uint8_t bus_id, uint8_t mode,  uint8_t frame_size)
 	}
 }
 
-void luat_i2s_set_lr_channel(uint8_t bus_id, uint8_t lr_channel)
+int luat_i2s_set_lr_channel(uint8_t bus_id, uint8_t lr_channel)
 {
 	I2sDataFmt_t DataFmt;
 	I2sSlotCtrl_t  SlotCtrl;
@@ -80,24 +80,24 @@ void luat_i2s_no_block_rx(uint8_t bus_id, uint32_t byte_len, void* cb, void *par
 }
 
 
-void luat_i2s_tx_stop(uint8_t bus_id)
+int luat_i2s_tx_stop(uint8_t bus_id)
 {
 	I2S_TxStop(bus_id);
 }
 
-void luat_i2s_rx_stop(uint8_t bus_id)
+int luat_i2s_rx_stop(uint8_t bus_id)
 {
 	I2S_RxStop(bus_id);
 }
 
-void luat_i2s_stop(uint8_t bus_id)
+int luat_i2s_stop(uint8_t bus_id)
 {
 	if (I2S_IsWorking(bus_id))
 	{
 		I2S_Stop(bus_id);
 	}
 }
-void luat_i2s_pause(uint8_t bus_id)
+int luat_i2s_pause(uint8_t bus_id)
 {
 	I2S_TxPause(bus_id);
 }
@@ -119,7 +119,7 @@ void luat_i2s_transfer_loop(uint8_t bus_id, uint8_t* address, uint32_t one_truck
 	I2S_TransferLoop(bus_id, address, one_truck_byte_len, total_trunk_cnt, need_irq);
 }
 
-void luat_i2s_transfer_stop(uint8_t bus_id)
+int luat_i2s_transfer_stop(uint8_t bus_id)
 {
 	if (I2S_IsWorking(bus_id))
 	{
