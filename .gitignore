@@ -26,9 +26,4 @@ out/
 /PLAT/core/ld/ec7xx_0h00_flash.ld
 /PLAT/core/ld/ec7xx_0h00_flash_bl.ld
 
-/PLAT/libs/ec716s
-/PLAT/libs/ec718p
-/PLAT/libs/ec718pv
-/PLAT/libs/ec718s
-
 /build2.bat
