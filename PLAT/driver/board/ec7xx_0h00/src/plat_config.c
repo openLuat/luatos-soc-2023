@@ -365,9 +365,11 @@ PLAT_BL_AIRAM_FLASH_TEXT static void BSP_SetDefaultRawFlashPlatConfig(void)
     g_rawFlashPlatConfig.slpLimitEn = 0;
 
     g_rawFlashPlatConfig.slpLimitTime = 0;
-
+#ifdef __USER_CODE__
     g_rawFlashPlatConfig.wfiMode = 1;
-
+#else
+    g_rawFlashPlatConfig.wfiMode = 0;
+#endif
     g_rawFlashPlatConfig.apIdlePercentPrintMode = 0;
 
     g_rawFlashPlatConfig.cpSlpTest = 0;

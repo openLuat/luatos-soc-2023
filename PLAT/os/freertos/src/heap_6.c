@@ -357,9 +357,10 @@ FREERTOS_HEAP6_TEXT_SECTION static void prvHeapInit( void )
 extern void tlsf_mem_get_record(tlsf_t tlsf, uint32_t *alloc, uint32_t *peak);
 FREERTOS_HEAP6_TEXT_SECTION void GetSRAMHeapInfo(uint32_t *total, uint32_t *alloc, uint32_t *peak)
 {
+	vTaskSuspendAll();
 	*total = gTotalHeapSize;
 	tlsf_mem_get_record(pxTlsf, alloc, peak);
-
+	xTaskResumeAll();
 }
 #endif
 

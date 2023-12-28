@@ -329,14 +329,17 @@ PLAT_PSRAM_HEAP6_RAMCODE static void prvHeapInit_Psram( void )
 
 
 #ifdef __USER_CODE__
+extern void soc_fast_printf(const char *fmt, ...);
 FREERTOS_HEAP6_TEXT_SECTION void GetPSRAMHeapInfo(uint32_t *total, uint32_t *alloc, uint32_t *peak)
 {
+	vTaskSuspendAll();
     if(NULL == pxTlsf_psram)
     {
         prvHeapInit_Psram();
     }
 	*total = gTotalHeapSize_psram;
 	tlsf_mem_get_record(pxTlsf_psram, alloc, peak);
+	xTaskResumeAll();
 
 }
 #endif
