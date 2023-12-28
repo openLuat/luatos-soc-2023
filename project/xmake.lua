@@ -212,7 +212,6 @@ target(USER_PROJECT_NAME..".elf")
     set_targetdir("$(buildir)/"..USER_PROJECT_NAME)
     add_deps("csdk")
     add_deps(USER_PROJECT_NAME)
-
     add_linkdirs("$(projectdir)/lib")
     add_linkdirs("$(projectdir)/PLAT/device/target/board/ec7xx_0h00/ap/gcc/")
     add_linkdirs("$(projectdir)/PLAT/prebuild/PS/lib/gcc/"..(CHIP_TARGET=="ec718e"and"ec718p"or CHIP_TARGET):sub(1,6).."/"..LIB_PS_PLAT)

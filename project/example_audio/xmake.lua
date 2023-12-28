@@ -23,7 +23,7 @@ target(TARGET_NAME)
     add_files(LUATOS_ROOT .. "/components/multimedia/amr_decode/**.c",{public = true})
 
     add_files("$(projectdir)/lib/libmp3.a")
-
+	add_files("$(projectdir)/PLAT/core/lib/libtts_res.a")
     add_files("$(projectdir)/PLAT/core/lib/libaisound50_16K.a")
     --8K版本用下面的库，注释掉16K的库
     -- add_files("$(projectdir)/PLAT/core/lib/libaisound50_8K.a")

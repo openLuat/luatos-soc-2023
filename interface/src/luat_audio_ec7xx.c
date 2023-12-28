@@ -424,7 +424,7 @@ int luat_i2s_recv(uint8_t id, char* buff, size_t len)
 }
 int luat_i2s_close(uint8_t id)
 {
-	luat_i2s_deinit(id);
+	luat_i2s_stop(id);
 	return 0;
 }
 int l_i2s_play(lua_State *L) {

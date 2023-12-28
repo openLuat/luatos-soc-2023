@@ -26,6 +26,7 @@
 #include "cmidev.h"
 #include "cmips.h"
 #include "cms_api.h"
+#include "soc_service.h"
 
 extern void soc_mobile_event_deregister_handler(void);
 extern void soc_mobile_get_imsi(uint8_t *buf);
@@ -54,7 +55,8 @@ extern void soc_mobile_clear_ip_data_traffic(uint8_t clear_uplink, uint8_t clear
 extern uint8_t soc_mobile_get_sim_state(void);
 extern void soc_mobile_rf_test_mode(uint8_t uart_id, uint8_t on_off);
 extern void soc_mobile_rf_test_input(uint8_t *data, uint32_t len);
-
+extern void soc_mobile_get_last_cc_event_info(void *info, uint32_t *info_len);
+extern void soc_mobile_get_last_nas_event(uint8_t *type, uint16_t *cause, uint16_t *phy_cellid, uint32_t *freq);
 void soc_mobile_set_network_check_period(uint32_t period);
 
 /**
@@ -962,4 +964,50 @@ void luat_mobile_rf_test_input(char *data, uint32_t data_len)
 void luat_mobile_rf_test_mode(uint8_t uart_id, uint8_t on_off)
 {
 	soc_mobile_rf_test_mode(uart_id, on_off);
+}
+
+void luat_mobile_get_last_nas_info(uint8_t *type, uint16_t *cause, uint16_t *phy_cellid, uint32_t *freq)
+{
+	soc_mobile_get_last_nas_event(type, cause, phy_cellid, freq);
+}
+//VOLTE相关
+
+
+void luat_mobile_get_last_call_num(char *buf, uint8_t buf_len)
+{
+	char number[80];
+	uint32_t len;
+	soc_mobile_get_last_cc_event_info(number, &len);
+	if (len < buf_len)
+	{
+		memcpy(buf, number, len);
+		buf[len] = 0;
+	}
+	else
+	{
+		memcpy(buf, number, buf_len - 1);
+		buf[buf_len] = 0;
+	}
+}
+
+int luat_mobile_make_call(uint8_t sim_id, char *number, uint8_t len)
+{
+	return soc_mobile_make_call(sim_id, number, len);
+}
+void luat_mobile_hangup_call(uint8_t sim_id)
+{
+	soc_mobile_hangup_call(sim_id);
+}
+int luat_mobile_answer_call(uint8_t sim_id)
+{
+	return soc_mobile_answer_call(sim_id);
+}
+
+void luat_mobile_speech_init(void *callback)
+{
+	soc_mobile_speech_init(callback);
+}
+int luat_mobile_speech_upload(uint8_t *data, uint32_t len)
+{
+	return soc_mobile_speech_upload(data, len);
 }
