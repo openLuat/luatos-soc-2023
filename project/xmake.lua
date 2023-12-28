@@ -7,8 +7,6 @@ local USER_PROJECT_DIR = USER_PROJECT_DIR
 local use_lto = false
 if CHIP_TARGET == "ec716s" or CHIP_TARGET == "ec718s" then 
     use_lto = true
-elseif CHIP_TARGET == "ec718pv" and USER_PROJECT_NAME == 'luatos' then 
-    use_lto = true
 elseif os.getenv("LTO_FEATURE_MODE") == "enable" then 
     use_lto = true
 end
