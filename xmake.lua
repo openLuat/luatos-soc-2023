@@ -1,5 +1,5 @@
 set_project("EC7XX")
-set_xmakever("2.8.5")
+set_xmakever("2.8.6")
 set_version("0.0.2", {build = "%Y%m%d%H%M"})
 add_rules("mode.debug", "mode.release")
 set_defaultmode("debug")

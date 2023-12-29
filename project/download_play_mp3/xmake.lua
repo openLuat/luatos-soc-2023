@@ -29,7 +29,8 @@ target(TARGET_NAME)
     -- **.c会递归所有子文件夹下的文件
     add_files(LUATOS_ROOT .. "/components/multimedia/amr_decode/**.c",{public = true})
 
-    add_files("$(projectdir)/lib/libmp3.a")
+    add_linkdirs("$(projectdir)/lib","$(projectdir)/PLAT/core/lib",{public = true})
+    -- -- 此处使用 libaisound50_16K.a, 还可选择 8K版本:libaisound50_8K.a,8K英文版本:libaisound50_8K_eng.a,16K英文版本:libaisound50_16K_eng.a
+    add_linkgroups("mp3","aisound50_16K", {whole = true,public = true})
 
-    add_files("$(projectdir)/PLAT/core/lib/libaisound50_16K.a")
 target_end()
