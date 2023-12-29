@@ -184,7 +184,7 @@ static void i2c_task_proc(void *arg)
 
 	while (1)
 	{
-		config_accelerated_speed_set(1);
+		config_GS_off_on(1);
 		luat_i2c_setup(I2C_ID, 1);
 		luat_i2c_send(I2C_ID, DA213B_ADDRESS, chipidaddr, 1, 1);
 		luat_i2c_recv(I2C_ID, DA213B_ADDRESS, recv_chipid_data, 1);
@@ -202,7 +202,7 @@ static void i2c_task_proc(void *arg)
 		luat_i2c_send(I2C_ID, DA213B_ADDRESS, enginaddr, 6, 1);
 		luat_rtos_task_sleep(60 * 1000);
 		luat_i2c_close(I2C_ID);
-		config_accelerated_speed_set(0);
+		config_GS_off_on(0);
 	}
 	luat_rtos_task_delete(i2c_task_handle);
 }
@@ -215,6 +215,7 @@ static void luat_da213b_monitor_task(void *args)
 	int result;
 	uint8_t data[200] = {0};
 	uint16_t len;
+	uint8_t i=0;
 	while (1)
 	{
 		//luat_lbs_task_init();
@@ -235,10 +236,11 @@ static void luat_da213b_monitor_task(void *args)
 			{
 				if (count > 20)
 				{
+					i=i+1;
 					count = 0;
 					device_is_stop = 1;
 					LUAT_DEBUG_PRINT("震动报警！！！");
-					protocol_jt_pack_gps_msg(&gpsx, data, &len, 200, 1, 1);//函数的参数的第五位是震动报警信息，1，报警，0没有报警
+					protocol_jt_pack_gps_msg(&gpsx, data, &len, 200, 1, i);//函数的参数的第五位是震动报警信息，1，报警，0没有报警
 					result = socket_service_send_data(data, len, send_alarm_data_from_task_callback, 0);
 					if (0 == result)
 					{
@@ -248,6 +250,11 @@ static void luat_da213b_monitor_task(void *args)
 					{
 						LUAT_DEBUG_PRINT("sync result %d", result);
 					}
+					if (i==3)
+					{
+						i=0;
+					}
+					
 				}
 			}
 			else

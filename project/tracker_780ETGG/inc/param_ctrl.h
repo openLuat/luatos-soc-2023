@@ -107,6 +107,6 @@ int config_gps_get(void);
 int config_vbat_get(void);
 int config_input_volt_get(void);
 int config_charge_get(void);
-int config_accelerated_speed_set(int status);
+int config_GS_off_on(int status);
 
 #endif

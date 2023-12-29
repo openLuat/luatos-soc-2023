@@ -290,6 +290,7 @@ void gps_led_task(void *args)
     luat_gpio_cfg_t gpio_cfg;
 	luat_gpio_set_default_cfg(&gpio_cfg);
 	gpio_cfg.pin = GPS_led_Pin;
+    gpio_cfg.alt_fun=GPS_led_Alt;
 	luat_gpio_open(&gpio_cfg);
     while (1)
     {

@@ -240,13 +240,13 @@ int config_relay_set(int status)
         luat_gpio_cfg_t gpio_cfg;
         luat_gpio_set_default_cfg(&gpio_cfg);
 
-        gpio_cfg.pin = HAL_GPIO_1;
+        gpio_cfg.pin = FuelCut_Pin;
         luat_gpio_open(&gpio_cfg);
-        ret = luat_gpio_set(HAL_GPIO_1, status);
+        ret = luat_gpio_set(FuelCut_Pin, status);
         flag = 1;
     }
     else
-        ret = luat_gpio_set(HAL_GPIO_1, status);
+        ret = luat_gpio_set(FuelCut_Pin, status);
 
     g_s_relay_status = status;
 
@@ -348,18 +348,18 @@ int config_input_volt_get(void)
     return (val2*76)/1000;
 }
 
-int config_charge_get(void)
+int config_charge_get(void)//获取VBUS的状态
 {
     int status;
     ChargeType type;
     luat_gpio_cfg_t gpio_cfg;
 	luat_gpio_set_default_cfg(&gpio_cfg);
 
-	gpio_cfg.pin = HAL_GPIO_12;
+	gpio_cfg.pin = HAL_WAKEUP_CHARGE;
     gpio_cfg.mode = LUAT_GPIO_INPUT;
 	luat_gpio_open(&gpio_cfg);
-	status = luat_gpio_get(HAL_GPIO_12);
-    luat_gpio_close(HAL_GPIO_12);
+	status = luat_gpio_get(HAL_WAKEUP_CHARGE);
+    luat_gpio_close(HAL_WAKEUP_CHARGE);
 
     if(status == 0)
         type = CHARGING;
@@ -371,7 +371,7 @@ int config_charge_get(void)
     return type;
 }
 
-int config_accelerated_speed_set(int status)
+int config_GS_off_on(int status)//打开GS 运动传感器的电源
 {
     int ret;
     static int flag = 0;
@@ -380,12 +380,12 @@ int config_accelerated_speed_set(int status)
         luat_gpio_cfg_t gpio_cfg;
         luat_gpio_set_default_cfg(&gpio_cfg);
 
-        gpio_cfg.pin = HAL_GPIO_15;
+        gpio_cfg.pin = GS_EN_Pin;
         luat_gpio_open(&gpio_cfg);
-        ret = luat_gpio_set(HAL_GPIO_15, status);
+        ret = luat_gpio_set(GS_EN_Pin, status);
     }
     else
-        ret = luat_gpio_set(HAL_GPIO_15, status);
+        ret = luat_gpio_set(GS_EN_Pin, status);
 
     return ret;
 }

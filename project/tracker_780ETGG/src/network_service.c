@@ -83,6 +83,7 @@ static void task_net_led_run(void *param)
 	luat_gpio_set_default_cfg(&gpio_cfg);
 
 	gpio_cfg.pin = Net_led_Pin;
+	gpio_cfg.alt_fun=Net_led_Alt;
 	luat_gpio_open(&gpio_cfg);
 	while(1)
 	{
