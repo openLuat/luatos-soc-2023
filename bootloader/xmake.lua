@@ -1,30 +1,31 @@
 
 local SDK_PATH = os.projectdir()
-local CHIP_TARGET = CHIP_TARGET
 local USER_PROJECT_NAME = USER_PROJECT_NAME
 
-local LIB_PS_PLAT = "full"
-if is_lspd then
-    if CHIP_TARGET == "ec718pv" then
-    LIB_FW = "audio"
-    LIB_PS_PLAT = "ims"
-    else 
-    LIB_PS_PLAT = "oc"
-    end
-else 
-    if CHIP_TARGET == "ec718p" or CHIP_TARGET == "ec718e" then
-        LIB_PS_PLAT = "full"
-    elseif CHIP_TARGET == "ec718pv" then
+if has_config("chip_target") and has_config("lspd_mode") then 
+    chip_target = get_config("chip_target") 
+    LIB_PS_PLAT = "full"
+    if get_config("lspd_mode") then
+        if chip_target == "ec718pv" then
         LIB_FW = "audio"
         LIB_PS_PLAT = "ims"
-    else
-        add_defines("MID_FEATURE_MODE")
-        LIB_PS_PLAT = "mid"
+        else 
+        LIB_PS_PLAT = "oc"
+        end
+    else 
+        if chip_target == "ec718p" or chip_target == "ec718e" then
+            LIB_PS_PLAT = "full"
+        elseif chip_target == "ec718pv" then
+            LIB_FW = "audio"
+            LIB_PS_PLAT = "ims"
+        else
+            add_defines("MID_FEATURE_MODE")
+            LIB_PS_PLAT = "mid"
+        end
     end
-end
-
-if CHIP_TARGET == "ec718pv" then
-    add_defines("FEATURE_AMR_CP_ENABLE","FEATURE_VEM_CP_ENABLE")
+    if chip_target == "ec718pv" then
+        add_defines("FEATURE_AMR_CP_ENABLE","FEATURE_VEM_CP_ENABLE")
+    end
 end
 
 add_defines("LTO_FEATURE_MODE",
@@ -88,15 +89,19 @@ target("ap_bootloader.elf")
     set_targetdir("$(buildir)/ap_bootloader")
     add_deps("driver")
 
-    add_linkdirs("$(projectdir)/PLAT/prebuild/PLAT/lib/gcc/"..(CHIP_TARGET=="ec718e"and"ec718p"or CHIP_TARGET):sub(1,6).."/"..LIB_PS_PLAT)
-    add_linkdirs("$(projectdir)/PLAT/libs/"..(CHIP_TARGET=="ec718e"and"ec718p"or CHIP_TARGET).."/bootloader")
-    add_linkdirs("$(projectdir)/lib/")
+    local chip_target = nil
+    if has_config("chip_target") then chip_target = get_config("chip_target") end
+    if chip_target then
+        add_linkdirs("$(projectdir)/PLAT/prebuild/PLAT/lib/gcc/"..(chip_target=="ec718e"and"ec718p"or chip_target):sub(1,6).."/"..LIB_PS_PLAT)
+        add_linkdirs("$(projectdir)/PLAT/libs/"..(chip_target=="ec718e"and"ec718p"or chip_target).."/bootloader")
+        if (chip_target=="ec718e"and"ec718p"or chip_target):sub(1,6) == "ec718p" then
+            add_linkgroups("ffota", {whole = true})
+        end
+    end
 
+    add_linkdirs("$(projectdir)/lib/")
     add_linkgroups("driver","startup","core_airm2m","lzma","driver_private_bl","bootloader","usbbl_priv",
                     "osa","middleware_ec","middleware_ec_private","ccio","fota","deltapatch2", {whole = true})
-    if (CHIP_TARGET=="ec718e"and"ec718p"or CHIP_TARGET):sub(1,6) == "ec718p" then
-        add_linkgroups("ffota", {whole = true})
-    end
 
     add_ldflags("-T$(projectdir)/PLAT/core/ld/ec7xx_0h00_flash_bl.ld","-Wl,-Map,$(buildir)/ap_bootloader/ap_bootloader_$(mode).map",{force = true})
     
@@ -141,13 +146,13 @@ target("ap_bootloader.elf")
         io.writefile("$(buildir)/ap_bootloader/ap_bootloader.size", os.iorun(toolchains .. "/arm-none-eabi-objdump -h $(buildir)/ap_bootloader/ap_bootloader.elf"))
         local size_file = io.open("$(buildir)/ap_bootloader/ap_bootloader.size", "a")
         size_file:write(os.iorun(toolchains .. "/arm-none-eabi-size -G $(buildir)/ap_bootloader/ap_bootloader.elf"))
-        if (CHIP_TARGET=="ec718e"and"ec718p"or CHIP_TARGET):sub(1,6) == "ec718p" then size_file:write(os.iorun(toolchains .. "/arm-none-eabi-size -t -G $(projectdir)/lib/libffota.a")) end
+        if (chip_target=="ec718e"and"ec718p"or chip_target):sub(1,6) == "ec718p" then size_file:write(os.iorun(toolchains .. "/arm-none-eabi-size -t -G $(projectdir)/lib/libffota.a")) end
         size_file:write(os.iorun(toolchains .. "/arm-none-eabi-size -t -G $(buildir)/bootloader_libdriver/libdriver.a"))
-        for _, filepath in ipairs(os.files("$(projectdir)/PLAT/libs/"..(CHIP_TARGET=="ec718e"and"ec718p"or CHIP_TARGET).."/bootloader/*.a")) do
+        for _, filepath in ipairs(os.files("$(projectdir)/PLAT/libs/"..(chip_target=="ec718e"and"ec718p"or chip_target).."/bootloader/*.a")) do
             size_file:write(os.iorun(toolchains .. "/arm-none-eabi-size -t -G " .. filepath))
         end
         size_file:close()
-        os.exec((is_plat("windows") and "./PLAT/tools/fcelf.exe " or "./PLAT/tools/fcelf ").."-C -bin ".."$(buildir)/ap_bootloader/ap_bootloader_unZip.bin".. " -cfg ".. "$(projectdir)/PLAT/project/ec7xx_0h00/ap/apps/bootloader/GCC/sectionInfo_"..(CHIP_TARGET=="ec718e"and"ec718p"or CHIP_TARGET):sub(1,6)..".json".. " -map ".."$(buildir)/ap_bootloader/ap_bootloader_debug.map".." -out ".."$(buildir)/ap_bootloader/ap_bootloader.bin")
+        os.exec((is_plat("windows") and "./PLAT/tools/fcelf.exe " or "./PLAT/tools/fcelf ").."-C -bin ".."$(buildir)/ap_bootloader/ap_bootloader_unZip.bin".. " -cfg ".. "$(projectdir)/PLAT/project/ec7xx_0h00/ap/apps/bootloader/GCC/sectionInfo_"..(chip_target=="ec718e"and"ec718p"or chip_target):sub(1,6)..".json".. " -map ".."$(buildir)/ap_bootloader/ap_bootloader_debug.map".." -out ".."$(buildir)/ap_bootloader/ap_bootloader.bin")
     end)
 target_end()
 

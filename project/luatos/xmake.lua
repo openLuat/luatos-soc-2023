@@ -1,20 +1,20 @@
 local TARGET_NAME = os.scriptdir():match(".+[/\\]([%w_]+)")
 local LIB_DIR = "$(buildir)/".. TARGET_NAME .. "/"
-local CHIP_TARGET = CHIP_TARGET
 
 target(TARGET_NAME)
     set_kind("static")
     set_targetdir(LIB_DIR)
     -- set_warnings("error")
+    local chip_target = get_config("chip_target")
     add_linkdirs("$(projectdir)/lib","$(projectdir)/PLAT/core/lib",{public = true})
     add_linkgroups("mp3", {whole = true,public = true})
     
     on_load(function(target)
-        assert (CHIP_TARGET == "ec718p" or CHIP_TARGET == "ec718pv" or CHIP_TARGET == "ec718e" ,"luatos only support ec718p/ec718pv/ec718e")
+        assert (chip_target == "ec718p" or chip_target == "ec718pv" or chip_target == "ec718e" ,"luatos only support ec718p/ec718pv/ec718e")
         local conf_data = io.readfile("$(projectdir)/project/luatos/inc/luat_conf_bsp.h")
         local ap_load_add
-        if CHIP_TARGET == "ec718p" then ap_load_add = "0x0007e000"  -- ec718p AP_FLASH_LOAD_ADDR
-        elseif CHIP_TARGET == "ec718pv" then ap_load_add = "0x000Ba000" -- ec718pv AP_FLASH_LOAD_ADDR
+        if chip_target == "ec718p" then ap_load_add = "0x0007e000"  -- ec718p AP_FLASH_LOAD_ADDR
+        elseif chip_target == "ec718pv" then ap_load_add = "0x000Ba000" -- ec718pv AP_FLASH_LOAD_ADDR
         end
         local FLASH_FOTA_REGION_START = 0x340000 -- ec718p/ec718pv FLASH_FOTA_REGION_START
         -- print("FLASH_FOTA_REGION_START",FLASH_FOTA_REGION_START)

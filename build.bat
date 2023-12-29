@@ -39,6 +39,7 @@ if not exist xmake.lua (
 	echo xmake.lua not exist
 	goto end
 )
+call xmake f --chip_target=%CHIP_TARGET% --lspd_mode=%LSPD_MODE%
 if "%3"=="-v" (
 	call xmake -v
 ) ELSE (

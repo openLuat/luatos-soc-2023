@@ -7,8 +7,7 @@ set_defaultmode("debug")
 LUATOS_ROOT = "$(projectdir)/../LuatOS"
 LUAT_BSP_VERSION = "V0002"
 USER_PROJECT_NAME = "example"
-CHIP_TARGET = "ec718p"
-is_lspd = true
+chip_target = nil
 USER_PROJECT_DIR = nil
 
 package("gnu_rm")
@@ -42,47 +41,66 @@ else
 	set_toolchains("gnu-rm@gnu_rm")
 end
 
--- 获取构建目标
-if os.getenv("CHIP_TARGET") then
-	CHIP_TARGET = os.getenv("CHIP_TARGET")
-end
-
--- 获取项目名称
-if os.getenv("PROJECT_NAME") then
-	USER_PROJECT_NAME = os.getenv("PROJECT_NAME")
-end
-
-if os.getenv("PROJECT_DIR") then
-    USER_PROJECT_DIR = os.getenv("PROJECT_DIR")
-    USER_PROJECT_NAME = USER_PROJECT_DIR:match(".+[/\\]([%w_]+)")
-end
-
--- 是否启用低速模式, 内存更大
-if os.getenv("LSPD_MODE") == "enable" or USER_PROJECT_NAME == 'luatos' then
-    is_lspd = true
-else
-    is_lspd = false
-end
-
 set_plat("cross")
 set_arch("arm")
 set_languages("gnu11", "cxx11")
 set_warnings("all")
 set_optimize("smallest")
 
-CHIP = "ec718"
-if CHIP_TARGET == "ec718p" or CHIP_TARGET == "ec718pv" or CHIP_TARGET == "ec718e" then
-    add_defines("CHIP_EC718","TYPE_EC718P")
-elseif CHIP_TARGET == "ec718s" then
-    add_defines("CHIP_EC718","TYPE_EC718S")
-elseif CHIP_TARGET == "ec716s" then
-    CHIP = "ec716"
-    add_defines("CHIP_EC716","TYPE_EC716S")
+if os.getenv("PROJECT_DIR") then
+    USER_PROJECT_DIR = os.getenv("PROJECT_DIR")
+    USER_PROJECT_NAME = USER_PROJECT_DIR:match(".+[/\\]([%w_]+)")
 end
 
--- 若启用is_lspd, 加上额外的宏
-if (CHIP_TARGET == "ec718pv" or CHIP_TARGET == "ec718p" or CHIP_TARGET == "ec718e") and is_lspd == true  or CHIP_TARGET == "ec716s" or CHIP_TARGET == "ec718s" then
-    add_defines("OPEN_CPU_MODE")
+option("chip_target")
+    set_default("ec718p")
+    set_showmenu(true)
+    set_values("ec716s","ec718s","ec718e","ec718p","ec718pv")
+    set_description("chip target")
+option_end()
+add_options("chip_target")
+
+if has_config("chip_target") then chip_target = get_config("chip_target") end
+
+-- 获取项目名称
+if os.getenv("PROJECT_NAME") then
+	USER_PROJECT_NAME = os.getenv("PROJECT_NAME")
+end
+
+-- option("project_name")
+--     set_default(true)
+--     set_showmenu(true)
+--     set_description("project name")
+-- option_end()
+-- add_options("project_name")
+
+-- if has_config("project_name") then project_name = get_config("project_name") end
+
+option("lspd_mode")
+    set_default(true)
+    set_showmenu(true)
+    set_description("Enable or disable low speed mode , more memory")
+option_end()
+add_options("lspd_mode")
+
+
+if chip_target then
+    CHIP = "ec718"
+    if chip_target == "ec718p" or chip_target == "ec718pv" or chip_target == "ec718e" then
+        add_defines("CHIP_EC718","TYPE_EC718P")
+    elseif chip_target == "ec718s" then
+        add_defines("CHIP_EC718","TYPE_EC718S")
+    elseif chip_target == "ec716s" then
+        CHIP = "ec716"
+        add_defines("CHIP_EC716","TYPE_EC716S")
+    end
+
+    -- 若启用is_lspd, 加上额外的宏
+    if (chip_target == "ec718pv" or chip_target == "ec718p" or chip_target == "ec718e") and get_config("lspd_mode")  or chip_target == "ec716s" or chip_target == "ec718s" then
+        add_defines("OPEN_CPU_MODE")
+    end
+    add_includedirs("$(projectdir)/PLAT/driver/hal/ec7xx/ap/inc/"..CHIP,
+                "$(projectdir)/PLAT/driver/chip/ec7xx/ap/inc/"..CHIP)
 end
 
 add_defines("__USER_CODE__",
@@ -153,9 +171,7 @@ add_includedirs("$(projectdir)/PLAT/device/target/board/common/ARMCM3/inc",
                 "$(projectdir)/PLAT/driver/board/ec7xx_0h00/inc/exstorage",
                 "$(projectdir)/PLAT/driver/hal/common/inc",
                 "$(projectdir)/PLAT/driver/hal/ec7xx/ap/inc",
-                "$(projectdir)/PLAT/driver/hal/ec7xx/ap/inc/"..CHIP,
                 "$(projectdir)/PLAT/driver/chip/ec7xx/ap/inc",
-                "$(projectdir)/PLAT/driver/chip/ec7xx/ap/inc/"..CHIP,
                 "$(projectdir)/PLAT/driver/chip/ec7xx/ap/inc_cmsis",
                 "$(projectdir)/PLAT/os/freertos/inc",
                 "$(projectdir)/PLAT/os/freertos/CMSIS/common/inc",
@@ -204,10 +220,9 @@ add_includedirs("$(projectdir)/PLAT/device/target/board/common/ARMCM3/inc",
                 "$(projectdir)/PLAT/prebuild/PLAT/inc")
 
 local USER_PROJECT_NAME = USER_PROJECT_NAME
-local CHIP_TARGET = CHIP_TARGET
 on_load(function (target)
-    assert (CHIP_TARGET == "ec718e" or CHIP_TARGET == "ec718p" or CHIP_TARGET == "ec718pv" or CHIP_TARGET == "ec718s" or CHIP_TARGET == "ec716s" ,"target only support ec718e/ec718p/ec718pv/ec718s/ec716s")
-
+    local chip_target = get_config("chip_target")
+    assert (chip_target == "ec718e" or chip_target == "ec718p" or chip_target == "ec718pv" or chip_target == "ec718s" or chip_target == "ec716s" ,"target only support ec718e/ec718p/ec718pv/ec718s/ec716s")
     for _, filepath in ipairs(os.files("$(projectdir)/project/"..USER_PROJECT_NAME.."/**/mem_map_7xx.h")) do
         if path.filename(filepath) == "mem_map_7xx.h" then
             target:add("defines", "__USER_MAP_CONF_FILE__=\"mem_map_7xx.h\"")

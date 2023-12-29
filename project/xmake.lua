@@ -1,31 +1,70 @@
 local SDK_PATH = os.projectdir()
-local CHIP_TARGET = CHIP_TARGET
 local CHIP = CHIP
 local USER_PROJECT_NAME = USER_PROJECT_NAME
 local USER_PROJECT_DIR = USER_PROJECT_DIR
+local LIB_PS_PLAT
+local LIB_FW
 
-local use_lto = false
-if CHIP_TARGET == "ec716s" or CHIP_TARGET == "ec718s" then 
-    use_lto = true
-elseif os.getenv("LTO_FEATURE_MODE") == "enable" then 
-    use_lto = true
-end
+if has_config("chip_target") and has_config("lspd_mode") then 
+    chip_target = get_config("chip_target")
+    use_lto = false
+    if chip_target == "ec716s" or chip_target == "ec718s" then 
+        use_lto = true
+    elseif os.getenv("LTO_FEATURE_MODE") == "enable" then 
+        use_lto = true
+    end
 
-if CHIP_TARGET == "ec718p" or CHIP_TARGET == "ec718pv" then
-    add_defines("PSRAM_FEATURE_ENABLE")
-end
+    if chip_target == "ec718p" or chip_target == "ec718pv" then
+        add_defines("PSRAM_FEATURE_ENABLE")
+    end
 
-if CHIP_TARGET == "ec718pv" then
-    add_defines("FEATURE_IMS_ENABLE",
-                "FEATURE_IMS_CC_ENABLE",
-                "FEATURE_IMS_SMS_ENABLE",
-                "FEATURE_IMS_USE_PSRAM_ENABLE",
-                -- "FEATURE_SUPPORT_APP_PCM_MEM_POOL",
-                "FEATURE_AUDIO_ENABLE",
-                "FEATURE_AMR_CP_ENABLE",
-                "FEATURE_VEM_CP_ENABLE")
+    if chip_target == "ec718pv" then
+        add_defines("FEATURE_IMS_ENABLE",
+                    "FEATURE_IMS_CC_ENABLE",
+                    "FEATURE_IMS_SMS_ENABLE",
+                    "FEATURE_IMS_USE_PSRAM_ENABLE",
+                    -- "FEATURE_SUPPORT_APP_PCM_MEM_POOL",
+                    "FEATURE_AUDIO_ENABLE",
+                    "FEATURE_AMR_CP_ENABLE",
+                    "FEATURE_VEM_CP_ENABLE")
 
-    add_cxflags("-fno-strict-aliasing",{force=true})
+        add_cxflags("-fno-strict-aliasing",{force=true})
+    end
+
+    if use_lto then
+        -- 开启 lto
+        add_defines("LTO_FEATURE_MODE")
+        add_cxflags("-flto",
+                    "-fuse-linker-plugin",
+                    "-ffat-lto-objects",
+                    "-Wno-lto-type-mismatch",
+                    {force=true})
+    end 
+
+    LIB_PS_PLAT = "full"
+    LIB_FW = "oc"
+    if get_config("lspd_mode") then
+        if chip_target == "ec718pv" then
+        LIB_FW = "audio"
+        LIB_PS_PLAT = "ims"
+        else 
+        LIB_PS_PLAT = "oc"
+        end
+    else 
+        if chip_target == "ec718p" or chip_target == "ec718e" then
+            LIB_PS_PLAT = "full"
+        elseif chip_target == "ec718pv" then
+            LIB_FW = "audio"
+            LIB_PS_PLAT = "ims"
+        else
+            add_defines("MID_FEATURE_MODE")
+            LIB_PS_PLAT = "mid"
+            LIB_FW = "wifi"
+        end
+    end
+
+    add_includedirs("$(projectdir)/PLAT/tools/"..(chip_target=="ec718e"and"ec718p"or chip_target))
+
 end
 
 add_defines("LUAT_BSP_VERSION=\""..LUAT_BSP_VERSION.."\"",
@@ -70,16 +109,6 @@ add_defines("sprintf=sprintf_",
             "snprintf=snprintf_",
             "vsnprintf=vsnprintf_")
 
-if use_lto then
-    -- 开启 lto
-    add_defines("LTO_FEATURE_MODE")
-    add_cxflags("-flto",
-                "-fuse-linker-plugin",
-                "-ffat-lto-objects",
-                "-Wno-lto-type-mismatch",
-                {force=true})
-end 
-
 add_ldflags("-Wl,--wrap=_malloc_r",
             "-Wl,--wrap=_free_r",
             "-Wl,--wrap=_realloc_r",
@@ -92,8 +121,7 @@ add_ldflags("-Wl,--wrap=_malloc_r",
 -- ==============================
 -- === includes =====
 -- SDK相关头文件引用
-add_includedirs("$(projectdir)/PLAT/tools/"..(CHIP_TARGET=="ec718e"and"ec718p"or CHIP_TARGET),
-                "$(projectdir)/thirdparty/littlefs",
+add_includedirs("$(projectdir)/thirdparty/littlefs",
                 "$(projectdir)/thirdparty/littlefs/port")
             
 -- CSDK 宏定义
@@ -117,28 +145,6 @@ add_includedirs(LUATOS_ROOT .. "/luat/include",
                 LUATOS_ROOT .. "/components/cjson",
                 LUATOS_ROOT .. "/components/multimedia",
 				"$(projectdir)/interface/include")
-
-local LIB_PS_PLAT = "full"
-local LIB_FW = "oc"
-if is_lspd then
-    if CHIP_TARGET == "ec718pv" then
-    LIB_FW = "audio"
-    LIB_PS_PLAT = "ims"
-    else 
-    LIB_PS_PLAT = "oc"
-    end
-else 
-    if CHIP_TARGET == "ec718p" or CHIP_TARGET == "ec718e" then
-        LIB_PS_PLAT = "full"
-    elseif CHIP_TARGET == "ec718pv" then
-        LIB_FW = "audio"
-        LIB_PS_PLAT = "ims"
-    else
-        add_defines("MID_FEATURE_MODE")
-        LIB_PS_PLAT = "mid"
-        LIB_FW = "wifi"
-    end
-end
 
 includes(USER_PROJECT_DIR or USER_PROJECT_NAME)
 
@@ -164,11 +170,13 @@ target("csdk")
 	add_files("$(projectdir)/PLAT/core/code/*.c",
             "$(projectdir)/PLAT/driver/board/ec7xx_0h00/src/*c",
             "$(projectdir)/PLAT/driver/hal/**.c",
-            "$(projectdir)/PLAT/driver/chip/ec7xx/ap/src/"..CHIP.."/adc.c",
             "$(projectdir)/PLAT/driver/chip/ec7xx/ap/src/*.c",
             "$(projectdir)/PLAT/driver/chip/ec7xx/ap/src/usb/open/*.c",
             "$(projectdir)/PLAT/driver/chip/ec7xx/common/gcc/memcpy-armv7m.S")
-	if CHIP_TARGET ~= "ec718pv" then
+    if CHIP then
+        add_files("$(projectdir)/PLAT/driver/chip/ec7xx/ap/src/"..CHIP.."/adc.c")
+    end
+	if chip_target ~= "ec718pv" then
 		remove_files("$(projectdir)/PLAT/driver/hal/ec7xx/ap/src/hal_voice_eng_mem.c")
 	end
 	remove_files("$(projectdir)/PLAT/driver/chip/ec7xx/ap/src/cspi.c",
@@ -210,19 +218,25 @@ target(USER_PROJECT_NAME..".elf")
     set_targetdir("$(buildir)/"..USER_PROJECT_NAME)
     add_deps("csdk")
     add_deps(USER_PROJECT_NAME)
+
+    local chip_target = nil
+    if has_config("chip_target") then chip_target = get_config("chip_target") end
+    if chip_target then
+        add_linkdirs("$(projectdir)/PLAT/prebuild/PS/lib/gcc/"..(chip_target=="ec718e"and"ec718p"or chip_target):sub(1,6).."/"..LIB_PS_PLAT)
+        add_linkdirs("$(projectdir)/PLAT/prebuild/PLAT/lib/gcc/"..(chip_target=="ec718e"and"ec718p"or chip_target):sub(1,6).."/"..LIB_PS_PLAT)
+        add_linkdirs("$(projectdir)/PLAT/libs/"..(chip_target=="ec718e"and"ec718p"or chip_target))
+        if chip_target=="ec718pv" then
+            add_linkgroups("imsnv","ims", {whole = true})
+        end
+    end
+
     add_linkdirs("$(projectdir)/lib")
     add_linkdirs("$(projectdir)/PLAT/device/target/board/ec7xx_0h00/ap/gcc/")
-    add_linkdirs("$(projectdir)/PLAT/prebuild/PS/lib/gcc/"..(CHIP_TARGET=="ec718e"and"ec718p"or CHIP_TARGET):sub(1,6).."/"..LIB_PS_PLAT)
-    add_linkdirs("$(projectdir)/PLAT/prebuild/PLAT/lib/gcc/"..(CHIP_TARGET=="ec718e"and"ec718p"or CHIP_TARGET):sub(1,6).."/"..LIB_PS_PLAT)
-    add_linkdirs("$(projectdir)/PLAT/libs/"..(CHIP_TARGET=="ec718e"and"ec718p"or CHIP_TARGET))
+
 
     add_linkgroups("ps","psl1","psif","psnv","tcpipmgr","lwip","osa","ccio","deltapatch",
                     "middleware_ec","middleware_ec_private","driver_private","usb_private",
                     "startup","core_airm2m","lzma","fota","csdk",{whole = true})
-
-    if CHIP_TARGET=="ec718pv" then
-        add_linkgroups("imsnv","ims", {whole = true})
-    end
 
     add_linkgroups(USER_PROJECT_NAME, {whole = true})
 
@@ -290,31 +304,30 @@ target(USER_PROJECT_NAME..".elf")
         io.writefile("$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".size", os.iorun(toolchains .. "/arm-none-eabi-objdump -h $(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".elf"))
         local size_file = io.open("$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".size", "a")
         size_file:write(os.iorun(toolchains .. "/arm-none-eabi-size -G $(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".elf"))
-        -- if CHIP_TARGET=="ec718pv" then size_file:write(os.iorun(toolchains .. "/arm-none-eabi-size -t -G $(projectdir)/PLAT/libs/ec718pv/libimsnv.a")) end
         size_file:write(os.iorun(toolchains .. "/arm-none-eabi-size -t -G $(buildir)/csdk/libcsdk.a"))
         size_file:write(os.iorun(toolchains .. "/arm-none-eabi-size -t -G $(buildir)/"..USER_PROJECT_NAME.."/lib"..USER_PROJECT_NAME..".a"))
-        for _, filepath in ipairs(os.files("$(projectdir)/PLAT/libs/"..(CHIP_TARGET=="ec718e"and"ec718p"or CHIP_TARGET).."/*.a")) do
+        for _, filepath in ipairs(os.files("$(projectdir)/PLAT/libs/"..(chip_target=="ec718e"and"ec718p"or chip_target).."/*.a")) do
             size_file:write(os.iorun(toolchains .. "/arm-none-eabi-size -t -G " .. filepath))
         end
         size_file:close()
 
 
-        os.exec((is_plat("windows") and "./PLAT/tools/fcelf.exe " or "./PLAT/tools/fcelf ").."-C -bin ".."$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME.."_unZip.bin".. " -cfg ".. SDK_PATH .. "/PLAT/device/target/board/ec7xx_0h00/ap/gcc/sectionInfo_"..(CHIP_TARGET=="ec718e"and"ec718p"or CHIP_TARGET):sub(1,6)..".json".. " -map ".."$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME.. "_debug.map".." -out ".."$(buildir)/"..USER_PROJECT_NAME.."/" .. USER_PROJECT_NAME .. ".bin")
+        os.exec((is_plat("windows") and "./PLAT/tools/fcelf.exe " or "./PLAT/tools/fcelf ").."-C -bin ".."$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME.."_unZip.bin".. " -cfg ".. SDK_PATH .. "/PLAT/device/target/board/ec7xx_0h00/ap/gcc/sectionInfo_"..(chip_target=="ec718e"and"ec718p"or chip_target):sub(1,6)..".json".. " -map ".."$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME.. "_debug.map".." -out ".."$(buildir)/"..USER_PROJECT_NAME.."/" .. USER_PROJECT_NAME .. ".bin")
 
         os.cp("$(buildir)/"..USER_PROJECT_NAME.."/*.bin", out_path)
 		os.cp("$(buildir)/"..USER_PROJECT_NAME.."/*.map", out_path)
 		os.cp("$(buildir)/"..USER_PROJECT_NAME.."/*.elf", out_path)
-		os.cp("./PLAT/tools/"..(CHIP_TARGET=="ec718e"and"ec718p"or CHIP_TARGET).."/comdb.txt", out_path)
+		os.cp("./PLAT/tools/"..(chip_target=="ec718e"and"ec718p"or chip_target).."/comdb.txt", out_path)
         os.cp("$(buildir)/"..USER_PROJECT_NAME.."/" .. USER_PROJECT_NAME .. ".bin", "$(buildir)/"..USER_PROJECT_NAME.."/ap.bin")
         ---------------------------------------------------------
         -------------- 这部分尚不能跨平台 -------------------------
         local binpkg = (is_plat("windows") and "./PLAT/tools/fcelf.exe " or "./PLAT/tools/fcelf ")..
                         "-M -input ./build/ap_bootloader/ap_bootloader.bin -addrname BL_PKGIMG_LNA -flashsize BOOTLOADER_PKGIMG_LIMIT_SIZE \
                         -input $(buildir)/"..USER_PROJECT_NAME.."/ap.bin -addrname AP_PKGIMG_LNA -flashsize AP_PKGIMG_LIMIT_SIZE \
-                        -input ./PLAT/prebuild/FW/lib/gcc/"..(CHIP_TARGET=="ec718e"and"ec718p"or CHIP_TARGET):sub(1,6).."/"..LIB_FW.."/cp-demo-flash.bin -addrname CP_PKGIMG_LNA -flashsize CP_PKGIMG_LIMIT_SIZE \
+                        -input ./PLAT/prebuild/FW/lib/gcc/"..(chip_target=="ec718e"and"ec718p"or chip_target):sub(1,6).."/"..LIB_FW.."/cp-demo-flash.bin -addrname CP_PKGIMG_LNA -flashsize CP_PKGIMG_LIMIT_SIZE \
                         -pkgmode 1 \
                         -banoldtool 1 \
-                        -productname "..(CHIP_TARGET=="ec718e"and"ec718p"or CHIP_TARGET):sub(1,6):upper().."_PRD \
+                        -productname "..(chip_target=="ec718e"and"ec718p"or chip_target):sub(1,6):upper().."_PRD \
                         -def "..out_path .. "/mem_map.txt \
                         -outfile " .. out_path.."/"..USER_PROJECT_NAME..".binpkg"
 
@@ -388,7 +401,7 @@ target(USER_PROJECT_NAME..".elf")
             json.savefile(out_path.."/pack/info.json", info_table)
             os.cp(out_path.."/"..USER_PROJECT_NAME..".binpkg", out_path.."/pack")
             os.cp(out_path.."/"..USER_PROJECT_NAME..".elf", out_path.."/pack")
-            os.cp("./PLAT/tools/"..(CHIP_TARGET=="ec718e"and"ec718p"or CHIP_TARGET).."/comdb.txt", out_path.."/pack")
+            os.cp("./PLAT/tools/"..(chip_target=="ec718e"and"ec718p"or chip_target).."/comdb.txt", out_path.."/pack")
             os.cp(out_path.."/".."mem_map.txt", out_path.."/pack")
             os.cp("$(projectdir)/project/luatos/inc/luat_conf_bsp.h", out_path.."/pack")
             local ret = archive.archive(out_path.."/"..USER_PROJECT_NAME..".7z", out_path.."/pack/*",options)
@@ -396,36 +409,25 @@ target(USER_PROJECT_NAME..".elf")
                 print("pls install p7zip-full in linux/mac.")
                 return
             end
-            -- local ver = "_FULL"
-            -- if os.getenv("LUAT_EC7XX_LITE_MODE") == "1" then
-            --     ver = ""
-            -- end
-            -- if os.getenv("LUAT_USE_TTS") == "1" then
-            --     ver = "_TTS"
-            --     if os.getenv("LUAT_USE_TTS_ONCHIP") == "1" then
-            --         ver = "_TTS_ONCHIP"
-            --     end
-            -- end
-            -- os.mv("LuatOS-SoC_"..LUAT_BSP_VERSION.."_EC7XX.7z", out_path.."/LuatOS-SoC_"..LUAT_BSP_VERSION.."_EC7XX"..ver..".soc")
             local ret = archive.archive(out_path.."/"..USER_PROJECT_NAME..".7z", out_path.."/pack/*",options)
             if not ret then
                 print("pls install p7zip-full in linux/mac.")
                 return
             end
-            os.mv(out_path.."/"..USER_PROJECT_NAME..".7z", out_path.."/LuatOS-SoC_"..LUAT_BSP_VERSION.."_".. CHIP_TARGET:upper() ..".soc")
+            os.mv(out_path.."/"..USER_PROJECT_NAME..".7z", out_path.."/LuatOS-SoC_"..LUAT_BSP_VERSION.."_".. chip_target:upper() ..".soc")
             os.rm(out_path.."/pack")
         else 
             json.savefile(out_path.."/pack/info.json", info_table)
             os.cp(out_path.."/"..USER_PROJECT_NAME..".binpkg", out_path.."/pack")
             os.cp(out_path.."/"..USER_PROJECT_NAME..".elf", out_path.."/pack")
-            os.cp("./PLAT/tools/"..(CHIP_TARGET=="ec718e"and"ec718p"or CHIP_TARGET).."/comdb.txt", out_path.."/pack")
+            os.cp("./PLAT/tools/"..(chip_target=="ec718e"and"ec718p"or chip_target).."/comdb.txt", out_path.."/pack")
             os.cp(out_path.."/".."mem_map.txt", out_path.."/pack")
             local ret = archive.archive(out_path.."/"..USER_PROJECT_NAME..".7z", out_path.."/pack/*",options)
             if not ret then
                 print("pls install p7zip-full in linux/mac , or 7zip in windows.")
                 return
             end
-            os.mv(out_path.."/"..USER_PROJECT_NAME..".7z", out_path.."/"..USER_PROJECT_NAME.."_".. CHIP_TARGET ..".soc")
+            os.mv(out_path.."/"..USER_PROJECT_NAME..".7z", out_path.."/"..USER_PROJECT_NAME.."_".. chip_target ..".soc")
             os.rm(out_path.."/pack")
         end
         -- 计算差分包大小, 需要把老的binpkg放在根目录,且命名为old.binpkg
