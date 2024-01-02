@@ -1,6 +1,6 @@
 local TARGET_NAME = "example_otp"
 local LIB_DIR = "$(buildir)/".. TARGET_NAME .. "/"
-local LIB_NAME = "lib" .. TARGET_NAME .. ".a "
+
 
 target(TARGET_NAME)
     set_kind("static")
