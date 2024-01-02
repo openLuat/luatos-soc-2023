@@ -360,7 +360,7 @@ flash xip address(from ap/cp view): 0x00800000---0x00a00000
 // BL Section define
 #define SECTIONBL_LOAD_AIRAM_SHARED           1
 #define SECTIONBL_LOAD_AIRAM_OTHER_RAMCODE    2
-
+#define SECTIONBL_LOAD_CIRAM_RAMCODE          3
 
 
 

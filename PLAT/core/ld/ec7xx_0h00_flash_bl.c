@@ -11,6 +11,7 @@ MEMORY
   ASMB_AREA_REMAP(rwx)          : ORIGIN = ASMB_START_ADDR,            LENGTH = ASMB_TOTAL_LENGTH                   /* 64KB */
   MSMB_AREA(rwx)                : ORIGIN = MSMB_START_ADDR,            LENGTH = MSMB_TOTAL_LENGTH                   /* 1.25MB */
   FLASH_AREA(rx)                : ORIGIN = BOOTLOADER_FLASH_LOAD_ADDR, LENGTH = BOOTLOADER_FLASH_LOAD_UNZIP_SIZE    /* 96KB */
+  CSMB_AREA(rwx)                : ORIGIN = APVIEW_CSMB_START_ADDR,     LENGTH = CSMB_TOTAL_LENGTH                   /* 64KB */
 }
 
 /* Define output sections */
@@ -61,30 +62,14 @@ SECTIONS
   Image$$LOAD_AIRAM_PRE2$$Length = SIZEOF(.load_airam_pre2);
   
   PROVIDE(flashXIPLimit =LOADADDR(.load_airam_other));
- 
+
   .load_airam_other :
   {
     . = ALIGN(4);
     Load$$LOAD_AIRAM_OTHER_RAMCODE$$Base = LOADADDR(.load_airam_other);
     Image$$LOAD_AIRAM_OTHER_RAMCODE$$Base = .;
-	*(.sect_bl_airam_flash_text.*)
-    *(.sect_bl_airam_flash_rodata.*)	
-    *(.sect_flash_text.*)
-    *(.sect_platPARamcode_text.*)
-    *(.sect_bl_airam_other_text.*)
-    *(.sect_bl_airam_other_rodata.*)	
     *(.rodata*)
-    *(.text*)
-    *(.memcpy.armv7m*)
-    *(.glue_7)
-    *(.glue_7t)
-    *(.vfpll_veneer)
-    *(.v4_bx)
-    *(.init*)
-    *(.fini*)
-    *(.iplt)
-    *(.igot.plt)
-    *(.rel.iplt)    
+    *(.text*)  
   } >ASMB_AREA_REMAP AT>FLASH_AREA
   Image$$LOAD_AIRAM_OTHER_RAMCODE$$Length = SIZEOF(.load_airam_other);  
   
@@ -108,7 +93,8 @@ SECTIONS
     *(.sect_*_data.*)
     *(.data*)
     . = ALIGN(4);
-	Image$$LOAD_AIRAM_SHARED_DATA$$Limit = .;
+    Image$$LOAD_AIRAM_SHARED_DATA$$Limit = .;
+    *(.USB_NOINIT_DATA_BUF*)
   } >ASMB_AREA_REMAP AT>FLASH_AREA
   Image$$LOAD_AIRAM_SHARED_DATA$$Length = SIZEOF(.load_airam_shared_data);
   
@@ -121,14 +107,35 @@ SECTIONS
     *(.bss*)
     *(.stack)
     Image$$LOAD_MIRAM_SHARED$$ZI$$Limit = .;
-	*(.USB_NOINIT_DATA_BUF*)
     . = ALIGN(4);    
 	PROVIDE(end_msmb_software_loc = . );
   } >MSMB_AREA
   Image$$LOAD_MIRAM_SHARED$$ZI$$Length = SIZEOF(.load_miram_shared_zi); 
 
-
-
+  .load_ciram APVIEW_CSMB_HEAP_END:
+  {
+    . = ALIGN(4);
+    Load$$LOAD_CIRAM_RAMCODE$$Base = LOADADDR(.load_ciram);
+    Image$$LOAD_CIRAM_RAMCODE$$Base = .;
+    *fota_nvm.o(.text*)
+    *(.sect_bl_ciram_flash_text.*)
+    *(.sect_bl_ciram_flash_rodata.*)
+    *(.sect_flash_text.*)
+    *(.sect_platPARamcode_text.*)
+    *(.memcpy.armv7m*)
+    *(.glue_7)
+    *(.glue_7t)
+    *(.vfpll_veneer)
+    *(.v4_bx)
+    *(.init*)
+    *(.fini*)
+    *(.iplt)
+    *(.igot.plt)
+    *(.rel.iplt)  
+    . = ALIGN(4);
+  } >CSMB_AREA AT>FLASH_AREA
+  Image$$LOAD_CIRAM_RAMCODE$$Length = SIZEOF(.load_ciram); 
+  
   _fota_mux_buf_start = MSMB_FOTA_MUXMEM_BASE_ADDR;
   _fota_mux_buf_end = MSMB_FOTA_MUXMEM_END_ADDR;
   
@@ -141,8 +148,8 @@ SECTIONS
   _decompress_buf_end = MSMB_DECOMPR_MEM_END_ADDR;
  
 #if HEAP_EXIST
-  _heap_memory_start = HEAP_START_ADDR;
-  _heap_memory_end = HEAP_END_ADDR;
+  _heap_memory_start = APVIEW_CSMB_HEAP_START;
+  _heap_memory_end = APVIEW_CSMB_HEAP_END;
 #endif
 }
 

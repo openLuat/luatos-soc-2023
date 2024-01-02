@@ -54,6 +54,7 @@ typedef enum
     PLAT_CFG_ULG_PORT_USB=0,
     PLAT_CFG_ULG_PORT_UART,
     PLAT_CFG_ULG_PORT_MIX,
+    PLAT_CFG_ULG_PORT_SRAM,
     PLAT_CFG_ULG_PORT_MAX
 } PlatCfgUlgPort_e;
 
@@ -380,7 +381,7 @@ __PACKED_STRUCT _plat_config_raw_flash
 
     /** wfi mode, do not enter doze */
     uint8_t wfiMode;
-	
+
     /** ECIDLEP config
     *  valid value:
     *        0 -- print flag set to 0

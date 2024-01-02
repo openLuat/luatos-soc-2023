@@ -44,7 +44,11 @@ void halI2sInit(i2sCbFunc_fn txCb, i2sCbFunc_fn rxCb)
     i2sDrv = &CREATE_SYMBOL(i2sDrvInterface, 1); // Choose i2s1
 #endif
 
-    i2sDrv->init(txCb, rxCb);
+    int32_t ret = i2sDrv->init(txCb, rxCb);
+#ifdef FEATURE_OS_ENABLE
+    ECPLAT_PRINTF(UNILOG_PLA_DRIVER, halI2sInit_0, P_DEBUG, "i2sInit:%d", ret);
+#endif
+
     i2sDrv->powerCtrl(I2S_POWER_FULL);
 }
 

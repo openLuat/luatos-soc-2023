@@ -418,7 +418,7 @@ uint8_t exFlashErase(uint32_t eAddr, uint32_t size)
 uint8_t exFlashWrite(uint8_t* pData, uint32_t WriteAddr, uint32_t size)
 {
     uint32_t end_addr, current_size, current_addr;
-    uint32_t irqMask;
+    //uint32_t irqMask;
 
     // Calculation of the size between the write address and the end of the page
     //write non-aligned bytes first
@@ -437,7 +437,7 @@ uint8_t exFlashWrite(uint8_t* pData, uint32_t WriteAddr, uint32_t size)
     // Perform the write page by page
     do
     {
-        irqMask = SaveAndSetIRQMask();
+        //irqMask = SaveAndSetIRQMask();
 
         exFlashPagePro(current_addr,pData,current_size);
 
@@ -446,7 +446,7 @@ uint8_t exFlashWrite(uint8_t* pData, uint32_t WriteAddr, uint32_t size)
         pData += current_size;
         current_size = ((current_addr + PAGE_SIZE) > end_addr) ? (end_addr - current_addr) : PAGE_SIZE;
 
-        RestoreIRQMask(irqMask);
+        //RestoreIRQMask(irqMask);
     } while (current_addr < end_addr);
 
     return EXFLASH_OK;

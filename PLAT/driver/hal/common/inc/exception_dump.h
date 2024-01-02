@@ -106,4 +106,12 @@ uint32_t EcDumpTopFlow(void);
 uint32_t EcDumpHandshakeProcUart(uint32_t SyncPeriod);
 uint32_t EcDumpDataFlowUart(void);
 #endif
+
+#ifdef FEATURE_EXCEPTION_FLASH_DUMP_ENABLE
+
+uint32_t ecGetDumpStartFlashAddr(void);
+uint8_t ecGetDumpFlashBlockNums(void);
+uint32_t ecGetDumpCUSTAddrOffset(void);
+uint32_t ecGetDumpCUSTSpace(void);
+#endif
 #endif  /* _EXCEPTION_DUMP_H */

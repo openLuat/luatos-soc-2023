@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "usb_bl_api.h"
+#include "sctdef.h"
 
 int vcomx_isconnect(uint8_t vcom_num);
 int vcomx_get_in_waiting(uint8_t vcom_num);
@@ -45,7 +46,7 @@ void vcomdbg_str(uint8_t* str)
     }
 }
 
-void vcomdbg_str_and_hex(uint8_t* str, uint32_t hex)
+PLAT_BL_CIRAM_FLASH_TEXT void vcomdbg_str_and_hex(uint8_t* str, uint32_t hex)
 {
     vcomdbg_str(str);
     //vcomdbg_str((uint8_t*)"\r\n");
@@ -54,7 +55,7 @@ void vcomdbg_str_and_hex(uint8_t* str, uint32_t hex)
 }
 #endif
 
-void vcom_app_delay(uint32_t ticks)
+PLAT_BL_CIRAM_FLASH_TEXT void vcom_app_delay(uint32_t ticks)
 {
     volatile int us_cnt = 0;
     volatile int loop_in_us;

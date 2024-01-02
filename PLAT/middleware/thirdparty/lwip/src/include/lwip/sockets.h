@@ -223,6 +223,7 @@ typedef enum sockimsdatatype
 
 #if PS_ENABLE_TCPIP_HIB_SLEEP2_MODE
 #define SO_HIB_SLEEP2    0x2001 /* set sock hib/sleep2 mode */
+#define SO_SLEEP2    0x2010 /* set sock sleep2 mode */
 #endif
 #if ENABLE_PSIF
 #define SO_SEQUENCE_HANDLER 0x2002 /*set the udp socket as sequence state handle socket*/
@@ -553,6 +554,14 @@ int lwip_bind(int s, const struct sockaddr *name, socklen_t namelen);
 */
 int lwip_bind_cid(int s, u8_t cid);
 
+int
+lwip_bind_cid_withpsstartchk(int s, u8_t cid, int bchk);
+
+int32_t
+lwip_alloc_server_port_withpsstartchk(u8_t type, int bchk);
+
+
+
 /*
 *lwip_alloc_server_port allocate udp/tcp server port
 *input: IPPROTO_TCP/IPPROTO_UDP
@@ -618,6 +627,9 @@ struct sockticksinfo
 };
 
 #define bind_cid(s,cid)                           lwip_bind_cid(s,cid)
+int
+ps_send_withpsstartchk(int s, const void *data, size_t size, int flags, u8_t dataRai, bool exceptdata, int bchk);
+
 int ps_send(int s, const void *data, size_t size, int flags, u8_t dataRai, bool exceptdata);
 int ps_sendto(int s, const void *data, size_t size, int flags,
               const struct sockaddr *to, socklen_t tolen, u8_t dataRai, bool exceptdata);
@@ -749,6 +761,9 @@ int lwip_erecvfrom(int s, void **mem, size_t len, int flags,
 #define socket(domain,type,protocol)              lwip_socket(domain,type,protocol)
 #if ENABLE_PSIF
 #define socket_expect(domain, type, protocol, expect_fd) lwip_socket_expect(domain, type, protocol, expect_fd)
+
+int
+lwip_socket_expect_withpsstartchk(int domain, int type, int protocol, int expect_fd, int bchk);
 #endif
 /** @ingroup socket */
 #define select(maxfdp1,readset,writeset,exceptset,timeout)     lwip_select(maxfdp1,readset,writeset,exceptset,timeout)
@@ -772,6 +787,60 @@ int lwip_socket_with_call_back(int domain, int type, int protocol, socket_callba
 #include "lwip/api.h"
 int lwip_socket_with_callback(int domain, int type, int protocol, netconn_callback callback);
 #endif
+
+int
+lwip_getsockopt_withpsstartchk(int s, int level, int optname, void *optval, socklen_t *optlen, int bchk);
+
+int
+lwip_setsockopt_withpsstartchk(int s, int level, int optname, const void *optval, socklen_t optlen, int bchk);
+
+int
+lwip_socket_withpsstartchk(int domain, int type, int protocol, int bchk);
+
+int
+lwip_accept_withpsstartchk(int s, struct sockaddr *addr, socklen_t *addrlen, int bchk);
+
+int
+lwip_bind_withpsstartchk(int s, const struct sockaddr *name, socklen_t namelen, int bchk);
+
+int
+lwip_close_withpsstartchk(int s, int bchk);
+
+int
+lwip_connect_withpsstartchk(int s, const struct sockaddr *name, socklen_t namelen, int bchk);
+
+int
+lwip_listen_withpsstartchk(int s, int backlog, int bchk);
+
+int
+lwip_recvfrom_withpsstartchk(int s, void *mem, size_t len, int flags,
+              struct sockaddr *from, socklen_t *fromlen, int bchk);
+
+int
+lwip_read_withpsstartchk(int s, void *mem, size_t len, int bchk);
+
+int
+lwip_recv_withpsstartchk(int s, void *mem, size_t len, int flags, int bchk);
+
+int
+lwip_send_withpsstartchk(int s, const void *data, size_t size, int flags, int bchk);
+
+int
+lwip_sendto_withpsstartchk(int s, const void *data, size_t size, int flags,
+       const struct sockaddr *to, socklen_t tolen, int bchk);
+
+int
+lwip_getpeername_withpsstartchk(int s, struct sockaddr *name, socklen_t *namelen, int bchk);
+
+int
+lwip_getsockname_withpsstartchk(int s, struct sockaddr *name, socklen_t *namelen, int bchk);
+
+int
+lwip_sendmsg_withpsstartchk(int s, const struct msghdr *msg, int flags, int bchk);
+
+int
+lwip_shutdown_withpsstartchk(int s, int how, int bchk);
+
 
 #if LWIP_POSIX_SOCKETS_IO_NAMES
 /** @ingroup socket */

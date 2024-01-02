@@ -13,6 +13,7 @@
 #include "ec7xx.h"
 #include "plat_config.h"
 #include "exception_process.h"
+#include "sctdef.h"
 #ifdef FEATURE_BOOTLOADER_PROJECT_ENABLE
 #include "debug_trace.h"
 #include "common.h"
@@ -51,7 +52,7 @@ extern uint8_t getOSState(void);
   \param[in]    bufSize     buffer size
   \returns      crcValue
 */
-static uint8_t BSP_CalcCrcValue(const uint8_t *buf, uint16_t bufSize)
+PLAT_BL_CIRAM_FLASH_TEXT static uint8_t BSP_CalcCrcValue(const uint8_t *buf, uint16_t bufSize)
 {
     uint32_t i = bufSize;
     uint32_t a = 1, b = 0;
@@ -307,7 +308,7 @@ PLATCONFIG_BSS_SECTION plat_config_raw_flash_t g_rawFlashPlatConfig;
   \brief        set default value of "g_rawFlashPlatConfig"
   \return       void
 */
-PLAT_BL_AIRAM_FLASH_TEXT static void BSP_SetDefaultRawFlashPlatConfig(void)
+PLAT_BL_CIRAM_FLASH_TEXT static void BSP_SetDefaultRawFlashPlatConfig(void)
 {
 #ifdef __USER_CODE__
     g_rawFlashPlatConfig.faultAction = EXCEP_OPTION_SILENT_RESET;//silent anable
@@ -330,6 +331,8 @@ PLAT_BL_AIRAM_FLASH_TEXT static void BSP_SetDefaultRawFlashPlatConfig(void)
     g_rawFlashPlatConfig.uartBaudRate = 3000000;
 #endif
     g_rawFlashPlatConfig.logLevel = P_DEBUG;
+
+    g_rawFlashPlatConfig.logOwnerAndLevel = 0; //default all owner log level is 0
 
     g_rawFlashPlatConfig.logPortSel = PLAT_CFG_ULG_PORT_MIX;//default MIX mode
 
@@ -427,7 +430,7 @@ void BSP_SavePlatConfigToRawFlash(void)
 
 }
 
-PLAT_BL_AIRAM_FLASH_TEXT static void BSP_WriteToRawFlash(uint8_t* pBuffer, uint32_t bufferSize)
+PLAT_BL_CIRAM_FLASH_TEXT static void BSP_WriteToRawFlash(uint8_t* pBuffer, uint32_t bufferSize)
 {
     if(pBuffer == NULL || bufferSize == 0)
     {
@@ -465,7 +468,7 @@ PLAT_BL_AIRAM_FLASH_TEXT static void BSP_WriteToRawFlash(uint8_t* pBuffer, uint3
 
 }
 
-PLAT_BL_AIRAM_FLASH_TEXT void BSP_LoadPlatConfigFromRawFlash(void)
+PLAT_BL_CIRAM_FLASH_TEXT void BSP_LoadPlatConfigFromRawFlash(void)
 {
     plat_info_layout_t platInfo;
     config_file_header_t header;
@@ -599,7 +602,7 @@ plat_config_raw_flash_t* BSP_GetRawFlashPlatConfig(void)
     return &g_rawFlashPlatConfig;
 }
 
-PLAT_BL_AIRAM_FLASH_TEXT uint32_t BSP_GetPlatConfigItemValue(plat_config_id_t id)
+PLAT_BL_CIRAM_FLASH_TEXT uint32_t BSP_GetPlatConfigItemValue(plat_config_id_t id)
 {
     switch(id)
     {
@@ -620,6 +623,9 @@ PLAT_BL_AIRAM_FLASH_TEXT uint32_t BSP_GetPlatConfigItemValue(plat_config_id_t id
 
         case PLAT_CONFIG_ITEM_LOG_LEVEL:
             return g_rawFlashPlatConfig.logLevel;
+
+        case PLAT_CONFIG_ITEM_LOG_OWNER_AND_LEVEL:
+            return g_rawFlashPlatConfig.logOwnerAndLevel;
 
         case PLAT_CONFIG_ITEM_ENABLE_PM:
         #ifdef PLAT_CONFIG_FS_ENABLE
@@ -770,6 +776,10 @@ void BSP_SetPlatConfigItemValue(plat_config_id_t id, uint32_t value)
         case PLAT_CONFIG_ITEM_LOG_LEVEL:
             if(value <= P_ERROR)
                 g_rawFlashPlatConfig.logLevel = (DebugTraceLevelType_e)value;
+            break;
+
+        case PLAT_CONFIG_ITEM_LOG_OWNER_AND_LEVEL:
+            g_rawFlashPlatConfig.logOwnerAndLevel = value;
             break;
 
         case PLAT_CONFIG_ITEM_ENABLE_PM:

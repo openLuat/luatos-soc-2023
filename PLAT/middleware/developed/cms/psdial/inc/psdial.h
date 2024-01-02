@@ -45,43 +45,48 @@
 */
 typedef struct PsDialContext_Tag
 {
-    UINT32      psTaskCreated : 1;  /* Whether PS tasks (CCM/NAS/RRC/AS/UICC) created.
-                                     * 1> As PS tasks is not created when power on/wake up from deep sleep by default.
-                                     *    Here, involved a flag to record it.
-                                     * 2> When APP/AT need PS service, need to check this flag firstly, and if PS task
-                                     *    is not created, need let/trigger PSDAIL to create PS tasks.
-                                    */
-    UINT32      psTaskReady : 1;    /* Whether PS tasks is ready to be accessed.
-                                     * 1> If first power on, after PS task created, then set it to TRUE
-                                     * 2> If wake up from deep sleep. after PS task created and PS wake up procedure done, then set it
-                                     *     to TRUE.
-                                    */
-    UINT32      psNeedWakeup : 1;   /* Whether PS task need wake up before set to "Ready"
-                                     * 1> Set to TRUE, when AP wake up from deep sleep, and PS task has created before.
-                                     * 2> Set to TRUE, when AP OS (IDLE task) called enter deep sleep callback to cover the case:
-                                     *    enter deep sleep failed, if a interrupt comes during enter deep sleep procedure.
-                                     * 3> Set to TRUE, after PS task woken up.
-                                     * Note:
-                                     * 1> "psTaskReady" & "psNeedWakeup" can not both set to TRUE, just
-                                     *   a) if "psNeedWakeup" = TRUE, "psTaskReady" must be FALSE
-                                     *   b) if "psTaskReady" = TRUE, "psNeedWakeup" must be FALSE
-                                     *   c) if "psNeedWakeup" = FALSE, "psTaskReady" could be TRUE or FALSE
-                                    */
+    UINT32      psTaskCreated   : 1;    /* Whether PS tasks (CCM/NAS/RRC/AS/UICC) created.
+                                         * 1> As PS tasks is not created when power on/wake up from deep sleep by default.
+                                         *    Here, involved a flag to record it.
+                                         * 2> When APP/AT need PS service, need to check this flag firstly, and if PS task
+                                         *    is not created, need let/trigger PSDAIL to create PS tasks.
+                                        */
+    UINT32      psTaskReady     : 1;    /* Whether PS tasks is ready to be accessed.
+                                         * 1> If first power on, after PS task created, then set it to TRUE
+                                         * 2> If wake up from deep sleep. after PS task created and PS wake up procedure done, then set it
+                                         *     to TRUE.
+                                        */
+    UINT32      psNeedWakeup    : 1;    /* Whether PS task need wake up before set to "Ready"
+                                         * 1> Set to TRUE, when AP wake up from deep sleep, and PS task has created before.
+                                         * 2> Set to TRUE, when AP OS (IDLE task) called enter deep sleep callback to cover the case:
+                                         *    enter deep sleep failed, if a interrupt comes during enter deep sleep procedure.
+                                         * 3> Set to TRUE, after PS task woken up.
+                                         * Note:
+                                         * 1> "psTaskReady" & "psNeedWakeup" can not both set to TRUE, just
+                                         *   a) if "psNeedWakeup" = TRUE, "psTaskReady" must be FALSE
+                                         *   b) if "psTaskReady" = TRUE, "psNeedWakeup" must be FALSE
+                                         *   c) if "psNeedWakeup" = FALSE, "psTaskReady" could be TRUE or FALSE
+                                        */
+
+    UINT32      bActIfDuringWakeup : 1; /* whether active bearer/netif during sleep2/hib wake up, proc:
+                                         * 1> CGCONTRDP, to read all default bearers, linkup netmgr/lwip
+                                         * 2> CGSCONTRDP, to read all dedicated bearers, linkup netmgr/lwip
+                                         * 3> CGTFTRDP, to read all TFT config, config to netmgr/lwip
+                                         * Set this value to FALSE, after all these done
+                                        */
+    UINT32      bSilentReset    : 1;
+
+    UINT32      imsTaskCreated  : 1;    /* Whether IMS tasks created.
+                                         * 1> As PS & IMS tasks is not created when power on/wake up from deep sleep by default.
+                                         *    Here, involved a flag to record it.
+                                        */
+
+    UINT32      rsvd0           : 2;
 
 
-    //UINT32      bNetifActed : 1;    //netif/PDP state, in fact this flag should set in LWIP net-manager side
-    UINT32      bActIfDuringWakeup : 1;  /* whether active bearer/netif during sleep2/hib wake up, proc:
-                                          * 1> CGCONTRDP, to read all default bearers, linkup netmgr/lwip
-                                          * 2> CGSCONTRDP, to read all dedicated bearers, linkup netmgr/lwip
-                                          * 3> CGTFTRDP, to read all TFT config, config to netmgr/lwip
-                                          * Set this value to FALSE, after all these done
-                                         */
-    UINT32      bSilentReset : 1;
-    UINT32      rsvd0 : 3;
-
-    UINT32      actingCid : 8;      /* current activating CID */
-    UINT32      actingCidCgevReason : 4;     /* CmiPsPdnTypeReason, 1> psdail need it decide whether need to init another PDP, 2> netif also need it */
-    UINT32      psConnStatus : 1;   /* 0 - RRC IDLE, 1- RRC connected */
+    UINT32      actingCid       : 8;    /* current activating CID */
+    UINT32      actingCidCgevReason : 4;/* CmiPsPdnTypeReason, 1> psdail need it decide whether need to init another PDP, 2> netif also need it */
+    UINT32      psConnStatus    : 1;    /* 0 - RRC IDLE, 1- RRC connected */
     UINT32      bTriggerConnRel : 1;    /* whether trigger rrc conn rel */
     UINT32      rsvd1 : 10;
 
@@ -101,8 +106,13 @@ typedef struct PsDialAonInfo_Tag
                                              * 2> No way to set FALSE.
                                              * Note: need it to decide whether need PS wakeup prcedure when PS task created
                                             */
-    UINT32      bSmsReady : 1; /* Whether SMS init ready or not */
-    UINT32      rsvd0 : 2;
+    UINT32      imsTaskCreatedBefore: 1;    /* Whether IMS task has been created before.
+                                             * 1> Set to TRUE, once PS task created.
+                                             * 2> No way to set FALSE.
+                                             * Note: need it to decide whether need PS wakeup prcedure when IMS task created
+                                            */
+    UINT32      bSmsReady   : 1;            /* Whether SMS init ready or not */
+    UINT32      rsvd0       : 1;
 
     UINT32      rsvd1 : 16;
 }PsDialAonInfo;

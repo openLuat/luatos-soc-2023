@@ -477,6 +477,8 @@ int32_t i2sDeInit(I2sResources_t *i2s)
     apmuVoteToDozeState(PMU_DOZE_USP_MOD, true);
 #endif
 
+    DMA_closeChannel(i2s->dma->rxInstance, i2s->dma->rxCh);
+    DMA_closeChannel(i2s->dma->txInstance, i2s->dma->txCh);
     return ARM_DRIVER_OK;
 }
 
@@ -641,7 +643,7 @@ static int32_t i2sSetSampleRate(uint32_t bps, I2sResources_t *i2s, I2sRole_e i2s
     {
         CLOCK_fracDivOutCLkEnable(FRACDIV1_OUT0); // Fracdiv1 out0 enable       
         CLOCK_setMclkSrc(MCLK1, MCLK_SRC_FRACDIV1_OUT0); // Choose Fracdiv1 out0 as MClk source
-        CLOCK_mclkEnable(MCLK1); // Mclk enable
+        //CLOCK_mclkEnable(MCLK1); // Mclk enable
         CLOCK_setFracDivOutClkDiv(FRACDIV1_OUT0, 6); // First step to generate MClk clock. 6 div
 
         // need to add gpr api for fracdiv
@@ -682,7 +684,7 @@ static int32_t i2sSetSampleRate(uint32_t bps, I2sResources_t *i2s, I2sRole_e i2s
             CLOCK_setBclkSrc(BCLK0, BCLK_SRC_FRACDIV0_OUT1); // Use fracdiv0 out1 to generate bclk
             CLOCK_setFracDivOutClkDiv(FRACDIV0_OUT1, 12); // First step to generate BClk clock. 8 div
             CLOCK_setBclkDiv(BCLK0, 4); // Second step 4 div
-            CLOCK_bclkEnable(BCLK0); // Enable bclk
+            //CLOCK_bclkEnable(BCLK0); // Enable bclk
         }
     }
     else

@@ -65,6 +65,7 @@ struct _coeffDiv
 // 8311 func list
 HalCodecFuncList_t es8311DefaultHandle = 
 {
+    .codecType                  = ES8311,
     .halCodecInitFunc           = es8311Init,
     .halCodecDeinitFunc         = es8311DeInit,
     .halCodecCtrlStateFunc      = es8311StartStop,
@@ -72,7 +73,7 @@ HalCodecFuncList_t es8311DefaultHandle =
     .halCodecSetMuteFunc        = es8311SetMute,
     .halCodecSetVolumeFunc      = es8311SetVolume,
     .halCodecGetVolumeFunc      = es8311GetVolume,
-    .halCodecEnablePAFunc       = es8311EnablePA,
+    //.halCodecEnablePAFunc           = es8311EnablePA,
     .halCodecSetMicVolumeFunc   = es8311SetMicVolume,
     .halCodecLock               = NULL,
     .handle                     = NULL,
@@ -153,6 +154,7 @@ static const struct _coeffDiv coeffDiv[] =
 };
 
 static uint8_t dacVolBak, adcVolBak;
+static bool isHasPA;
 
 /*----------------------------------------------------------------------------*
  *                      PRIVATE FUNCS                                      *
@@ -404,7 +406,6 @@ HalCodecSts_e es8311Init(HalCodecCfg_t *codecCfg)
     es8311WriteReg(ES8311_ADC_REG17,            0x88);
     es8311WriteReg(ES8311_DAC_REG32,            0xf6);
     
-    
    #else
    HalCodecIface_t *i2sCfg = &(codecCfg->codecIface);
     ret |= es8311WriteReg(ES8311_CLK_MANAGER_REG01, 0x3F);
@@ -556,8 +557,10 @@ HalCodecSts_e es8311Init(HalCodecCfg_t *codecCfg)
     }
     #endif
 
-    if (codecCfg->enablePA)
+    if (codecCfg->hasPA)
     {       
+        isHasPA = codecCfg->hasPA;
+        
         // GPIO function select
         PadConfig_t     padConfig = {0};
         GpioPinConfig_t pinConfig = {0};
@@ -671,8 +674,15 @@ HalCodecSts_e es8311StartStop(HalCodecMode_e mode, HalCodecCtrlState_e ctrlState
     switch(ctrlState)
     {
         case CODEC_CTRL_START:
+        {
             ret |= es8311Start(mode);
-            break;
+            if (isHasPA)
+            {
+                es8311EnablePA(true);
+            }
+        }
+        break;
+
         case CODEC_CTRL_STOP:
             ret |= es8311Stop(mode);
             break;
@@ -753,7 +763,15 @@ HalCodecSts_e es8311Stop(HalCodecMode_e mode)
         break;
 
         case CODEC_MODE_DECODE:
-        es8311DacStandby(&dacVolBak);
+        {
+            es8311DacStandby(&dacVolBak);
+            
+            // disable  PA
+            if (isHasPA)
+            {
+                es8311EnablePA(false);
+            }
+        }
         break;
 
         case CODEC_MODE_BOTH:
@@ -777,7 +795,15 @@ HalCodecSts_e es8311Resume(HalCodecMode_e mode)
         break;
 
         case CODEC_MODE_DECODE:
-        es8311DacResume();
+        {
+            es8311DacResume();
+            
+            // enable  PA
+            if (isHasPA)
+            {
+                es8311EnablePA(true);
+            }
+        }
         break;
 
         case CODEC_MODE_BOTH:

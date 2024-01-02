@@ -6,6 +6,7 @@
 #include "usbd_func_cconf.h"
 #include "usbd_func_cc.h"
 #include "usbd_multi_usrcfg_common.h"
+#include "sctdef.h"
 typedef struct tag_usbd_cdc_ccinst_desc_inhrnt usbd_cdc_desc_inhrnt_st;
 
 #define CC_INHRNT_CMDEP_MPS 16
@@ -149,7 +150,7 @@ uint8_t vcom_func_inhrnt_desc_ass(usb_func_ccinst_st *p_func_ccinst)
     return usbd_ret_no_err;    
 }
 
-uint8_t vcom_func_inhrnt_desc_parse(usb_func_ccinst_st *p_func_ccinst)
+PLAT_BL_CIRAM_FLASH_TEXT uint8_t vcom_func_inhrnt_desc_parse(usb_func_ccinst_st *p_func_ccinst)
 {
     const uint8_t * p_desc_buf;
     uint16_t pos = 0;
@@ -328,7 +329,7 @@ uint8_t vcom_func_inhrnt_bind(usb_func_ccinst_st *p_func_ccinst,
     return ret;
 }
 
-uint8_t vcom_func_inhrnt_get_desc(usb_func_ccinst_st *p_func_ccinst, ccinst_desc_call_data_st*p_desc_call_data)
+PLAT_BL_CIRAM_FLASH_TEXT uint8_t vcom_func_inhrnt_get_desc(usb_func_ccinst_st *p_func_ccinst, ccinst_desc_call_data_st*p_desc_call_data)
 {    
 
     ccinst_cdc_setting_st* p_ccinst_cdc_setting;

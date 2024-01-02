@@ -25,10 +25,13 @@
 #define FOTA_PLAT_SCT_ZI /*PLAT_BL_SCT_ZI*/
 
 #if defined CHIP_EC616 || defined CHIP_EC616_Z0
+#include "system_ec616.h"
 #include "flash_ec616_rt.h"
 #elif defined CHIP_EC616S
+#include "system_ec616s.h"
 #include "flash_ec616s_rt.h"
 #elif defined CHIP_EC626
+#include "system_ec626.h"
 #include "flash_ec626_rt.h"
 #endif
 
@@ -39,7 +42,13 @@
 #include "debug_log.h"
 #endif
 
-#else /* ec618/ec7xx */
+#else /* ec618/ec7xx/... */
+#if defined CHIP_EC618 || defined CHIP_EC618_Z0
+#include "system_ec618.h"
+#elif defined CHIP_EC718 || defined CHIP_EC716
+#include "system_ec7xx.h"
+#endif
+
 #include "sctdef.h"
 #include "flash_rt.h"
 

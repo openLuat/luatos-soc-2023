@@ -206,7 +206,7 @@ void ImsSendImiReqSig(UINT16 srcHdr, UINT8 imaId, UINT16 primId, UINT16 primSize
  * call by CMS/other APP, to get/set the request from/to IMS module
  * Note: this API is blocked the Caller task
 */
-ImiRcCode ImsImiSynReq(UINT8 imaId, UINT16 primId, UINT16 primSize, const void *primBody, UINT16 outCnfSize, void *pOutCnfBody);
+ImiRcCode ImsSendImiSynReq(UINT8 imaId, UINT16 primId, UINT16 primSize, const void *primBody, UINT16 outCnfSize, void *pOutCnfBody);
 
 
 #endif

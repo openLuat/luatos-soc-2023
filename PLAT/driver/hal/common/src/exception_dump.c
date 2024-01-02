@@ -1,3 +1,4 @@
+#ifdef CORE_IS_AP
 #include "stdio.h"
 #include "string.h"
 
@@ -12,6 +13,18 @@
 #include "exception_dump.h"
 #include "plat_config.h"
 #include "sctdef.h"
+#include "utfc.h"
+#endif
+
+#ifdef FEATURE_EXCEPTION_FLASH_DUMP_ENABLE
+#ifdef CORE_IS_CP
+#include "mem_map.h"
+#include "exception_process.h"
+#include "exception_dump.h"
+#endif
+#endif
+
+#ifdef CORE_IS_AP
 
 #ifdef FEATURE_UART_HELP_DUMP_ENABLE
 EXCEP_DUMP_DATA int *excepStepDump = (int *)0x404008;
@@ -615,6 +628,14 @@ uint32_t EcDumpTopFlow(void)
     *excepStep = (*excepStep | 0x1);
     eehDumpMediaFlush(instance);
     RetValue = EcDumpHandshakeProc(WaitPeriod_1s>>1);
+    
+    //stop log to avoid log output when call following API
+    uniLogStop();
+    //from test with linux tool, ulg ep txcmplt may mis-clear by UTFC, SW API will timeout
+    if(uniLogGetPherType() == USB_FOR_UNILOG)
+    {
+        utfcEpnClear((UsbTxEpNum_e)(usbDevGetUlgInEpNum()));
+    }
 
     if (RetValue == 0)
     {
@@ -792,4 +813,30 @@ uint32_t EcDumpDataFlowUart(void)
     }
     return RetValue;
 }
+#endif
+
+#endif
+
+#ifdef FEATURE_EXCEPTION_FLASH_DUMP_ENABLE
+
+uint32_t ecGetDumpStartFlashAddr(void)
+{
+	return FLASH_EXCEP_DUMP_ADDR;
+}
+
+uint8_t ecGetDumpFlashBlockNums(void)
+{
+	return EC_EXCEP_FLASH_BLOCK_NUMBS;
+}
+
+uint32_t ecGetDumpCUSTSpace(void)
+{
+	return FLASH_EXCEP_DUMP_CUST_SPACE_LIMIT;
+}
+
+uint32_t ecGetDumpCUSTAddrOffset(void)
+{
+	return FLASH_EXCEP_DUMP_ADDR_OFFSET_CUST;
+}
+
 #endif

@@ -9,6 +9,9 @@
 #define CSMB_START_ADDR                 (0x0)
 #define CSMB_END_ADDR                   (0x10000)
 #define CSMB_TOTAL_LENGTH               (CSMB_END_ADDR-CSMB_START_ADDR)
+#define APVIEW_CSMB_START_ADDR          (0x200000)      
+#define APVIEW_CSMB_HEAP_START          (0x200010)      // first two word used for fast boot, keep align
+#define APVIEW_CSMB_HEAP_END            (0x204000)
 
 //csmb end
 
@@ -65,14 +68,10 @@
 
 
 //heap
-#define HEAP_EXIST                      (0)
-#define HEAP_START_ADDR                 (MSMB_FOTA_MUXMEM_END_ADDR)
-#define HEAP_END_ADDR                   (MSMB_END_ADDR)
+#define HEAP_EXIST                      (1)
+#define HEAP_START_ADDR                 (APVIEW_CSMB_HEAP_START)
+#define HEAP_END_ADDR                   (APVIEW_CSMB_HEAP_END)
 #define HEAP_TOTAL_LENGTH               (HEAP_END_ADDR-HEAP_START_ADDR)
-
-#if((HEAP_EXIST == 1) && (HEAP_END_ADDR == 0x00500000))
-#error "error! there is no enough memory in msmb for heap!"
-#endif
 
 #endif
 

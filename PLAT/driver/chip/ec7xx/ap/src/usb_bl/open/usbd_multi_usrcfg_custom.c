@@ -4,6 +4,7 @@
 #include "usbd_clscdc.h"
 #include "usbd_func_cc.h"
 #include "usbd_multi_usrcfg_common.h"
+#include "sctdef.h"
 
 #ifndef USB_DRV_SMALL_IMAGE
 #include "plat_config.h"
@@ -342,7 +343,7 @@ static multidev_custom_info_st t_multidev_custom_info = {
 #endif
 
 extern uint32_t usbc_dev_int_handler (void);
-void USB_IRQ_Handler(void)
+PLAT_BL_CIRAM_FLASH_TEXT void USB_IRQ_Handler(void)
 {
 #if (RTE_USB_EN == 1)
 #if MEASURE_USB_INT_TIME

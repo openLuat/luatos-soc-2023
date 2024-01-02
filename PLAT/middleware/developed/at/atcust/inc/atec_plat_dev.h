@@ -96,7 +96,13 @@
 #define ATC_ECPCFG_FAULT_VAL_DEFAULT            EXCEP_OPTION_DUMP_FLASH_EPAT_LOOP  /* full functionality */
 
 #define ATC_ECPCFG_LOG_PORT_SEL_MIN             0
+
+#ifdef FEATURE_EXCEPTION_FLASH_DUMP_ENABLE
+#define ATC_ECPCFG_LOG_PORT_SEL_MAX             3
+#else
 #define ATC_ECPCFG_LOG_PORT_SEL_MAX             2
+#endif
+
 #define ATC_ECPCFG_LOG_PORT_SEL_DEFAULT         0
 
 

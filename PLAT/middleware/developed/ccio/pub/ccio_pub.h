@@ -150,6 +150,12 @@ typedef int32_t (*chdevExecFunc)(uint32_t flags, void *args);
  */
 typedef int32_t (*chdevStatusCallback)(uint32_t flags, void *args);
 
+/*-This function is called by ccio message
+ * to pass the final operations for every type.
+ * @param args: NULL.
+ */
+typedef int32_t (*msgAllDoneCallback)(void* args);
+
 
 typedef struct CcioDevice
 {
@@ -174,7 +180,8 @@ typedef struct CcioDevice
     uint32_t needCleanRb   :1;
     uint32_t waitCleanUlpcb:1;
     uint32_t codecType     :1;
-    uint32_t rsvBits       :14;
+    uint32_t i2sOwner      :3;
+    uint32_t rsvBits       :11;
     void    *chent;             /* for fast accessing, via monitor */
 
     chdevOutFunc         chdevOutFn;     /* via driver */

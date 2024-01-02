@@ -143,27 +143,24 @@ if any other common part as OS add below
 #ifdef FEATURE_BOOTLOADER_PROJECT_ENABLE
 //BL section define start
 #define PLAT_BL_UNCOMP_FLASH_TEXT SECTION_DEF_IMPL(.sect_bl_uncompress_flash_text) SECTION_DEF_RAMCODE
-#define PLAT_BL_UNCOMP_FLASH_RODATA SECTION_DEF_IMPL(.sect_bl_uncompress_flash_rodata) SECTION_DEF_RAMCODE
+#define PLAT_BL_UNCOMP_FLASH_RODATA SECTION_DEF_IMPL(.sect_bl_uncompress_flash_rodata)
 
 #define PLAT_BL_AIRAM_PRE1_TEXT SECTION_DEF_IMPL(.sect_bl_airam_pre1_text) SECTION_DEF_RAMCODE
-#define PLAT_BL_AIRAM_PRE1_RODATA SECTION_DEF_IMPL(.sect_bl_airam_pre1_rodata) SECTION_DEF_RAMCODE
+#define PLAT_BL_AIRAM_PRE1_RODATA SECTION_DEF_IMPL(.sect_bl_airam_pre1_rodata)
 
 #define PLAT_BL_AIRAM_PRE2_TEXT SECTION_DEF_IMPL(.sect_bl_airam_pre2_text) SECTION_DEF_RAMCODE
-#define PLAT_BL_AIRAM_PRE2_RODATA SECTION_DEF_IMPL(.sect_bl_airam_pre2_rodata) SECTION_DEF_RAMCODE
+#define PLAT_BL_AIRAM_PRE2_RODATA SECTION_DEF_IMPL(.sect_bl_airam_pre2_rodata) 
 
-#define PLAT_BL_AIRAM_FLASH_TEXT SECTION_DEF_IMPL(.sect_bl_airam_flash_text) SECTION_DEF_RAMCODE
-#define PLAT_BL_AIRAM_FLASH_RODATA SECTION_DEF_IMPL(.sect_bl_airam_flash_rodata) SECTION_DEF_RAMCODE
+#define PLAT_BL_CIRAM_FLASH_TEXT SECTION_DEF_IMPL(.sect_bl_ciram_flash_text) SECTION_DEF_RAMCODE
+#define PLAT_BL_CIRAM_FLASH_RODATA SECTION_DEF_IMPL(.sect_bl_ciram_flash_rodata)
 
-#define PLAT_BL_AIRAM_OTHER_TEXT SECTION_DEF_IMPL(.sect_bl_airam_other_text) SECTION_DEF_RAMCODE
-#define PLAT_BL_AIRAM_OTHER_RODATA SECTION_DEF_IMPL(.sect_bl_airam_other_rodata) SECTION_DEF_RAMCODE
-
-#define PLAT_BL_MIRAM_USB_DATA SECTION_DEF_IMPL(.sect_bl_usb_data) SECTION_DEF_RAMCODE
+#define PLAT_BL_MIRAM_USB_DATA SECTION_DEF_IMPL(.sect_bl_usb_data)
 #define PLAT_BL_MIRAM_USB_BSS SECTION_DEF_IMPL(.sect_bl_usb_bss)
 
 #define PLAT_BL_CUST_XIP_TEXT SECTION_DEF_IMPL(.sect_bl_cust_xip_text) SECTION_DEF_RAMCODE
-#define PLAT_BL_CUST_XIP_RODATA SECTION_DEF_IMPL(.sect_bl_cust_xip_rodata) SECTION_DEF_RAMCODE
+#define PLAT_BL_CUST_XIP_RODATA SECTION_DEF_IMPL(.sect_bl_cust_xip_rodata) 
 
-#define PLAT_BL_CUST_XIP_DATA SECTION_DEF_IMPL(.sect_bl_cust_xip_data) SECTION_DEF_RAMCODE
+#define PLAT_BL_CUST_XIP_DATA SECTION_DEF_IMPL(.sect_bl_cust_xip_data)
 #define PLAT_BL_CUST_XIP_BSS SECTION_DEF_IMPL(.sect_bl_cust_xip_bss)
 
 
@@ -186,11 +183,8 @@ if any other common part as OS add below
 #define PLAT_BL_MIRAM_USB_DATA
 #define PLAT_BL_MIRAM_USB_BSS
 
-#define PLAT_BL_AIRAM_FLASH_TEXT
-#define PLAT_BL_IRAM_FLASH_RODATA
-
-#define PLAT_BL_AIRAM_OTHER_TEXT
-#define PLAT_BL_AIRAM_OTHER_RODATA
+#define PLAT_BL_CIRAM_FLASH_TEXT
+#define PLAT_BL_CIRAM_FLASH_RODATA
 
 #define PLAT_BL_SCT_ZI
 #define FOTA_PLAT_SCT_ZI

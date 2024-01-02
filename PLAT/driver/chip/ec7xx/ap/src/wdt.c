@@ -10,7 +10,7 @@
 #include "wdt.h"
 #include "clock.h"
 #include "slpman.h"
-
+#include "sctdef.h"
 
 #define WDT_TEXT_SECTION     SECTION_DEF_IMPL(.sect_wdt_text)
 #define WDT_RODATA_SECTION   SECTION_DEF_IMPL(.sect_wdt_rodata)
@@ -102,7 +102,7 @@ void WDT_unlock(void)
     WDT->LOCK = 0xABABU;
 }
 
-void WDT_kick(void)
+PLAT_BL_CIRAM_FLASH_TEXT void WDT_kick(void)
 {
     uint32_t mask = SaveAndSetIRQMask();
 
@@ -120,7 +120,7 @@ void WDT_getDefaultConfig(WdtConfig_t *config)
     config->timeoutValue = 0xFFFFU;
 }
 
-PLAT_BL_AIRAM_FLASH_TEXT void WDT_init(const WdtConfig_t *config)
+PLAT_BL_CIRAM_FLASH_TEXT void WDT_init(const WdtConfig_t *config)
 {
     ASSERT(config);
 
@@ -171,7 +171,7 @@ void WDT_deInit(void)
 
 }
 
-PLAT_BL_AIRAM_FLASH_TEXT void WDT_start(void)
+PLAT_BL_CIRAM_FLASH_TEXT void WDT_start(void)
 {
     uint32_t mask = SaveAndSetIRQMask();
 
@@ -181,7 +181,7 @@ PLAT_BL_AIRAM_FLASH_TEXT void WDT_start(void)
     RestoreIRQMask(mask);
 }
 
-void WDT_stop(void)
+PLAT_BL_CIRAM_FLASH_TEXT void WDT_stop(void)
 {
     uint32_t mask = SaveAndSetIRQMask();
 

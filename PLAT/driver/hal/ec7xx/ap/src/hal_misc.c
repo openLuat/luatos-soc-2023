@@ -220,7 +220,7 @@ PLAT_PA_RAMCODE ClockId_e CLOCK_checkClkID(void)
              len buffer len
   \note
  */
-PLAT_BL_AIRAM_FLASH_TEXT uint32_t halCrc32(void* input, int len)
+PLAT_BL_CIRAM_FLASH_TEXT uint32_t halCrc32(void* input, int len)
 {
     int i;
     uint8_t index;

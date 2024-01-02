@@ -39,8 +39,7 @@ BSP_BSS_SECTION ARM_DRIVER_USART *UsartUnilogHandle = NULL;
 BSP_BSS_SECTION ARM_DRIVER_USART *UsartAtCmdHandle = NULL;
 
 BSP_BSS_SECTION static uint8_t OSState = 0;     // OSState = 0 os not start, OSState = 1 os started
-#ifdef __USER_CODE__	//����Ҫ
-extern void AonPrepareForUSBDldBoot(void);
+#ifdef __USER_CODE__
 extern void ResetECSystemReset(void);
 #else
 BSP_BSS_SECTION static uint32_t gUartBaudrate[3]; // a copy for uart baud rate
@@ -199,12 +198,28 @@ uint8_t* getDebugDVersion(void)
 {
     return (uint8_t*)DB_VERSION_UNIQ_ID;
 }
-#ifdef __USER_CODE__	//����Ҫ�����������ط�
+
+__attribute__ ((noinline)) uint32_t getUnilogUartPort(void)
+{
+    return UART_0_FOR_UNILOG;      // Swith to UART_x_FOR_UNILOG if need to use other uart for unilog
+}
+
+__attribute__ ((noinline)) void getUnilogRamLogBuff(uint32_t *addr, uint32_t *len)
+{
+#ifdef FEATURE_EXCEPTION_FLASH_DUMP_ENABLE
+    ecGetUnilogDumpAddrAndLen(addr, len);
+#else
+    *addr = 0; // suggest to be 16 bytes aligned, note this area shall not be initialized in boot phase
+    *len = 0;
+#endif
+}
+
+#ifdef __USER_CODE__	//
 #else
 void setUartBaudRate(uint8_t idx, uint32_t baudRate)
 {
     gUartBaudrate[idx] = baudRate;
-    
+
     ECPLAT_PRINTF(UNILOG_PMU, setUartBaudRate_1, P_WARNING, "Set BaudRate = %d, %d, %d", gUartBaudrate[0], gUartBaudrate[1], gUartBaudrate[2]);
 }
 
@@ -271,7 +286,7 @@ void logToolCommandHandle(uint32_t event, uint8_t *cmd_buffer, uint32_t len)
 
 }
 
-#ifdef __USER_CODE__	//����Ҫ�����������ط�
+#ifdef __USER_CODE__
 #else
 /**
  * unilog entity is removed for the reason of BSP small image.
@@ -335,6 +350,7 @@ void logToolCommandHandle(uint32_t event, uint8_t *cmd_buffer, uint32_t len)
 #endif
 }
 #endif
+
 #endif
 void GPR_rmiErrDetectIsr(void)
 {

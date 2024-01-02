@@ -28,7 +28,7 @@ typedef struct PsifUlRawData_Tag
     UINT16 rsvd;
     struct PsifUlRawData_Tag *pNext;
     UINT8 pData[]; //the ul raw data buffer
-}PsifUlRawData; //allocate by malloc();and it will be free with free() api
+}PsifUlRawData; //allocate by PsifAllocRawUlBlockMem();and it will be free with PsifFreeRawUlBlockMem() api or PsifFreeRawUlBlockMemList()
 
 typedef struct PsifRawUlPkgPendingList_Tag
 {

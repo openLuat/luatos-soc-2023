@@ -166,12 +166,23 @@ flash xip address(from both ap/cp view): 0x00800000---0x00c00000
 //ap image addr and size
 #if defined (FEATURE_AMR_CP_ENABLE) || defined (FEATURE_VEM_CP_ENABLE)
 #define AP_FLASH_LOAD_ADDR              (0x008BA000)
+
+#ifdef FEATURE_EXCEPTION_FLASH_DUMP_ENABLE
+#define AP_FLASH_LOAD_SIZE              (0x2CF000 - FLASH_EXCEP_DUMP_SIZE)//2876KB - 8KB
+#else
 #define AP_FLASH_LOAD_SIZE              (0x2CF000)//2876KB
+#endif
 #define AP_FLASH_LOAD_UNZIP_SIZE        (0x319000)//3172KB ,for ld
 
 #else
 #define AP_FLASH_LOAD_ADDR              (0x0087e000)
+
+#ifdef FEATURE_EXCEPTION_FLASH_DUMP_ENABLE
+#define AP_FLASH_LOAD_SIZE              (0x307000)//(0x30b000 - FLASH_EXCEP_DUMP_SIZE)//3116KB - 8KB
+#else
 #define AP_FLASH_LOAD_SIZE              (0x30b000)//3116KB
+#endif
+
 #define AP_FLASH_LOAD_UNZIP_SIZE        (0x319000)//3172KB ,for ld
 #endif
 
@@ -237,16 +248,34 @@ flash xip address(from both ap/cp view): 0x00800000---0x00c00000
 //#define CP_IMG_MERGE_ADDR               (0x00018000)
 //#define BL_IMG_MERGE_ADDR               (0x00003000)
 
-
-
-
-/*temp add here, need handle from caller !!!!*/
-// 512KB flash dump area for 8M flash
-#define FLASH_EXCEP_DUMP_ADDR            0x0
-#define FLASH_EXCEP_DUMP_SIZE            0x0
-#define FLASH_EXCEP_DUMP_SECTOR_NUM      0x0
+// Flash Dump Macros
+#define FLASH_EXCEP_DUMP_ADDR            (AP_FLASH_LOAD_ADDR+AP_FLASH_LOAD_SIZE-AP_FLASH_XIP_ADDR)
+#define FLASH_EXCEP_DUMP_SIZE            0x4000
+#define FLASH_EXCEP_DUMP_SECTOR_NUM      0x4
 #define FLASH_EXCEP_KEY_INFO_ADDR        0x0
 #define FLASH_EXCEP_KEY_INFO_LEN         0x0
+
+#ifdef FEATURE_EXCEPTION_FLASH_DUMP_ENABLE
+/*
+ *	BaseAddress is FLASH_EXCEP_DUMP_ADDR and the dump space is FLASH_EXCEP_DUMP_SIZE.  
+ *	offset 0                   offset 0x1000	          offset 0x3000
+ *	|--------------------------|--------------------------|--------------------------|
+ *	| 1K PLAT + 1K PHY + 2K PS |         8K UNILOG        |         4K CUST          |
+ *	|--------------------------|--------------------------|--------------------------|
+ */
+#define FLASH_EXCEP_DUMP_ADDR_OFFSET_PLAT    0x0000
+#define FLASH_EXCEP_DUMP_ADDR_OFFSET_PHY     0x0400
+#define FLASH_EXCEP_DUMP_ADDR_OFFSET_PS      0x0800
+#define FLASH_EXCEP_DUMP_ADDR_OFFSET_UNILOG  0x1000
+#define FLASH_EXCEP_DUMP_ADDR_OFFSET_CUST    0x3000
+#define FLASH_EXCEP_DUMP_SPACE_LIMIT_PLAT    (FLASH_EXCEP_DUMP_ADDR_OFFSET_PHY - FLASH_EXCEP_DUMP_ADDR_OFFSET_PLAT)
+#define FLASH_EXCEP_DUMP_SPACE_LIMIT_PHY     (FLASH_EXCEP_DUMP_ADDR_OFFSET_PS - FLASH_EXCEP_DUMP_ADDR_OFFSET_PHY)
+#define FLASH_EXCEP_DUMP_SPACE_LIMIT_PS      (FLASH_EXCEP_DUMP_ADDR_OFFSET_UNILOG - FLASH_EXCEP_DUMP_ADDR_OFFSET_PS)
+#define FLASH_EXCEP_DUMP_SPACE_LIMIT_UNILOG  (FLASH_EXCEP_DUMP_ADDR_OFFSET_CUST - FLASH_EXCEP_DUMP_ADDR_OFFSET_UNILOG)
+#define FLASH_EXCEP_DUMP_CUST_SPACE_LIMIT    (0x1000) /* Customer can change this macro depend on its real needs */
+#endif
+
+
 
 //for secure boot
 #define BLS_SEC_HAED_ADDR               (0x0)
@@ -460,6 +489,7 @@ flash xip address(from both ap/cp view): 0x00800000---0x00c00000
 #define SECTIONBL_LOAD_AIRAM_OTHER_RAMCODE    2
 #define SECTIONBL_LOAD_MIRAM_USB              3
 #define SECTIONBL_LOAD_MIRAM_USB_DATA         4
+#define SECTIONBL_LOAD_CIRAM_RAMCODE          5
 
 #include "pkg_718p_mapchk.h"
 

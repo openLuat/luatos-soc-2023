@@ -30,6 +30,21 @@ enum pcb_hib_state {
   PCB_HIB_ENABLE_ACTIVE        = 2,
 };
 
+enum pcb_sleep2_state {
+  PCB_SLEEP2_DISABLE_DEACTIVE     = 0,
+  PCB_SLEEP2_ENABLE_DEACTIVE      = 1,
+  PCB_SLEEP2_ENABLE_ACTIVE        = 2,
+};
+
+typedef enum PsifSleepAllowType_Tag
+{
+    PSIFSLEEPALLOW_SLEEP1 = 0,
+    PSIFSLEEPALLOW_SLEEP2 = 1,
+    PSIFSLEEPALLOW_HIB    = 3,
+}PsifSleepAllowType;
+
+
+
 
 /******************************************************************************
  *****************************************************************************
@@ -37,7 +52,7 @@ enum pcb_hib_state {
  *****************************************************************************
 ******************************************************************************/
 
-BOOL PsifIsTcpipAllowEnterHIB(void);
+UINT8 PsifIsTcpipAllowEnterHIB(void);
 
 void PsifRequestRecoverContextFromHib(void);
 
@@ -53,7 +68,7 @@ BOOL PsifGetTcpipHibContextChanged(UINT8 type);
 
 void PisfCheckTcpipHibContextNeedChang(void);
 
-void PsifTcpipAllowEnterHib(void);
+void PsifTcpipAllowEnterHib(UINT8 sleepAllowType);
 
 void PsifTcpipNotAllowEnterHib(void);
 

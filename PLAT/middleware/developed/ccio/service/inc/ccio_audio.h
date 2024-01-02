@@ -40,6 +40,7 @@ extern "C" {
 /*----------------------------------------------------------------------------*
  *                   DATA TYPE DEFINITION                                     *
  *----------------------------------------------------------------------------*/
+typedef void (*i2sToneCbFunc)(void*);
 
 /******************************************************************************
  *****************************************************************************
@@ -69,7 +70,8 @@ typedef enum audioPlayTypeTag
     PLAY_CALL_WAITING_TONE          = 5, // call waiting tone
     PLAY_MULTI_CALL_PROMPT_TONE     = 6, // multi call prompt tone
     PLAY_CALL_ALERT_RINGING         = 7, // incoming call alert ringing
-    PLAY_SPEECH_PCM_DATA            = 8  // early media or voice in speech buffer
+    PLAY_SPEECH_PCM_DATA            = 8, // early media or voice in speech buffer
+    PLAY_MULTI_MEDIA                = 9
     //...add if required
 }AudioPlayType_e;
 
@@ -81,6 +83,7 @@ int32_t audioDataInput(UlPduBlock_t *ulpdu, void *extras);
 int32_t audioDataOutput(uint8_t chanNo, DlPduBlock_t *dlpdu, void *extras);
 int32_t audioDataOutputEx(uint8_t audioCid, DlPduBlock_t *dlpdu, void *extras);
 
+void audioFreeRecordBuf(void *ulpdu);
 
 /*----------------------------------------------------------------------------*
  *                    GLOBAL FUNCTIONS DECLEARATION                           *
@@ -93,7 +96,7 @@ int32_t audioDataOutputEx(uint8_t audioCid, DlPduBlock_t *dlpdu, void *extras);
   \returns     BOOL, TRUE -init buffer memory, etc. ok; FALSE - init fail, shall stop call precesure
   \NOTE:       thsi api MUST be sync interface without block
 */
-BOOL audioDrvInit();
+int32_t audioDrvInit(uint8_t owner);
 
 /**
   \fn          audioDrvDeInit
@@ -148,7 +151,42 @@ void audioStartPlaySound(uint8_t type, uint8_t *pSpeechBuf, uint16_t speechBufSi
 */
 void audioStopPlaySound(uint8_t type);
 
-void audioFreeRecordBuf(void *ulpdu);
+/**
+  \fn          audioRegisterToneCb
+  \brief       This api should register cb in play tone in order to trigger app task to start decode mp3 or others
+  \             For example:
+  \                  startDecode = 1; // trigger app to decode
+  \                  status = osMessageQueuePut(gMsgqHandle, (const void*)&startDecode,  0, 0);
+  \                  EC_ASSERT(status == osOK, status, 0, 0);
+  \param[in]   i2sToneCbFunc cb, app ab 
+  \returns     null
+*/
+void audioRegisterToneCb(i2sToneCbFunc cb);
+
+/**
+  \fn          audioAppStartPlaySound
+  \brief      This api is like audioStartPlaySound in functional, but can only be used by app player.
+*/
+int audioAppStartPlaySound(uint8_t type, uint8_t *pSpeechBuf, uint16_t speechBufSize, 
+                            uint8_t sampleRate, uint8_t pcmBitWidth);
+
+/**
+  \fn          audioAppStopPlaySound
+  \brief      This api is like audioStopPlaySound in functional, but can only be used by app player.
+*/
+int audioAppStopPlaySound(uint8_t type);
+
+/**
+  \fn          audioAppStartRecord
+  \brief      This api is like audioStartRecordVoice in functional, but can only be used by app recoder.
+*/
+int audioAppStartRecord(uint8_t codecType);
+
+/**
+  \fn          audioAppStopRecord
+  \brief      This api is like audioStopRecordVoice in functional, but can only be used by app recoder.
+*/
+int audioAppStopRecord(uint8_t codecType);
 
 
 #ifdef __cplusplus

@@ -229,6 +229,7 @@ HalCodecSts_e halCodecSetMute(HalCodecFuncList_t* codecHal, bool mute, bool need
     return ret;
 }
 
+#if 0
 HalCodecSts_e halCodecEnablePA(HalCodecFuncList_t* codecHal, bool enable, bool needLock)
 {
     int32_t ret = CODEC_EOK;
@@ -238,6 +239,7 @@ HalCodecSts_e halCodecEnablePA(HalCodecFuncList_t* codecHal, bool enable, bool n
     if (needLock) halCodecUnlock(codecHal->halCodecLock);
     return ret;
 }
+#endif
 
 HalCodecSts_e halCodecSetVolume(HalCodecFuncList_t* codecHal, int volume, bool needLock)
 {

@@ -118,6 +118,10 @@ err_t            raw_send       (struct raw_pcb *pcb, struct pbuf *p);
 void             raw_recv       (struct raw_pcb *pcb, raw_recv_fn recv, void *recv_arg);
 
 /* The following functions are the lower layer interface to RAW. */
+#if LWIP_IPV6
+void raw_remove_frag_hdr(struct pbuf *p);
+#endif
+
 u8_t             raw_input      (struct pbuf *p, struct netif *inp);
 #define raw_init() /* Compatibility define, no init needed. */
 

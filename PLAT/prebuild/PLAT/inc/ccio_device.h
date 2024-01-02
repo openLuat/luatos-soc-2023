@@ -71,6 +71,9 @@ typedef enum _EPAT_CcioDevExecFlagsTag
     CCIO_DEF_AUDIO_START_REC,
     CCIO_DEF_AUDIO_STOP_REC,
 
+    CCIO_DEF_AUDIO_INIT,
+    CCIO_DEF_AUDIO_DEINIT,
+
     CCIO_DEF_CUST_RSVD_BEGIN = 0x0DEFC000,
     /*
      * rsvd for customers

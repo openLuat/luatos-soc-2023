@@ -228,6 +228,10 @@ typedef enum atecMoSmsType_enum
 #define CONCAT_SMS_MAX_BUFFER_SIZE              5
 #define CONCAT_SMS_BUFFER_GARD_TIMER_SEC        600     /* 600 second */
 
+#define ATC_SMS_CONCAT_SMS_TIMER_ID                 0
+#define ATC_SMS_MT_SMS_ACK_TIMER_ID                 1
+#define MT_SMS_ACK_TIMER_SEC                        17  /* 17 second */
+
 typedef enum ConcatSmsReportMode_enum
 {
     CONCAT_SMS_REPORT_NONE      = 0,

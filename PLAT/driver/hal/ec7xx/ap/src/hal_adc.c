@@ -182,7 +182,11 @@ int32_t HAL_ADC_SampleVbatVoltage(uint32_t timeout_ms)
     if(g_adcVbatResult.sem != NULL)
     {
         ADC_getDefaultConfig(&adcConfig);
+#if defined CHIP_EC718
         adcConfig.channelConfig.vbatResDiv = ADC_VBAT_RESDIV_RATIO_8OVER32;
+#elif defined CHIP_EC716
+        adcConfig.channelConfig.vbatResDiv = ADC_VBAT_RESDIV_RATIO_6OVER32;
+#endif
         ADC_channelInit(ADC_CHANNEL_VBAT, ADC_USER_APP, &adcConfig, ADC_VbatCallback);
 
         ADC_startConversion(ADC_CHANNEL_VBAT, ADC_USER_APP);
@@ -195,7 +199,11 @@ int32_t HAL_ADC_SampleVbatVoltage(uint32_t timeout_ms)
         {
             ret = HAL_ADC_CalibrateRawCode(g_adcVbatResult.rawCode);
             // amplify the result by the reciprocal of div ratio
+#if defined CHIP_EC718
             ret = ret * 4;
+#elif defined CHIP_EC716
+            ret = ret * 16 / 3;
+#endif
             ret = (ret + 500) / 1000; // uV -> mV
         }
 

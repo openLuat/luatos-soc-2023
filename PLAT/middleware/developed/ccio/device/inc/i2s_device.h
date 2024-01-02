@@ -46,6 +46,7 @@ extern "C" {
 /*----------------------------------------------------------------------------*
  *                   DATA TYPE DEFINITION                                     *
  *----------------------------------------------------------------------------*/
+
 /**
  * configuration about a i2s device.
  */
@@ -98,6 +99,22 @@ typedef struct
     void*     playParamBk;
 }I2sChdevExtraParam_t;
 
+typedef enum
+{
+    AUDIO_OWNER_NONE          = 0,
+    AUDIO_OWNER_APP_PLAY      = 1,
+    AUDIO_OWNER_APP_RECORD    = 2,
+    AUDIO_OWNER_IMS           = 3
+}I2sOwner_e;
+
+typedef struct
+{
+    uint16_t   onDmaCnt;
+    uint16_t   onDmaCntBak;
+    uint16_t   offDmaCnt;
+    uint16_t   offDmaCntBak;
+    uint8_t    *pToneSrc;
+}I2sStandardTone_t;
 
 
 /*----------------------------------------------------------------------------*

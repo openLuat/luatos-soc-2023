@@ -10,7 +10,7 @@
 #include "pad.h"
 #include "clock.h"
 #include "slpman.h"
-
+#include "sctdef.h"
 
 #define PAD_TEXT_SECTION     SECTION_DEF_IMPL(.sect_pad_text)
 #define PAD_RODATA_SECTION   SECTION_DEF_IMPL(.sect_pad_rodata)
@@ -85,7 +85,7 @@ void PAD_exitLowPowerStateRestore(void* pdata, slpManLpState state)
 }
 #endif
 
-void PAD_driverInit(void)
+PLAT_BL_CIRAM_FLASH_TEXT void PAD_driverInit(void)
 {
 #ifdef PM_FEATURE_ENABLE
     slpManRegisterPredefinedBackupCb(SLP_CALLBACK_PAD_MODULE, PAD_enterLowPowerStatePrepare, NULL);

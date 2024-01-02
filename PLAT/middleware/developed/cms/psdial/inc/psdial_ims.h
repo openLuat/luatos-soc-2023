@@ -41,6 +41,19 @@
  * Functions
  *****************************************************************************
 ******************************************************************************/
+
+/**
+ * PS dial create IMS tasks
+*/
+void psDialCreateImsTasks(void);
+
+/**
+ * Wake up IMS (modem), PS can't process any other signal/command before wake up confiramtion,
+ *  here, all signal need to pending (enqueue) before wake up confiramtion from IMS
+*/
+void psDialWakeupIms(void);
+
+
 void psDialGetImsMedStackMem(UINT16 statckSize, void **pStackMem, void **pTaskCbMem);
 
 void *psDialAllocImsMemory(UINT16 size);

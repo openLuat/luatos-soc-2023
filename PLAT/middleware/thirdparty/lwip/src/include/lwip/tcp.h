@@ -362,6 +362,7 @@ struct tcp_pcb {
    // tcp pcb sock hib/sleep2 mode flag.
    // 0 ->disable & deactive; 1 -> enable & deactive; 2 -> enable & active
    u8_t pcb_hib_sleep2_mode_flag; //tcp_pcb_hib_state
+   u8_t pcb_sleep2_mode_flag;
 #endif
 
 #if ENABLE_PSIF
@@ -564,6 +565,27 @@ BOOL tcp_check_is_include_list(struct tcp_pcb* pcb);
 u16_t get_hib_tcp_pcb_active_local_port(void);
 struct tcp_pcb *get_tcp_all_list(u8_t index);
 
+u8_t tcp_get_curr_sleep2_pcb_num(void);
+
+struct tcp_pcb **tcp_get_curr_sleep2_info(u8_t *pcb_num);
+
+void tcp_enable_sleep2_mode(struct tcp_pcb *pcb, u8_t state);
+
+void tcp_disable_sleep2_mode(struct tcp_pcb *pcb, u8_t state);
+
+void tcp_set_sleep2_state(struct tcp_pcb *pcb, u8_t state);
+
+void tcp_add_sleep2_pcb_list(struct tcp_pcb * new_pcb);
+
+struct tcp_pcb *tcp_add_sleep2_context_pcb(void);
+
+void tcp_remove_sleep2_pcb_list(struct tcp_pcb * pcb);
+
+struct tcp_pcb *tcp_find_sleep2_pcb_by_remote_info(u16_t remote_port, ip_addr_t *remote_addr);
+
+BOOL tcp_check_active_sleep2_local_port(u16_t local_port);
+
+void tcp_sleep2_pcb_local_ip_change(ip_addr_t *local_addr);
 
 
 

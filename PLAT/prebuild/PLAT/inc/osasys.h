@@ -99,6 +99,9 @@ typedef enum _EPAT_OsaHibTimerId_enum
     PS_HIB_ERRC_LOG_INTERVAL_TIMER,
 
     /*40 ~ 50 is pre defined for IMS used */
+    PS_IMS_HIB_BASE_TIMER       = 40,
+    PS_IMS_HIB_MAX_TIMER        = 50,
+
     PS_HIB_MAX_TIMER             = 0x40,     /* 64 HIB timer resversed for PS */
 
     CMS_HIB_POWER_ON_DELAY_TIMER = 0x41,    /* Now, power on random delay handled in CMS task */

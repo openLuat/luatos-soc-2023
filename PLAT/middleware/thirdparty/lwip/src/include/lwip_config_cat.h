@@ -101,6 +101,9 @@
 //the max hib/sleep2 mode tcp connection number
 #define TCP_HIB_SLEEP2_PCB_MAX_NUM 1
 
+//the max sleep2 mode tcp connection number
+#define TCP_SLEEP2_PCB_MAX_NUM 2
+
 //the max hib/sleep2 mode udp connection number
 #define UDP_HIB_SLEEP2_PCB_MAX_NUM 1
 
@@ -1472,7 +1475,7 @@
  * an upper limit on the MSS advertised by the remote host.
  */
 #if !defined TCP_MSS || defined __DOXYGEN__
-#define TCP_MSS                         1340
+#define TCP_MSS                         1440
 #endif
 
 /**

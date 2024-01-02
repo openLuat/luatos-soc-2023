@@ -41,7 +41,6 @@ void BSP_QSPI_Set_Clk_50M(void);
 void BSP_WdtInit(void);
 
 void SelNormalOrURCPrint(uint32_t Sel);
-#if defined CHIP_EC716
 /*ONLY for FOTA case!!!!!!, and only when SRAM is not enough
   e.g. if FOTA and USB URC en, USB mem may in CSMB
   call en API before USB init
@@ -53,7 +52,6 @@ void SelNormalOrURCPrint(uint32_t Sel);
   */
 void BSP_apAccCmsbEn(void);
 void BSP_apAccCmsbDisEn(void);
-#endif
 
 /*
  *  URC set enable and baudrate value config

@@ -639,6 +639,8 @@ typedef struct SmsDataCodingSchemeTag
     BOOL                        bCompressed;        /* the text is compressed */
     BOOL                        bCodingAndClass;    /* Data coding/message class */
     BOOL                        bMessageWait;       /* Message Waiting Indication Group */
+    UINT8                       rawDcs;
+    UINT16                      reserved1;
     MessageWaitingIndication    waitIndication;     /* Message Waiting Indication Group content */
 }SmsDataCodingScheme;
 

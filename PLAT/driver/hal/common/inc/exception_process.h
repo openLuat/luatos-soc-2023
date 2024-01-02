@@ -24,7 +24,10 @@
 #include "cmsis_compiler.h"
 #include "commontypedef.h"
 #include "mem_map.h"
-
+#ifdef FEATURE_EXCEPTION_FLASH_DUMP_ENABLE
+#include "sys_record.h"
+#include "stdbool.h"
+#endif
 
 /*----------------------------------------------------------------------------*
  *                    MACROS                                                  *
@@ -448,6 +451,127 @@ typedef enum
     EC_CHIP_TYPE_EC716U 	= 0x7164,
     
 }ecChipType;
+
+#ifdef FEATURE_EXCEPTION_FLASH_DUMP_ENABLE
+
+#define EC_CONSTRUCT_STORE_LEN(len) ((len/2)+(len%2))
+
+#define EC_EXCEPTION_OCCURED              0xECECCECE
+
+#define EC_EXCEP_ADDR_MAPPING_INTO_ASMB   0x0
+#define EC_EXCEP_ADDR_MAPPING_INTO_CSMB   0x1
+#define EC_EXCEP_ADDR_MAPPING_INTO_MSMB   0x2
+#define EC_EXCEP_ADDR_MAPPING_INTO_PSRAM  0x3
+
+typedef enum
+{
+	EC_EXCEP_INFO_PART_1  = 1,
+	EC_EXCEP_INFO_PART_2  = 2,
+	EC_EXCEP_INFO_PART_3  = 3,
+	EC_EXCEP_INFO_PART_4  = 4,
+	EC_EXCEP_INFO_PART_5  = 5,
+	EC_EXCEP_INFO_PART_6  = 6,
+	EC_EXCEP_INFO_PART_7  = 7,
+	EC_EXCEP_INFO_PART_8  = 8,
+	EC_EXCEP_INFO_PART_9  = 9,
+	EC_EXCEP_INFO_PART_10 = 10,
+	EC_EXCEP_INFO_PART_11 = 11,
+	EC_EXCEP_INFO_PART_12 = 12,
+	EC_EXCEP_INFO_PART_13 = 13,
+	EC_EXCEP_INFO_PART_14 = 14,
+	EC_EXCEP_INFO_PART_15 = 15
+}EcExcepInfoPart_e;
+
+#define EC_EXCEP_INFO_PART_NUM_PLAT       EC_EXCEP_INFO_PART_3
+#define EC_EXCEP_INFO_PART_NUM_PHY        EC_EXCEP_INFO_PART_5
+#define EC_EXCEP_INFO_PART_NUM_PS         EC_EXCEP_INFO_PART_15
+#define EC_EXCEP_INFO_PART_NUM_UNILOG     EC_EXCEP_INFO_PART_1
+#define EC_EXCEP_INFO_PART_NUM_CUST       EC_EXCEP_INFO_PART_15
+
+typedef enum
+{
+	EC_EXCEP_INFO_TYPE_PLAT   = 0x00,
+	EC_EXCEP_INFO_TYPE_PHY    = 0x10,
+	EC_EXCEP_INFO_TYPE_PS     = 0x20,
+	EC_EXCEP_INFO_TYPE_UNILOG = 0x30,
+	EC_EXCEP_INFO_TYPE_CUST   = 0x40,
+	EC_EXCEP_INFO_TYPE_MAX    = 0x50
+}EcExcepInfoType_e;
+
+typedef struct
+{
+	uint32_t ramMap : 2; /* ram mapping : 0:ASMB 1:CSMB 2:MSMB 3:PSRAM */
+	uint32_t addr   : 21; /* 21 bits of addr */
+	uint32_t len_l9 : 9; /* the low 9 bits of length */
+}EcExcepInfoAddr_bm;
+
+typedef struct
+{
+	uint16_t plat_flag_cnt  : 4;
+	uint16_t phy_flag_cnt   : 4;
+	uint16_t ps_flag_cnt    : 4;
+	uint16_t cust_flag_cnt  : 4;
+}EcExcepInfoRegFlag_bm;
+
+typedef struct
+{
+	EcExcepInfoAddr_bm PLAT_info[EC_EXCEP_INFO_PART_NUM_PLAT];
+	EcExcepInfoAddr_bm PHY_info[EC_EXCEP_INFO_PART_NUM_PHY];
+	EcExcepInfoAddr_bm PS_info[EC_EXCEP_INFO_PART_NUM_PS];
+	EcExcepInfoAddr_bm Unilog_info[EC_EXCEP_INFO_PART_NUM_UNILOG];
+	EcExcepInfoAddr_bm CUST_info[EC_EXCEP_INFO_PART_NUM_CUST];
+	uint8_t PLAT_store_len[EC_CONSTRUCT_STORE_LEN(EC_EXCEP_INFO_PART_NUM_PLAT)];
+	uint8_t PHY_store_len[EC_CONSTRUCT_STORE_LEN(EC_EXCEP_INFO_PART_NUM_PHY)];
+	uint8_t PS_store_len[EC_CONSTRUCT_STORE_LEN(EC_EXCEP_INFO_PART_NUM_PS)];
+	uint8_t Unilog_store_len[EC_CONSTRUCT_STORE_LEN(EC_EXCEP_INFO_PART_NUM_UNILOG)];
+	uint8_t CUST_store_len[EC_CONSTRUCT_STORE_LEN(EC_EXCEP_INFO_PART_NUM_CUST)];
+	EcExcepInfoRegFlag_bm reg_flag;
+}__attribute__((aligned(1))) EcExcepInfoReg_s;
+
+
+typedef struct
+{
+	uint32_t uiExcepOccured;
+	uint16_t usExceptChipType;
+	uint8_t ucExcepCPUType;
+	uint8_t ucIsUnilogDump;
+	uint32_t uiExcepFlag;
+	uint32_t uiUlgDumpOft;
+	uint16_t usUlgStrOftAddr;
+	uint16_t usUlgStrSpace;
+	ec_m3_exception_regs excep_regs;
+	uint8_t ucCurrTaskName[EC_EXCEP_TASK_NAME_LEN];
+    uint8_t ucEecepAssertBuff[EC_EXCEP_ASSERT_BUFF_LEN];
+
+	struct
+	{
+		uint32_t uiTotalHeapSize;
+		uint32_t uiFreeSize;
+		uint32_t uiMaxFreeBlockSize;
+		uint32_t uiMinEverFreeHeapSize;
+	}heap_info_s;
+}EcExcepKeyInfoStore_s; //ec_excep_key_info_store
+
+/*
+ * \brief       Get the address and data length info of unilog.
+ * \param[out]  puiAddr : the pointer to get address info.
+ * \param[out]  pusLen : the pointer to get data length info.
+ * \returns     void
+ */
+void ecGetUnilogDumpAddrAndLen(uint32_t *puiAddr, uint32_t *pusLen);
+
+/*
+ * \brief       Register the dumped info of PLAT/PHY/PS/CUST
+ * 			   and the dumped info is stored with a partition.
+ * \param[in]   eExcepInfoType : should be set like EC_EXCEP_INFO_TYPE_(PLAT/
+ *             PHY/PS/CUST)	| EC_EXCEP_INFO_PART_(1~15).
+ * \param[in]   uiStoreAddr : the address of Dump info stored.
+ * \param[in]   usLen       : the data length of the Dump info.
+ * \returns     bool
+ */
+bool excepKeyStoreInfoReg(EcExcepInfoType_e eExcepInfoType, uint32_t uiStoreAddr, uint16_t usLen);
+
+#endif
 
 
 /*----------------------------------------------------------------------------*

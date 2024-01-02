@@ -132,28 +132,28 @@ int32_t exStorageClear(uint32_t zid, uint32_t offset, uint32_t len)
 
     if(zid >= EXSTO_ZONE_MAXNUM)
     {
-        ECPLAT_PRINTF(UNILOG_FOTA, EX_STO_CLEAR_0, P_WARNING, "clr: invalid zoneId(%d)! max(%d)\n",
+        ECPLAT_PRINTF(UNILOG_PLA_DRIVER, EX_STO_CLEAR_0, P_WARNING, "clr: invalid zoneId(%d)! max(%d)\n",
                                                                zid, EXSTO_ZONE_MAXNUM);
         return EXSTO_EUNDEF;
     }
 
     if(!(gExStoZoneMan.bmZoneId & (1 << zid)))
     {
-        ECPLAT_PRINTF(UNILOG_FOTA, EX_STO_CLEAR_1, P_WARNING, "clr: no exSto zone(%d)! bmZoneId(0x%x)\n",
+        ECPLAT_PRINTF(UNILOG_PLA_DRIVER, EX_STO_CLEAR_1, P_WARNING, "clr: no exSto zone(%d)! bmZoneId(0x%x)\n",
                                                                zid, gExStoZoneMan.bmZoneId);
         return EXSTO_EERASE;
     }
 
     if(currLen > gExStoZoneMan.zone[zid].size)
     {
-        ECPLAT_PRINTF(UNILOG_FOTA, EX_STO_CLEAR_2, P_WARNING, "clr zone(%d): len(%d) overflowed! set it max(%d)!\n",
+        ECPLAT_PRINTF(UNILOG_PLA_DRIVER, EX_STO_CLEAR_2, P_WARNING, "clr zone(%d): len(%d) overflowed! set it max(%d)!\n",
                                                                zid, currLen, gExStoZoneMan.zone[zid].size);
         currLen = gExStoZoneMan.zone[zid].size;
     }
 
     if(offset >= gExStoZoneMan.zone[zid].size)
     {
-        ECPLAT_PRINTF(UNILOG_FOTA, EX_STO_CLEAR_3, P_ERROR, "clr zone(%d): invalid offset(%d)! max(%d)\n",
+        ECPLAT_PRINTF(UNILOG_PLA_DRIVER, EX_STO_CLEAR_3, P_ERROR, "clr zone(%d): invalid offset(%d)! max(%d)\n",
                                                              zid, offset, gExStoZoneMan.zone[zid].size);
         return EXSTO_EOVRFLOW;
     }
@@ -182,28 +182,28 @@ int32_t exStorageWrite(uint32_t zid, uint32_t offset, uint8_t *buf, uint32_t buf
 
     if(zid >= EXSTO_ZONE_MAXNUM)
     {
-        ECPLAT_PRINTF(UNILOG_FOTA, EX_STO_WRITE_0, P_WARNING, "wr: invalid zoneId(%d)! max(%d)\n",
+        ECPLAT_PRINTF(UNILOG_PLA_DRIVER, EX_STO_WRITE_0, P_WARNING, "wr: invalid zoneId(%d)! max(%d)\n",
                                                                zid, EXSTO_ZONE_MAXNUM);
         return EXSTO_EUNDEF;
     }
 
     if(!(gExStoZoneMan.bmZoneId & (1 << zid)))
     {
-        ECPLAT_PRINTF(UNILOG_FOTA, EX_STO_WRITE_1, P_WARNING, "wr: no exSto zone(%d)! bmZoneId(0x%x)\n",
+        ECPLAT_PRINTF(UNILOG_PLA_DRIVER, EX_STO_WRITE_1, P_WARNING, "wr: no exSto zone(%d)! bmZoneId(0x%x)\n",
                                                                zid, gExStoZoneMan.bmZoneId);
         return EXSTO_EWRITE;
     }
 
     if(currLen > gExStoZoneMan.zone[zid].size)
     {
-        ECPLAT_PRINTF(UNILOG_FOTA, EX_STO_WRITE_2, P_WARNING, "wr zone(%d): len(%d) overflowed! set it max(%d)!\n",
+        ECPLAT_PRINTF(UNILOG_PLA_DRIVER, EX_STO_WRITE_2, P_WARNING, "wr zone(%d): len(%d) overflowed! set it max(%d)!\n",
                                                                zid, currLen, gExStoZoneMan.zone[zid].size);
         currLen = gExStoZoneMan.zone[zid].size;
     }
 
     if(offset >= gExStoZoneMan.zone[zid].size)
     {
-        ECPLAT_PRINTF(UNILOG_FOTA, EX_STO_WRITE_3, P_ERROR, "wr zone(%d): invalid offset(%d)! max(%d)\n",
+        ECPLAT_PRINTF(UNILOG_PLA_DRIVER, EX_STO_WRITE_3, P_ERROR, "wr zone(%d): invalid offset(%d)! max(%d)\n",
                                                              zid, offset, gExStoZoneMan.zone[zid].size);
         return EXSTO_EOVRFLOW;
     }
@@ -244,28 +244,28 @@ int32_t exStorageRead(uint32_t zid, uint32_t offset, uint8_t *buf, uint32_t bufL
 
     if(zid >= EXSTO_ZONE_MAXNUM)
     {
-        ECPLAT_PRINTF(UNILOG_FOTA, EX_STO_READ_0, P_WARNING, "rd: invalid zoneId(%d)! max(%d)\n",
+        ECPLAT_PRINTF(UNILOG_PLA_DRIVER, EX_STO_READ_0, P_WARNING, "rd: invalid zoneId(%d)! max(%d)\n",
                                                               zid, EXSTO_ZONE_MAXNUM);
         return EXSTO_EUNDEF;
     }
 
     if(!(gExStoZoneMan.bmZoneId & (1 << zid)))
     {
-        ECPLAT_PRINTF(UNILOG_FOTA, EX_STO_READ_1, P_WARNING, "rd: no exSto zone(%d)! bmZoneId(0x%x)\n",
+        ECPLAT_PRINTF(UNILOG_PLA_DRIVER, EX_STO_READ_1, P_WARNING, "rd: no exSto zone(%d)! bmZoneId(0x%x)\n",
                                                               zid, gExStoZoneMan.bmZoneId);
         return EXSTO_EWRITE;
     }
 
     if(currLen > gExStoZoneMan.zone[zid].size)
     {
-        ECPLAT_PRINTF(UNILOG_FOTA, EX_STO_READ_2, P_WARNING, "rd zone(%d): len(%d) overflowed! set it max(%d)!\n",
+        ECPLAT_PRINTF(UNILOG_PLA_DRIVER, EX_STO_READ_2, P_WARNING, "rd zone(%d): len(%d) overflowed! set it max(%d)!\n",
                                                               zid, currLen, gExStoZoneMan.zone[zid].size);
         currLen = gExStoZoneMan.zone[zid].size;
     }
 
     if(offset >= gExStoZoneMan.zone[zid].size)
     {
-        ECPLAT_PRINTF(UNILOG_FOTA, EX_STO_READ_3, P_ERROR, "rd zone(%d): invalid offset(%d)! max(%d)\n",
+        ECPLAT_PRINTF(UNILOG_PLA_DRIVER, EX_STO_READ_3, P_ERROR, "rd zone(%d): invalid offset(%d)! max(%d)\n",
                                                             zid, offset, gExStoZoneMan.zone[zid].size);
         return EXSTO_EOVRFLOW;
     }
@@ -292,13 +292,13 @@ uint32_t exStorageGetZid(uint32_t addr, uint32_t *size, uint32_t *offset)
 
     if(!size)
     {
-        ECPLAT_PRINTF(UNILOG_FOTA, EX_STO_GET_ZID_1, P_ERROR, "get zid: null size ptr!\n");
+        ECPLAT_PRINTF(UNILOG_PLA_DRIVER, EX_STO_GET_ZID_1, P_ERROR, "get zid: null size ptr!\n");
         goto GET_ZID_END;
     }
 
     if(!addr && !(*size))
     {
-        ECPLAT_PRINTF(UNILOG_FOTA, EX_STO_GET_ZID_2, P_SIG, "get zid: set it default(%d: %d)!\n", zid, zsz);
+        ECPLAT_PRINTF(UNILOG_PLA_DRIVER, EX_STO_GET_ZID_2, P_SIG, "get zid: set it default(%d: %d)!\n", zid, zsz);
         goto GET_ZID_END;
     }
 
@@ -313,7 +313,7 @@ uint32_t exStorageGetZid(uint32_t addr, uint32_t *size, uint32_t *offset)
 
         default:
         {
-            ECPLAT_PRINTF(UNILOG_FOTA, EX_STO_GET_ZID_3, P_WARNING, "get zid: unknown starting addr(0x%x)!\n", addr);
+            ECPLAT_PRINTF(UNILOG_PLA_DRIVER, EX_STO_GET_ZID_3, P_WARNING, "get zid: unknown starting addr(0x%x)!\n", addr);
             break;
         }
     }
@@ -327,7 +327,7 @@ GET_ZID_END:
     {
         if(*size != zsz)
         {
-            ECPLAT_PRINTF(UNILOG_FOTA, EX_STO_GET_ZID_4, P_WARNING, "get zid: in_size(%d) != zone_size(%d)!\n", *size, zsz);
+            ECPLAT_PRINTF(UNILOG_PLA_DRIVER, EX_STO_GET_ZID_4, P_WARNING, "get zid: in_size(%d) != zone_size(%d)!\n", *size, zsz);
         }
     }
 
@@ -339,9 +339,9 @@ GET_ZID_END:
 
 /**
  * @brief exStorageGetSize(uint32_t zid, uint8_t isOvhdExcl)
- * @details get the nvm size of specific fota zone
+ * @details get the nvm size of specific exstorage zone
  *
- * @param zid         zone Id of fota nvm
+ * @param zid         zone Id of exstorage zone
  * @param isOvhdExcl  overhead size of the zone is excluded or not
  * @return the size of zone.
  */
@@ -349,14 +349,14 @@ uint32_t exStorageGetSize(uint32_t zid, uint8_t isOvhdExcl)
 {
     if(zid >= EXSTO_ZONE_MAXNUM)
     {
-        ECPLAT_PRINTF(UNILOG_FOTA, EX_GET_SZ_0, P_WARNING, "get size: invalid zoneId(%d)! max(%d)\n",
+        ECPLAT_PRINTF(UNILOG_PLA_DRIVER, EX_GET_SZ_0, P_WARNING, "get size: invalid zoneId(%d)! max(%d)\n",
                                                             zid, EXSTO_ZONE_MAXNUM);
         return EXSTO_EUNDEF;
     }
 
     if(!(gExStoZoneMan.bmZoneId & (1 << zid)))
     {
-        ECPLAT_PRINTF(UNILOG_FOTA, EX_GET_SZ_1, P_WARNING, "get size: no exSto zone(%d)! bmZoneId(0x%x)\n",
+        ECPLAT_PRINTF(UNILOG_PLA_DRIVER, EX_GET_SZ_1, P_WARNING, "get size: no exSto zone(%d)! bmZoneId(0x%x)\n",
                                                              zid, gExStoZoneMan.bmZoneId);
         return EXSTO_EWRITE;
     }
@@ -389,14 +389,14 @@ int32_t exStorageVerifyPkg(uint32_t zid, uint8_t *hash, uint32_t pkgSize, uint32
 
     if(zid >= EXSTO_ZONE_MAXNUM)
     {
-        ECPLAT_PRINTF(UNILOG_FOTA, EX_VERIFY_PKG_1, P_WARNING, "verify pkg: invalid zoneId(%d)! max(%d)\n",
+        ECPLAT_PRINTF(UNILOG_PLA_DRIVER, EX_VERIFY_PKG_1, P_WARNING, "verify pkg: invalid zoneId(%d)! max(%d)\n",
                                                                 zid, EXSTO_ZONE_MAXNUM);
         return EXSTO_EUNDEF;
     }
 
     if(!(gExStoZoneMan.bmZoneId & (1 << zid)))
     {
-        ECPLAT_PRINTF(UNILOG_FOTA, EX_VERIFY_PKG_2, P_WARNING, "verify pkg: no exSto zone(%d)! bmZoneId(0x%x)\n",
+        ECPLAT_PRINTF(UNILOG_PLA_DRIVER, EX_VERIFY_PKG_2, P_WARNING, "verify pkg: no exSto zone(%d)! bmZoneId(0x%x)\n",
                                                                 zid, gExStoZoneMan.bmZoneId);
         return EXSTO_EWRITE;
     }
@@ -406,7 +406,7 @@ int32_t exStorageVerifyPkg(uint32_t zid, uint8_t *hash, uint32_t pkgSize, uint32
     buffer = (uint8_t*)malloc(stepSize);
     if(buffer == NULL)
     {
-        ECPLAT_PRINTF(UNILOG_FOTA, EX_VERIFY_PKG_3, P_WARNING, "verify pkg: zone(%d) malloc(%d) failure!\n",
+        ECPLAT_PRINTF(UNILOG_PLA_DRIVER, EX_VERIFY_PKG_3, P_WARNING, "verify pkg: zone(%d) malloc(%d) failure!\n",
                                                                 zid, stepSize);
         goto VERIFY_PKG_END;
     }
@@ -428,21 +428,21 @@ int32_t exStorageVerifyPkg(uint32_t zid, uint8_t *hash, uint32_t pkgSize, uint32
 
         if(EXSTO_OK != exStorageRead(zid, offset, buffer, readSize))
         {
-            ECPLAT_PRINTF(UNILOG_FOTA, EX_VERIFY_PKG_4, P_WARNING, "zid(%d) flash read failure!\n", zid);
+            ECPLAT_PRINTF(UNILOG_PLA_DRIVER, EX_VERIFY_PKG_4, P_WARNING, "zid(%d) flash read failure!\n", zid);
             goto VERIFY_PKG_END;
         }
 
         if(0 != mwAalUpdateSha256(&sha256, buffer, outHash, readSize, isLast))
         {
-            ECPLAT_PRINTF(UNILOG_FOTA, EX_VERIFY_PKG_5, P_ERROR, "zid(%d) flash sha256sum fail!\n", zid);
+            ECPLAT_PRINTF(UNILOG_PLA_DRIVER, EX_VERIFY_PKG_5, P_ERROR, "zid(%d) flash sha256sum fail!\n", zid);
             goto VERIFY_PKG_END;
         }
     }
 
     if(memcmp(outHash, hash, 32))
     {
-        ECPLAT_DUMP(UNILOG_FOTA, EX_VERIFY_PKG_6, P_WARNING, "input hash: ", 32, hash);
-        ECPLAT_DUMP(UNILOG_FOTA, EX_VERIFY_PKG_7, P_WARNING, "calc hash : ", 32, outHash);
+        ECPLAT_DUMP(UNILOG_PLA_DRIVER, EX_VERIFY_PKG_6, P_WARNING, "input hash: ", 32, hash);
+        ECPLAT_DUMP(UNILOG_PLA_DRIVER, EX_VERIFY_PKG_7, P_WARNING, "calc hash : ", 32, outHash);
     }
     else
     {

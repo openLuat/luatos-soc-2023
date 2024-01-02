@@ -78,6 +78,8 @@ typedef void (*IRQ_Callback_t)();
 uint8_t* getBuildInfo(void);
 uint8_t* getATIVersionInfo(void);
 uint8_t* getVersionInfo(void);
+uint32_t getUnilogUartPort(void);
+void getUnilogRamLogBuff(uint32_t *addr, uint32_t *len);
 void FlushUnilogOutput(void);
 void SetUnilogUart(usart_port_t port, uint32_t baudrate, bool startRecv);
 void BSP_CommonInit(void);

@@ -17,6 +17,11 @@
           "secname":"load_airam_other",
           "sectype":"SECTIONBL_LOAD_AIRAM_OTHER_RAMCODE",
           "isCompressed":true
+        },
+        {
+          "secname":"load_ciram",
+          "sectype":"SECTIONBL_LOAD_CIRAM_RAMCODE",
+          "isCompressed":true
         }
       ]
     }
