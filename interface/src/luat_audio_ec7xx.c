@@ -367,7 +367,7 @@ uint16_t luat_audio_vol(uint8_t multimedia_id, uint16_t vol)
  *
  * @param bus_type 见MULTIMEDIA_AUDIO_BUS，目前只有0=DAC 1=I2S 2=SOFT_DAC
  */
-void luat_audio_set_bus_type(uint8_t bus_type)
+void luat_audio_set_bus_type(uint8_t multimedia_id,uint8_t bus_type)
 {
 	audio_play_set_bus_type(bus_type);
 	g_s_audio_hardware.soft_dac_mode = (bus_type == 2);
