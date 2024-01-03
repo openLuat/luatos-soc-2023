@@ -105,14 +105,14 @@ int luat_i2s_tx_stat(uint8_t id, size_t *buffsize, size_t* remain) {
     return -1;
 }
 
-void luat_i2s_transfer(uint8_t bus_id, uint8_t* address, uint32_t byte_len)
+int luat_i2s_transfer(uint8_t id, uint8_t* txbuff, size_t len)
 {
-	I2S_Transfer(bus_id, address, byte_len);
+	I2S_Transfer(id, txbuff, len);
 }
 
-void luat_i2s_transfer_loop(uint8_t bus_id, uint8_t* address, uint32_t one_truck_byte_len, uint32_t total_trunk_cnt, uint8_t need_irq)
+int luat_i2s_transfer_loop(uint8_t id, uint8_t* buff, uint32_t one_truck_byte_len, uint32_t total_trunk_cnt)
 {
-	I2S_TransferLoop(bus_id, address, one_truck_byte_len, total_trunk_cnt, need_irq);
+	I2S_TransferLoop(id, buff, one_truck_byte_len, total_trunk_cnt, 1);
 }
 
 int luat_i2s_transfer_stop(uint8_t bus_id)

@@ -385,7 +385,7 @@ int luat_i2s_setup(luat_i2s_conf_t *conf)
 	if (conf->id >= I2S_MAX) return -1;
 	if (conf->channel_bits != 16)
 	{
-		switch (conf->bits_per_sample)
+		switch (conf->data_bits)
 		{
 		case 24:
 			frame_size = I2S_FRAME_SIZE_24_32;
@@ -398,7 +398,7 @@ int luat_i2s_setup(luat_i2s_conf_t *conf)
 			break;
 		}
 	}
-	luat_i2s_base_setup(conf->id, conf->communication_format, frame_size);
+	luat_i2s_base_setup(conf->id, conf->standard, frame_size);
 	g_s_audio_hardware.record_sample_rate[conf->id] = conf->sample_rate;
 	g_s_audio_hardware.record_channel = (conf->channel_format < 2)?1:2;
 	if (conf->channel_format < 2)
@@ -407,12 +407,16 @@ int luat_i2s_setup(luat_i2s_conf_t *conf)
 	}
 	return 0;
 }
-int luat_i2s_send(uint8_t id, char* buff, size_t len)
+int luat_i2s_send(uint8_t id, uint8_t* buff, size_t len)
 {
 	return -1;
 }
 
-int luat_i2s_recv(uint8_t id, char* buff, size_t len)
+int luat_i2s_rx_cb(void *pdata, void *param){
+	luat_i2s_event_cb((uint8_t)param ,LUAT_I2S_EVENT_RX_DONE, pdata);
+}
+
+int luat_i2s_recv(uint8_t id, uint8_t* buff, size_t len)
 {
 	if (id >= I2S_MAX) return -1;
 	if (I2S_Start(id, 0, g_s_audio_hardware.record_sample_rate[id], g_s_audio_hardware.record_channel))
