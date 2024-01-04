@@ -24,6 +24,12 @@
 #define PA_PWR_PIN HAL_GPIO_20
 #define PA_PWR_PIN_ALT_FUN	0
 #endif
+
+#define TEST_I2C_ID I2C_ID1
+#define ES8311_I2C_ADDR 0x18
+#define ES8311  0
+#define TM8211	1
+
 #define MP3_BUFFER_LEN_MIN	(10 * 1024)	//MP3数据必须大于10KB才开始解码，需要根据实际情况确定
 #define MP3_BUFFER_LEN_LOW	(30 * 1024)
 #define MP3_BUFFER_LEN_HIGH	(40 * 1024)
@@ -135,8 +141,44 @@ void audio_event_cb(uint32_t event, void *param)
 		luat_audio_play_stop_raw(0);
 		luat_rtos_timer_stop(g_s_delay_timer);
 		luat_gpio_set(PA_PWR_PIN, 0);
-		luat_gpio_set(CODEC_PWR_PIN, 0);
+		codec_ctrl(0);
 		break;
+	}
+}
+
+void HAL_I2sSrcAdjustVolumn(int16_t* srcBuf, uint32_t srcTotalNum, uint16_t volScale)
+{
+	int integer = volScale / 10;
+	int decimal = volScale % 10;
+	int scale = 0;
+	int32_t tmp = 0;
+	uint32_t totalNum = srcTotalNum;
+	uint32_t step = 0;
+	
+	while (totalNum)
+	{
+		if (volScale < 10)
+		{
+			tmp = ((*(srcBuf + step)) * (256 * integer + 26 * decimal)) >> 8;
+		}
+		else
+		{
+			scale = (256 * integer + 26 * decimal) >> 8;
+			tmp = (*(srcBuf + step)) * scale;
+		}
+		
+		if (tmp > 32767)
+		{
+			tmp = 32767;
+		}
+		else if (tmp < -32768)
+		{
+			tmp = -32768;
+		}
+			
+		*(srcBuf + step) = (int16_t)tmp;
+		step += 1;
+		totalNum -= 2;
 	}
 }
 
@@ -144,6 +186,9 @@ void audio_data_cb(uint8_t *data, uint32_t len, uint8_t bits, uint8_t channels)
 {
 	//这里可以对音频数据进行软件音量缩放，或者直接清空来静音
 	//软件音量缩放参考HAL_I2sSrcAdjustVolumn
+// #if ES8311 == 1
+// 	//HAL_I2sSrcAdjustVolumn((int16_t *)data, len, 3);
+// #endif
 	//LUAT_DEBUG_PRINT("%x,%d,%d,%d", data, len, bits, channels);
 }
 
@@ -211,7 +256,7 @@ int run_mp3_play(uint8_t is_start)
 		{
 			luat_audio_play_start_raw(0, AUSTREAM_FORMAT_PCM, num_channels, sample_rate, 16, 1);
 			//打开外部DAC，由于要配合PA的启动，需要播放一段空白音
-			luat_gpio_set(CODEC_PWR_PIN, 1);
+			codec_ctrl(1);
 			luat_audio_play_write_blank_raw(0, 6, 1);
 			is_start = 0;
 			luat_rtos_timer_start(g_s_delay_timer, 200, 0, app_pa_on, NULL);
@@ -295,6 +340,158 @@ static void luatos_http_cb(int status, void *data, uint32_t len, void *param)
 	}
 }
 
+
+typedef struct
+ {
+     uint8_t                 regAddr;    ///< Register addr
+     uint8_t                regVal;     ///< Register value
+ }i2c_reg_t;
+
+static i2c_reg_t es8311_reg_table[] = 
+{
+	{0x45,0x00},
+	{0x01,0x30},
+	{0x02,0x10},
+	//Ratio=MCLK/LRCK=256：12M288-48K；4M096-16K; 2M048-8K
+	{0x02,0x00},//MCLK DIV=1
+	{0x03,0x10},
+	{0x16,0x24},
+	{0x04,0x20},
+	{0x05,0x00},
+	{0x06,(0<<5) + 4 -1},//(0x06,(SCLK_INV<<5) + SCLK_DIV -1); SCLK=BCLK
+	{0x07,0x00},
+	{0x08,0xFF},//0x07 0x08 fs=256
+	{0x09,0x0C},//I2S mode, 16bit
+	{0x0A,0x0C},//I2S mode, 16bit
+	{0x0B,0x00},
+	{0x0C,0x00},
+	// {0x10,(0x1C*0) + (0x60*0x01) + 0x03},	//(0x10,(0x1C*DACHPModeOn) + (0x60*VDDA_VOLTAGE) + 0x03);	//VDDA_VOLTAGE=1.8V  close es8311MasterInit 3.3PWR setting
+	{0x10,(0x1C*0) + (0x60*0x00) + 0x03},	//(0x10,(0x1C*DACHPModeOn) + (0x60*VDDA_VOLTAGE) + 0x03);	//VDDA_VOLTAGE=3.3V open es8311MasterInit 3.3PWR setting
+	{0x11,0x7F},
+	{0x00,0x80 + (0<<6)},//Slave  Mode	(0x00,0x80 + (MSMode_MasterSelOn<<6));//Slave  Mode
+	{0x0D,0x01},
+	{0x01,0x3F + (0x00<<7)},//(0x01,0x3F + (MCLK<<7));
+	{0x14,(0<<6) + (1<<4) + 10},//选择CH1输入+30DB GAIN	(0x14,(Dmic_Selon<<6) + (ADCChannelSel<<4) + ADC_PGA_GAIN);
+	{0x12,0x28},
+	{0x13,0x00 + (0<<4)},	//(0x13,0x00 + (DACHPModeOn<<4));
+	{0x0E,0x02},
+	{0x0F,0x44},
+	{0x15,0x00},
+	{0x1B,0x0A},
+	{0x1C,0x6A},
+	{0x37,0x48},
+	{0x44,(0 << 7)},	//(0x44,(ADC2DAC_Sel <<7));
+	{0x17,0xd2},//(0x17,ADC_Volume);
+	{0x32,0xc8},//(0x32,DAC_Volume);
+};
+
+static i2c_reg_t es8311_standby_reg_table[] = 
+{
+	{0x32,0x00},
+	{0x17,0x00},
+	{0x0E,0xFF},
+	{0x12,0x02},
+	{0x14,0x00},
+	{0x0D,0xFA},
+	{0x15,0x00},
+	{0x37,0x08},
+	{0x02,0x10},
+	{0x00,0x00},
+	{0x00,0x1F},
+	{0x01,0x30},
+	{0x01,0x00},
+	{0x45,0x00},
+	{0x0D,0xFC},
+	{0x02,0x00},
+};
+
+static i2c_reg_t es8311_resume_reg_table[] = 
+{
+	{0x0D,0x01},
+	{0x45,0x00},
+	{0x01,0x3F},
+	{0x00,0x80},
+	{0x02,0x00},
+	{0x37,0x08},
+	{0x15,0x40},
+	{0x14,0x10},
+	{0x12,0x00},
+	{0x0E,0x00},
+	{0x32,0xc8},
+	{0x17,0xd2},
+};
+
+void es8311_standby()
+{
+	for (int i = 0; i < sizeof(es8311_standby_reg_table) / sizeof(i2c_reg_t); i++)
+	{
+		luat_i2c_send(TEST_I2C_ID, ES8311_I2C_ADDR, &es8311_standby_reg_table[i], 2, 1);
+	}
+}
+
+void es8311_resume()
+{
+	for (int i = 0; i < sizeof(es8311_resume_reg_table) / sizeof(i2c_reg_t); i++)
+	{
+		luat_i2c_send(TEST_I2C_ID, ES8311_I2C_ADDR, &es8311_resume_reg_table[i], 2, 1);
+	}
+}
+
+void codec_ctrl(uint8_t onoff)
+{
+	if (1 == onoff)
+	{
+#if ES8311 == 1
+	es8311_resume();
+#else
+	luat_gpio_set(CODEC_PWR_PIN, 1);
+#endif
+	}
+	else
+	{
+#if ES8311 == 1
+	es8311_standby();
+#else
+	luat_gpio_set(CODEC_PWR_PIN, 0);
+#endif
+	}
+}
+static int codec_config()
+{
+#if ES8311 == 1
+	luat_gpio_set(CODEC_PWR_PIN, 1);
+	luat_i2c_setup(TEST_I2C_ID, 0);
+	uint8_t tx_buf[2] = {0};
+	uint8_t rx_buf[2] = {0};
+	tx_buf[0] = 0xfd;
+    luat_i2c_send(TEST_I2C_ID, ES8311_I2C_ADDR, tx_buf, 1, 1);
+    luat_i2c_recv(TEST_I2C_ID, ES8311_I2C_ADDR, rx_buf, 1);
+
+    tx_buf[0] = 0xfe;
+    luat_i2c_send(TEST_I2C_ID, ES8311_I2C_ADDR, tx_buf, 1, 1);
+    luat_i2c_recv(TEST_I2C_ID, ES8311_I2C_ADDR, rx_buf + 1, 1);
+
+	if (rx_buf[0] != 0x83 && rx_buf[1] != 0x11)
+	{
+		LUAT_DEBUG_PRINT("not find es8311");
+		return -1;
+	}
+	LUAT_DEBUG_PRINT("find es8311");
+	for (int i = 0; i < sizeof(es8311_reg_table)/sizeof(i2c_reg_t); i++)
+    {
+		luat_i2c_send(TEST_I2C_ID, ES8311_I2C_ADDR, &es8311_reg_table[i], 2, 1);
+    }
+	luat_rtos_task_sleep(500);
+#endif
+	return 0;
+}
+
+
+
+
+
+
+
 static void luat_test_task(void *param)
 {
 	luat_event_t event;
@@ -310,6 +507,16 @@ static void luat_test_task(void *param)
 	luat_audio_play_global_init_with_task_priority(audio_event_cb, audio_data_cb, NULL, NULL, NULL, 90);
 //	Audio_StreamStruct *stream = (Audio_StreamStruct *)luat_audio_play_get_stream(0);
 //	如下配置可使用TM8211
+
+	int result = codec_config();
+	if(result)
+	{
+		while (1)
+		{
+			LUAT_DEBUG_PRINT("codec config fail");
+			luat_rtos_task_sleep(1000);
+		}
+	}
     luat_i2s_base_setup(0, I2S_MODE_MSB, I2S_FRAME_SIZE_16_16);
 
     g_s_http_client = luat_http_client_create(luatos_http_cb, luat_rtos_get_current_handle(), -1);
