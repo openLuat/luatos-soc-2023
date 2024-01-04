@@ -413,7 +413,10 @@ int luat_i2s_send(uint8_t id, uint8_t* buff, size_t len)
 }
 
 int luat_i2s_rx_cb(void *pdata, void *param){
-	luat_i2s_event_cb((uint8_t)param ,LUAT_I2S_EVENT_RX_DONE, pdata);
+	luat_audio_conf_t* audio_conf = luat_audio_get_config((uint8_t)param);
+	if (audio_conf->codec_conf.i2s_conf->luat_i2s_event_callback){
+		audio_conf->codec_conf.i2s_conf->luat_i2s_event_callback((uint8_t)param ,LUAT_I2S_EVENT_RX_DONE, pdata);
+	}
 }
 
 int luat_i2s_recv(uint8_t id, uint8_t* buff, size_t len)
