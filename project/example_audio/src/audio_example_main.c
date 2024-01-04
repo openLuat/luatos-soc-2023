@@ -26,9 +26,11 @@
 #endif
 
 #define TEST_I2C_ID I2C_ID1
+#define TEST_I2S_ID I2S_ID0
 #define ES8311_I2C_ADDR 0x18
-#define ES8311  0
-#define TM8211	1
+#define ES8311  1
+#define TM8211	0
+
 
 typedef struct
  {
@@ -285,13 +287,17 @@ static int codec_config()
 static void play_channel_config(void)
 {
 	// 模拟DAC通道
-	// luat_audio_play_set_bus_type(LUAT_AUDIO_BUS_SOFT_DAC);
-	
-	// ES7149/ES7148
-	// luat_i2s_base_setup(0, I2S_MODE_I2S, I2S_FRAME_SIZE_16_16);
-
+	// luat_audio_play_set_bus_type(TEST_I2S_ID, LUAT_AUDIO_BUS_SOFT_DAC);
+	luat_i2s_conf_t conf = {0};
+	conf.id = TEST_I2S_ID;
 	// TM8211/ES8311
-	luat_i2s_base_setup(0, I2S_MODE_MSB, I2S_FRAME_SIZE_16_16);
+	conf.standard = LUAT_I2S_MODE_MSB;
+	conf.channel_format = LUAT_I2S_CHANNEL_STEREO;
+	// ES7149/ES7148
+	// conf.standard = I2S_MODE_I2S;
+	conf.channel_bits = LUAT_I2S_BITS_16;
+	conf.data_bits = LUAT_I2S_BITS_16;
+	luat_i2s_setup(&conf);
 }
 
 

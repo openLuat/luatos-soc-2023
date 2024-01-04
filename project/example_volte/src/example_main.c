@@ -39,8 +39,6 @@
 #define I2C_ID	1
 #define I2S_ID	0
 
-#define CODEC_CTRL	//如果云喇叭开发板上的CODEC因为电压波动工作不正常，可以去掉这个宏，但是去掉后会有爆破音
-
 extern uint8_t callAlertRing16k[];
 extern uint8_t tone450_8k[];
 extern uint8_t tone950_8k[];
@@ -642,6 +640,7 @@ static uint8_t g_s_codec_is_on;
 static uint8_t g_s_record_type;
 static uint8_t g_s_play_type;
 static HANDLE g_s_delay_timer;
+static luat_i2s_conf_t *g_s_i2s_conf;
 enum
 {
 	VOLTE_EVENT_PLAY_TONE = 1,
@@ -655,34 +654,7 @@ static luat_rtos_task_handle g_s_task_handle;
 
 static int32_t play_tone_cb(void *pdata, void *param)
 {
-	if (g_s_tone_play_type)
-	{
-		g_s_tone_off_cnt++;
-		if (g_s_tone_off_cnt < g_s_tone_off_total)
-		{
-			luat_i2s_transfer_loop(I2S_ID, NULL, 1600, 2, 1);
-		}
-		else
-		{
-			g_s_tone_on_cnt = 0;
-			g_s_tone_play_type = 0;
-			luat_i2s_transfer_loop(I2S_ID, g_s_tone_src, 160, 2, 1);
-		}
-	}
-	else
-	{
-		g_s_tone_on_cnt++;
-		if (g_s_tone_on_cnt < g_s_tone_on_total)
-		{
-			luat_i2s_transfer_loop(I2S_ID, g_s_tone_src, 160, 2, 1);
-		}
-		else
-		{
-			g_s_tone_off_cnt = 0;
-			g_s_tone_play_type = 1;
-			luat_i2s_transfer_loop(I2S_ID, NULL, 1600, 2, 1);
-		}
-	}
+
 	return 0;
 }
 static void play_tone(uint8_t param)
@@ -692,15 +664,13 @@ static void play_tone(uint8_t param)
 	{
 		g_s_record_type = 0;
 		g_s_play_type = 0;
-		luat_i2s_stop(I2S_ID);
+		luat_i2s_close(I2S_ID);
 		if (g_s_codec_is_on)
 		{
 			g_s_codec_is_on = 0;
-#ifdef CODEC_CTRL
 			es8311_stop();
-#endif
 		}
-
+		g_s_i2s_conf->is_full_duplex = 0;
 		return;
 	}
 	if (param != LUAT_MOBILE_CC_PLAY_CALL_INCOMINGCALL_RINGING)
@@ -738,8 +708,7 @@ static void play_tone(uint8_t param)
 
 			break;
 		}
-		luat_i2s_stop(I2S_ID);
-		luat_i2s_transfer_start(I2S_ID, 8000, 1, 0, play_tone_cb, NULL);
+		luat_i2s_modify(I2S_ID, LUAT_I2S_CHANNEL_RIGHT, LUAT_I2S_BITS_16, 8000);
 		g_s_tone_on_cnt = 0;
 		g_s_tone_off_cnt = 0;
 		g_s_tone_play_type = 0;
@@ -747,21 +716,12 @@ static void play_tone(uint8_t param)
 	}
 	else
 	{
-		luat_i2s_start(I2S_ID, 1, 16000, 1);
+		luat_i2s_modify(I2S_ID, LUAT_I2S_CHANNEL_RIGHT, LUAT_I2S_BITS_16, 16000);
 		luat_i2s_transfer_loop(I2S_ID, callAlertRing16k, 4872, 12, 0);
 	}
 	g_s_codec_is_on = 1;
-#ifdef CODEC_CTRL
 	es8311AllResume();
-#endif
 }
-
-static void start_speech(uint8_t *data, uint32_t param)
-{
-
-
-}
-
 
 static void mobile_event_cb(uint8_t event, uint8_t index, uint8_t status)
 {
@@ -838,12 +798,45 @@ void mobile_voice_data_input(uint8_t *input, uint32_t len, uint32_t sample_rate,
 
 }
 
-__CORE_FUNC_IN_RAM__ int32_t record_cb(void *pdata, void *param)
+__USER_FUNC_IN_RAM__ int record_cb(uint8_t id ,luat_i2s_event_t event, uint8_t *rx_data, uint32_t rx_len, void *param)
 {
-	Buffer_Struct *buffer = (Buffer_Struct *)pdata;
-	if (buffer)
+	switch(event)
 	{
-		luat_rtos_event_send(g_s_task_handle, VOLTE_EVENT_RECORD_VOICE_UPLOAD, (uint32_t)buffer->Data, buffer->Pos, 0, 0);
+	case LUAT_I2S_EVENT_RX_DONE:
+		luat_rtos_event_send(g_s_task_handle, VOLTE_EVENT_RECORD_VOICE_UPLOAD, (uint32_t)rx_data, rx_len, 0, 0);
+		break;
+	case LUAT_I2S_EVENT_TRANSFER_DONE:
+		if (g_s_tone_play_type)
+		{
+			g_s_tone_off_cnt++;
+			if (g_s_tone_off_cnt < g_s_tone_off_total)
+			{
+				luat_i2s_transfer_loop(I2S_ID, NULL, 1600, 2, 1);
+			}
+			else
+			{
+				g_s_tone_on_cnt = 0;
+				g_s_tone_play_type = 0;
+				luat_i2s_transfer_loop(I2S_ID, g_s_tone_src, 160, 2, 1);
+			}
+		}
+		else
+		{
+			g_s_tone_on_cnt++;
+			if (g_s_tone_on_cnt < g_s_tone_on_total)
+			{
+				luat_i2s_transfer_loop(I2S_ID, g_s_tone_src, 160, 2, 1);
+			}
+			else
+			{
+				g_s_tone_off_cnt = 0;
+				g_s_tone_play_type = 1;
+				luat_i2s_transfer_loop(I2S_ID, NULL, 1600, 2, 1);
+			}
+		}
+		break;
+	default:
+		break;
 	}
 	return 0;
 }
@@ -860,7 +853,8 @@ static void volte_task(void *param)
 	luat_rtos_timer_create(&g_s_delay_timer);
 	luat_i2c_setup(I2C_ID, 0);
 	luat_i2c_set_polling_mode(I2C_ID, 1);
-	luat_i2s_base_setup(I2S_ID, I2S_MODE_LSB, I2S_FRAME_SIZE_16_16);	//ES8311就是这个配置
+
+
 	size_t total, alloc, peak;
 	luat_rtos_task_sleep(50);
 	luat_gpio_set(CODEC_PWR_PIN, 1);
@@ -878,11 +872,7 @@ static void volte_task(void *param)
 	{
 		LUAT_DEBUG_PRINT("find es8311");
 		codecInit();
-
-#ifdef CODEC_CTRL
 		es8311_stop();
-#endif
-
 	}
 	else
 	{
@@ -913,13 +903,13 @@ static void volte_task(void *param)
 		case VOLTE_EVENT_RECORD_VOICE_START:
 			g_s_codec_is_on = 1;
 			g_s_record_type = event.param1;
-			luat_i2s_stop(I2S_ID);
+			luat_i2s_close(I2S_ID);
 			luat_rtos_task_sleep(1);
-			luat_i2s_transfer_start(I2S_ID, g_s_record_type * 8000, 1, 320 * g_s_record_type, record_cb, NULL);
+			g_s_i2s_conf->is_full_duplex = 1;
+			g_s_i2s_conf->cb_rx_len = 320 * g_s_record_type;
+			luat_i2s_modify(I2S_ID, LUAT_I2S_CHANNEL_RIGHT, LUAT_I2S_BITS_16, g_s_record_type * 8000);
 			luat_i2s_transfer_loop(I2S_ID, NULL, 3200, 2, 0);	//address传入空地址就是播放空白音
-#ifdef CODEC_CTRL
 			es8311AllResume();
-#endif
 			break;
 		case VOLTE_EVENT_RECORD_VOICE_UPLOAD:
 			luat_mobile_speech_upload((uint8_t *)event.param1, event.param2);
@@ -930,8 +920,9 @@ static void volte_task(void *param)
 			{
 				LUAT_DEBUG_PRINT("对方没接电话，直接挂断了, 5秒后自动断开");
 				luat_rtos_timer_start(g_s_delay_timer, 5000, 0, hangup_delay, NULL);
-				luat_i2s_stop(I2S_ID);
-				luat_i2s_start(I2S_ID, 1, g_s_play_type * 8000, 1);
+				luat_i2s_close(I2S_ID);
+				g_s_i2s_conf->is_full_duplex = 0;
+				luat_i2s_modify(I2S_ID, LUAT_I2S_CHANNEL_RIGHT, LUAT_I2S_BITS_16, g_s_play_type * 8000);
 				if (2 == g_s_play_type)
 				{
 					luat_i2s_transfer_loop(I2S_ID, (uint8_t *)event.param1, event.param2/3, 3, 0);
@@ -983,6 +974,16 @@ static void task_demo_init(void)
 	luat_mobile_event_register_handler(mobile_event_cb);
 	luat_mobile_speech_init(mobile_voice_data_input);
 	luat_rtos_task_create(&g_s_task_handle, 4096, 100, "volte", volte_task, NULL, 64);
+
+	luat_i2s_conf_t conf = {0};
+	conf.id = I2S_ID;
+	conf.mode = LUAT_I2S_MODE_MASTER;
+	conf.channel_format = LUAT_I2S_CHANNEL_RIGHT;
+	conf.standard = LUAT_I2S_MODE_LSB;
+	conf.channel_bits = LUAT_I2S_BITS_16;
+	conf.data_bits = LUAT_I2S_BITS_16;
+	luat_i2s_setup(&conf);
+	g_s_i2s_conf = luat_i2s_get_config(I2S_ID);
 }
 
 INIT_TASK_EXPORT(task_demo_init, "1");
