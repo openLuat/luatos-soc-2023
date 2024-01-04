@@ -980,6 +980,7 @@ static void task_demo_init(void)
 	conf.standard = LUAT_I2S_MODE_LSB;
 	conf.channel_bits = LUAT_I2S_BITS_16;
 	conf.data_bits = LUAT_I2S_BITS_16;
+	conf.luat_i2s_event_callback = record_cb;
 	luat_i2s_setup(&conf);
 	g_s_i2s_conf = luat_i2s_get_config(I2S_ID);
 }
