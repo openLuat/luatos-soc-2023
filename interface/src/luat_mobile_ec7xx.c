@@ -930,6 +930,11 @@ int luat_mobile_config(uint8_t item, uint32_t value)
 		// DBG("CALL psCamCmiReq");
 		cmsNonBlockApiCall(luat_mobile_sim_write_mode, 4, &value);
 		return 0;
+	case MOBILE_CONF_FAKE_CELL_BARTIME:
+		req.enableFakeCellOpt = value?1:0;
+		req.fakeCellBarTimerS = value;
+		req.enableFakeCellOptPresent = 1;
+		break;
 	default:
 		return -1;
 	}
