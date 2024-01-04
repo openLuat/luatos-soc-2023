@@ -20,8 +20,6 @@
  */
 #include "common_api.h"
 
-//#if defined FEATURE_IMS_ENABLE
-#if 1
 #include "common_api.h"
 #include "luat_gpio.h"
 #include "luat_mobile.h"
@@ -31,7 +29,7 @@
 #include "luat_debug.h"
 #include "luat_mem.h"
 
-//demo 配置带ES8311硬件的云喇叭开发板
+//demo 配置带ES8311硬件的云喇叭开发板，编译时需要把build.bat里的CHIP_TARGET改成ec718pv
 #define CODEC_PWR_PIN HAL_GPIO_16
 #define CODEC_PWR_PIN_ALT_FUN	4
 #define PA_PWR_PIN HAL_GPIO_25
@@ -988,5 +986,3 @@ static void task_demo_init(void)
 
 INIT_TASK_EXPORT(task_demo_init, "1");
 
-
-#endif
