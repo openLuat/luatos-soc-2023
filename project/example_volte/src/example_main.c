@@ -650,11 +650,6 @@ enum
 
 static luat_rtos_task_handle g_s_task_handle;
 
-static int32_t play_tone_cb(void *pdata, void *param)
-{
-
-	return 0;
-}
 static void play_tone(uint8_t param)
 {
 	bool needIrq = true;
@@ -706,6 +701,8 @@ static void play_tone(uint8_t param)
 
 			break;
 		}
+		g_s_i2s_conf->is_full_duplex = 1;
+		g_s_i2s_conf->cb_rx_len = 0;	//这样不会有RX回调
 		luat_i2s_modify(I2S_ID, LUAT_I2S_CHANNEL_RIGHT, LUAT_I2S_BITS_16, 8000);
 		g_s_tone_on_cnt = 0;
 		g_s_tone_off_cnt = 0;
@@ -714,6 +711,7 @@ static void play_tone(uint8_t param)
 	}
 	else
 	{
+		g_s_i2s_conf->is_full_duplex = 0;
 		luat_i2s_modify(I2S_ID, LUAT_I2S_CHANNEL_RIGHT, LUAT_I2S_BITS_16, 16000);
 		luat_i2s_transfer_loop(I2S_ID, callAlertRing16k, 4872, 12, 0);
 	}
@@ -803,6 +801,7 @@ __USER_FUNC_IN_RAM__ int record_cb(uint8_t id ,luat_i2s_event_t event, uint8_t *
 	case LUAT_I2S_EVENT_RX_DONE:
 		luat_rtos_event_send(g_s_task_handle, VOLTE_EVENT_RECORD_VOICE_UPLOAD, (uint32_t)rx_data, rx_len, 0, 0);
 		break;
+	case LUAT_I2S_EVENT_TX_DONE:
 	case LUAT_I2S_EVENT_TRANSFER_DONE:
 		if (g_s_tone_play_type)
 		{
@@ -885,7 +884,8 @@ static void volte_task(void *param)
 	LUAT_DEBUG_PRINT("psram total %u, used %u, max used %u", total, alloc, peak);
 	luat_meminfo_opt_sys(LUAT_HEAP_SRAM, &total, &alloc, &peak);
 	LUAT_DEBUG_PRINT("sram total %u, used %u, max used %u", total, alloc, peak);
-
+	luat_rtos_task_sleep(15000);
+//	luat_mobile_make_call(0, "xxx", 11);	//这里填入手机号可以自动拨打
 	while (1)
 	{
 		luat_rtos_event_recv(g_s_task_handle, 0, &event, NULL, LUAT_WAIT_FOREVER);
@@ -910,7 +910,10 @@ static void volte_task(void *param)
 			es8311AllResume();
 			break;
 		case VOLTE_EVENT_RECORD_VOICE_UPLOAD:
-			luat_mobile_speech_upload((uint8_t *)event.param1, event.param2);
+			if (g_s_record_type)
+			{
+				luat_mobile_speech_upload((uint8_t *)event.param1, event.param2);
+			}
 			break;
 		case VOLTE_EVENT_PLAY_VOICE:
 			g_s_play_type = event.param3; //1 = 8K 2 = 16K
