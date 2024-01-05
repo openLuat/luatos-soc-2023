@@ -68,13 +68,13 @@ uint32_t luat_mcu_hz(void) {
     return 1000;
 }
 
-uint64_t luat_mcu_tick64(void) {
+__USER_FUNC_IN_RAM__ uint64_t luat_mcu_tick64(void) {
     return soc_get_poweron_time_tick();
 }
 int luat_mcu_us_period(void) {
     return 26;
 }
-uint64_t luat_mcu_tick64_ms(void) {
+__USER_FUNC_IN_RAM__ uint64_t luat_mcu_tick64_ms(void) {
     return soc_get_poweron_time_ms();
 }
 

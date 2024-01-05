@@ -9,6 +9,7 @@
 #include "interf_enc.h"
 #include "luat_uart.h"
 #include "luat_mem.h"
+//本demo的I2S用法已经不符合API，暂时无法使用，请参考example_speech
 //AIR780EP音频开发板配置
 #define MIC_VOL_EN	HAL_GPIO_26
 #define MIC_VOL_EN_ALT_FUN	0
