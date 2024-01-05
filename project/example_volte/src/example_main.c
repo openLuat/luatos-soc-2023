@@ -932,9 +932,12 @@ static void volte_task(void *param)
 				{
 					luat_i2s_transfer_loop(I2S_ID, (uint8_t *)event.param1, event.param2/6, 6, 0);
 				}
-#ifdef CODEC_CTRL
-				es8311AllResume();
-#endif
+				if (!g_s_codec_is_on)
+				{
+					g_s_codec_is_on = 1;
+					es8311AllResume();
+				}
+
 			}
 			else
 			{
