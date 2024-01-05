@@ -884,7 +884,7 @@ static void volte_task(void *param)
 	LUAT_DEBUG_PRINT("psram total %u, used %u, max used %u", total, alloc, peak);
 	luat_meminfo_opt_sys(LUAT_HEAP_SRAM, &total, &alloc, &peak);
 	LUAT_DEBUG_PRINT("sram total %u, used %u, max used %u", total, alloc, peak);
-	luat_rtos_task_sleep(15000);
+//	luat_rtos_task_sleep(15000);			//如果需要自动拨打出去，这里延迟一下，等volte准备好
 //	luat_mobile_make_call(0, "xxx", 11);	//这里填入手机号可以自动拨打
 	while (1)
 	{
