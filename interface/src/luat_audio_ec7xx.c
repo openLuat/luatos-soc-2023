@@ -379,61 +379,6 @@ void luat_audio_set_debug(uint8_t on_off)
 	audio_play_debug_onoff(0, on_off);
 }
 
-int luat_i2s_setup(luat_i2s_conf_t *conf)
-{
-	uint8_t frame_size = I2S_FRAME_SIZE_16_16;
-	if (conf->id >= I2S_MAX) return -1;
-	if (conf->channel_bits != 16)
-	{
-		switch (conf->data_bits)
-		{
-		case 24:
-			frame_size = I2S_FRAME_SIZE_24_32;
-			break;
-		case 32:
-			frame_size = I2S_FRAME_SIZE_32_32;
-			break;
-		default:
-			frame_size = I2S_FRAME_SIZE_16_32;
-			break;
-		}
-	}
-	luat_i2s_base_setup(conf->id, conf->standard, frame_size);
-	g_s_audio_hardware.record_sample_rate[conf->id] = conf->sample_rate;
-	g_s_audio_hardware.record_channel = (conf->channel_format < 2)?1:2;
-	if (conf->channel_format < 2)
-	{
-		luat_i2s_set_lr_channel(conf->id, conf->channel_format);
-	}
-	return 0;
-}
-int luat_i2s_send(uint8_t id, uint8_t* buff, size_t len)
-{
-	return -1;
-}
-
-int luat_i2s_rx_cb(void *pdata, void *param){
-	luat_audio_conf_t* audio_conf = luat_audio_get_config((uint8_t)param);
-	if (audio_conf->codec_conf.i2s_conf->luat_i2s_event_callback){
-		audio_conf->codec_conf.i2s_conf->luat_i2s_event_callback((uint8_t)param ,LUAT_I2S_EVENT_RX_DONE, pdata);
-	}
-}
-
-int luat_i2s_recv(uint8_t id, uint8_t* buff, size_t len)
-{
-	if (id >= I2S_MAX) return -1;
-	if (I2S_Start(id, 0, g_s_audio_hardware.record_sample_rate[id], g_s_audio_hardware.record_channel))
-	{
-		DBG("!");
-		return -1;
-	}
-	return I2S_Rx(id, len, luat_i2s_rx_cb, id);
-}
-int luat_i2s_close(uint8_t id)
-{
-	luat_i2s_stop(id);
-	return 0;
-}
 int l_i2s_play(lua_State *L) {
     return -1;
 }
