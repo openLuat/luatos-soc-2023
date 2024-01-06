@@ -36,6 +36,7 @@
 #define PA_PWR_PIN_ALT_FUN	0
 #define I2C_ID	1
 #define I2S_ID	0
+#define NO_ANSWER_AUTO_HANGUP_TIME	30000	//无接听自动挂断时间，单位ms
 
 extern uint8_t callAlertRing16k[];
 extern uint8_t tone450_8k[];
@@ -650,6 +651,12 @@ enum
 
 static luat_rtos_task_handle g_s_task_handle;
 
+
+static LUAT_RT_RET_TYPE hangup_delay(LUAT_RT_CB_PARAM)
+{
+	luat_rtos_event_send(g_s_task_handle, VOLTE_EVENT_HANGUP, 0, 0, 0, 0);
+}
+
 static void play_tone(uint8_t param)
 {
 	bool needIrq = true;
@@ -664,6 +671,7 @@ static void play_tone(uint8_t param)
 			es8311_stop();
 		}
 		g_s_i2s_conf->is_full_duplex = 0;
+		luat_rtos_timer_stop(g_s_delay_timer);
 		return;
 	}
 	if (param != LUAT_MOBILE_CC_PLAY_CALL_INCOMINGCALL_RINGING)
@@ -717,6 +725,7 @@ static void play_tone(uint8_t param)
 	}
 	g_s_codec_is_on = 1;
 	es8311AllResume();
+	luat_rtos_timer_start(g_s_delay_timer, NO_ANSWER_AUTO_HANGUP_TIME, 0, hangup_delay, NULL);
 }
 
 static void mobile_event_cb(uint8_t event, uint8_t index, uint8_t status)
@@ -838,10 +847,6 @@ __USER_FUNC_IN_RAM__ int record_cb(uint8_t id ,luat_i2s_event_t event, uint8_t *
 	return 0;
 }
 
-static LUAT_RT_RET_TYPE hangup_delay(LUAT_RT_CB_PARAM)
-{
-	luat_rtos_event_send(g_s_task_handle, VOLTE_EVENT_HANGUP, 0, 0, 0, 0);
-}
 
 
 static void volte_task(void *param)
@@ -908,6 +913,7 @@ static void volte_task(void *param)
 			luat_i2s_modify(I2S_ID, LUAT_I2S_CHANNEL_RIGHT, LUAT_I2S_BITS_16, g_s_record_type * 8000);
 			luat_i2s_transfer_loop(I2S_ID, NULL, 3200, 2, 0);	//address传入空地址就是播放空白音
 			es8311AllResume();
+			luat_rtos_timer_stop(g_s_delay_timer);
 			break;
 		case VOLTE_EVENT_RECORD_VOICE_UPLOAD:
 			if (g_s_record_type)
@@ -919,8 +925,6 @@ static void volte_task(void *param)
 			g_s_play_type = event.param3; //1 = 8K 2 = 16K
 			if (!g_s_record_type)
 			{
-				LUAT_DEBUG_PRINT("对方没接电话，直接挂断了, 5秒后自动断开");
-				luat_rtos_timer_start(g_s_delay_timer, 5000, 0, hangup_delay, NULL);
 				luat_i2s_close(I2S_ID);
 				g_s_i2s_conf->is_full_duplex = 0;
 				luat_i2s_modify(I2S_ID, LUAT_I2S_CHANNEL_RIGHT, LUAT_I2S_BITS_16, g_s_play_type * 8000);
