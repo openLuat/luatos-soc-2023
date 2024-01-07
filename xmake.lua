@@ -115,8 +115,8 @@ add_defines("__USER_CODE__",
             "SOFTPACK_VERSION=\"\"",
             "HAVE_STRUCT_TIMESPEC",
             "FEATURE_FOTAPAR_ENABLE",
-            "__ASSEMBLY__"
-            -- "__CURRENT_FILE_NAME__=system_ec7xx",
+            "__ASSEMBLY__",
+            "__CURRENT_FILE_NAME__=__FILE__"
             )
 
 add_cxflags("-g3",
