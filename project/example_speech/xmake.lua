@@ -22,5 +22,9 @@ target(TARGET_NAME)
     -- **.c会递归所有子文件夹下的文件
     add_files(LUATOS_ROOT .. "/components/multimedia/amr_decode/**.c",{public = true})
     add_files("$(projectdir)/lib/libmp3.a")
-
+    -- common
+    add_includedirs(LUATOS_ROOT.."/components/common",{public = true})
+    -- audio
+    add_includedirs(LUATOS_ROOT.."/components/multimedia/",{public = true})
+    add_files(LUATOS_ROOT.."/components/multimedia/luat_audio_es8311.c")
 target_end()
