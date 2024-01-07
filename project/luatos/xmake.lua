@@ -1,5 +1,6 @@
 local TARGET_NAME = os.scriptdir():match(".+[/\\]([%w_]+)")
 local LIB_DIR = "$(buildir)/".. TARGET_NAME .. "/"
+local SDK_PATH = os.projectdir()
 
 target(TARGET_NAME)
     set_kind("static")
@@ -21,6 +22,10 @@ target(TARGET_NAME)
         local LUAT_SCRIPT_SIZE = tonumber(conf_data:match("\r#define LUAT_SCRIPT_SIZE (%d+)") or conf_data:match("\n#define LUAT_SCRIPT_SIZE (%d+)"))
         local LUAT_SCRIPT_OTA_SIZE = tonumber(conf_data:match("\r#define LUAT_SCRIPT_OTA_SIZE (%d+)") or conf_data:match("\n#define LUAT_SCRIPT_OTA_SIZE (%d+)"))
         -- print(string.format("script zone %d ota %d", LUAT_SCRIPT_SIZE, LUAT_SCRIPT_OTA_SIZE))
+        if chip_target == "ec718pv" and LUAT_SCRIPT_SIZE > 128 then
+            LUAT_SCRIPT_SIZE = 128
+            LUAT_SCRIPT_OTA_SIZE = 96
+        end
         local LUA_SCRIPT_ADDR = FLASH_FOTA_REGION_START - (LUAT_SCRIPT_SIZE + LUAT_SCRIPT_OTA_SIZE) * 1024
         local LUA_SCRIPT_OTA_ADDR = FLASH_FOTA_REGION_START - LUAT_SCRIPT_OTA_SIZE * 1024
         local script_addr = string.format("%X", LUA_SCRIPT_ADDR)

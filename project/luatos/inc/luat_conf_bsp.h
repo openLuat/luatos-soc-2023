@@ -250,9 +250,17 @@
 #define LUAT_HEAP_SIZE (250*1024)
 #endif
 
-#if defined (FEATURE_AMR_CP_ENABLE) || defined (FEATURE_VEM_CP_ENABLE)
+#if defined TYPE_EC718P && (defined (FEATURE_AMR_CP_ENABLE) || defined (FEATURE_VEM_CP_ENABLE))
 #if LUAT_HEAP_SIZE > (160*1024)
+#undef LUAT_HEAP_SIZE
 #define LUAT_HEAP_SIZE (160*1024)
+#endif
+
+#if LUAT_SCRIPT_SIZE > 128
+#undef LUAT_SCRIPT_SIZE
+#undef LUAT_SCRIPT_OTA_SIZE
+#define LUAT_SCRIPT_SIZE 128
+#define LUAT_SCRIPT_OTA_SIZE 96
 #endif
 #endif
 
@@ -363,6 +371,35 @@
 #undef LUAT_USE_TLS
 #endif
 
+
+#if defined TYPE_EC718P && (defined (FEATURE_AMR_CP_ENABLE) || defined (FEATURE_VEM_CP_ENABLE))
+#undef LUAT_USE_LVGL
+#undef LUAT_USE_LCD
+#undef LUAT_USE_TJPGD
+#undef LUAT_USE_EINK
+#undef LUAT_USE_U8G2
+#undef LUAT_USE_FONTS
+
+#undef LUAT_USE_PROTOBUF
+#undef LUAT_USE_RSA
+#undef LUAT_USE_YMODEM
+#undef LUAT_USE_FATFS
+#undef LUAT_USE_LORA
+#undef LUAT_USE_I2CTOOLS
+#undef LUAT_USE_SFUD
+#undef LUAT_USE_SENSOR
+#undef LUAT_USE_MINIZ
+#undef LUAT_USE_FDB
+#undef LUAT_USE_HMETA
+#undef LUAT_USE_W5500
+#undef LUAT_USE_IOTAUTH
+#undef LUAT_USE_WEBSOCKET
+#undef LUAT_USE_FTP
+
+#define LUAT_CONF_TLS_DTLS_DISABLE
+#define LUAT_CONF_TLS_DISABLE_NC
+#define LUAT_CONF_TLS_DISABLE_ECP_ECDHE
+#endif
 
 // 关闭加密版本的UDP, 类似于TCP的TLS/SSL, 极少使用
 #ifdef LUAT_CONF_TLS_DTLS_DISABLE
