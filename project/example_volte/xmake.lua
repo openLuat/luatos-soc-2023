@@ -9,5 +9,10 @@ target(TARGET_NAME)
     --加入代码和头文件
     add_includedirs("./inc",{public = true})
     add_files("./src/*.c",{public = true})
+    -- common
+    add_includedirs(LUATOS_ROOT.."/components/common",{public = true})
+    -- audio
+    add_includedirs(LUATOS_ROOT.."/components/multimedia/",{public = true})
+    add_files(LUATOS_ROOT.."/components/multimedia/luat_audio_es8311.c")
 
 target_end()
