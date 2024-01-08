@@ -77,7 +77,7 @@ end
 -- if has_config("project_name") then project_name = get_config("project_name") end
 
 option("lspd_mode")
-    set_default(true)
+    set_default("enable")
     set_showmenu(true)
     set_description("Enable or disable low speed mode , more memory")
 option_end()

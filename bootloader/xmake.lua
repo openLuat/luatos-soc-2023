@@ -1,11 +1,11 @@
 
 local SDK_PATH = os.projectdir()
 local USER_PROJECT_NAME = USER_PROJECT_NAME
-
+local LIB_PS_PLAT = nil
 if has_config("chip_target") and has_config("lspd_mode") then 
     chip_target = get_config("chip_target") 
     LIB_PS_PLAT = "full"
-    if get_config("lspd_mode") then
+    if get_config("lspd_mode")=="enable" then
         if chip_target == "ec718pv" then
         LIB_FW = "audio"
         LIB_PS_PLAT = "ims"
@@ -90,7 +90,7 @@ target("ap_bootloader.elf")
     add_deps("driver")
 
     local chip_target = nil
-    if has_config("chip_target") then chip_target = get_config("chip_target") end
+    if has_config("chip_target") and has_config("lspd_mode") then chip_target = get_config("chip_target") end
     if chip_target then
         add_linkdirs("$(projectdir)/PLAT/prebuild/PLAT/lib/gcc/"..(chip_target=="ec718e"and"ec718p"or chip_target):sub(1,6).."/"..LIB_PS_PLAT)
         add_linkdirs("$(projectdir)/PLAT/libs/"..(chip_target=="ec718e"and"ec718p"or chip_target).."/bootloader")
@@ -108,7 +108,7 @@ target("ap_bootloader.elf")
     local toolchains = nil
     local ld_parameter = nil 
     before_link(function(target)
-        toolchains = target:toolchains()[1]:bindir()
+        toolchains = target:tool("cc"):match('.+\\bin')
         for _, dep in ipairs(target:orderdeps()) do
             local linkdir = dep:targetdir()
             target:add("ldflags","-L./"..linkdir, {force=true})
