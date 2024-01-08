@@ -21,6 +21,9 @@
 
 #ifndef __PLATFORM_DEFINE_H__
 #define __PLATFORM_DEFINE_H__
+
+#include "sctdef.h"
+
 enum
 {
 	UART_DATA_BIT5 = 5,

@@ -34,6 +34,8 @@ void I2S_RxDebug(uint8_t I2SID);
 int32_t I2S_StartTransfer(uint8_t I2SID, uint32_t SampleRate, uint8_t ChannelNum, uint32_t ByteLen, CBFuncEx_t cb, void *param);
 void I2S_Transfer(uint8_t I2SID, uint8_t* Data, uint32_t ByteLen);
 void I2S_TransferLoop(uint8_t I2SID, uint8_t* Data, uint32_t OneTrunkByteLen, uint32_t TotalTrunkCnt, uint8_t NeedIrq);
+void I2S_TransferFast(uint8_t I2SID, uint8_t* Data, uint32_t OneTrunkByteLen, uint32_t TotalTrunkCnt, uint8_t IsLoop);
+void I2S_TransferPrepare(uint8_t I2SID, uint32_t TotalTrunkCnt);
 void I2S_Stop(uint8_t I2SID);
 uint8_t I2S_IsWorking(uint8_t I2SID);
 

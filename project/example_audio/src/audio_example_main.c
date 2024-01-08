@@ -303,7 +303,7 @@ static void play_channel_config(void)
 
 static void demo_task(void *arg)
 {
-	size_t total = 0, used = 0, max_used = 0;
+	size_t total = 0, alloc = 0, peak = 0;
 	luat_debug_set_fault_mode(LUAT_DEBUG_FAULT_HANG);
 	// 中文测试用下面的
 	char tts_string[] = "支付宝到账123.45元,微信收款9876.12元ABC,支付宝到账123.45元,微信收款9876.12元ABC,支付宝到账123.45元,微信收款9876.12元ABC,支付宝到账123.45元,微信收款9876.12元ABC";
@@ -351,21 +351,27 @@ static void demo_task(void *arg)
     {
     	luat_audio_play_multi_files(0, mp3_info, 4);
 		luat_rtos_task_sleep(9000);
-		luat_meminfo_sys(&total, &used, &max_used);
-    	LUAT_DEBUG_PRINT("meminfo total %d, used %d, max_used%d",total, used, max_used);
+		luat_meminfo_opt_sys(LUAT_HEAP_PSRAM, &total, &alloc, &peak);
+		LUAT_DEBUG_PRINT("psram total %u, used %u, max used %u", total, alloc, peak);
+		luat_meminfo_opt_sys(LUAT_HEAP_SRAM, &total, &alloc, &peak);
+		LUAT_DEBUG_PRINT("sram total %u, used %u, max used %u", total, alloc, peak);
 
 		luat_audio_play_multi_files(0, amr_info, 5);
 		luat_rtos_task_sleep(9000);
-    	luat_meminfo_sys(&total, &used, &max_used);
-    	LUAT_DEBUG_PRINT("meminfo total %d, used %d, max_used%d",total, used, max_used);
+		luat_meminfo_opt_sys(LUAT_HEAP_PSRAM, &total, &alloc, &peak);
+		LUAT_DEBUG_PRINT("psram total %u, used %u, max used %u", total, alloc, peak);
+		luat_meminfo_opt_sys(LUAT_HEAP_SRAM, &total, &alloc, &peak);
+		LUAT_DEBUG_PRINT("sram total %u, used %u, max used %u", total, alloc, peak);
 
 		luat_audio_play_tts_text(0, tts_string, sizeof(tts_string));
 		luat_rtos_task_sleep(35000);
-		luat_meminfo_sys(&total, &used, &max_used);
-    	LUAT_DEBUG_PRINT("meminfo total %d, used %d, max_used%d",total, used, max_used);
+		luat_meminfo_opt_sys(LUAT_HEAP_PSRAM, &total, &alloc, &peak);
+		LUAT_DEBUG_PRINT("psram total %u, used %u, max used %u", total, alloc, peak);
+		luat_meminfo_opt_sys(LUAT_HEAP_SRAM, &total, &alloc, &peak);
+		LUAT_DEBUG_PRINT("sram total %u, used %u, max used %u", total, alloc, peak);
     }
 }
-
+extern void audio_play_set_ram_type(LUAT_HEAP_TYPE_E Type);
 static void test_audio_demo_init(void)
 {
 	luat_fs_init();
@@ -386,7 +392,9 @@ static void test_audio_demo_init(void)
 	// 当前仅EC718p支持这个demo
 	#if defined TYPE_EC718P
 	luat_rtos_task_create(&task_handle, 2048, 20, "test", demo_task, NULL, 0);
+	//audio_play_set_ram_type(LUAT_HEAP_SRAM);		//打开后消耗RAM较多的地方将使用SRAM，否则使用AUTO模式
 	#endif
+
 }
 
 INIT_TASK_EXPORT(test_audio_demo_init, "1");

@@ -189,37 +189,32 @@ static void record_encode_amr(uint8_t *data, uint32_t len)
 		}
 		done_len += 160;
 	}
-	free(data);
 }
 
 static void record_stop_encode_amr(uint8_t *data, uint32_t len)
 {
+	luat_i2s_close(TEST_I2S_ID);
 	Encoder_Interface_exit(g_s_amr_encoder_handler);
 	g_s_amr_encoder_handler = NULL;
 	LUAT_DEBUG_PRINT("amr encode stop");
 }
 
-static int32_t record_cb(void *pdata, void *param)
+__USER_FUNC_IN_RAM__ int record_cb(uint8_t id ,luat_i2s_event_t event, uint8_t *rx_data, uint32_t rx_len, void *param)
 {
-	Buffer_Struct *buffer = (Buffer_Struct *)pdata;
-	if (buffer && (buffer->Pos >= 320))
+	switch(event)
 	{
-		void *buff = malloc(buffer->Pos);
-		memcpy(buff, buffer->Data, buffer->Pos);
-		//复杂耗时的操作不可以在回调里处理，这里放到audio task，当然也可以放到用户自己的task里
-		soc_call_function_in_audio(record_encode_amr, (uint32_t)buff, buffer->Pos, LUAT_WAIT_FOREVER);
+	case LUAT_I2S_EVENT_RX_DONE:
+		soc_call_function_in_audio(record_encode_amr, (uint32_t)rx_data, rx_len, LUAT_WAIT_FOREVER);
 		g_s_record_time++;
 		if (g_s_record_time >= (RECORD_TIME * 5))	//15秒
 		{
-			luat_i2s_rx_stop(TEST_I2S_ID);
 			soc_call_function_in_audio(record_stop_encode_amr, 0, 0, LUAT_WAIT_FOREVER);
 		}
+		break;
 
-
-		buffer->Pos = 0;
-
+	default:
+		break;
 	}
-
 	return 0;
 }
 
@@ -296,23 +291,39 @@ static void es8311_demo_task(void *arg)
 			while (1)
 			{
 				LUAT_DEBUG_PRINT("start record");
+			    luat_i2s_conf_t i2s_conf = {
+			        .id = TEST_I2S_ID,
+			        .mode = LUAT_I2S_MODE_SLAVE,
+			        .channel_format = LUAT_I2S_CHANNEL_RIGHT,
+			        .standard = LUAT_I2S_MODE_LSB,
+			        .channel_bits = LUAT_I2S_BITS_16,
+			        .data_bits = LUAT_I2S_BITS_16,
+					.is_full_duplex = 0,
+					.cb_rx_len = 320 * 10,
+			        .luat_i2s_event_callback = record_cb,
+			    };
+				luat_i2s_setup(&i2s_conf);
+
 				g_s_amr_encoder_handler = Encoder_Interface_init(0);
 				g_s_record_time = 0;
 				g_s_amr_rom_file.Pos = 0;
 				OS_BufferWrite(&g_s_amr_rom_file, "#!AMR\n", 6);
-				luat_i2s_base_setup(TEST_I2S_ID, I2S_MODE_I2S, I2S_FRAME_SIZE_16_16);
-				luat_i2s_start(TEST_I2S_ID, 0, 8000, 1);
-				luat_i2s_no_block_rx(TEST_I2S_ID, 320 * 10, record_cb, NULL);	//单声道8K的amr编码一次320字节，这里每200ms回调一次
+				luat_i2s_modify(TEST_I2S_ID, LUAT_I2S_CHANNEL_RIGHT, LUAT_I2S_BITS_16, 8000);
+				luat_i2s_recv(TEST_I2S_ID, NULL, 0);
 				tx_buf[0] = 0x00;
 				tx_buf[1] = 0x80|(1 << 6);
 				luat_i2c_send(TEST_I2C_ID, ES8311_I2C_ADDR, tx_buf, 2, 1);
 				luat_meminfo_sys(&total, &used, &max_used);
     	    	LUAT_DEBUG_PRINT("meminfo total %d, used %d, max_used%d",total, used, max_used);
 				luat_rtos_task_sleep((RECORD_TIME + 1) * 1000);
+
 				tx_buf[0] = 0x00;
 				tx_buf[1] = 0x80|(0 << 6);
 				luat_i2c_send(TEST_I2C_ID, ES8311_I2C_ADDR, tx_buf, 2, 1);
-				luat_i2s_base_setup(TEST_I2S_ID, I2S_MODE_MSB, I2S_FRAME_SIZE_16_16);
+				i2s_conf.mode = LUAT_I2S_MODE_MASTER;
+				i2s_conf.sample_rate = 0;
+				luat_i2s_setup(&i2s_conf);
+
 				info[0].address = (uint32_t)g_s_amr_rom_file.Data;
 				info[0].rom_data_len = g_s_amr_rom_file.Pos;
 				luat_audio_play_multi_files(0, info, 1);
