@@ -252,7 +252,7 @@ target(USER_PROJECT_NAME..".elf")
 			os.mkdir(SDK_PATH .. "/out/")
 			os.mkdir(out_path)
 		end
-        toolchains = target:tool("cc"):match('.+\\bin')
+        toolchains = target:tool("cc"):match('.+\\bin') or target:tool("cc"):match('.+/bin')
         for _, dep in ipairs(target:orderdeps()) do
             local linkdir = dep:targetdir()
             target:add("ldflags","-L./"..linkdir, {force=true})
