@@ -3,6 +3,7 @@
 #include "common_api.h"
 #include "driver_usp.h"
 #include "driver_gpio.h"
+#include "cmsis_gcc.h"
 
 typedef struct
 {
@@ -35,6 +36,8 @@ LUAT_WEAK int luat_lcd_draw(luat_lcd_conf_t* conf, int16_t x1, int16_t y1, int16
 {
     return 0;
 }
+
+#define __SWAP_RB(value) ((value & 0x07e0) | (value >> 11) | (value << 11))
 
 static void prvLCD_Task(void* params)
 {
@@ -187,8 +190,8 @@ int luat_lcd_IF_read_cmd_data(luat_lcd_conf_t* conf,const uint8_t cmd, uint8_t *
 
 int luat_lcd_IF_draw(luat_lcd_conf_t* conf, int16_t x1, int16_t y1, int16_t x2, int16_t y2, luat_color_t* color)
 {
-	uint32_t size,w,h;
-	uint8_t *dummy = NULL;
+	uint32_t size,w,h,points,i;
+	PV_Union dummy;
 	uint32_t temp[16];
 	int res;
     uint8_t data_x[] = {(x1+conf->xoffset)>>8,x1+conf->xoffset,(x2+conf->xoffset)>>8,x2+conf->xoffset};
@@ -200,12 +203,16 @@ int luat_lcd_IF_draw(luat_lcd_conf_t* conf, int16_t x1, int16_t y1, int16_t x2, 
 	w = x2 - x1 + 1;
 	h = y2 - y1 + 1;
 	size = w * h * sizeof(luat_color_t);
-
+	points = w * h;
 	if ((uint32_t)color & 0x03)
 	{
 		if (size <= sizeof(temp))
 		{
-			memcpy(temp, color, size);
+			dummy.pu32 = temp;
+			for(i = 0; i < points; i++)
+			{
+				dummy.pu16[i] = __SWAP_RB(color[i]);
+			}
 			GPIO_Output(conf->lcd_cs_pin, 0);
 			LSPI_WriteImageData(USP_ID2, w, h, (uint32_t)temp, size, 1);
 			GPIO_Output(conf->lcd_cs_pin, 1);
@@ -213,16 +220,23 @@ int luat_lcd_IF_draw(luat_lcd_conf_t* conf, int16_t x1, int16_t y1, int16_t x2, 
 		}
 		else
 		{
-			dummy = (uint8_t *)malloc(size + 4);
-			memcpy(dummy, color, size);
+			dummy.pu8 = (uint8_t *)malloc(size + 4);
+			for(i = 0; i < points; i++)
+			{
+				dummy.pu16[i] = __SWAP_RB(color[i]);
+			}
 			GPIO_Output(conf->lcd_cs_pin, 0);
-			LSPI_WriteImageData(USP_ID2, w, h, (uint32_t)dummy, size, 1);
+			LSPI_WriteImageData(USP_ID2, w, h, dummy.u32, size, 1);
 			GPIO_Output(conf->lcd_cs_pin, 1);
-			free(dummy);
+			free(dummy.p);
 		}
 	}
 	else
 	{
+		for(i = 0; i < points; i++)
+		{
+			color[i] = __SWAP_RB(color[i]);
+		}
 		GPIO_Output(conf->lcd_cs_pin, 0);
 		LSPI_WriteImageData(USP_ID2, w, h, (uint32_t)color, size, 1);
 		GPIO_Output(conf->lcd_cs_pin, 1);
