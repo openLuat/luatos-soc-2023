@@ -206,7 +206,9 @@ target("csdk")
             LUATOS_ROOT.."/luat/vfs/luat_vfs.c")
 
     -- cjson
-    add_files(LUATOS_ROOT.."/components/cjson/*.c")
+	if chip_target == "ec718pv" then
+		add_files(LUATOS_ROOT.."/components/cjson/*.c")
+	end
 
     add_files(LUATOS_ROOT.."/components/minmea/minmea.c")
 	add_files(LUATOS_ROOT.."/components/mobile/luat_mobile_common.c")
