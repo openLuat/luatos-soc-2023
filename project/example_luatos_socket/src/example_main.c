@@ -44,7 +44,7 @@ static void luat_test_task(void *param)
 	g_s_network_ctrl = network_alloc_ctrl(NW_ADAPTER_INDEX_LWIP_GPRS);
 	network_init_ctrl(g_s_network_ctrl, g_s_task_handle, luat_test_socket_callback, NULL);
 	network_set_base_mode(g_s_network_ctrl, 1, 15000, 1, 300, 5, 9);
-	g_s_network_ctrl->is_debug = 0;	//下行测速时关闭debug，如果只是普通测试，打开debug
+	g_s_network_ctrl->is_debug = 1;	//下行测速时关闭debug，如果只是普通测试，打开debug
 
 	if (SOCKET_TCP_SSL==1)
 	{
@@ -57,7 +57,7 @@ static void luat_test_task(void *param)
 	
 	// 请访问 https://netlab.luatos.com 获取新的端口号,之后修改remote_ip port再进行编译
 	const char remote_ip[] = "112.125.89.8";
-	int port = 45631;
+	int port = 47160;
 	const char hello[] = "hello, luatos!";
 	uint8_t *tx_data = malloc(1024);
 	uint8_t *rx_data = malloc(1024 * 8);
