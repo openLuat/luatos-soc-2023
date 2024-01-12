@@ -67,6 +67,12 @@ static void task_test_adc(void *param)
     luat_adc_open(3 , NULL);
     luat_adc_open(LUAT_ADC_CH_CPU, NULL);
     luat_adc_open(LUAT_ADC_CH_VBAT, NULL);
+#if defined TYPE_EC716S
+    luat_adc_ctrl_param_t ctrl_param;
+    ctrl_param.range = LUAT_ADC_AIO_RANGE_1_9;
+    luat_adc_ctrl(0, LUAT_ADC_SET_GLOBAL_RANGE, ctrl_param);
+    luat_adc_ctrl(1, LUAT_ADC_SET_GLOBAL_RANGE, ctrl_param);
+#endif
     while (1)
     {
         luat_rtos_task_sleep(1000);
