@@ -59,7 +59,6 @@ static void luatos_http_cb(int status, void *data, uint32_t len, void *param)
 {
 	uint8_t *head_data;
 	uint8_t *body_data;
-	// time_t ntime;
     if(status < 0) 
     {
 		luat_rtos_event_send(param, TEST_HTTP_FAILED, 0, 0, 0, 0);
@@ -72,7 +71,6 @@ static void luatos_http_cb(int status, void *data, uint32_t len, void *param)
 		{
 			body_data = luat_heap_malloc(len);
 			memcpy(body_data, data, len);
-			// localtime(&ntime);
 			luat_rtos_event_send(param, TEST_HTTP_GET_DATA, (uint32_t)body_data, len, 0, 0);
 		}
 		else
@@ -84,7 +82,6 @@ static void luatos_http_cb(int status, void *data, uint32_t len, void *param)
 		if (data)
 		{
 			head_data = luat_heap_malloc(len);
-			// localtime(&ntime);
 			memcpy(head_data, data, len);
 			luat_rtos_event_send(param, TEST_HTTP_GET_HEAD, (uint32_t)head_data, len, 0, 0);
 		}
@@ -124,6 +121,9 @@ static void luat_test_http_async_task(void *param)
 		luat_rtos_event_recv(g_s_task_handle, 0, &event, NULL, LUAT_WAIT_FOREVER);
 		switch(event.id)
 		{
+		case TEST_HTTP_GET_HEAD:
+			luat_heap_free((char *)event.param1);
+			break;
 		case TEST_HTTP_GET_HEAD_DONE:
 			// 在这里处理http响应头
 			done_len = 0;
