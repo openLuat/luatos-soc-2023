@@ -59,20 +59,22 @@ static void task_test_adc(void *param)
 
     // LUAT_ADC_CH_CPU和LUAT_ADC_CH_VBAT的说明如下：
     // LUAT_ADC_CH_CPU被芯片内部用来检测温度，仅支持软件上open、read和close操作，用户不能做其他用途使用；
-    // LUAT_ADC_CH_VBAT被芯片内部用来检测VBAT电压，仅支持软件上open、read和close操作，用户不能做其他用途使用；   
+    // LUAT_ADC_CH_VBAT被芯片内部用来检测VBAT电压，仅支持软件上open、read和close操作，用户不能做其他用途使用；
 
+    //如果使用的模组内部芯片为716S，请使用外部分压方式   
+#if defined TYPE_EC716S
+    luat_adc_ctrl_param_t ctrl_param;
+    ctrl_param.range = LUAT_ADC_AIO_RANGE_1_2;
+    luat_adc_ctrl(0, LUAT_ADC_SET_GLOBAL_RANGE, ctrl_param);
+    luat_adc_ctrl(1, LUAT_ADC_SET_GLOBAL_RANGE, ctrl_param);
+#endif
     luat_adc_open(0 , NULL);
     luat_adc_open(1 , NULL);
     luat_adc_open(2 , NULL);
     luat_adc_open(3 , NULL);
     luat_adc_open(LUAT_ADC_CH_CPU, NULL);
     luat_adc_open(LUAT_ADC_CH_VBAT, NULL);
-#if defined TYPE_EC716S
-    luat_adc_ctrl_param_t ctrl_param;
-    ctrl_param.range = LUAT_ADC_AIO_RANGE_1_9;
-    luat_adc_ctrl(0, LUAT_ADC_SET_GLOBAL_RANGE, ctrl_param);
-    luat_adc_ctrl(1, LUAT_ADC_SET_GLOBAL_RANGE, ctrl_param);
-#endif
+
     while (1)
     {
         luat_rtos_task_sleep(1000);
