@@ -68,13 +68,6 @@ flash xip address(from ap/cp view): 0x00800000---0x00a00000
 #else
 #define AP_FLASH_LOAD_UNZIP_SIZE        (AP_FLASH_LOAD_SIZE + 0x10000)//AP_FLASH_LOAD_SIZE+64KB ,for ld
 #endif //undef AP_FLASH_LOAD_SIZE
-#ifdef MID_FEATURE_MODE
-#define AP_FLASH_LOAD_SIZE              (0x132000)//1232KB-8KB for CP
-#define AP_FLASH_LOAD_UNZIP_SIZE        (0x140000)//1288KB-8KB for CP,for ld
-#else//mini
-#define AP_FLASH_LOAD_SIZE              (0x134000)//1232KB
-#define AP_FLASH_LOAD_UNZIP_SIZE        (0x142000)//1288KB ,for ld
-#endif
 
 //fs addr and size
 #define FLASH_FS_REGION_START           (0x1a6000)
@@ -252,13 +245,6 @@ flash xip address(from ap/cp view): 0x00800000---0x00a00000
 #else
 #define AP_FLASH_LOAD_UNZIP_SIZE        (AP_FLASH_LOAD_SIZE + 0x10000)//AP_FLASH_LOAD_SIZE+64KB ,for ld
 #endif //undef AP_FLASH_LOAD_SIZE
-#ifdef MID_FEATURE_MODE
-#define AP_FLASH_LOAD_SIZE              (0x132000)//1232KB-8KB for CP
-#define AP_FLASH_LOAD_UNZIP_SIZE        (0x140000)//1288KB-8KB for CP,for ld
-#else//mini
-#define AP_FLASH_LOAD_SIZE              (0x134000)//1232KB
-#define AP_FLASH_LOAD_UNZIP_SIZE        (0x142000)//1288KB ,for ld
-#endif
 
 //fs addr and size
 #define FLASH_FS_REGION_START           (0x1a6000)
