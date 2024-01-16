@@ -78,12 +78,12 @@ static HANDLE g_s_delay_timer;
 static luat_i2s_conf_t *g_s_i2s_conf;
 //通话录音相关控制
 #ifdef SPEECH_RECORD_ENABLE
-static uint64_t g_s_record_next_tick;	//由于使用系统定时器来确定采集时间可能会有累计误差，因此需要通过精确的tick来进行修正
 static HANDLE g_s_record_timer;
-static uint32_t g_s_next_dl_point;
+static volatile uint32_t g_s_next_dl_point;
 static uint32_t g_s_download_data[480];		//最大消耗1920字节，开启模拟录音功能后，将由这个buffer代替原先播放的buffer，只要声音连续不断，音质正常，说明录音功能正常
 static uint8_t *g_s_org_buffer;
-static uint8_t g_s_current_record_time;
+static uint8_t g_s_dl_index;
+static luat_rtos_queue_t g_s_record_queue;
 #endif
 enum
 {
@@ -246,7 +246,21 @@ static void mobile_event_cb(uint8_t event, uint8_t index, uint8_t status)
 
 void mobile_voice_data_input(uint8_t *input, uint32_t len, uint32_t sample_rate, uint8_t bits)
 {
-
+#ifdef SPEECH_RECORD_ENABLE
+	memset(g_s_download_data, 0, sizeof(g_s_download_data));
+	g_s_org_buffer = input;
+	g_s_next_dl_point = 1;	//第一个20ms里已经有数据了
+	if (1 == sample_rate)
+	{
+		g_s_dl_index = 6;
+	}
+	else
+	{
+		g_s_dl_index = 3;
+	}
+	memcpy(g_s_download_data + sample_rate * 320, g_s_org_buffer,  sample_rate * 320); //由于是模拟录音，为了播放流畅，需要往后挪一个20ms，如果是真实录音，不需要+ sample_rate * 320
+	luat_start_rtos_timer(g_s_record_timer, 20, 1);
+#endif
 	luat_rtos_event_send(g_s_task_handle, VOLTE_EVENT_PLAY_VOICE, (uint32_t)input, len, sample_rate, 0);
 
 }
@@ -297,42 +311,20 @@ __USER_FUNC_IN_RAM__ int record_cb(uint8_t id ,luat_i2s_event_t event, uint8_t *
 #ifdef SPEECH_RECORD_ENABLE
 static __USER_FUNC_IN_RAM__ LUAT_RT_RET_TYPE download_data_callback(LUAT_RT_CB_PARAM)
 {
-	uint64_t tick = luat_mcu_tick64_ms();
-	uint32_t play_cnt = (g_s_next_dl_point + 1) % 3; //由于是模拟录音，为了播放流畅，需要往后挪一个20ms，如果是真实录音，不需要+ 1
-	memcpy(g_s_download_data + play_cnt * g_s_record_type * 320, g_s_org_buffer + g_s_next_dl_point * g_s_record_type * 320, g_s_record_type * 320);//20ms录音完成
-	g_s_next_dl_point = (g_s_next_dl_point + 1) % 3;
-	if (g_s_current_record_time != 20)
+	uint8_t *point = (uint8_t *)g_s_download_data;
+	volatile uint32_t play_cnt = 0;
+	if (g_s_record_type && g_s_play_type)
 	{
-		luat_start_rtos_timer(g_s_record_timer, 20, 1);
-		g_s_current_record_time = 20;
+		play_cnt = (g_s_next_dl_point + 1) % g_s_dl_index; //由于是模拟录音，为了播放流畅，需要往后挪一个20ms，如果是真实录音，不需要+ 1
+		memcpy(point + play_cnt * g_s_record_type * 320, g_s_org_buffer + g_s_next_dl_point * g_s_record_type * 320, g_s_record_type * 320);//20ms录音完成
+		g_s_next_dl_point = (g_s_next_dl_point + 1) % g_s_dl_index;
 	}
-	else
-	{
-		if (tick < g_s_record_next_tick)
-		{
-			if ((g_s_record_next_tick - tick) > 1)
-			{
-				DBG("%u", (uint32_t)(g_s_record_next_tick - tick));
-				luat_start_rtos_timer(g_s_record_timer, 22, 1);
-				g_s_current_record_time = 22;
-			}
-		}
-		else
-		{
-			if ((tick - g_s_record_next_tick) > 1)
-			{
-				DBG("%u", (uint32_t)(tick - g_s_record_next_tick));
-				luat_start_rtos_timer(g_s_record_timer, 18, 1);
-				g_s_current_record_time = 18;
-			}
-		}
-	}
-
-	g_s_record_next_tick += 20;
 }
+
 #endif
 static void volte_task(void *param)
 {
+	luat_debug_set_fault_mode(LUAT_DEBUG_FAULT_HANG);
 	luat_gpio_cfg_t gpio_cfg;
 	luat_gpio_set_default_cfg(&gpio_cfg);
 
@@ -441,23 +433,6 @@ static void volte_task(void *param)
 			{
 				g_s_i2s_conf->is_full_duplex = 0;
 				luat_i2s_modify(I2S_ID, LUAT_I2S_CHANNEL_RIGHT, LUAT_I2S_BITS_16, g_s_play_type * 8000);
-#ifdef SPEECH_RECORD_ENABLE
-				memset(g_s_download_data, 0, sizeof(g_s_download_data));
-				g_s_org_buffer = (uint8_t *)event.param1;
-				g_s_next_dl_point = 1;	//第一个20ms里已经有数据了
-				memcpy(g_s_download_data + g_s_play_type * 320, g_s_org_buffer,  g_s_play_type * 320); //由于是模拟录音，为了播放流畅，需要往后挪一个20ms，如果是真实录音，不需要+ g_s_play_type * 320
-				luat_start_rtos_timer(g_s_record_timer, 20, 1);
-				g_s_record_next_tick = luat_mcu_tick64_ms() + 20;
-				g_s_current_record_time = 20;
-				if (2 == g_s_play_type)
-				{
-					luat_i2s_transfer_loop(I2S_ID, (uint8_t *)g_s_download_data, event.param2/3, 3, 0);
-				}
-				else
-				{
-					luat_i2s_transfer_loop(I2S_ID, (uint8_t *)g_s_download_data, event.param2/6, 6, 0);
-				}
-#else
 				if (2 == g_s_play_type)
 				{
 					luat_i2s_transfer_loop(I2S_ID, (uint8_t *)event.param1, event.param2/3, 3, 0);
@@ -466,7 +441,7 @@ static void volte_task(void *param)
 				{
 					luat_i2s_transfer_loop(I2S_ID, (uint8_t *)event.param1, event.param2/6, 6, 0);
 				}
-#endif
+
 				if (!g_s_codec_is_on)
 				{
 					g_s_codec_is_on = 1;
@@ -477,7 +452,18 @@ static void volte_task(void *param)
 			}
 			else
 			{
-				LUAT_DEBUG_PRINT("%x,%d", event.param1, event.param2);
+				LUAT_DEBUG_PRINT("%d,%d,%d", g_s_play_type, g_s_record_type, event.param2);
+#ifdef SPEECH_RECORD_ENABLE
+				//模拟录音时，下行数据播放buffer改成g_s_download_data，只要播放音质正常，就说明真实录音时，音质也正常
+				if (2 == g_s_play_type)
+				{
+					luat_i2s_transfer_loop(I2S_ID, (uint8_t *)g_s_download_data, event.param2/3, 3, 0);
+				}
+				else
+				{
+					luat_i2s_transfer_loop(I2S_ID, (uint8_t *)g_s_download_data, event.param2/6, 6, 0);
+				}
+#else
 				if (2 == g_s_record_type)
 				{
 					luat_i2s_transfer_loop(I2S_ID, (uint8_t *)event.param1, event.param2/3, 3, 0);
@@ -486,6 +472,7 @@ static void volte_task(void *param)
 				{
 					luat_i2s_transfer_loop(I2S_ID, (uint8_t *)event.param1, event.param2/6, 6, 0);
 				}
+#endif
 			}
 			break;
 		case VOLTE_EVENT_HANGUP:

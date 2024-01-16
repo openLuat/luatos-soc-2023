@@ -27,6 +27,7 @@
 #include "cmips.h"
 #include "cms_api.h"
 #include "soc_service.h"
+#include "luat_audio.h"
 
 extern void soc_mobile_event_deregister_handler(void);
 extern void soc_mobile_get_imsi(uint8_t *buf);
@@ -1011,7 +1012,7 @@ int luat_mobile_answer_call(uint8_t sim_id)
 	return soc_mobile_answer_call(sim_id);
 }
 
-int luat_mobile_speech_init(uint8_t multimedia_id,void *callback)
+int luat_mobile_speech_init(luat_audio_codec_conf_t* luat_audio_codec,void *callback)
 {
 #ifndef __LUATOS__
 	soc_mobile_speech_init(callback);
