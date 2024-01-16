@@ -28,8 +28,8 @@
 #include "luat_rtos.h"
 #include "luat_debug.h"
 #include "luat_mem.h"
-
-#include"luat_audio.h"
+#include "luat_mcu.h"
+#include "luat_audio.h"
 
 //demo 配置带ES8311硬件的云喇叭开发板，编译时需要把build.bat里的CHIP_TARGET改成ec718pv
 #define CODEC_PWR_PIN HAL_GPIO_16
@@ -37,12 +37,13 @@
 #define PA_PWR_PIN HAL_GPIO_25
 #define PA_PWR_PIN_ALT_FUN	0
 #define PA_ON_LEVEL 0
+//#define SPEECH_RECORD_ENABLE	//通话录音，由于上行语音都是用户自己采集的，这里演示如果采集下行的语音
 
 #define I2C_ID	1
 #define I2S_ID	0
 
 #define VOICE_VOL   70
-#define MIC_VOL     80
+#define MIC_VOL     65
 
 static luat_audio_codec_conf_t luat_audio_codec = {
     .i2c_id = I2C_ID,
@@ -75,6 +76,15 @@ static uint8_t g_s_record_type;
 static uint8_t g_s_play_type;
 static HANDLE g_s_delay_timer;
 static luat_i2s_conf_t *g_s_i2s_conf;
+//通话录音相关控制
+#ifdef SPEECH_RECORD_ENABLE
+static uint64_t g_s_record_next_tick;	//由于使用系统定时器来确定采集时间可能会有累计误差，因此需要通过精确的tick来进行修正
+static HANDLE g_s_record_timer;
+static uint32_t g_s_next_dl_point;
+static uint32_t g_s_download_data[480];		//最大消耗1920字节，开启模拟录音功能后，将由这个buffer代替原先播放的buffer，只要声音连续不断，音质正常，说明录音功能正常
+static uint8_t *g_s_org_buffer;
+static uint8_t g_s_current_record_time;
+#endif
 enum
 {
 	VOLTE_EVENT_PLAY_TONE = 1,
@@ -106,6 +116,9 @@ static void play_tone(uint8_t param)
 		}
 		g_s_i2s_conf->is_full_duplex = 0;
         luat_rtos_timer_stop(g_s_delay_timer);
+#ifdef SPEECH_RECORD_ENABLE
+        luat_rtos_timer_stop(g_s_record_timer);
+#endif
 		return;
 	}
 	if (param != LUAT_MOBILE_CC_PLAY_CALL_INCOMINGCALL_RINGING)
@@ -281,8 +294,43 @@ __USER_FUNC_IN_RAM__ int record_cb(uint8_t id ,luat_i2s_event_t event, uint8_t *
 	}
 	return 0;
 }
+#ifdef SPEECH_RECORD_ENABLE
+static __USER_FUNC_IN_RAM__ LUAT_RT_RET_TYPE download_data_callback(LUAT_RT_CB_PARAM)
+{
+	uint64_t tick = luat_mcu_tick64_ms();
+	uint32_t play_cnt = (g_s_next_dl_point + 1) % 3; //由于是模拟录音，为了播放流畅，需要往后挪一个20ms，如果是真实录音，不需要+ 1
+	memcpy(g_s_download_data + play_cnt * g_s_record_type * 320, g_s_org_buffer + g_s_next_dl_point * g_s_record_type * 320, g_s_record_type * 320);//20ms录音完成
+	g_s_next_dl_point = (g_s_next_dl_point + 1) % 3;
+	if (g_s_current_record_time != 20)
+	{
+		luat_start_rtos_timer(g_s_record_timer, 20, 1);
+		g_s_current_record_time = 20;
+	}
+	else
+	{
+		if (tick < g_s_record_next_tick)
+		{
+			if ((g_s_record_next_tick - tick) > 1)
+			{
+				DBG("%u", (uint32_t)(g_s_record_next_tick - tick));
+				luat_start_rtos_timer(g_s_record_timer, 22, 1);
+				g_s_current_record_time = 22;
+			}
+		}
+		else
+		{
+			if ((tick - g_s_record_next_tick) > 1)
+			{
+				DBG("%u", (uint32_t)(tick - g_s_record_next_tick));
+				luat_start_rtos_timer(g_s_record_timer, 18, 1);
+				g_s_current_record_time = 18;
+			}
+		}
+	}
 
-
+	g_s_record_next_tick += 20;
+}
+#endif
 static void volte_task(void *param)
 {
 	luat_gpio_cfg_t gpio_cfg;
@@ -351,8 +399,12 @@ static void volte_task(void *param)
 	LUAT_DEBUG_PRINT("psram total %u, used %u, max used %u", total, alloc, peak);
 	luat_meminfo_opt_sys(LUAT_HEAP_SRAM, &total, &alloc, &peak);
 	LUAT_DEBUG_PRINT("sram total %u, used %u, max used %u", total, alloc, peak);
+#ifdef SPEECH_RECORD_ENABLE
+	g_s_record_timer = luat_create_rtos_timer(download_data_callback, NULL, NULL);
+#endif
 //	luat_rtos_task_sleep(15000);			//如果需要自动拨打出去，这里延迟一下，等volte准备好
 //	luat_mobile_make_call(0, "xxx", 11);	//这里填入手机号可以自动拨打
+
 	while (1)
 	{
 		luat_rtos_event_recv(g_s_task_handle, 0, &event, NULL, LUAT_WAIT_FOREVER);
@@ -389,6 +441,23 @@ static void volte_task(void *param)
 			{
 				g_s_i2s_conf->is_full_duplex = 0;
 				luat_i2s_modify(I2S_ID, LUAT_I2S_CHANNEL_RIGHT, LUAT_I2S_BITS_16, g_s_play_type * 8000);
+#ifdef SPEECH_RECORD_ENABLE
+				memset(g_s_download_data, 0, sizeof(g_s_download_data));
+				g_s_org_buffer = (uint8_t *)event.param1;
+				g_s_next_dl_point = 1;	//第一个20ms里已经有数据了
+				memcpy(g_s_download_data + g_s_play_type * 320, g_s_org_buffer,  g_s_play_type * 320); //由于是模拟录音，为了播放流畅，需要往后挪一个20ms，如果是真实录音，不需要+ g_s_play_type * 320
+				luat_start_rtos_timer(g_s_record_timer, 20, 1);
+				g_s_record_next_tick = luat_mcu_tick64_ms() + 20;
+				g_s_current_record_time = 20;
+				if (2 == g_s_play_type)
+				{
+					luat_i2s_transfer_loop(I2S_ID, (uint8_t *)g_s_download_data, event.param2/3, 3, 0);
+				}
+				else
+				{
+					luat_i2s_transfer_loop(I2S_ID, (uint8_t *)g_s_download_data, event.param2/6, 6, 0);
+				}
+#else
 				if (2 == g_s_play_type)
 				{
 					luat_i2s_transfer_loop(I2S_ID, (uint8_t *)event.param1, event.param2/3, 3, 0);
@@ -397,6 +466,7 @@ static void volte_task(void *param)
 				{
 					luat_i2s_transfer_loop(I2S_ID, (uint8_t *)event.param1, event.param2/6, 6, 0);
 				}
+#endif
 				if (!g_s_codec_is_on)
 				{
 					g_s_codec_is_on = 1;
@@ -429,7 +499,7 @@ static void task_demo_init(void)
 {
     luat_debug_set_fault_mode(LUAT_DEBUG_FAULT_HANG);
 	luat_mobile_event_register_handler(mobile_event_cb);
-	luat_mobile_speech_init(luat_audio_codec,mobile_voice_data_input);
+	luat_mobile_speech_init(&luat_audio_codec,mobile_voice_data_input);
 	luat_rtos_task_create(&g_s_task_handle, 4*1024, 100, "volte", volte_task, NULL, 64);
 }
 

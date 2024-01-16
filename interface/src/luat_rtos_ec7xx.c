@@ -38,7 +38,9 @@ typedef struct
 int luat_rtos_task_create(luat_rtos_task_handle *task_handle, uint32_t stack_size, uint8_t priority, const char *task_name, luat_rtos_task_entry task_fun, void* user_data, uint16_t event_cout)
 {
 	if (!task_handle) return -1;
+	vTaskSuspendAll();
 	*task_handle = create_event_task(task_fun, user_data, stack_size, priority, event_cout, task_name);
+	xTaskResumeAll();
 	return (*task_handle)?0:-1;
 }
 
