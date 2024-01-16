@@ -1000,22 +1000,24 @@ int luat_mobile_make_call(uint8_t sim_id, char *number, uint8_t len)
 {
 	return soc_mobile_make_call(sim_id, number, len);
 }
+
 void luat_mobile_hangup_call(uint8_t sim_id)
 {
 	soc_mobile_hangup_call(sim_id);
 }
+
 int luat_mobile_answer_call(uint8_t sim_id)
 {
 	return soc_mobile_answer_call(sim_id);
 }
 
-#ifndef __LUATOS__
-int luat_mobile_speech_init(luat_audio_codec_conf_t* luat_audio_codec,void *callback)
+int luat_mobile_speech_init(uint8_t multimedia_id,void *callback)
 {
+#ifndef __LUATOS__
 	soc_mobile_speech_init(callback);
+#endif
 	return 0;
 }
-#endif
 
 int luat_mobile_speech_upload(uint8_t *data, uint32_t len)
 {

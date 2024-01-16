@@ -26,6 +26,7 @@
 #define LUAT_USE_HMETA 1
 
 #define LUAT_USE_IOTAUTH 1
+#define LUAT_USE_MQTT 1
 #define LUAT_USE_WEBSOCKET 1
 
 // #define LUAT_USE_SOFT_UART 1
@@ -333,6 +334,39 @@
 #define LUAT_USE_HMETA 1
 #endif
 
+#if defined TYPE_EC718P && (defined (FEATURE_AMR_CP_ENABLE) || defined (FEATURE_VEM_CP_ENABLE))
+#undef LUAT_USE_LVGL
+#undef LUAT_USE_LCD
+#undef LUAT_USE_TJPGD
+#undef LUAT_USE_EINK
+#undef LUAT_USE_U8G2
+#undef LUAT_USE_FONTS
+
+#undef LUAT_USE_LIBGNSS
+#undef LUAT_USE_BIT64
+#undef LUAT_USE_PROTOBUF
+#undef LUAT_USE_RSA
+#undef LUAT_USE_YMODEM
+#undef LUAT_USE_FATFS
+#undef LUAT_USE_LORA
+#undef LUAT_USE_I2CTOOLS
+#undef LUAT_USE_SENSOR
+#undef LUAT_USE_MINIZ
+#undef LUAT_USE_FDB
+#undef LUAT_USE_HMETA
+#undef LUAT_USE_W5500
+#undef LUAT_USE_IOTAUTH
+#undef LUAT_USE_WEBSOCKET
+#undef LUAT_USE_FTP
+
+#ifndef LUAT_USE_MEDIA
+#define LUAT_USE_MEDIA 1
+#endif
+
+#define LUAT_USE_TTS_ONLY
+
+#endif
+
 // // TTS 相关
 #ifdef LUAT_USE_TTS
 
@@ -369,36 +403,6 @@
 
 #ifdef LUAT_USE_TLS_DISABLE
 #undef LUAT_USE_TLS
-#endif
-
-
-#if defined TYPE_EC718P && (defined (FEATURE_AMR_CP_ENABLE) || defined (FEATURE_VEM_CP_ENABLE))
-#undef LUAT_USE_LVGL
-#undef LUAT_USE_LCD
-#undef LUAT_USE_TJPGD
-#undef LUAT_USE_EINK
-#undef LUAT_USE_U8G2
-#undef LUAT_USE_FONTS
-
-#undef LUAT_USE_PROTOBUF
-#undef LUAT_USE_RSA
-#undef LUAT_USE_YMODEM
-#undef LUAT_USE_FATFS
-#undef LUAT_USE_LORA
-#undef LUAT_USE_I2CTOOLS
-#undef LUAT_USE_SFUD
-#undef LUAT_USE_SENSOR
-#undef LUAT_USE_MINIZ
-#undef LUAT_USE_FDB
-#undef LUAT_USE_HMETA
-#undef LUAT_USE_W5500
-#undef LUAT_USE_IOTAUTH
-#undef LUAT_USE_WEBSOCKET
-#undef LUAT_USE_FTP
-
-#define LUAT_CONF_TLS_DTLS_DISABLE
-#define LUAT_CONF_TLS_DISABLE_NC
-#define LUAT_CONF_TLS_DISABLE_ECP_ECDHE
 #endif
 
 // 关闭加密版本的UDP, 类似于TCP的TLS/SSL, 极少使用
