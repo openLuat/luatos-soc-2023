@@ -486,7 +486,7 @@ static void task_demo_init(void)
 {
     luat_debug_set_fault_mode(LUAT_DEBUG_FAULT_HANG);
 	luat_mobile_event_register_handler(mobile_event_cb);
-	luat_mobile_speech_init(I2S_ID,mobile_voice_data_input);
+	luat_mobile_speech_init(0,mobile_voice_data_input);
 	luat_rtos_task_create(&g_s_task_handle, 4*1024, 100, "volte", volte_task, NULL, 64);
 }
 

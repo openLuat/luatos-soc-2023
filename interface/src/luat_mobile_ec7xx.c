@@ -1013,9 +1013,7 @@ int luat_mobile_answer_call(uint8_t sim_id)
 
 int luat_mobile_speech_init(uint8_t multimedia_id,void *callback)
 {
-#ifndef __LUATOS__
 	soc_mobile_speech_init(callback);
-#endif
 	return 0;
 }
 
