@@ -97,6 +97,15 @@ int luat_i2s_setup(luat_i2s_conf_t *conf)
 int luat_i2s_modify(uint8_t id,uint8_t channel_format,uint8_t data_bits,uint32_t sample_rate)
 {
 	if (id >= I2S_MAX) return -1;
+	if (!sample_rate)
+	{
+		if (I2S_IsWorking(id))
+		{
+			I2S_Stop(id);
+		}
+		prv_i2s[id].state = LUAT_I2S_STATE_STOP;
+		return 0;
+	}
 	if (data_bits != prv_i2s[id].data_bits)
 	{
 		prv_i2s[id].data_bits = data_bits;
@@ -118,7 +127,8 @@ int luat_i2s_modify(uint8_t id,uint8_t channel_format,uint8_t data_bits,uint32_t
 		}
 		I2S_BaseConfig(id, prv_i2s[id].standard, frame_size);
 	}
-
+	prv_i2s[id].sample_rate = sample_rate;
+	prv_i2s[id].channel_format = channel_format;
 	if (LUAT_I2S_MODE_SLAVE == prv_i2s[id].mode)
 	{
 		I2S_Start(id, 0, sample_rate, (channel_format == LUAT_I2S_CHANNEL_STEREO)?2:1);
@@ -131,13 +141,33 @@ int luat_i2s_modify(uint8_t id,uint8_t channel_format,uint8_t data_bits,uint32_t
 	{
 		I2S_Start(id, 1, sample_rate, (channel_format == LUAT_I2S_CHANNEL_STEREO)?2:1);
 	}
+	prv_i2s[id].state = LUAT_I2S_STATE_RUNING;
 
 }
-
+static __USER_FUNC_IN_RAM__ void luat_i2s_check_start(id)
+{
+	if (!prv_i2s[id].state)
+	{
+		if (LUAT_I2S_MODE_SLAVE == prv_i2s[id].mode)
+		{
+			I2S_Start(id, 0, prv_i2s[id].sample_rate, (prv_i2s[id].channel_format == LUAT_I2S_CHANNEL_STEREO)?2:1);
+		}
+		else if (prv_i2s[id].is_full_duplex)
+		{
+			I2S_StartTransfer(id, prv_i2s[id].sample_rate, (prv_i2s[id].channel_format == LUAT_I2S_CHANNEL_STEREO)?2:1, prv_i2s[id].cb_rx_len, prv_i2s_cb, (void *)&prv_i2s[id]);
+		}
+		else
+		{
+			I2S_Start(id, 1, prv_i2s[id].sample_rate, (prv_i2s[id].channel_format == LUAT_I2S_CHANNEL_STEREO)?2:1);
+		}
+		prv_i2s[id].state = LUAT_I2S_STATE_RUNING;
+	}
+}
 // 传输(异步接口)
 __USER_FUNC_IN_RAM__ int luat_i2s_send(uint8_t id, uint8_t* buff, size_t len)
 {
 	if (id >= I2S_MAX) return -1;
+	luat_i2s_check_start();
 	I2S_Tx(id, buff, len, prv_i2s_cb, (void *)&prv_i2s[id]);
 	return 0;
 }
@@ -146,12 +176,14 @@ int luat_i2s_recv(uint8_t id, uint8_t* buff, size_t len)
 {
 	if (id >= I2S_MAX) return -1;
 	if (prv_i2s[id].is_full_duplex) return -1;
+	luat_i2s_check_start();
 	I2S_Rx(id, prv_i2s[id].cb_rx_len, prv_i2s_cb, (void *)&prv_i2s[id]);
 }
 
 __USER_FUNC_IN_RAM__ int luat_i2s_transfer(uint8_t id, uint8_t* txbuff, size_t len)
 {
 	if (id >= I2S_MAX) return -1;
+	luat_i2s_check_start();
 	I2S_Transfer(id, txbuff, len);
 	return 0;
 }
@@ -159,6 +191,7 @@ __USER_FUNC_IN_RAM__ int luat_i2s_transfer(uint8_t id, uint8_t* txbuff, size_t l
 int luat_i2s_transfer_loop(uint8_t id, uint8_t* buff, uint32_t one_truck_byte_len, uint32_t total_trunk_cnt, uint8_t need_callback)
 {
 	if (id >= I2S_MAX) return -1;
+	luat_i2s_check_start();
 	I2S_TransferLoop(id, buff, one_truck_byte_len, total_trunk_cnt, need_callback);
 }
 // 控制
@@ -178,6 +211,7 @@ int luat_i2s_close(uint8_t id)
 	{
 		I2S_Stop(id);
 	}
+	prv_i2s[id].state = LUAT_I2S_STATE_STOP;
 }
 
 // 获取配置
