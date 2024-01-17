@@ -104,6 +104,7 @@ int luat_i2s_modify(uint8_t id,uint8_t channel_format,uint8_t data_bits,uint32_t
 			I2S_Stop(id);
 		}
 		prv_i2s[id].state = LUAT_I2S_STATE_STOP;
+		DBG("i2s%d stop", id);
 		return 0;
 	}
 	if (data_bits != prv_i2s[id].data_bits)
@@ -148,6 +149,7 @@ static __USER_FUNC_IN_RAM__ void luat_i2s_check_start(id)
 {
 	if (!prv_i2s[id].state)
 	{
+		DBG("i2s%d need start samplerate %u,channel_format %d, mode %d full duplex %d", id, prv_i2s[id].sample_rate, prv_i2s[id].channel_format, prv_i2s[id].mode, prv_i2s[id].is_full_duplex);
 		if (LUAT_I2S_MODE_SLAVE == prv_i2s[id].mode)
 		{
 			I2S_Start(id, 0, prv_i2s[id].sample_rate, (prv_i2s[id].channel_format == LUAT_I2S_CHANNEL_STEREO)?2:1);
