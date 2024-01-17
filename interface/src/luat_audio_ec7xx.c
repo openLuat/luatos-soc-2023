@@ -38,12 +38,10 @@
 #include "driver_pcm.h"
 #include "luat_fs.h"
 
-typedef struct
-{
+typedef struct{
 	uint32_t dac_delay_len;
 	uint32_t pa_delay_time;
 	uint32_t dac_off_delay_time;
-	uint32_t record_sample_rate[I2S_MAX];
 	HANDLE pa_delay_timer;
 	int pa_pin;
 	int dac_pin;
@@ -53,7 +51,6 @@ typedef struct
 	uint8_t raw_mode;
 	uint8_t debug_on_off;
 	uint8_t soft_dac_mode;
-	uint8_t record_channel;
 }luat_audio_hardware_t;
 
 static luat_audio_hardware_t g_s_audio_hardware;
@@ -61,21 +58,14 @@ extern const unsigned char ivtts_16k[];
 extern const unsigned char ivtts_8k[];
 
 extern int l_multimedia_raw_handler(lua_State *L, void* ptr);
-//extern void audio_play_file_default_fun(void *param);
-//extern void audio_play_TTS_default_fun(void *param);
-//extern void audio_play_tts_set_resource_ex(void *address, void *sdk_id, void *read_resource_fun);
-//extern void audio_play_global_init_ex(audio_play_event_cb_fun_t event_cb, audio_play_data_cb_fun_t data_cb, audio_play_default_fun_t play_file_fun, audio_play_default_fun_t play_tts_fun, void *user_param);
-//extern int audio_play_write_blank_raw_ex(uint8_t multimedia_id, uint8_t cnt, uint8_t add_font);
 
 static void app_pa_on(uint32_t arg)
 {
 	luat_gpio_set(g_s_audio_hardware.pa_pin, g_s_audio_hardware.pa_on_level);
 }
 
-static void audio_event_cb(uint32_t event, void *param)
-{
-	if (g_s_audio_hardware.debug_on_off)
-	{
+static void audio_event_cb(uint32_t event, void *param){
+	if (g_s_audio_hardware.debug_on_off){
 		DBG("%d", event);
 	}
 	rtos_msg_t msg = {0};
@@ -107,17 +97,12 @@ static void audio_event_cb(uint32_t event, void *param)
 		break;
 	case MULTIMEDIA_CB_AUDIO_DONE:
 		luat_rtos_timer_stop(g_s_audio_hardware.pa_delay_timer);
-//		luat_audio_play_get_last_error(0);
 		luat_gpio_set(g_s_audio_hardware.pa_pin, !g_s_audio_hardware.pa_on_level);
 		if (g_s_audio_hardware.dac_off_delay_time)
 		{
 			luat_rtos_task_sleep(g_s_audio_hardware.dac_off_delay_time);
 		}
 		luat_gpio_set(g_s_audio_hardware.dac_pin, !g_s_audio_hardware.dac_on_level);
-		if (g_s_audio_hardware.soft_dac_mode)
-		{
-			// SoftDAC_Stop();
-		}
 		msg.handler = l_multimedia_raw_handler;
 		msg.arg1 = MULTIMEDIA_CB_AUDIO_DONE;
 		msg.arg2 = (int)param;
@@ -154,6 +139,7 @@ static void audio_data_cb(uint8_t *data, uint32_t len, uint8_t bits, uint8_t cha
 		}
 	}
 }
+
 #ifdef LUAT_USE_TTS
 #ifdef LUAT_USE_TTS_ONCHIP
 static ivBool tts_read_data(
@@ -314,8 +300,12 @@ int luat_audio_stop_raw(uint8_t multimedia_id)
 
 void luat_audio_config_pa(uint8_t multimedia_id, uint32_t pin, int level, uint32_t dummy_time_len, uint32_t pa_delay_time)
 {
+	luat_audio_conf_t* audio_conf = luat_audio_get_config(multimedia_id);
 	if (pin < HAL_GPIO_MAX)
 	{
+		audio_conf->codec_conf.pa_pin = pin;
+		audio_conf->codec_conf.pa_on_level = level;
+
 		g_s_audio_hardware.pa_pin = pin;
 		g_s_audio_hardware.pa_on_level = level;
 		GPIO_Config(pin, 0, !level);
@@ -324,6 +314,7 @@ void luat_audio_config_pa(uint8_t multimedia_id, uint32_t pin, int level, uint32
 	}
 	else
 	{
+		audio_conf->codec_conf.pa_pin = LUAT_CODEC_PA_NONE;
 		g_s_audio_hardware.pa_pin = -1;
 	}
 	g_s_audio_hardware.dac_delay_len = dummy_time_len;
@@ -358,6 +349,12 @@ void luat_audio_config_dac(uint8_t multimedia_id, int pin, int level, uint32_t d
 
 uint16_t luat_audio_vol(uint8_t multimedia_id, uint16_t vol)
 {
+    luat_audio_conf_t* audio_conf = luat_audio_get_config(multimedia_id);
+    if (audio_conf){
+        if (audio_conf->bus_type == 1){
+            audio_conf->codec_conf.codec_opts->control(&audio_conf->codec_conf,LUAT_CODEC_SET_VOICE_VOL,vol);
+        }
+    }
 	g_s_audio_hardware.vol = vol;
 	return g_s_audio_hardware.vol;
 }
@@ -379,18 +376,6 @@ void luat_audio_set_debug(uint8_t on_off)
 	audio_play_debug_onoff(0, on_off);
 }
 
-int l_i2s_play(lua_State *L) {
-    return -1;
-}
-
-int l_i2s_pause(lua_State *L) {
-    return 0;
-}
-
-int l_i2s_stop(lua_State *L) {
-	uint8_t id = luaL_checkinteger(L, 1);
-	I2S_RxStop(id);
-}
 #ifdef LUAT_USE_TTS
 int luat_audio_play_tts_text(uint32_t multimedia_id, void *text, uint32_t text_bytes)
 {

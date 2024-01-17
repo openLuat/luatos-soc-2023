@@ -27,6 +27,7 @@ if has_config("chip_target") and has_config("lspd_mode") then
                     "FEATURE_AUDIO_ENABLE",
                     "FEATURE_AMR_CP_ENABLE",
                     "FEATURE_VEM_CP_ENABLE")
+        add_defines("LUAT_USE_VOLTE")
 
         add_cxflags("-fno-strict-aliasing",{force=true})
     end
