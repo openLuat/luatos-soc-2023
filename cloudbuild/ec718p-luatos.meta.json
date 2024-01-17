@@ -83,7 +83,7 @@
                     },
                     {
                         "name": "@comment_6",
-                        "content": "lua基础库, 网络基础库(socket/http/mqtt)都是默认开启的,没有配置项",
+                        "content": "lua基础库, 网络基础库(socket/http)是默认开启的,没有配置项",
                         "rsize": 0,
                         "fsize": 0,
                         "dft": false
@@ -206,6 +206,49 @@
                 "dft": false
             },
             {
+                "icon": "zmdi-puzzle-piece",
+                "name": "@NETWORKS",
+                "content": "网络协议相关",
+                "rsize": 0,
+                "children": [
+                    {
+                        "name": "mqtt",
+                        "content": "MQTT客户端",
+                        "rsize": 6008,
+                        "fsize": 274360,
+                        "dft": false
+                    },
+                    {
+                        "name": "websocket",
+                        "content": "websocket客户端",
+                        "rsize": 6008,
+                        "fsize": 274360,
+                        "dft": false
+                    },
+                    {
+                        "name": "ftp",
+                        "content": "FTP客户端",
+                        "rsize": 6008,
+                        "fsize": 274360,
+                        "dft": false
+                    },
+                    {
+                        "name": "w5500",
+                        "content": "以太网支持库,支持W5500",
+                        "rsize": 6008,
+                        "fsize": 274360,
+                        "dft": false
+                    },
+                    {
+                       "name":"iotauth",
+                       "content":"云服务鉴权密钥生成,阿里云/腾讯云/百度云/华为云/涂鸦等",
+                       "rsize":14928,
+                       "fsize":418304,
+                       "dft":false
+                    }
+                ]
+            },
+            {
                 "name": "@tts",
                 "content": "TTS=离线文本转语音,需开启media,占用200k",
                 "rsize": 0,
@@ -268,13 +311,6 @@
                         "rsize": 5800,
                         "fsize": 293220,
                         "dft": false
-                    },
-                    {
-                       "name":"iotauth",
-                       "content":"云服务鉴权密钥生成,阿里云/腾讯云/百度云/华为云/涂鸦等",
-                       "rsize":14928,
-                       "fsize":418304,
-                       "dft":false
                     },
                     {
                         "name": "fs",
@@ -377,20 +413,6 @@
                     {
                         "name": "rsa",
                         "content": "RSA 加密解密,签名验签,不依赖crypto库",
-                        "rsize": 6008,
-                        "fsize": 274360,
-                        "dft": false
-                    },
-                    {
-                        "name": "ftp",
-                        "content": "FTP客户端",
-                        "rsize": 6008,
-                        "fsize": 274360,
-                        "dft": false
-                    },
-                    {
-                        "name": "w5500",
-                        "content": "以太网支持库,支持W5500",
                         "rsize": 6008,
                         "fsize": 274360,
                         "dft": false
