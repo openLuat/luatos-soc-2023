@@ -194,6 +194,7 @@ int luat_i2s_recv(uint8_t id, uint8_t* buff, size_t len)
 {
 	if (id >= I2S_MAX) return -1;
 	if (prv_i2s[id].is_full_duplex) return -1;
+	if (len) prv_i2s[id].cb_rx_len = len;
 	luat_i2s_check_start();
 	I2S_Rx(id, prv_i2s[id].cb_rx_len, prv_i2s_cb, (void *)&prv_i2s[id]);
 }
