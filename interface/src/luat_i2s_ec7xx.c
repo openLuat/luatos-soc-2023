@@ -25,6 +25,22 @@
 
 static luat_i2s_conf_t prv_i2s[I2S_MAX];
 
+#ifdef __LUATOS__
+#include "luat_msgbus.h"
+
+int l_i2s_play(lua_State *L) {
+    return -1;
+}
+
+int l_i2s_pause(lua_State *L) {
+    return 0;
+}
+
+int l_i2s_stop(lua_State *L) {
+	uint8_t id = luaL_checkinteger(L, 1);
+	I2S_RxStop(id);
+}
+#endif
 
 static __USER_FUNC_IN_RAM__ int32_t prv_i2s_cb(void *pdata, void *param)
 {

@@ -10,8 +10,16 @@ target(TARGET_NAME)
     add_linkdirs("$(projectdir)/lib","$(projectdir)/PLAT/core/lib",{public = true})
     add_linkgroups("mp3", {whole = true,public = true})
     
-    on_load(function(target)
+    on_config(function(target)
         assert (chip_target == "ec718p" or chip_target == "ec718pv" or chip_target == "ec718e" ,"luatos only support ec718p/ec718pv/ec718e")
+        -- toolchains = target:tool("cc"):match('.+\\bin')
+        -- local parameter = {"-E","-P"}
+        -- for _, define_flasg in pairs(target:get("defines")) do
+        --     table.insert(parameter,"-D" .. define_flasg)
+        -- end
+        -- print(parameter)
+        -- os.execv(toolchains .. "/arm-none-eabi-gcc",table.join(parameter, {"-o",SDK_PATH .. "/project/luatos/inc/luat_conf_bsp.txt","-"}),{stdin = SDK_PATH .. "/project/luatos/inc/luat_conf_bsp.h"})
+        
         local conf_data = io.readfile("$(projectdir)/project/luatos/inc/luat_conf_bsp.h")
         local ap_load_add
         if chip_target == "ec718p" then ap_load_add = "0x0007e000"  -- ec718p AP_FLASH_LOAD_ADDR
@@ -49,6 +57,11 @@ target(TARGET_NAME)
             target:add("defines", "LUAT_USE_TLS",{public = true})
         end
     end)
+
+    if chip_target == "ec718pv" then
+        -- cc
+        add_files(LUATOS_ROOT.."/components/cc/*.c")
+    end
 
     add_defines("__LUATOS__",{public = true})
 
@@ -101,7 +114,6 @@ target(TARGET_NAME)
     add_includedirs(LUATOS_ROOT.."/components/fatfs",{public = true})
     add_files(LUATOS_ROOT.."/components/fatfs/*.c")
     -- sfud
-    add_defines("LUAT_USE_SFUD",{public = true})
     add_includedirs(LUATOS_ROOT.."/components/sfud",{public = true})
     add_files(LUATOS_ROOT.."/components/sfud/*.c")
     -- fskv
