@@ -335,6 +335,8 @@
 #endif
 
 #if defined TYPE_EC718P && (defined (FEATURE_AMR_CP_ENABLE) || defined (FEATURE_VEM_CP_ENABLE))
+#define LUAT_USE_VOLTE
+
 #undef LUAT_USE_LVGL
 #undef LUAT_USE_LCD
 #undef LUAT_USE_TJPGD

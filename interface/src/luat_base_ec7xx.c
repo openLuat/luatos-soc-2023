@@ -272,6 +272,9 @@ static const luaL_Reg loadedlibs[] = {
 #ifdef LUAT_USE_XXTEA
   {"xxtea", luaopen_xxtea},
 #endif
+#ifdef LUAT_USE_VOLTE
+  {"cc", luaopen_cc},
+#endif
   {NULL, NULL}
 };
 
