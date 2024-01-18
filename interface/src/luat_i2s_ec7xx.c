@@ -81,6 +81,14 @@ int luat_i2s_setup(luat_i2s_conf_t *conf)
 	int pad;
 	switch(conf->id)
 	{
+#if defined TYPE_EC716S
+	case I2S_ID0:
+		GPIO_IomuxEC7XX(11, 6, 1, 0);
+		GPIO_IomuxEC7XX(25, 6, 1, 0);
+		GPIO_IomuxEC7XX(26, 6, 1, 0);
+		GPIO_IomuxEC7XX(28, 6, 1, 0);
+		break;
+#else
 	case I2S_ID0:
 		for(pad = 35; pad <= 39; pad++)
 		{
@@ -93,6 +101,9 @@ int luat_i2s_setup(luat_i2s_conf_t *conf)
 			GPIO_IomuxEC7XX(pad, 1, 1, 0);
 		}
 		break;
+#endif
+	default:
+		return -1;
 	}
 
 	if (conf->channel_format < LUAT_I2S_CHANNEL_STEREO)
