@@ -114,8 +114,8 @@
 // 3. 缩减脚本区到 64+48模式, 甚至 32+24 模式
 // 4. 使用8k的资源文件可节省100k,音质见仁见智,可选
 // ------------------------------
-// #define LUAT_USE_MEDIA    1
-// #define LUAT_SUPPORT_AMR  1
+#define LUAT_USE_MEDIA    1
+#define LUAT_SUPPORT_AMR  1
 // #define LUAT_USE_TTS    1
 // #define LUAT_USE_TTS_ONCHIP    1
 // // 仅开启TTS, 禁用AMR/MP3的解码
@@ -167,7 +167,7 @@
 //---------------------
 // LVGL
 // 主推的UI库, 功能强大但API繁琐
-#define LUAT_USE_LVGL
+// #define LUAT_USE_LVGL
 // #define LUAT_USE_LVGL_DEMO
 #define LUAT_USE_LVGL_JPG 1 // 启用JPG解码支持
 // #define LUAT_USE_LVGL_PNG 1 // 启用PNG解码支持
