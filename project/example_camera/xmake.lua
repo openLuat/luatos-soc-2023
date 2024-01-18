@@ -11,5 +11,6 @@ target(TARGET_NAME)
     --路径可以随便写,可以加任意路径的代码,下面代码等效上方代码
     -- add_includedirs("$(projectdir)/project/" .. TARGET_NAME .. "/inc",{public = true})
     -- add_files("$(projectdir)/project/" .. TARGET_NAME .. "/src/*.c",{public = true})
-    add_files("$(projectdir)/lib/image_decoder_0.a")
+    add_linkdirs("$(projectdir)/lib","$(projectdir)/PLAT/core/lib",{public = true})
+	add_linkgroups("image_decoder_0", {whole = true,public = true})
 target_end()
