@@ -289,6 +289,10 @@ int luat_pm_power_ctrl(int id, uint8_t onoff)
 		}
 		return luat_pm_set_power_mode(onoff, 0);
 		break;
+	case LUAT_PM_POWER_LDO_CTL_PIN:
+		GPIO_IomuxEC7XX(GPIO_ToPadEC7XX(HAL_GPIO_16, 4), 4, 0, 0);
+		GPIO_Config(HAL_GPIO_16, 0, onoff);
+		break;
 	default:
 		return -1;
 	}

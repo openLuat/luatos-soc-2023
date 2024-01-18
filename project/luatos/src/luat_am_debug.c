@@ -9,7 +9,7 @@
 
 void luat_shell_push(char* uart_buff, size_t rcount);
 
-#if 1
+#if 0
 
 #define LUAT_LOG_TAG "sc"
 #include "luat_log.h"
