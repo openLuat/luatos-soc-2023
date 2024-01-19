@@ -493,8 +493,15 @@
                     },
                     {
                         "name": "LUAT_CONF_VM_64bit",
-                        "content": "64bit虚拟机(测试阶段)",
+                        "content": "(测试阶段)64bit虚拟机",
                         "rsize": 193240,
+                        "fsize": 1024,
+                        "dft": false
+                    },
+                    {
+                        "name": "LUAT_USE_PSRAM_AS_LUAHEAP",
+                        "content": "(测试阶段)使用PSRAM作为lua内存,1.25m字节. 勾选后,这个固件就不能使用休眠功能,连轻休眠都不支持,不支持任何低功耗模式,运行速度也下降",
+                        "rsize": 1024,
                         "fsize": 1024,
                         "dft": false
                     }
