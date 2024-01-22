@@ -365,10 +365,25 @@ uint16_t luat_audio_vol(uint8_t multimedia_id, uint16_t vol)
  *
  * @param bus_type 见MULTIMEDIA_AUDIO_BUS，目前只有0=DAC 1=I2S 2=SOFT_DAC
  */
-void luat_audio_set_bus_type(uint8_t multimedia_id,uint8_t bus_type)
+int luat_audio_set_bus_type(uint8_t multimedia_id,uint8_t bus_type)
 {
-	audio_play_set_bus_type(bus_type);
-	g_s_audio_hardware.soft_dac_mode = (bus_type == 2);
+    luat_audio_conf_t* audio_conf = luat_audio_get_config(multimedia_id);
+    if (audio_conf){
+        if (bus_type == 1){
+            audio_conf->bus_type = 1;
+            if (audio_conf->codec_conf.codec_opts->init(&audio_conf->codec_conf,LUAT_CODEC_MODE_SLAVE)){
+                LLOGE("no codec %s",audio_conf->codec_conf.codec_opts->name);
+                return -1;
+            }else{
+                LLOGD("find codec %s",audio_conf->codec_conf.codec_opts->name);
+            }
+            audio_conf->codec_conf.codec_opts->control(&audio_conf->codec_conf,LUAT_CODEC_SET_FORMAT,LUAT_CODEC_FORMAT_I2S);
+        }
+		audio_play_set_bus_type(bus_type);
+		g_s_audio_hardware.soft_dac_mode = (bus_type == 2);
+		return 0;
+    }
+	return -1;
 }
 
 void luat_audio_set_debug(uint8_t on_off)
