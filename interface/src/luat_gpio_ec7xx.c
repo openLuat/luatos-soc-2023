@@ -299,13 +299,13 @@ int luat_gpio_ctrl(int pin, LUAT_GPIO_CTRL_CMD_E cmd, int param)
 		switch(param)
 		{
 		case LUAT_GPIO_PULLUP:
-			GPIO_Config(GPIO_ToPadEC718(pin, alt_fun), 1, 1);
+			GPIO_Config(GPIO_ToPadEC7XX(pin, alt_fun), 1, 1);
 			break;
 		case LUAT_GPIO_PULLDOWN:
-			GPIO_Config(GPIO_ToPadEC718(pin, alt_fun), 1, 0);
+			GPIO_Config(GPIO_ToPadEC7XX(pin, alt_fun), 1, 0);
 			break;
 		default:
-			GPIO_Config(GPIO_ToPadEC718(pin, alt_fun), 0, 0);
+			GPIO_Config(GPIO_ToPadEC7XX(pin, alt_fun), 0, 0);
 			break;
 		}
 		break;
