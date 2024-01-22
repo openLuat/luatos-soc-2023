@@ -351,8 +351,9 @@ uint16_t luat_audio_vol(uint8_t multimedia_id, uint16_t vol)
 {
     luat_audio_conf_t* audio_conf = luat_audio_get_config(multimedia_id);
     if (audio_conf){
-        if (audio_conf->bus_type == 1){
+        if (audio_conf->bus_type == 1 && audio_conf->codec_conf.codec_opts != NULL){
             audio_conf->codec_conf.codec_opts->control(&audio_conf->codec_conf,LUAT_CODEC_SET_VOICE_VOL,vol);
+			return audio_conf->codec_conf.codec_opts->control(&audio_conf->codec_conf,LUAT_CODEC_GET_VOICE_VOL,0);
         }
     }
 	g_s_audio_hardware.vol = vol;
