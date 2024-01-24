@@ -780,12 +780,23 @@ int luat_audio_standby(uint8_t multimedia_id)
 
 int luat_audio_record(uint8_t multimedia_id, uint32_t sample_rate)
 {
-
+	if (I2S_IsWorking(prv_audio_config.codec_conf.i2s_id))
+	{
+		I2S_Stop(prv_audio_config.codec_conf.i2s_id);
+	}
+	luat_i2s_conf_t *i2s = luat_i2s_get_config(prv_audio_config.codec_conf.i2s_id);
+	luat_audio_sleep(0, 0);
+	luat_i2s_modify(prv_audio_config.codec_conf.i2s_id, i2s->channel_format, i2s->data_bits, sample_rate);
+	I2S_TransferLoop(prv_audio_config.codec_conf.i2s_id, NULL, 3200, 2, 0);
 }
 
-int luat_audio_record_stop(uint8_t multimedia_id, uint32_t sample_rate)
+int luat_audio_record_stop(uint8_t multimedia_id)
 {
-
+	if (I2S_IsWorking(prv_audio_config.codec_conf.i2s_id))
+	{
+		I2S_Stop(prv_audio_config.codec_conf.i2s_id);
+	}
+	return 0;
 }
 
 

@@ -15,6 +15,10 @@
 #include "luat_mem.h"
 #include "luat_i2c.h"
 #include "luat_pm.h"
+
+#include "interf_enc.h"
+#include "interf_dec.h"
+
 //AIR780P音频开发板配置，如果用的ES8311而且要低功耗的，不建议用LDO_CTL，换成AGPIO
 #define CODEC_PWR_PIN HAL_GPIO_16
 #define CODEC_PWR_PIN_ALT_FUN	4
@@ -28,11 +32,17 @@
 
 #define TEST_I2C_ID I2C_ID1
 #define TEST_I2S_ID I2S_ID0
-#define TEST_USE_ES8311	0
-#define TEST_USE_TM8211 1
+#define TEST_USE_ES8311	1
+#define TEST_USE_TM8211 0
 
-#define RECORD_ONCE_LEN	20	   //单声道 8K录音单次20个编码块，总共400ms回调 320B 20ms，amr编码要求，20ms一个块
+#define RECORD_ONCE_LEN	10	   //单声道 8K录音单次10个编码块，总共200ms回调 320B 20ms，amr编码要求，20ms一个块
+#define RECORD_TIME	(5)	//设置5秒录音，只要ram够，当然可以更长
 int record_cb(uint8_t id ,luat_i2s_event_t event, uint8_t *rx_data, uint32_t rx_len, void *param);
+
+static HANDLE g_s_amr_encoder_handler;
+static uint32_t g_s_record_time;
+static Buffer_Struct g_s_amr_rom_file;
+static uint8_t g_s_test_only_record;
 
 static const luat_audio_codec_conf_t luat_audio_codec_es8311 = {
     .i2c_id = TEST_I2C_ID,
@@ -42,7 +52,7 @@ static const luat_audio_codec_conf_t luat_audio_codec_es8311 = {
 	.power_pin = CODEC_PWR_PIN,
 	.power_on_level = 1,
 	.power_on_delay_ms = 10,
-	.pa_delay_time = 100,
+	.pa_delay_time = 200,
 	.after_sleep_ready_time = 600,
 	.codec_delay_off_time = 1,
     .codec_opts = &codec_opts_es8311,
@@ -100,12 +110,57 @@ static const int g_s_amr_nb_sizes[] = { 12, 13, 15, 17, 19, 20, 26, 31, 5, 6, 5,
 
 static luat_rtos_task_handle g_s_task_handle;
 
+static void record_encode_amr(uint8_t *data, uint32_t len)
+{
+	uint8_t outbuf[64];
+	int16_t *pcm = (int16_t *)data;
+	uint32_t total_len = len >> 1;
+	uint32_t done_len = 0;
+	int out_len;
+	while ((total_len - done_len) >= 160)
+	{
+		out_len = Encoder_Interface_Encode(g_s_amr_encoder_handler, MR122, &pcm[done_len], outbuf, 0);
+
+		if (out_len <= 0)
+		{
+			LUAT_DEBUG_PRINT("encode error in %d,result %d", done_len, out_len);
+		}
+		else
+		{
+			OS_BufferWrite(&g_s_amr_rom_file, outbuf, out_len);
+		}
+		done_len += 160;
+	}
+}
+
+static void record_stop_encode_amr(uint8_t *data, uint32_t len)
+{
+	luat_audio_record_stop(0);
+	luat_audio_standby(0);
+	Encoder_Interface_exit(g_s_amr_encoder_handler);
+	g_s_amr_encoder_handler = NULL;
+	LUAT_DEBUG_PRINT("amr encode stop");
+}
+
 __USER_FUNC_IN_RAM__ int record_cb(uint8_t id ,luat_i2s_event_t event, uint8_t *rx_data, uint32_t rx_len, void *param)
 {
 	switch(event)
 	{
 	case LUAT_I2S_EVENT_RX_DONE:
-		luat_rtos_event_send(g_s_task_handle, VOLTE_EVENT_RECORD_VOICE_UPLOAD, (uint32_t)rx_data, rx_len, 0, 0);
+		if (g_s_test_only_record)
+		{
+			soc_call_function_in_audio(record_encode_amr, (uint32_t)rx_data, rx_len, LUAT_WAIT_FOREVER);
+			g_s_record_time++;
+			if (g_s_record_time >= (RECORD_TIME * 5))	//15秒
+			{
+				soc_call_function_in_audio(record_stop_encode_amr, 0, 0, LUAT_WAIT_FOREVER);
+			}
+		}
+		else
+		{
+			luat_rtos_event_send(g_s_task_handle, VOLTE_EVENT_RECORD_VOICE_UPLOAD, (uint32_t)rx_data, rx_len, 0, 0);
+		}
+
 		break;
 	case LUAT_I2S_EVENT_TRANSFER_DONE:
 		break;
@@ -224,7 +279,7 @@ static void demo_task(void *arg)
 		luat_i2c_setup(luat_audio_codec_es8311.i2c_id, 1);
 		luat_i2s_setup(&luat_i2s_conf_es8311);
 		luat_audio_setup_codec(0, &luat_audio_codec_es8311);
-		luat_audio_init_codec(0, 70, 65);
+		luat_audio_init_codec(0, 65, 75);
 	}
 	if (TEST_USE_TM8211)
 	{
@@ -244,28 +299,30 @@ static void demo_task(void *arg)
 	luat_audio_play_info_t amr_info[5] = {0};
 	download_file();
 
-	mp3_info[0].path = "test1.mp3";
-	mp3_info[1].path = "test2.mp3";
-	mp3_info[2].path = "test3.mp3";
-	mp3_info[3].path = "test4.mp3";
-	amr_info[0].path = NULL;
-    amr_info[0].address = (uint32_t)amr_alipay_data;
-    amr_info[0].rom_data_len = sizeof(amr_alipay_data);
-    amr_info[1].path = NULL;
-    amr_info[1].address = (uint32_t)amr_2_data;
-    amr_info[1].rom_data_len = sizeof(amr_2_data);
-    amr_info[2].path = NULL;
-    amr_info[2].address = (uint32_t)amr_10_data;
-    amr_info[2].rom_data_len = sizeof(amr_10_data);
-    amr_info[3].path = NULL;
-    amr_info[3].address = (uint32_t)amr_2_data;
-    amr_info[3].rom_data_len = sizeof(amr_2_data);
-    amr_info[4].path = NULL;
-    amr_info[4].address = (uint32_t)amr_yuan_data;
-    amr_info[4].rom_data_len = sizeof(amr_yuan_data);
+
 
     while(1)
     {
+    	mp3_info[0].path = "test1.mp3";
+    	mp3_info[1].path = "test2.mp3";
+    	mp3_info[2].path = "test3.mp3";
+    	mp3_info[3].path = "test4.mp3";
+    	amr_info[0].path = NULL;
+        amr_info[0].address = (uint32_t)amr_alipay_data;
+        amr_info[0].rom_data_len = sizeof(amr_alipay_data);
+        amr_info[1].path = NULL;
+        amr_info[1].address = (uint32_t)amr_2_data;
+        amr_info[1].rom_data_len = sizeof(amr_2_data);
+        amr_info[2].path = NULL;
+        amr_info[2].address = (uint32_t)amr_10_data;
+        amr_info[2].rom_data_len = sizeof(amr_10_data);
+        amr_info[3].path = NULL;
+        amr_info[3].address = (uint32_t)amr_2_data;
+        amr_info[3].rom_data_len = sizeof(amr_2_data);
+        amr_info[4].path = NULL;
+        amr_info[4].address = (uint32_t)amr_yuan_data;
+        amr_info[4].rom_data_len = sizeof(amr_yuan_data);
+
     	luat_audio_play_multi_files(0, mp3_info, 4);
 		luat_rtos_event_recv(g_s_task_handle, AUDIO_EVENT_PLAY_DONE, &event, NULL, LUAT_WAIT_FOREVER);
 		luat_meminfo_opt_sys(LUAT_HEAP_PSRAM, &total, &alloc, &peak);
@@ -287,21 +344,22 @@ static void demo_task(void *arg)
 		luat_meminfo_opt_sys(LUAT_HEAP_SRAM, &total, &alloc, &peak);
 		LUAT_DEBUG_PRINT("sram total %u, used %u, max used %u", total, alloc, peak);
 #endif
-		//演示一下休眠
-		luat_audio_sleep(0, 1);
-		luat_pm_power_ctrl(LUAT_PM_POWER_USB, 0);	//没接USB的，只需要在开始的时候关闭一次USB就行了
-		luat_pm_request(LUAT_PM_SLEEP_MODE_LIGHT);
-		luat_rtos_task_sleep(10000);
-		luat_pm_request(LUAT_PM_SLEEP_MODE_IDLE);
-		luat_pm_power_ctrl(LUAT_PM_POWER_USB, 1);
+
+		//带ES8311的演示录音后再放音，录音15秒
 		if (TEST_USE_ES8311)
 		{
-			luat_audio_init_codec(0, 70, 65);	//如果没有AGPIO来控制，需要重新初始化ES8311，如果用AGPIO来控制的，就不需要重新初始化
-			luat_audio_sleep(0, 0);
-		}
-		//带ES8311的演示录音后再放音
-		if (TEST_USE_ES8311)
-		{
+			g_s_amr_encoder_handler = Encoder_Interface_init(0);
+			g_s_record_time = 0;
+			g_s_amr_rom_file.Pos = 0;
+			OS_BufferWrite(&g_s_amr_rom_file, "#!AMR\n", 6);
+			g_s_test_only_record = 1;
+			luat_audio_record(0, 8000);
+			luat_rtos_task_sleep((RECORD_TIME + 1) * 1000);
+			g_s_test_only_record = 0;
+			amr_info[0].address = (uint32_t)g_s_amr_rom_file.Data;
+			amr_info[0].rom_data_len = g_s_amr_rom_file.Pos;
+			luat_audio_play_multi_files(0, amr_info, 1);
+			luat_rtos_event_recv(g_s_task_handle, AUDIO_EVENT_PLAY_DONE, &event, NULL, LUAT_WAIT_FOREVER);
 			luat_meminfo_opt_sys(LUAT_HEAP_PSRAM, &total, &alloc, &peak);
 			LUAT_DEBUG_PRINT("psram total %u, used %u, max used %u", total, alloc, peak);
 			luat_meminfo_opt_sys(LUAT_HEAP_SRAM, &total, &alloc, &peak);
@@ -322,6 +380,19 @@ static void demo_task(void *arg)
 			LUAT_DEBUG_PRINT("psram total %u, used %u, max used %u", total, alloc, peak);
 			luat_meminfo_opt_sys(LUAT_HEAP_SRAM, &total, &alloc, &peak);
 			LUAT_DEBUG_PRINT("sram total %u, used %u, max used %u", total, alloc, peak);
+		}
+
+		//演示一下休眠
+		luat_audio_sleep(0, 1);
+		luat_pm_power_ctrl(LUAT_PM_POWER_USB, 0);	//没接USB的，只需要在开始的时候关闭一次USB就行了
+		luat_pm_request(LUAT_PM_SLEEP_MODE_LIGHT);
+		luat_rtos_task_sleep(10000);
+		luat_pm_request(LUAT_PM_SLEEP_MODE_IDLE);
+		luat_pm_power_ctrl(LUAT_PM_POWER_USB, 1);
+		if (TEST_USE_ES8311)
+		{
+			luat_audio_init_codec(0, 70, 65);	//如果没有AGPIO来控制，需要重新初始化ES8311，如果用AGPIO来控制的，就不需要重新初始化
+			luat_audio_sleep(0, 0);
 		}
     }
 }
