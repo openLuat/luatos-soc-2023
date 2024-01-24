@@ -21,9 +21,12 @@
 
 #ifndef __LUAT_AUDIO_PLAY_EC618_H__
 #define __LUAT_AUDIO_PLAY_EC618_H__
+#include "bsp_common.h"
 #include "common_api.h"
 #include "audio_ll_drv.h"
 #include "audio_play.h"
+#include "luat_audio.h"
+#include "luat_audio_codec.h"
 /**
  * @defgroup luatos_audio 音频接口
  * @{
@@ -57,21 +60,7 @@ enum
 
 void luat_audio_play_file_default_fun(void *param);
 void luat_audio_play_tts_default_fun(void *param);
-/**
- * @brief 音频播放初始化，可以选择是否启用TTS，文件播放功能，用来节省flash空间
- *
- * @param event_cb 播放时event回调函数
- * @param data_cb 数据解码回调函数，如果是直接播放原始数据流就不会用到
- * @param play_file_fun 播放文件的具体处理函数，选择luat_audio_play_file_default_fun进行处理，或者写NULL不启用播放文件的功能
- * @param play_tts_fun 播放TTS的具体处理函数，选择luat_audio_play_tts_default_fun进行处理，或者写NULL不启用播放TTS的功能
- * @param user_param 回调函数的用户参数
- */
-void luat_audio_play_global_init(
-		audio_play_event_cb_fun_t event_cb,
-		audio_play_data_cb_fun_t data_cb,
-		audio_play_default_fun_t play_file_fun,
-		audio_play_default_fun_t play_tts_fun,
-		void *user_param);
+
 /**
  * @brief 音频播放初始化，可以选择是否启用TTS，文件播放功能，用来节省flash空间，可以配置audio任务优先级
  *
@@ -83,7 +72,7 @@ void luat_audio_play_global_init(
  * @param priority audio任务优先级
  */
 void luat_audio_play_global_init_with_task_priority(audio_play_event_cb_fun_t event_cb, audio_play_data_cb_fun_t data_cb, audio_play_default_fun_t play_file_fun, audio_play_default_fun_t play_tts_fun, void *user_param, uint8_t priority);
-
+#ifndef __LUATOS__
 /**
  * @brief 播放指定数量的文件或者ROM数组（文件数据直接写成数组形式）
  *
@@ -92,37 +81,30 @@ void luat_audio_play_global_init_with_task_priority(audio_play_event_cb_fun_t ev
  * @param files_num 文件数量
  * @return int =0成功，其他失败
  */
-int luat_audio_play_multi_files(uint32_t multimedia_id, luat_audio_play_info_t info[], uint32_t files_num);
-
+int luat_audio_play_multi_files(uint8_t multimedia_id, luat_audio_play_info_t info[], uint32_t files_num);
+#endif
 /**
  * @brief 是否播放完全部数据
  *
  * @param multimedia_id multimedia_id 多媒体通道，目前只有0
  * @return uint8_t =1是，=0没有
  */
-uint8_t luat_audio_play_is_finish(uint32_t multimedia_id);
+uint8_t luat_audio_play_is_finish(uint8_t multimedia_id);
 
-/**
- * @brief 强制停止播放文件，但是不会停止已经输出到底层驱动的数据播放
- *
- * @param multimedia_id multimedia_id 多媒体通道，目前只有0
- * @return int =0成功，其他失败
- */
-int luat_audio_play_stop(uint32_t multimedia_id);
 /**
  * @brief 强制停止播放文件，如果音频解码已经完成了，会停止已经输出到底层驱动的数据播放
  *
  * @param multimedia_id multimedia_id 多媒体通道，目前只有0
  * @return int =0成功，其他失败
  */
-int luat_audio_play_fast_stop(uint32_t multimedia_id);
+int luat_audio_play_fast_stop(uint8_t multimedia_id);
 /**
  * @brief 清除强制停止播放文件的标识，可以在误操作stop时不影响下一次播放
  *
  * @param multimedia_id multimedia_id 多媒体通道，目前只有0
  * @return int =0成功，其他失败
  */
-int luat_audio_play_clear_stop_flag(uint32_t multimedia_id);
+int luat_audio_play_clear_stop_flag(uint8_t multimedia_id);
 
 /**
  * @brief 暂停/恢复播放
@@ -131,7 +113,7 @@ int luat_audio_play_clear_stop_flag(uint32_t multimedia_id);
  * @param is_pause 0恢复，其他暂停
  * @return int =0成功，其他失败
  */
-int luat_audio_play_pause_raw(uint32_t multimedia_id, uint8_t is_pause);
+int luat_audio_play_pause_raw(uint8_t multimedia_id, uint8_t is_pause);
 
 /**
  * @brief 获取上一次播放结果，在MULTIMEDIA_CB_AUDIO_DONE回调时调用最佳
@@ -139,7 +121,7 @@ int luat_audio_play_pause_raw(uint32_t multimedia_id, uint8_t is_pause);
  * @param multimedia_id multimedia_id 多媒体通道，目前只有0
  * @return int =0完整的播放完成，<0被用户停止了，>0 TTS失败，或者第几个音频文件解码失败（用户在play_info未设置了解码失败后继续，文件位置+1）
  */
-int luat_audio_play_get_last_error(uint32_t multimedia_id);
+int luat_audio_play_get_last_error(uint8_t multimedia_id);
 
 /**
  * @brief 在开头或者结尾插入多段空白数据，每段数据约100ms
@@ -149,7 +131,7 @@ int luat_audio_play_get_last_error(uint32_t multimedia_id);
  * @param add_font 是否加载到开头位置 1是，0否
  * @return int =0成功，其他失败
  */
-int luat_audio_play_write_blank_raw(uint32_t multimedia_id, uint8_t cnt, uint8_t add_font);
+int luat_audio_play_write_blank_raw(uint8_t multimedia_id, uint8_t cnt, uint8_t add_font);
 /**
  * @brief 立刻初始化播放未编码的原始音频数据流
  *
@@ -161,7 +143,7 @@ int luat_audio_play_write_blank_raw(uint32_t multimedia_id, uint8_t cnt, uint8_t
  * @param is_signed 量化数据是否带符号，只能是1
  * @return int =0成功，其他失败
  */
-int luat_audio_play_start_raw(uint32_t multimedia_id, uint8_t audio_format, uint8_t num_channels, uint32_t sample_rate, uint8_t bits_per_sample, uint8_t is_signed);
+int luat_audio_play_start_raw(uint8_t multimedia_id, uint8_t audio_format, uint8_t num_channels, uint32_t sample_rate, uint8_t bits_per_sample, uint8_t is_signed);
 /**
  * @brief 向底层驱动传入一段原始音频数据
  *
@@ -170,32 +152,14 @@ int luat_audio_play_start_raw(uint32_t multimedia_id, uint8_t audio_format, uint
  * @param len 原始音频数据长度
  * @return int =0成功，其他失败
  */
-int luat_audio_play_write_raw(uint32_t multimedia_id, uint8_t *data, uint32_t len);
+int luat_audio_play_write_raw(uint8_t multimedia_id, uint8_t *data, uint32_t len);
 /**
  * @brief 强制停止所有播放，同时底层驱动也会停止输出，不要用于播放文件的结束
  *
  * @param multimedia_id multimedia_id 多媒体通道，目前只有0
  * @return int =0成功，其他失败
  */
-int luat_audio_play_stop_raw(uint32_t multimedia_id);
-/**
- * @brief 编码并播放一段文字
- *
- * @param multimedia_id multimedia_id 多媒体通道，目前只有0
- * @param text 文字数据
- * @param text_bytes 文字数据长度
- * @return int =0成功，其他失败
- */
-int luat_audio_play_tts_text(uint32_t multimedia_id, void *text, uint32_t text_bytes);
-/**
- * @brief 在收到MULTIMEDIA_CB_TTS_INIT回调时，可以设置TTS参数，等同于ivTTS_SetParam
- *
- * @param multimedia_id multimedia_id 多媒体通道，目前只有0
- * @param param_id 见ivTTS_PARAM_XXX
- * @param param_value param_id对应的value
- * @return int =0成功，其他失败
- */
-int luat_audio_play_tts_set_param(uint32_t multimedia_id, uint32_t param_id, uint32_t param_value);
+int luat_audio_play_stop_raw(uint8_t multimedia_id);
 
 /**
  * @brief 设置TTS的资源和对应SDKID，TTS资源有很多种。
@@ -205,27 +169,21 @@ int luat_audio_play_tts_set_param(uint32_t multimedia_id, uint32_t param_id, uin
  * @param tts_resource_read_fun 读取资源文件的函数，如果是NULL，则使用默认函数，即单纯的拷贝，如果用自己的函数，必须按照ivCBReadResExt定义
  */
 void luat_audio_play_tts_set_resource(void *address, void *sdk_id, void *tts_resource_read_fun);
-/**
- * @brief 设置音频硬件输出类型
- *
- * @param bus_type 见LUAT_AUDIO_BUS，目前只有1=I2S 2=SOFT_DAC
- */
-void luat_audio_play_set_bus_type(uint8_t bus_type);
+
 /**
  * @brief 获取底层播放的stream指针
  *
  * @param multimedia_id multimedia_id 多媒体通道，目前只有0
  * @return void *stream指针，真正的类型是Audio_StreamStruct
  */
-void *luat_audio_play_get_stream(uint32_t multimedia_id);
+void *luat_audio_play_get_stream(uint8_t multimedia_id);
 /**
  * @brief 控制底层播放是否允许结束
  *
  * @param multimedia_id multimedia_id 多媒体通道，目前只有0
  * @return onoff =0允许结束 其他不允许结束
  */
-void luat_audio_play_set_user_lock(uint32_t multimedia_id, uint8_t onoff);
+void luat_audio_play_set_user_lock(uint8_t multimedia_id, uint8_t onoff);
 
-void luat_audio_play_debug_onoff(uint32_t multimedia_id, uint8_t onoff);
 /**@}*/
 #endif

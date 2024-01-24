@@ -57,7 +57,7 @@ static __USER_FUNC_IN_RAM__ int32_t prv_i2s_cb(void *pdata, void *param)
 	return 0;
 }
 
-int luat_i2s_setup(luat_i2s_conf_t *conf)
+int luat_i2s_setup(const luat_i2s_conf_t *conf)
 {
 	if (conf->id >= I2S_MAX) return -1;
 
