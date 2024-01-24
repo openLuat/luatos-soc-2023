@@ -29,7 +29,7 @@
 #define LUAT_USE_MQTT 1
 #define LUAT_USE_WEBSOCKET 1
 
-// #define LUAT_USE_SOFT_UART 1
+#define LUAT_USE_SOFT_UART 1
 //----------------------------
 // 常用工具库, 按需启用, cjson和pack是强烈推荐启用的
 #define LUAT_USE_CRYPTO  1
@@ -308,6 +308,8 @@
 #define LV_TICK_CUSTOM 1
 #define LV_TICK_CUSTOM_INCLUDE  "common_api.h"         /*Header for the system time function*/
 #define LV_TICK_CUSTOM_SYS_TIME_EXPR ((uint32_t)GetSysTickMS())     /*Expression evaluating to current system time in ms*/
+
+// #define LUAT_USE_LCD_CUSTOM_DRAW
 
 #define __LUATOS_TICK_64BIT__
 
