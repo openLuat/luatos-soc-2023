@@ -155,6 +155,7 @@ int luat_camera_close(int id)
 	if (id < 0 || id >= CSPI_ID2) return -1;
 	if (!g_s_camera[id].is_init) return -ERROR_OPERATION_FAILED;
 	CSPI_Stop(id);
+	g_s_camera[id].is_init = 0;
 	g_s_camera[id].callback = luat_camera_dummy_callback;
 	return 0;
 
