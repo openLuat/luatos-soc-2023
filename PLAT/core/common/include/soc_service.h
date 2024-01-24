@@ -168,6 +168,9 @@ enum
 	SOC_SYS_CTRL_AUDIO,
 	SOC_SYS_CTRL_LCD,
 	SOC_SYS_CTRL_SOFT_DAC,
+	SOC_SYS_CTRL_SPI,
+	SOC_SYS_CTRL_UART,
+	SOC_SYS_CTRL_GPIO,
 	SOC_SYS_CTRL_USER = 16,
 	SOC_SYS_CTRL_MAX = 32,
 };
@@ -239,4 +242,6 @@ void soc_psram_dma_on_off(uint32_t mask_bit, uint8_t on_off);
 void soc_flash_dma_on_off(uint32_t mask_bit, uint8_t on_off);
 void soc_cp_force_wakeup_on_off(uint32_t mask_bit, uint8_t on_off);
 void soc_sys_force_wakeup_on_off(uint32_t mask_bit, uint8_t on_off);
+void soc_doze_force_wakeup_on_off(uint32_t mask_bit, uint8_t on_off);
+uint8_t soc_user_wfi_mode(void);
 #endif /* CORE_INCLUDE_SOC_SERVICE_H_ */

@@ -302,7 +302,9 @@ void BSP_SetFSAssertCount(uint32_t value)
 
 
 PLATCONFIG_BSS_SECTION plat_config_raw_flash_t g_rawFlashPlatConfig;
-
+#ifdef __USER_CODE__
+extern uint8_t soc_user_wfi_mode(void);
+#endif
 /**
   \fn           void BSP_SetDefaultRawFlashPlatConfig(void)
   \brief        set default value of "g_rawFlashPlatConfig"
@@ -369,7 +371,7 @@ PLAT_BL_CIRAM_FLASH_TEXT static void BSP_SetDefaultRawFlashPlatConfig(void)
 
     g_rawFlashPlatConfig.slpLimitTime = 0;
 #ifdef __USER_CODE__
-    g_rawFlashPlatConfig.wfiMode = 1;
+    g_rawFlashPlatConfig.wfiMode = soc_user_wfi_mode();
 #else
     g_rawFlashPlatConfig.wfiMode = 0;
 #endif

@@ -14,7 +14,8 @@
 #include "luat_fs.h"
 #include "luat_mem.h"
 #include "luat_i2c.h"
-//AIR780P音频开发板配置
+#include "luat_pm.h"
+//AIR780P音频开发板配置，如果用的ES8311而且要低功耗的，不建议用LDO_CTL，换成AGPIO
 #define CODEC_PWR_PIN HAL_GPIO_16
 #define CODEC_PWR_PIN_ALT_FUN	4
 #ifndef CHIP_EC716
@@ -27,8 +28,8 @@
 
 #define TEST_I2C_ID I2C_ID1
 #define TEST_I2S_ID I2S_ID0
-#define TEST_USE_ES8311	1
-#define TEST_USE_TM8211 0
+#define TEST_USE_ES8311	0
+#define TEST_USE_TM8211 1
 
 #define RECORD_ONCE_LEN	20	   //单声道 8K录音单次20个编码块，总共400ms回调 320B 20ms，amr编码要求，20ms一个块
 int record_cb(uint8_t id ,luat_i2s_event_t event, uint8_t *rx_data, uint32_t rx_len, void *param);
@@ -43,6 +44,7 @@ static const luat_audio_codec_conf_t luat_audio_codec_es8311 = {
 	.power_on_delay_ms = 10,
 	.pa_delay_time = 100,
 	.after_sleep_ready_time = 600,
+	.codec_delay_off_time = 1,
     .codec_opts = &codec_opts_es8311,
 };
 
@@ -84,66 +86,6 @@ static const luat_i2s_conf_t luat_i2s_conf_tm8211 =
 
 extern void download_file();
 
-typedef struct
-{
-	uint8_t reg;
-	uint8_t value;
-}i2c_reg_t;
-
-static const i2c_reg_t es8311_reg_table[] =
-{
-	{0x45,0x00},
-	{0x01,0x30},
-	{0x02,0x10},
-
-
-	//Ratio=MCLK/LRCK=256：12M288-48K；4M096-16K; 2M048-8K
-	{0x02,0x00},//MCLK DIV=1
-	{0x03,0x10},
-	{0x16,0x24},
-	{0x04,0x20},
-	{0x05,0x00},
-	{0x06,(0<<5) + 4 -1},//(0x06,(SCLK_INV<<5) + SCLK_DIV -1); SCLK=BCLK
-	{0x07,0x00},
-	{0x08,0xFF},//0x07 0x08 fs=256
-
-
-	{0x09,0x0C},//I2S mode, 16bit
-	{0x0A,0x0C},//I2S mode, 16bit
-
-
-
-	{0x0B,0x00},
-	{0x0C,0x00},
-
-//	{0x10,(0x1C*0) + (0x60*0x01) + 0x03},	//(0x10,(0x1C*DACHPModeOn) + (0x60*VDDA_VOLTAGE) + 0x03);	//VDDA_VOLTAGE=1.8V  close es8311MasterInit 3.3PWR setting
-	{0x10,(0x1C*0) + (0x60*0x00) + 0x03},	//(0x10,(0x1C*DACHPModeOn) + (0x60*VDDA_VOLTAGE) + 0x03);	//VDDA_VOLTAGE=3.3V open es8311MasterInit 3.3PWR setting
-
-	{0x11,0x7F},
-
-	{0x00,0x80 + (0<<6)},//Slave  Mode	(0x00,0x80 + (MSMode_MasterSelOn<<6));//Slave  Mode
-
-	{0x0D,0x01},
-
-	{0x01,0x3F + (0x00<<7)},//(0x01,0x3F + (MCLK<<7));
-
-	{0x14,(0<<6) + (1<<4) + 10},//选择CH1输入+30DB GAIN	(0x14,(Dmic_Selon<<6) + (ADCChannelSel<<4) + ADC_PGA_GAIN);
-
-	{0x12,0x28},
-	{0x13,0x00 + (0<<4)},	//(0x13,0x00 + (DACHPModeOn<<4));
-
-	{0x0E,0x02},
-	{0x0F,0x44},
-	{0x15,0x00},
-	{0x1B,0x0A},
-	{0x1C,0x6A},
-	{0x37,0x48},
-	{0x44,(0 <<7)},	//(0x44,(ADC2DAC_Sel <<7));
-	{0x17,0xd2},//(0x17,ADC_Volume);
-	{0x32,0xc8},//(0x32,DAC_Volume);
-
-};
-
 enum
 {
 	VOLTE_EVENT_PLAY_TONE = 1,
@@ -179,7 +121,7 @@ void audio_event_cb(uint32_t event, void *param)
 	switch(event)
 	{
 	case LUAT_MULTIMEDIA_CB_AUDIO_DECODE_START:
-		luat_audio_check_wakeup(0);
+		luat_audio_check_ready(0);
 		break;
 	case LUAT_MULTIMEDIA_CB_AUDIO_OUTPUT_START:
 		break;
@@ -193,7 +135,9 @@ void audio_event_cb(uint32_t event, void *param)
 		break;
 	case LUAT_MULTIMEDIA_CB_AUDIO_DONE:
 		LUAT_DEBUG_PRINT("audio play done, result=%d!", luat_audio_play_get_last_error(0));
-		luat_audio_play_blank(0);
+		luat_audio_standby(0);
+		//如果追求极致的功耗，用luat_audio_sleep代替luat_audio_standby
+		//luat_audio_sleep(0, 1);
 		//通知一下用户task播放完成了
 		luat_rtos_event_send(g_s_task_handle, AUDIO_EVENT_PLAY_DONE, luat_audio_play_get_last_error(0), 0, 0, 0);
 		break;
@@ -240,9 +184,6 @@ void audio_data_cb(uint8_t *data, uint32_t len, uint8_t bits, uint8_t channels)
 {
 	//这里可以对音频数据进行软件音量缩放，或者直接清空来静音
 	//软件音量缩放参考HAL_I2sSrcAdjustVolumn
-#if ES8311 == 1
-	HAL_I2sSrcAdjustVolumn((int16_t *)data, len, 5);
-#endif
 	//LUAT_DEBUG_PRINT("%x,%d,%d,%d", data, len, bits, channels);
 }
 
@@ -283,23 +224,19 @@ static void demo_task(void *arg)
 		luat_i2c_setup(luat_audio_codec_es8311.i2c_id, 1);
 		luat_i2s_setup(&luat_i2s_conf_es8311);
 		luat_audio_setup_codec(0, &luat_audio_codec_es8311);
+		luat_audio_init_codec(0, 70, 65);
 	}
 	if (TEST_USE_TM8211)
 	{
 		luat_i2s_setup(&luat_i2s_conf_tm8211);
 		luat_audio_setup_codec(0, &luat_audio_codec_tm8211);
-	}
-	luat_audio_init_codec(0);
-
-	for(int i = 0; i < sizeof(es8311_reg_table)/sizeof(i2c_reg_t);i++)
-	{
-		luat_i2c_send(TEST_I2C_ID, 0x18, (uint8_t *)&es8311_reg_table[i], 2, 1);
+		luat_audio_init_codec(0, 100, 0);
 	}
 
 #if defined FEATURE_IMS_ENABLE	//VOLTE固件不支持TTS
 #else
 	// 中文测试用下面的
-	char tts_string[] = "支付宝到账123.45元,微信收款9876.12元ABC,支付宝到账123.45元,微信收款9876.12元ABC,支付宝到账123.45元,微信收款9876.12元ABC,支付宝到账123.45元,微信收款9876.12元ABC";
+	char tts_string[] = "支付宝到账123.45元,微信收款9876.12元ABC";
 	// 英文测试用下面的
 	// char tts_string[] = "hello world, now test once";
 #endif
@@ -335,7 +272,6 @@ static void demo_task(void *arg)
 		LUAT_DEBUG_PRINT("psram total %u, used %u, max used %u", total, alloc, peak);
 		luat_meminfo_opt_sys(LUAT_HEAP_SRAM, &total, &alloc, &peak);
 		LUAT_DEBUG_PRINT("sram total %u, used %u, max used %u", total, alloc, peak);
-
 		luat_audio_play_multi_files(0, amr_info, 5);
 		luat_rtos_event_recv(g_s_task_handle, AUDIO_EVENT_PLAY_DONE, &event, NULL, LUAT_WAIT_FOREVER);
 		luat_meminfo_opt_sys(LUAT_HEAP_PSRAM, &total, &alloc, &peak);
@@ -351,6 +287,42 @@ static void demo_task(void *arg)
 		luat_meminfo_opt_sys(LUAT_HEAP_SRAM, &total, &alloc, &peak);
 		LUAT_DEBUG_PRINT("sram total %u, used %u, max used %u", total, alloc, peak);
 #endif
+		//演示一下休眠
+		luat_audio_sleep(0, 1);
+		luat_pm_power_ctrl(LUAT_PM_POWER_USB, 0);	//没接USB的，只需要在开始的时候关闭一次USB就行了
+		luat_pm_request(LUAT_PM_SLEEP_MODE_LIGHT);
+		luat_rtos_task_sleep(10000);
+		luat_pm_request(LUAT_PM_SLEEP_MODE_IDLE);
+		luat_pm_power_ctrl(LUAT_PM_POWER_USB, 1);
+		if (TEST_USE_ES8311)
+		{
+			luat_audio_init_codec(0, 70, 65);	//如果没有AGPIO来控制，需要重新初始化ES8311，如果用AGPIO来控制的，就不需要重新初始化
+			luat_audio_sleep(0, 0);
+		}
+		//带ES8311的演示录音后再放音
+		if (TEST_USE_ES8311)
+		{
+			luat_meminfo_opt_sys(LUAT_HEAP_PSRAM, &total, &alloc, &peak);
+			LUAT_DEBUG_PRINT("psram total %u, used %u, max used %u", total, alloc, peak);
+			luat_meminfo_opt_sys(LUAT_HEAP_SRAM, &total, &alloc, &peak);
+			LUAT_DEBUG_PRINT("sram total %u, used %u, max used %u", total, alloc, peak);
+		}
+		//带ES8311的演示双向对讲
+		if (TEST_USE_ES8311)
+		{
+			luat_meminfo_opt_sys(LUAT_HEAP_PSRAM, &total, &alloc, &peak);
+			LUAT_DEBUG_PRINT("psram total %u, used %u, max used %u", total, alloc, peak);
+			luat_meminfo_opt_sys(LUAT_HEAP_SRAM, &total, &alloc, &peak);
+			LUAT_DEBUG_PRINT("sram total %u, used %u, max used %u", total, alloc, peak);
+		}
+		//带ES8311+780EPV的演示VOLTE通话
+		if (TEST_USE_ES8311)
+		{
+			luat_meminfo_opt_sys(LUAT_HEAP_PSRAM, &total, &alloc, &peak);
+			LUAT_DEBUG_PRINT("psram total %u, used %u, max used %u", total, alloc, peak);
+			luat_meminfo_opt_sys(LUAT_HEAP_SRAM, &total, &alloc, &peak);
+			LUAT_DEBUG_PRINT("sram total %u, used %u, max used %u", total, alloc, peak);
+		}
     }
 }
 extern void audio_play_set_ram_type(LUAT_HEAP_TYPE_E Type);
@@ -373,7 +345,7 @@ static void test_audio_demo_init(void)
 	// 当前仅EC718p/EC718pv支持这个demo
 	#if defined TYPE_EC718P
 	luat_rtos_task_create(&g_s_task_handle, 4096, 100, "test", demo_task, NULL, 0);
-	//audio_play_set_ram_type(LUAT_HEAP_SRAM);		//打开后消耗RAM较多的地方将使用SRAM，否则使用AUTO模式
+//	audio_play_set_ram_type(LUAT_HEAP_SRAM);		//打开后消耗RAM较多的地方将使用SRAM，否则使用AUTO模式
 	#endif
 
 }

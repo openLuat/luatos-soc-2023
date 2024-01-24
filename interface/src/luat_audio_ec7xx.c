@@ -49,13 +49,12 @@ extern void audio_play_global_init_ex(audio_play_event_cb_fun_t event_cb, audio_
 extern void audio_play_global_init_with_task_priority(audio_play_event_cb_fun_t event_cb, audio_play_data_cb_fun_t data_cb, audio_play_default_fun_t play_file_fun, audio_play_default_fun_t play_tts_fun, void *user_param, uint8_t priority);
 extern int audio_play_write_blank_raw_ex(uint32_t multimedia_id, uint8_t cnt, uint8_t add_font);
 static luat_audio_conf_t prv_audio_config;
-
+int luat_audio_play_blank(uint8_t multimedia_id);
 static void app_pa_on(uint32_t arg)
 {
+	prv_audio_config.pa_on_enable = 1;
 	luat_gpio_set(prv_audio_config.codec_conf.pa_pin, prv_audio_config.codec_conf.pa_on_level);
-	DBG("pa on");
 }
-
 #ifdef __LUATOS__
 extern const unsigned char ivtts_16k[];
 extern const unsigned char ivtts_8k[];
@@ -71,18 +70,9 @@ static void audio_event_cb(uint32_t event, void *param){
 	switch(event)
 	{
 	case LUAT_MULTIMEDIA_CB_AUDIO_DECODE_START:
-//		if (prv_audio_config.codec_conf.codec_opts->no_control)
-//		{
-//			luat_gpio_set(prv_audio_config.codec_conf.power_pin, prv_audio_config.codec_conf.power_on_level);
-//			audio_play_write_blank_raw_ex(0, prv_audio_config.codec_delay_on_time, 1);
-//		}
-//		else
-//		{
-//			prv_audio_config.codec_conf.codec_opts->control(&prv_audio_config.codec_conf,LUAT_CODEC_MODE_NORMAL,0);
-//		}
+		luat_audio_check_ready(0);
 		break;
 	case LUAT_MULTIMEDIA_CB_AUDIO_OUTPUT_START:
-//		luat_rtos_timer_start(prv_audio_config.pa_delay_timer, prv_audio_config.codec_conf.pa_delay_time, 0, app_pa_on, NULL);
 		break;
 	case LUAT_MULTIMEDIA_CB_AUDIO_NEED_DATA:
 		if (prv_audio_config.raw_mode)
@@ -102,20 +92,7 @@ static void audio_event_cb(uint32_t event, void *param){
 		}
 		break;
 	case LUAT_MULTIMEDIA_CB_AUDIO_DONE:
-//		luat_rtos_timer_stop(prv_audio_config.pa_delay_timer);
-//		luat_gpio_set(prv_audio_config.codec_conf.pa_pin, !prv_audio_config.codec_conf.pa_on_level);
-//		if (prv_audio_config.codec_conf.codec_opts->no_control)
-//		{
-//			if (prv_audio_config.codec_delay_off_time)
-//			{
-//				luat_rtos_task_sleep(prv_audio_config.codec_delay_off_time);
-//			}
-//			luat_gpio_set(prv_audio_config.codec_conf.power_pin, !prv_audio_config.codec_conf.power_on_level);
-//		}
-//		else
-//		{
-//			prv_audio_config.codec_conf.codec_opts->control(&prv_audio_config.codec_conf,LUAT_CODEC_MODE_STANDBY,0);
-//		}
+		luat_audio_standby(0);
 		msg.handler = l_multimedia_raw_handler;
 		msg.arg1 = LUAT_MULTIMEDIA_CB_AUDIO_DONE;
 		msg.arg2 = (int)param;
@@ -230,11 +207,6 @@ static void luat_audio_prepare(void)
 	if (prv_audio_config.is_sleep)
 	{
 		luat_audio_sleep(0, 0);
-	}
-	if (I2S_IsWorking(prv_audio_config.codec_conf.i2s_id))
-	{
-		DBG("!");
-		I2S_Stop(prv_audio_config.codec_conf.i2s_id);
 	}
 }
 
@@ -409,8 +381,8 @@ void luat_audio_play_tts_default_fun(void *param)
 void luat_audio_play_global_init_with_task_priority(audio_play_event_cb_fun_t event_cb, audio_play_data_cb_fun_t data_cb, audio_play_default_fun_t play_file_fun, audio_play_default_fun_t play_tts_fun, void *user_param, uint8_t priority)
 {
 	audio_play_global_init_with_task_priority(event_cb, data_cb, play_file_fun, play_tts_fun, user_param, priority);
-	prv_audio_config.pa_delay_timer = luat_create_rtos_timer(app_pa_on, NULL, NULL);
 	prv_audio_config.soft_vol = 100;
+	prv_audio_config.pa_delay_timer = luat_create_rtos_timer(app_pa_on, NULL, NULL);
 }
 
 
@@ -604,7 +576,6 @@ int luat_audio_play_multi_files(uint8_t multimedia_id, luat_audio_play_info_t in
 {
 	luat_audio_prepare();
 	prv_audio_config.raw_mode = 0;
-	DBG("%d", prv_audio_config.codec_conf.i2s_id);
 	return audio_play_multi_files(prv_audio_config.codec_conf.i2s_id, (audio_play_info_t*)info, files_num);
 }
 #endif
@@ -621,12 +592,12 @@ int luat_audio_setup_codec(uint8_t multimedia_id, const luat_audio_codec_conf_t 
 	return 0;
 }
 
-int luat_audio_init_codec(uint8_t multimedia_id)
+int luat_audio_init_codec(uint8_t multimedia_id, uint16_t init_vol, uint16_t init_mic_vol)
 {
 	luat_audio_play_blank(0);
 	luat_gpio_set(prv_audio_config.codec_conf.power_pin, prv_audio_config.codec_conf.power_on_level);
 	prv_audio_config.last_wakeup_time_ms = luat_mcu_tick64_ms();
-
+	prv_audio_config.hardware_vol = init_vol;
 	if (prv_audio_config.codec_conf.power_on_delay_ms)
 	{
 		luat_rtos_task_sleep(prv_audio_config.codec_conf.power_on_delay_ms);
@@ -637,44 +608,48 @@ int luat_audio_init_codec(uint8_t multimedia_id)
 	}
 	else
 	{
-//		int result = prv_audio_config.codec_conf.codec_opts->init(&prv_audio_config.codec_conf, LUAT_CODEC_MODE_SLAVE);
-//		if (result)
-//		{
-//			DBG("no codec");
-//			return result;
-//		}
-//		result = prv_audio_config.codec_conf.codec_opts->control(&prv_audio_config.codec_conf,LUAT_CODEC_SET_RATE, 16000);
-//		if (result)
-//		{
-//			return result;
-//		}
-//		result = prv_audio_config.codec_conf.codec_opts->control(&prv_audio_config.codec_conf,LUAT_CODEC_SET_BITS, 16);
-//		if (result)
-//		{
-//			return result;
-//		}
-//		result = prv_audio_config.codec_conf.codec_opts->control(&prv_audio_config.codec_conf,LUAT_CODEC_SET_FORMAT,LUAT_CODEC_FORMAT_I2S);
-//		if (result)
-//		{
-//			return result;
-//		}
-//		result = prv_audio_config.codec_conf.codec_opts->control(&prv_audio_config.codec_conf,LUAT_CODEC_SET_VOICE_VOL, 100);
-//		if (result)
-//		{
-//			return result;
-//		}
-//		result = prv_audio_config.codec_conf.codec_opts->control(&prv_audio_config.codec_conf,LUAT_CODEC_SET_MIC_VOL, 100);
-//		if (result)
-//		{
-//			return result;
-//		}
-//		result = prv_audio_config.codec_conf.codec_opts->control(&prv_audio_config.codec_conf,LUAT_CODEC_MODE_NORMAL,LUAT_CODEC_MODE_ALL);
-//		if (result)
-//		{
-//			return result;
-//		}
+		int result = prv_audio_config.codec_conf.codec_opts->init(&prv_audio_config.codec_conf, LUAT_CODEC_MODE_SLAVE);
+		if (result)
+		{
+			DBG("no codec");
+			return result;
+		}
+		result = prv_audio_config.codec_conf.codec_opts->control(&prv_audio_config.codec_conf,LUAT_CODEC_SET_RATE, 16000);
+		if (result)
+		{
+			return result;
+		}
+		result = prv_audio_config.codec_conf.codec_opts->control(&prv_audio_config.codec_conf,LUAT_CODEC_SET_BITS, 16);
+		if (result)
+		{
+			return result;
+		}
+		result = prv_audio_config.codec_conf.codec_opts->control(&prv_audio_config.codec_conf,LUAT_CODEC_SET_FORMAT,LUAT_CODEC_FORMAT_I2S);
+		if (result)
+		{
+			return result;
+		}
+		result = prv_audio_config.codec_conf.codec_opts->control(&prv_audio_config.codec_conf,LUAT_CODEC_SET_VOICE_VOL, init_vol);
+		if (result)
+		{
+			return result;
+		}
+		result = prv_audio_config.codec_conf.codec_opts->control(&prv_audio_config.codec_conf,LUAT_CODEC_SET_MIC_VOL, init_mic_vol);
+		if (result)
+		{
+			return result;
+		}
+		result = prv_audio_config.codec_conf.codec_opts->control(&prv_audio_config.codec_conf,LUAT_CODEC_MODE_STANDBY,LUAT_CODEC_MODE_ALL);
+		if (result)
+		{
+			return result;
+		}
+		result = prv_audio_config.codec_conf.codec_opts->control(&prv_audio_config.codec_conf,LUAT_CODEC_MODE_NORMAL,LUAT_CODEC_MODE_ALL);
+		if (result)
+		{
+			return result;
+		}
 	}
-	luat_start_rtos_timer(prv_audio_config.pa_delay_timer, prv_audio_config.codec_conf.pa_delay_time, 0);
 	return 0;
 }
 
@@ -693,17 +668,22 @@ int luat_audio_sleep(uint8_t multimedia_id, uint8_t on_off)
 			else
 			{
 				result = prv_audio_config.codec_conf.codec_opts->control(&prv_audio_config.codec_conf,LUAT_CODEC_MODE_PWRDOWN,LUAT_CODEC_MODE_ALL);
-				if (!result)
+				if (result)
 				{
 					return result;
 				}
 			}
-			luat_gpio_set(prv_audio_config.codec_conf.pa_pin, !prv_audio_config.codec_conf.pa_on_level);
 			if (I2S_IsWorking(prv_audio_config.codec_conf.i2s_id))
 			{
 				I2S_Stop(prv_audio_config.codec_conf.i2s_id);
 			}
 			prv_audio_config.wakeup_ready = 0;
+			prv_audio_config.pa_on_enable = 0;
+			if (prv_audio_config.codec_conf.codec_delay_off_time)
+			{
+				luat_rtos_task_sleep(prv_audio_config.codec_conf.codec_delay_off_time);
+			}
+			luat_gpio_set(prv_audio_config.codec_conf.pa_pin, !prv_audio_config.codec_conf.pa_on_level);
 		}
 		else
 		{
@@ -716,30 +696,37 @@ int luat_audio_sleep(uint8_t multimedia_id, uint8_t on_off)
 			else
 			{
 				result = prv_audio_config.codec_conf.codec_opts->control(&prv_audio_config.codec_conf,LUAT_CODEC_MODE_NORMAL,LUAT_CODEC_MODE_ALL);
-				if (!result)
+				if (result)
 				{
 					return result;
 				}
 			}
 			prv_audio_config.wakeup_ready = 0;
+			prv_audio_config.pa_on_enable = 0;
 			prv_audio_config.last_wakeup_time_ms = luat_mcu_tick64_ms();
-			luat_start_rtos_timer(prv_audio_config.pa_delay_timer, prv_audio_config.codec_conf.pa_delay_time, 0);
+
 		}
 		prv_audio_config.is_sleep = on_off;
 	}
+
 	return 0;
 }
 
-int luat_audio_check_wakeup(uint8_t multimedia_id)
+int luat_audio_check_ready(uint8_t multimedia_id)
 {
-	if (prv_audio_config.wakeup_ready) return 0;
+	uint32_t rest;
+	if (prv_audio_config.wakeup_ready)
+	{
+		luat_audio_play_write_blank_raw(prv_audio_config.codec_conf.i2s_id, 1, 1);
+		goto ENABLE_PA;
+	}
 	if ((luat_mcu_tick64_ms() - prv_audio_config.last_wakeup_time_ms) > prv_audio_config.codec_conf.after_sleep_ready_time)
 	{
-		DBG("codec wakeup ready");
 		prv_audio_config.wakeup_ready = 1;
-		return 0;
+		luat_audio_play_write_blank_raw(prv_audio_config.codec_conf.i2s_id, 1, 1);
+		goto ENABLE_PA;
 	}
-	uint32_t rest = prv_audio_config.codec_conf.after_sleep_ready_time - ((uint32_t)(luat_mcu_tick64_ms() - prv_audio_config.last_wakeup_time_ms));
+	rest = prv_audio_config.codec_conf.after_sleep_ready_time - ((uint32_t)(luat_mcu_tick64_ms() - prv_audio_config.last_wakeup_time_ms));
 	DBG("codec wakeup need %dms", rest);
 	if (rest > 100)
 	{
@@ -749,24 +736,58 @@ int luat_audio_check_wakeup(uint8_t multimedia_id)
 	{
 		luat_audio_play_write_blank_raw(prv_audio_config.codec_conf.i2s_id, 1, 1);
 	}
+ENABLE_PA:
+	if (prv_audio_config.pa_on_enable)
+	{
+		luat_gpio_set(prv_audio_config.codec_conf.pa_pin, prv_audio_config.codec_conf.pa_on_level);
+	}
+	else
+	{
+		if ((luat_mcu_tick64_ms() - prv_audio_config.last_wakeup_time_ms) > (prv_audio_config.codec_conf.pa_delay_time - 10))
+		{
+			prv_audio_config.pa_on_enable = 1;
+			luat_gpio_set(prv_audio_config.codec_conf.pa_pin, prv_audio_config.codec_conf.pa_on_level);
+		}
+		else
+		{
+			rest = prv_audio_config.codec_conf.pa_delay_time - ((uint32_t)(luat_mcu_tick64_ms() - prv_audio_config.last_wakeup_time_ms));
+			DBG("pa enable need %dms", rest);
+			luat_start_rtos_timer(prv_audio_config.pa_delay_timer, rest, 0);
+		}
+	}
+	return 0;
 }
 
 int luat_audio_play_blank(uint8_t multimedia_id)
 {
-	luat_i2s_conf_t *i2s = luat_i2s_get_config(prv_audio_config.codec_conf.i2s_id);
 	if (I2S_IsWorking(prv_audio_config.codec_conf.i2s_id))
 	{
 		I2S_Stop(prv_audio_config.codec_conf.i2s_id);
 	}
-	I2S_Start(prv_audio_config.codec_conf.i2s_id, 1, 8000, (i2s->channel_format == LUAT_I2S_CHANNEL_STEREO)?2:1);
+	I2S_Start(prv_audio_config.codec_conf.i2s_id, 1, 16000, 2);
 	I2S_TransferLoop(prv_audio_config.codec_conf.i2s_id, NULL, 3200, 2, 0);
 }
 
+int luat_audio_standby(uint8_t multimedia_id)
+{
+	luat_audio_play_blank(multimedia_id);
+	if (prv_audio_config.codec_conf.codec_delay_off_time)
+	{
+		luat_rtos_task_sleep(prv_audio_config.codec_conf.codec_delay_off_time);
+	}
+	luat_gpio_set(prv_audio_config.codec_conf.pa_pin, !prv_audio_config.codec_conf.pa_on_level);
+}
 
 int luat_audio_record(uint8_t multimedia_id, uint32_t sample_rate)
 {
 
 }
+
+int luat_audio_record_stop(uint8_t multimedia_id, uint32_t sample_rate)
+{
+
+}
+
 
 int luat_audio_speech(uint8_t multimedia_id, uint8_t only_play, uint32_t sample_rate)
 {

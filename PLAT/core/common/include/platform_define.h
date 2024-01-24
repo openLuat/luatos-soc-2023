@@ -119,7 +119,10 @@ enum
 	USP_MAX,
 
 	I2S_ID0 = USP_ID0,
+#if defined TYPE_EC716S
+#else
 	I2S_ID1,
+#endif
 	I2S_MAX,
 
 	CSPI_ID0 = USP_ID0,
