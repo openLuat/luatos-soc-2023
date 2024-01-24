@@ -9,7 +9,7 @@
 #include "interf_enc.h"
 #include "luat_uart.h"
 #include "luat_mem.h"
-//本demo的I2S用法已经不符合API，暂时无法使用，请参考example_speech
+//本demo的I2S用法是了为了兼容AIR780E的代码，使用的旧方法，只能做为参考，推荐看example_audio内的录音代码
 //AIR780EP音频开发板配置
 #define MIC_VOL_EN	HAL_GPIO_26
 #define MIC_VOL_EN_ALT_FUN	0
@@ -264,7 +264,7 @@ static void es8311_demo_task(void *arg)
 	uint8_t tx_buf[2];
 	uint8_t rx_buf[2];
 	luat_audio_play_info_t info[1] = {0};
-    luat_audio_play_global_init(audio_event_cb, audio_data_cb, luat_audio_play_file_default_fun, NULL, NULL);
+	luat_audio_play_global_init_with_task_priority(audio_event_cb, audio_data_cb, luat_audio_play_file_default_fun, NULL, NULL, 50);
 	luat_i2c_setup(TEST_I2C_ID, 0);
 
     tx_buf[0] = 0xfd;

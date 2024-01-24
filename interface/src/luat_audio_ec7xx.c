@@ -233,6 +233,7 @@ static void luat_audio_prepare(void)
 	}
 	if (I2S_IsWorking(prv_audio_config.codec_conf.i2s_id))
 	{
+		DBG("!");
 		I2S_Stop(prv_audio_config.codec_conf.i2s_id);
 	}
 }
@@ -603,6 +604,7 @@ int luat_audio_play_multi_files(uint8_t multimedia_id, luat_audio_play_info_t in
 {
 	luat_audio_prepare();
 	prv_audio_config.raw_mode = 0;
+	DBG("%d", prv_audio_config.codec_conf.i2s_id);
 	return audio_play_multi_files(prv_audio_config.codec_conf.i2s_id, (audio_play_info_t*)info, files_num);
 }
 #endif
@@ -635,42 +637,42 @@ int luat_audio_init_codec(uint8_t multimedia_id)
 	}
 	else
 	{
-		int result = prv_audio_config.codec_conf.codec_opts->init(&prv_audio_config.codec_conf, LUAT_CODEC_MODE_SLAVE);
-		if (result)
-		{
-			DBG("no codec");
-			return result;
-		}
-		result = prv_audio_config.codec_conf.codec_opts->control(&prv_audio_config.codec_conf,LUAT_CODEC_SET_RATE, 16000);
-		if (result)
-		{
-			return result;
-		}
-		result = prv_audio_config.codec_conf.codec_opts->control(&prv_audio_config.codec_conf,LUAT_CODEC_SET_BITS, 16);
-		if (result)
-		{
-			return result;
-		}
-		result = prv_audio_config.codec_conf.codec_opts->control(&prv_audio_config.codec_conf,LUAT_CODEC_SET_FORMAT,LUAT_CODEC_FORMAT_I2S);
-		if (result)
-		{
-			return result;
-		}
-		result = prv_audio_config.codec_conf.codec_opts->control(&prv_audio_config.codec_conf,LUAT_CODEC_SET_VOICE_VOL, 70);
-		if (result)
-		{
-			return result;
-		}
-		result = prv_audio_config.codec_conf.codec_opts->control(&prv_audio_config.codec_conf,LUAT_CODEC_SET_MIC_VOL, 100);
-		if (result)
-		{
-			return result;
-		}
-		result = prv_audio_config.codec_conf.codec_opts->control(&prv_audio_config.codec_conf,LUAT_CODEC_MODE_NORMAL,LUAT_CODEC_MODE_ALL);
-		if (result)
-		{
-			return result;
-		}
+//		int result = prv_audio_config.codec_conf.codec_opts->init(&prv_audio_config.codec_conf, LUAT_CODEC_MODE_SLAVE);
+//		if (result)
+//		{
+//			DBG("no codec");
+//			return result;
+//		}
+//		result = prv_audio_config.codec_conf.codec_opts->control(&prv_audio_config.codec_conf,LUAT_CODEC_SET_RATE, 16000);
+//		if (result)
+//		{
+//			return result;
+//		}
+//		result = prv_audio_config.codec_conf.codec_opts->control(&prv_audio_config.codec_conf,LUAT_CODEC_SET_BITS, 16);
+//		if (result)
+//		{
+//			return result;
+//		}
+//		result = prv_audio_config.codec_conf.codec_opts->control(&prv_audio_config.codec_conf,LUAT_CODEC_SET_FORMAT,LUAT_CODEC_FORMAT_I2S);
+//		if (result)
+//		{
+//			return result;
+//		}
+//		result = prv_audio_config.codec_conf.codec_opts->control(&prv_audio_config.codec_conf,LUAT_CODEC_SET_VOICE_VOL, 100);
+//		if (result)
+//		{
+//			return result;
+//		}
+//		result = prv_audio_config.codec_conf.codec_opts->control(&prv_audio_config.codec_conf,LUAT_CODEC_SET_MIC_VOL, 100);
+//		if (result)
+//		{
+//			return result;
+//		}
+//		result = prv_audio_config.codec_conf.codec_opts->control(&prv_audio_config.codec_conf,LUAT_CODEC_MODE_NORMAL,LUAT_CODEC_MODE_ALL);
+//		if (result)
+//		{
+//			return result;
+//		}
 	}
 	luat_start_rtos_timer(prv_audio_config.pa_delay_timer, prv_audio_config.codec_conf.pa_delay_time, 0);
 	return 0;
@@ -756,7 +758,7 @@ int luat_audio_play_blank(uint8_t multimedia_id)
 	{
 		I2S_Stop(prv_audio_config.codec_conf.i2s_id);
 	}
-	I2S_Start(prv_audio_config.codec_conf.i2s_id, 1, 8000, 2);
+	I2S_Start(prv_audio_config.codec_conf.i2s_id, 1, 8000, (i2s->channel_format == LUAT_I2S_CHANNEL_STEREO)?2:1);
 	I2S_TransferLoop(prv_audio_config.codec_conf.i2s_id, NULL, 3200, 2, 0);
 }
 
