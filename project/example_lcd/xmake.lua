@@ -5,7 +5,7 @@ target(TARGET_NAME)
     set_kind("static")
     set_targetdir(LIB_DIR)
     -- set_warnings("error")
-
+    -- add_defines("LUAT_USE_LCD_CUSTOM_DRAW",{public = true})
     add_includedirs(LUATOS_ROOT.."/components/u8g2", {public = true})
 
     add_includedirs(LUATOS_ROOT.."/components/lcd", {public = true})
