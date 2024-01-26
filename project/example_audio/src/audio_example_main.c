@@ -54,7 +54,6 @@ static const luat_audio_codec_conf_t luat_audio_codec_es8311 = {
 	.power_on_delay_ms = 10,
 	.pa_delay_time = 200,
 	.after_sleep_ready_time = 600,
-	.codec_delay_off_time = 1,
     .codec_opts = &codec_opts_es8311,
 };
 
@@ -182,6 +181,7 @@ void audio_event_cb(uint32_t event, void *param)
 		break;
 	case LUAT_MULTIMEDIA_CB_TTS_INIT:
 		break;
+	case LUAT_MULTIMEDIA_CB_DECODE_DONE:
 	case LUAT_MULTIMEDIA_CB_TTS_DONE:
 		if (!luat_audio_play_get_last_error(0))
 		{
@@ -279,7 +279,7 @@ static void demo_task(void *arg)
 		luat_i2c_setup(luat_audio_codec_es8311.i2c_id, 1);
 		luat_i2s_setup(&luat_i2s_conf_es8311);
 		luat_audio_setup_codec(0, &luat_audio_codec_es8311);
-		luat_audio_init_codec(0, 65, 75);
+		luat_audio_init_codec(0, 75, 75);
 	}
 	if (TEST_USE_TM8211)
 	{
@@ -353,7 +353,7 @@ static void demo_task(void *arg)
 			g_s_amr_rom_file.Pos = 0;
 			OS_BufferWrite(&g_s_amr_rom_file, "#!AMR\n", 6);
 			g_s_test_only_record = 1;
-			luat_audio_record(0, 8000);
+			luat_audio_record_and_play(0, 8000, NULL, 3200, 2); //放音buffer填NULL，就是喇叭静音
 			luat_rtos_task_sleep((RECORD_TIME + 1) * 1000);
 			g_s_test_only_record = 0;
 			amr_info[0].address = (uint32_t)g_s_amr_rom_file.Data;
@@ -365,6 +365,7 @@ static void demo_task(void *arg)
 			luat_meminfo_opt_sys(LUAT_HEAP_SRAM, &total, &alloc, &peak);
 			LUAT_DEBUG_PRINT("sram total %u, used %u, max used %u", total, alloc, peak);
 		}
+
 		//带ES8311的演示双向对讲
 		if (TEST_USE_ES8311)
 		{
