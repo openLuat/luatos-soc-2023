@@ -112,7 +112,3 @@ size_t luat_flash_get_fskv_addr(size_t *len)
 #endif
 }
 
-uint8_t FLASH_eraseSectorSafe(uint32_t SectorAddress){
-	return 0;
-}
-
