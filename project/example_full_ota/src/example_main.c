@@ -97,6 +97,10 @@ static void luat_ymodem_cb(uint8_t *data, uint32_t data_len)
 			LUAT_DEBUG_PRINT("end");
 			if (!luat_fota_done())
 			{
+
+				size_t all,used,max_used;
+				luat_meminfo_sys(&all, &used, &max_used);
+				LUAT_DEBUG_PRINT("meminfo %d,%d,%d", all, used, max_used);
 				LUAT_DEBUG_PRINT("OTA包写入完成，重启模块!");
 				luat_os_reboot(0);
 			}
@@ -176,7 +180,8 @@ static void luat_test_task(void *param)
 {
 	luat_debug_set_fault_mode(LUAT_DEBUG_FAULT_HANG_RESET);
 #ifdef OTA_BY_USB
-	uint8_t temp[128];
+	size_t all,used,max_used;
+	uint8_t *temp = luat_heap_malloc(4096);
     luat_uart_t uart = {
         .id = UART_ID,
         .baud_rate = 3000000,
@@ -202,7 +207,7 @@ static void luat_test_task(void *param)
     	}
     	else
     	{
-    		read_len = luat_uart_read(UART_ID, temp, 128);
+    		read_len = luat_uart_read(UART_ID, temp, 4096);
     		while(read_len > 0)
     		{
     			result = luat_ymodem_receive(ymodem_handler, temp, read_len, &ack, &flag, &file_ok, &all_done);
@@ -218,8 +223,16 @@ static void luat_test_task(void *param)
     			{
     				luat_uart_write(UART_ID, &flag, 1);
     			}
-    			read_len = luat_uart_read(UART_ID, temp, 128);
+    			read_len = luat_uart_read(UART_ID, temp, 4096);
+        		luat_meminfo_sys(&all, &used, &max_used);
+        		if (all - used < 100 * 1024)
+        		{
+        			LUAT_DEBUG_PRINT("%d,%d mem used too much, wait",all,used);
+        			luat_rtos_task_sleep(10);
+        		}
     		}
+
+
 
     	}
     }

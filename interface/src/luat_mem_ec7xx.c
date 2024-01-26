@@ -47,12 +47,15 @@ void luat_heap_free(void* ptr) {
 	//先做简单判断，如果有问题，再做严格判断
 	if ((uint32_t)ptr > MSMB_START_ADDR && (uint32_t)ptr <= up_buf_start) {
 		free(ptr);
+		return ;
 	}
 #if defined (PSRAM_FEATURE_ENABLE) && (PSRAM_EXIST==1)
 	if ((uint32_t)ptr > PSRAM_START_ADDR && (uint32_t)ptr <= PSRAM_END_ADDR) {
 		vPortFree_Psram(ptr);
+		return ;
 	}
 #endif
+	DBG("invaild ptr %p", ptr);
 }
 
 void* luat_heap_realloc(void* ptr, size_t len) {
