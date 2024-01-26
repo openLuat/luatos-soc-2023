@@ -173,6 +173,7 @@ target("csdk")
             "$(projectdir)/PLAT/driver/hal/**.c",
             "$(projectdir)/PLAT/driver/chip/ec7xx/ap/src/*.c",
             "$(projectdir)/PLAT/driver/chip/ec7xx/ap/src/usb/open/*.c",
+			"$(projectdir)/PLAT/driver/chip/ec7xx/common/src/VPU/vem_cfg_default.c",
             "$(projectdir)/PLAT/driver/chip/ec7xx/common/gcc/memcpy-armv7m.S")
     if CHIP then
         add_files("$(projectdir)/PLAT/driver/chip/ec7xx/ap/src/"..CHIP.."/adc.c")
