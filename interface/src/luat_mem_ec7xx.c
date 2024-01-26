@@ -29,6 +29,10 @@
 #include "common_api.h"
 #include "mem_map.h"
 #include "luat_mem.h"
+//extern uint32_t start_up_buffer;
+//extern uint32_t end_ap_data;
+//uint32_t sys_heap_start = &(start_up_buffer);
+//uint32_t sys_heap_end = &(end_ap_data);
 
 #include "FreeRTOS.h"
 extern void GetSRAMHeapInfo(uint32_t *total, uint32_t *alloc, uint32_t *peak);
@@ -39,7 +43,16 @@ void* luat_heap_malloc(size_t len) {
 }
 
 void luat_heap_free(void* ptr) {
-    free(ptr);
+//	if ((uint32_t)ptr > sys_heap_start && (uint32_t)ptr <= sys_heap_end) {
+	//先做简单判断，如果有问题，再做严格判断
+	if ((uint32_t)ptr > MSMB_START_ADDR && (uint32_t)ptr <= up_buf_start) {
+		free(ptr);
+	}
+#if defined (PSRAM_FEATURE_ENABLE) && (PSRAM_EXIST==1)
+	if ((uint32_t)ptr > PSRAM_START_ADDR && (uint32_t)ptr <= PSRAM_END_ADDR) {
+		vPortFree_Psram(ptr);
+	}
+#endif
 }
 
 void* luat_heap_realloc(void* ptr, size_t len) {
@@ -71,12 +84,7 @@ void* luat_heap_opt_malloc(LUAT_HEAP_TYPE_E type,size_t len){
 }
 
 void luat_heap_opt_free(LUAT_HEAP_TYPE_E type,void* ptr){
-	if (ptr){
-		if(ptr<PSRAM_START_ADDR) return free(ptr);
-#if defined (PSRAM_FEATURE_ENABLE) && (PSRAM_EXIST==1)
-		else vPortFree_Psram(ptr);
-#endif
-	}
+	luat_heap_free(ptr);
 }
 
 void* luat_heap_opt_realloc(LUAT_HEAP_TYPE_E type,void* ptr, size_t len){
