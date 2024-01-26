@@ -50,9 +50,15 @@ EXCEP_DUMP_DATA const uint16_t wCRCTableAbs[] =
 
 EXCEP_DUMP_DATA uint32_t tDataInfoCell [][2]=
 {
-    {EC_EXCEPTION_AP_RAM_BASE,     EC_EXCEPTION_AP_RAM_LEN},
-    {EC_EXCEPTION_CP_RAM_BASE,     EC_EXCEPTION_CP_RAM_LEN},
-    {EC_EXCEPTION_APCP_RAM_BASE,   EC_EXCEPTION_APCP_RAM_LEN},
+    {EC_EXCEPTION_AP_RAM_BASE,      EC_EXCEPTION_AP_RAM_LEN},
+    {EC_EXCEPTION_CP_RAM_BASE,      EC_EXCEPTION_CP_RAM_LEN},
+    {EC_EXCEPTION_APCP_RAM_BASE,    EC_EXCEPTION_APCP_RAM_LEN},
+#ifdef __USER_CODE__	//luatools not support,wait support
+#else
+    #if (PSRAM_EXIST==1)
+    {EC_EXCEPTION_PSRAM_RAM_BASE,   EC_EXCEPTION_PSRAM_RAM_LEN},
+    #endif
+#endif
 };
 
 extern void delay_us(uint32_t us);
@@ -838,5 +844,56 @@ uint32_t ecGetDumpCUSTAddrOffset(void)
 {
 	return FLASH_EXCEP_DUMP_ADDR_OFFSET_CUST;
 }
+
+#ifdef CORE_IS_AP
+extern uint8_t FLASH_read(uint8_t* pData, uint32_t ReadAddr, uint32_t Size);
+
+static __FORCEINLINE uint16_t __builtin_clz_16(uint16_t usData)
+{
+    uint8_t ucCount = 0;
+    uint16_t uMask = 0x8000;
+
+    if (usData == 0)
+	{
+		return 16;
+	}
+
+    while ((usData & uMask) == 0)
+    {
+        ucCount += 1;
+        uMask = uMask >> 1;
+    }
+
+    return (ucCount);
+}
+
+/*
+ * \brief       Check whether Flash dump occured or not.
+ * \param[in]   void.
+ * \returns     true  : Flash dump occured.
+ *   			flase : Flash dump doesn't occured.
+ */
+bool ecFlashDumpOccuredCheck(void)
+{
+	uint16_t usBitMap = 0;
+	uint8_t ucPartNums = 0;
+	uint32_t uiExcepOccured = 0;
+
+	FLASH_read((uint8_t *)&usBitMap, ecGetDumpStartFlashAddr(), 2);
+
+	ucPartNums = 16 - __builtin_clz_16(usBitMap);
+	if (!ucPartNums)
+	{
+		return false;
+	}
+
+	FLASH_read((uint8_t *)&uiExcepOccured, ecGetDumpStartFlashAddr()+ucPartNums*4+2, 4);
+	if (uiExcepOccured  == EC_EXCEPTION_OCCURED)
+	{
+		return true;
+	}
+	return false;
+}
+#endif
 
 #endif

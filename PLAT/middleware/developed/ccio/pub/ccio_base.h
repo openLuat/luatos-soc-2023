@@ -34,6 +34,11 @@ extern "C" {
 /*----------------------------------------------------------------------------*
  *                    MACROS                                                  *
  *----------------------------------------------------------------------------*/
+/* undefined value */
+#define CCIO_VAL_UINT8_UNDEF       (0xff)
+#define CCIO_VAL_UINT16_UNDEF      (0xffff)
+#define CCIO_VAL_UINT32_UNDEF      (0xffffffff)
+
 /* buffer size */
 #define CCIO_BUF_SIZE_8            (8)
 #define CCIO_BUF_SIZE_16           (16)

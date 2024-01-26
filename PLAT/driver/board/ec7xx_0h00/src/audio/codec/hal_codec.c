@@ -116,11 +116,15 @@ void codecI2cDeInit()
 
 int32_t codecI2cWrite(uint8_t slaveAddr, uint8_t regAddr, uint16_t regVal)
 {
+    ARM_I2C_STATUS status = {0};
+    
     uint8_t  cmd[2] = {0, 0};
     cmd[0]  = regAddr;
     cmd[1]  = regVal & 0xff;
 
-    return i2cDrvInstance->MasterTransmit(slaveAddr, cmd, 2, false);
+    i2cDrvInstance->MasterTransmit(slaveAddr, cmd, 2, false);
+    status = i2cDrvInstance->GetStatus();
+    return status.rx_nack;
 }
 
 uint8_t codecI2cRead(uint8_t slaveAddr, uint8_t regAddr)

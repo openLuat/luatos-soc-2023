@@ -165,6 +165,11 @@ static int32_t es8311WriteReg(uint8_t regAddr, uint16_t data)
     int32_t ret = 0;
     ret = codecI2cWrite(ES8311_IICADDR, regAddr, data);
 
+    if (ret == 1)
+    {
+        // if fail , write again
+        ret = codecI2cWrite(ES8311_IICADDR, regAddr, data);
+    }
 #if 0
 #ifdef FEATURE_OS_ENABLE        
     DEBUG_PRINT(UNILOG_PLA_DRIVER, es8311WriteReg_1, P_DEBUG, "reg write: reg=%x, data=%x", regAddr, data);
@@ -258,7 +263,11 @@ static HalCodecSts_e es8311AllResume()
     es8311WriteReg(ES8311_GP_REG45,             0x00);
     es8311WriteReg(ES8311_CLK_MANAGER_REG01,    0x3F);
     es8311WriteReg(ES8311_RESET_REG00,          0x80);
+#ifdef FEATURE_OS_ENABLE
+    osDelay(1);
+#else    
     delay_us(1000);
+#endif    
     es8311WriteReg(ES8311_SYSTEM_REG0D,         0x01);
     es8311WriteReg(ES8311_CLK_MANAGER_REG02,    0x00);
     es8311WriteReg(ES8311_DAC_REG37,            0x08);
@@ -279,14 +288,22 @@ static HalCodecSts_e es8311AdcResume()
     es8311WriteReg(ES8311_SYSTEM_REG0D,         0x01);
     es8311WriteReg(ES8311_CLK_MANAGER_REG01,    0x3F);
     es8311WriteReg(ES8311_RESET_REG00,          0x80);
+#ifdef FEATURE_OS_ENABLE
+    osDelay(1);
+#else    
     delay_us(1000);
+#endif    
     es8311WriteReg(ES8311_SYSTEM_REG0D,         0x01);
     es8311WriteReg(ES8311_DAC_REG37,            0x08);
     es8311WriteReg(ES8311_ADC_REG15,            0x00);
     es8311WriteReg(ES8311_SYSTEM_REG14,         0x18);
     es8311WriteReg(ES8311_SYSTEM_REG0E,         0x02);
     es8311WriteReg(ES8311_ADC_REG17,            adcVolBak);
+#ifdef FEATURE_OS_ENABLE
+    osDelay(50);
+#else    
     delay_us(50*1000);
+#endif    
     es8311WriteReg(ES8311_SDPOUT_REG0A,         0x00);
     return CODEC_EOK;
 }
@@ -298,7 +315,11 @@ static HalCodecSts_e es8311DacResume()
     es8311WriteReg(ES8311_SYSTEM_REG0D,         0x01);
     es8311WriteReg(ES8311_CLK_MANAGER_REG01,    0x3F);
     es8311WriteReg(ES8311_RESET_REG00,          0x80);
+#ifdef FEATURE_OS_ENABLE
+    osDelay(1);
+#else    
     delay_us(1000);
+#endif    
     es8311WriteReg(ES8311_SYSTEM_REG0D,         0x01);
     es8311WriteReg(ES8311_DAC_REG37,            0x08);
     es8311WriteReg(ES8311_ADC_REG15,            0x00);
@@ -324,10 +345,18 @@ static HalCodecSts_e es8311PwrDown()
     es8311WriteReg(ES8311_DAC_REG37,            0x08);
     es8311WriteReg(ES8311_CLK_MANAGER_REG02,    0x10);
     es8311WriteReg(ES8311_RESET_REG00,          0x00);
+#ifdef FEATURE_OS_ENABLE
+    osDelay(1);
+#else    
     delay_us(1000);
+#endif 
     es8311WriteReg(ES8311_RESET_REG00,          0x1f);
     es8311WriteReg(ES8311_CLK_MANAGER_REG01,    0x30);    
+#ifdef FEATURE_OS_ENABLE
+    osDelay(1);
+#else    
     delay_us(1000);
+#endif 
     es8311WriteReg(ES8311_CLK_MANAGER_REG01,    0x00);
     es8311WriteReg(ES8311_GP_REG45,             0x00);
     es8311WriteReg(ES8311_SYSTEM_REG0D,         0xfc);

@@ -12,8 +12,7 @@
 #include "slpman.h"
 #include "ec7xx.h"
 
-#define LDO_AIO_CTRL_REG_ADDR           (0x4F020180)
-#define DCXO_CK2AUXADC_REG_ADDR         (0x4F050440)
+#define DCXO_CK2AUXADC_REG_ADDR         (0x4F050424)
 
 #define ADC_ENABLE()                    do                                                               \
                                         {                                                                \
@@ -22,13 +21,11 @@
                                             delay_us(5);                                                 \
                                             ADC->CTRL = ADC_CTRL_LDO_EN_Msk;                             \
                                             delay_us(5);                                                 \
-                                            *(uint32_t*)(LDO_AIO_CTRL_REG_ADDR) = 1;                     \
                                         } while(0)
 
 #define ADC_DISABLE()                   do                                                               \
                                         {                                                                \
                                             ADC->CTRL = 0;                                               \
-                                            *(uint32_t*)(LDO_AIO_CTRL_REG_ADDR) = 0;                     \
                                         } while(0)
 
 #define ADC_CHANNEL_NUMBER              (6)

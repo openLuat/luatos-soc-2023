@@ -1071,11 +1071,23 @@ void slpManDCXOOutputEn(bool en);
 void slpManSetCPSleepEnable(bool en);
 /**
 * @brief void void slpManSetHibAreaNotAvaliable(bool noPmuArea)
-* @details  set hibernate area not avaliable, if you need use this area
+* @details  set hibernate area not avaliable, if you need use this area.
+            suggest to call this API in BSP_CustomInit before apmuGetPMUSettings
+            example: if no hibernate area available:
+                     slpManSetHibAreaNotAvaliable(true);    --call before apmuGetPMUSettings
+                     apmuGetPMUSettings(AP_STATE_IDLE);
+                     
 * @param    noPmuArea: true, sdk do not use FLASH_HIB_BACKUP area, and will not enter hibernate
                        false, FLASH_HIB_BACKUP avaliable and hibernate enabled
 */
 void slpManSetHibAreaNotAvaliable(bool noPmuArea);
+/* 
+    check whether ADC is ready to work.
+    ADC is ready to work 20ms after power on/wakeup from sleep/sleep failed,
+    so always check ADC is ready before start adc conversion. Return true means ADC is ready.
+    Also you need lock sleep when waiting ADC ready.
+*/
+bool slpManCheckADCReady(void);
 
 /** \} */
 

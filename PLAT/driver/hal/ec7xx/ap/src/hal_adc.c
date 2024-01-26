@@ -9,6 +9,7 @@
  ****************************************************************************/
 
 #include "adc.h"
+#include "slpman.h"
 #include "hal_trim.h"
 #include "cmsis_os2.h"
 #include "sctdef.h"
@@ -181,6 +182,14 @@ int32_t HAL_ADC_SampleVbatVoltage(uint32_t timeout_ms)
     // semphore created succussful
     if(g_adcVbatResult.sem != NULL)
     {
+        uint32_t adcReadyTimeout = 30; // at most 30ms
+
+        while((slpManCheckADCReady() == false) && adcReadyTimeout)
+        {
+            osDelay(1);
+            adcReadyTimeout--;
+        }
+
         ADC_getDefaultConfig(&adcConfig);
 #if defined CHIP_EC718
         adcConfig.channelConfig.vbatResDiv = ADC_VBAT_RESDIV_RATIO_8OVER32;
@@ -226,6 +235,14 @@ int32_t HAL_ADC_GetThermalTemperature(uint32_t timeout_ms, int32_t* temperatrueP
     // semphore created succussful
     if(g_adcThermalResult.sem != NULL)
     {
+        uint32_t adcReadyTimeout = 30; // at most 30ms
+
+        while((slpManCheckADCReady() == false) && adcReadyTimeout)
+        {
+            osDelay(1);
+            adcReadyTimeout--;
+        }
+
         ADC_channelInit(ADC_CHANNEL_THERMAL, ADC_USER_APP, NULL, ADC_ThermalCallback);
 
         ADC_startConversion(ADC_CHANNEL_THERMAL, ADC_USER_APP);

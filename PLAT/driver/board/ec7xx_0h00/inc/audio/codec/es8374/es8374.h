@@ -94,6 +94,8 @@ extern "C" {
 #define ES8374_REG_37               0x37
 #define ES8374_REG_38               0x38
 #define ES8374_REG_6D               0x6D
+#define ES8374_REG_6F               0x6F
+#define ES8374_REG_72               0x72
 
 
 /*----------------------------------------------------------------------------*
@@ -216,12 +218,13 @@ HalCodecSts_e es8374Stop(HalCodecModule_e mode);
 HalCodecSts_e es8374GetVoiceMute(int *mute);
 
 /**
-  \brief    Set ES8374 mic gain
-  \param[in] gain db of mic gain
+  \brief    Set ES8374 mic gain and volume
+  \param[in] not used
+  \param[in] micVolume micVolume, varies from 0~100, default is 75
   \return    -CODEC_EOK   -CODEC_ERR
   \note
  */ 
-HalCodecSts_e es8374SetMicVolume(int micVolume);
+HalCodecSts_e es8374SetMicVolume(uint8_t micGain, int micVolume);
 
 /**
  * @brief Print all ES8374 registers
@@ -245,6 +248,7 @@ void es8374ReadAll();
  */
 HalCodecCfg_t es8374GetDefaultCfg();
 
+HalCodecSts_e es8374Resume(HalCodecMode_e mode);
 
 
 

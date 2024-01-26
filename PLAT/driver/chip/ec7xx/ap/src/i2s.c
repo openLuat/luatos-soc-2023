@@ -61,6 +61,7 @@ const uint32_t i2sSampleRateTbl[][4] =
     {SAMPLE_RATE_8K,    256, 0,        0x32},   // 256fs, 8k
     {SAMPLE_RATE_16K,   256, 0,        0x19},   // 256fs, 16k
     {SAMPLE_RATE_22_05K,256, 0x23fdad, 0x12},   // 256fs, 22.05k
+    {SAMPLE_RATE_24K,	256, 0xaaaaaa, 0x10},   // 256fs, 24k
     {SAMPLE_RATE_32K,   256, 0x800000, 0x0C},   // 256fs, 32k
     {SAMPLE_RATE_44_1K, 256, 0x11eb85, 0x09},   // 256fs, 44.1k
     {SAMPLE_RATE_48K,   256, 0x555555, 0x08},   // 256fs, 48k
@@ -356,6 +357,15 @@ static void i2sExitLpStateRestore(void* pdata, slpManLpState state)
                     i2sInstance[i]->I2SBUSSEL   = i2sDataBase[i].regsBackup.I2SBUSSEL;
                 }
             }
+#if (VOLTE_EC_OWN_BOARD_SUPPORT)
+            extern i2sSlp1Cb_fn i2sSlp1CbFn;
+
+            if (i2sSlp1CbFn)
+            {
+                i2sSlp1CbFn();
+            }
+#endif            
+            
             break;
 
         default:
@@ -475,6 +485,7 @@ int32_t i2sDeInit(I2sResources_t *i2s)
     }
 
     apmuVoteToDozeState(PMU_DOZE_USP_MOD, true);
+    CHECK_TO_UNLOCK_SLEEP(instance);
 #endif
 
     DMA_closeChannel(i2s->dma->rxInstance, i2s->dma->rxCh);

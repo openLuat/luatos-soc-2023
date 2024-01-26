@@ -72,7 +72,7 @@ typedef struct MidWareSockAonInfo_Tag
 #endif
 }MidWareSockAonInfo;
 
-#ifdef FEATURE_PS_SMS_AT_ENABLE
+#if defined FEATURE_PS_SMS_AT_ENABLE || defined FEATURE_SMS_API_ENABLE
 typedef struct MidWareSimSmsAddress_Tag
 {
     UINT8      typeOfNumber;
@@ -188,7 +188,7 @@ typedef struct MidWareAonInfo_Tag
     */
     MidWareSockAonInfo      mwSockAonInfo;
 
-#ifdef FEATURE_PS_SMS_AT_ENABLE
+#if defined FEATURE_PS_SMS_AT_ENABLE || defined FEATURE_SMS_API_ENABLE
     /*
      * SIM SMS parameters aon info
     */
@@ -298,7 +298,8 @@ void mwAonSetNitzUtcTimeSyncFlag(BOOL bSync);
 */
 void mwAonPsDialInfoChanged(void);
 
-#ifdef FEATURE_PS_SMS_AT_ENABLE
+#if defined FEATURE_PS_SMS_AT_ENABLE || defined FEATURE_SMS_API_ENABLE
+
 /**
   \fn           mwGetSimSmspAonInfo
   \brief        Get middle ware SIM smsp AON info

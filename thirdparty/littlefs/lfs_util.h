@@ -51,6 +51,9 @@ extern "C"
 #define LFS_NO_WARN
 #define LFS_NO_ERROR
 
+#define EC_FS_ASSERT_REFORMAT_THRESHOLD     (10)
+#define EC_FS_ASSERT_FLASH_RESET_FLAG       (0x1)
+
 #ifndef LFS_TRACE
 #ifdef LFS_YES_TRACE
 #define LFS_TRACE_(fmt, ...) \
@@ -94,12 +97,10 @@ extern "C"
 // Runtime assertions
 #ifndef LFS_ASSERT
 #ifndef LFS_NO_ASSERT
-#define LFS_ASSERT(test)                  do                                                                   \
-                                          {                                                                    \
-                                              EC_ASSERT((test), EC_FS_ASSERT_MAGIC_NUMBER0,                      \
-                                              EC_FS_ASSERT_MAGIC_NUMBER1, EC_FS_ASSERT_MAGIC_NUMBER2);              \
-                                          }                                                                    \
-                                          while(0)
+void lfs_setAssertFlag(uint32_t flag);
+void lfs_assert(bool test);
+
+#define LFS_ASSERT(test)     lfs_assert(test)
 
 #else
 #define LFS_ASSERT(test)

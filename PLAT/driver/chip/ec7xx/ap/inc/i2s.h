@@ -38,10 +38,11 @@ extern "C" {
 #define SAMPLE_RATE_8K                      0x0
 #define SAMPLE_RATE_16K                     0x1
 #define SAMPLE_RATE_22_05K                  0x2
-#define SAMPLE_RATE_32K                     0x3
-#define SAMPLE_RATE_44_1K                   0x4
-#define SAMPLE_RATE_48K                     0x5
-#define SAMPLE_RATE_96K                     0x6
+#define SAMPLE_RATE_24K		                0x3
+#define SAMPLE_RATE_32K                     0x4
+#define SAMPLE_RATE_44_1K                   0x5
+#define SAMPLE_RATE_48K                     0x6
+#define SAMPLE_RATE_96K                     0x7
 
 // I2S DMA chain num
 #define I2S_DMA_TX_DESCRIPTOR_CHAIN_NUM     20
@@ -84,6 +85,9 @@ extern "C" {
  *----------------------------------------------------------------------------*/
 
 typedef void (*i2sCbEvent_fn) (uint32_t event, uint32_t arg);     // i2s callback event.
+#if (VOLTE_EC_OWN_BOARD_SUPPORT)
+typedef void (*i2sSlp1Cb_fn)();
+#endif
 
 // I2S IRQ
 typedef struct 

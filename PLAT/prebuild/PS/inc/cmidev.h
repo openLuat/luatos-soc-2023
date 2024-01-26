@@ -543,7 +543,8 @@ typedef struct CmiDevSetExtCfgReq_Tag
     UINT8   relaxMonitorDeltaP; /*range [0..15], value in dB, 0 means relaxed monitoring(36.304, 5.2.4.12) in is not used, used in CERRC*/
 
     BOOL    relVersionPresent;
-    UINT8   relVersion;         //release version, 13-14
+    //NOTE: The release version 9 is only used for LAB GCF certification with testSIM(PLMN 0x00101)
+    UINT8   relVersion;         //release version: 9, 13-14
     BOOL    ueCategoryPresent;
     UINT8   ueCategory;         /* Configure the UE category. */
 
@@ -588,7 +589,8 @@ typedef struct CmiDevSetExtCfgReq_Tag
 
     BOOL    disableNCellMeasPresent;
     BOOL    disableNCellMeas;
-    UINT16  rsvd6;
+    BOOL    enableLoggedMDTPresent;
+    BOOL    enableLoggedMDT;
 }CmiDevSetExtCfgReq;    // 64 bytes
 
 typedef struct CmiDevSetMeasAdjustCfgReq_Tag
@@ -681,7 +683,7 @@ typedef struct CmiDevGetExtCfgCnf_Tag
     /* ERRC */
     UINT8   ueCfgDataInactTimer;        /* ERRC data inactivity timer, in seconds */
     UINT8   ueCfgRelaxMonitorDeltaP;    /* relaxed monitor parameter, in DB, 0 - 17 */
-    UINT8   relVersion;                 /* release version, 13 - 14 */
+    UINT8   relVersion;                 /* release version: 9, 13 - 14 */
     UINT8   ueCategory;                 /* Configure the UE category. Both support NB-IoT and Cat.1 now */
 
     UINT8   enableABCheck;
@@ -696,7 +698,7 @@ typedef struct CmiDevGetExtCfgCnf_Tag
     UINT8   userDrxCycle;              //CmiUserDrxCycle
     BOOL    cfunClrBarCell;
     BOOL    disableNCellMeas;
-    UINT8   rsvd3;
+    BOOL    enableLoggedMDT;
 
     UINT16  rohcProfileBit;
     BOOL    enableSps;

@@ -49,6 +49,9 @@ typedef enum
     PS_URC_ID_SIM_READY,      /**< SIM card is ready*/
     PS_URC_ID_SIM_REMOVED,    /**< SIM card is removed*/
 
+    PS_URC_GROUP_SMS = (CAM_SMS << 12), //0x6000
+    PS_URC_ID_NEW_SMS,
+
     PS_URC_GROUP_IMS = 0x7000,
     PS_URC_ID_IMS_REG_CHANGED, /* URC: +CIREG*/
     PS_URC_ID_IMS_CALL_INCOMING, /* URC: RING */

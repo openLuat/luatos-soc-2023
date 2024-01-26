@@ -159,12 +159,13 @@ void __aeabi_assert (const char *expr, const char *file, int line) {
 #endif
 
 
-
+#ifdef __USER_CODE__
+#else
 uint32_t GET_PMU_RAWFLASH_OFFSET(void)
 {
 	return FLASH_MEM_BACKUP_ADDR;
 }
-
+#endif
 
 
 void setOSState(uint8_t state)

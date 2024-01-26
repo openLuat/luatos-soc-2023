@@ -48,6 +48,8 @@ extern "C" {
 #define OSA_ULFC_MEM_USED_THRES_8K                8192
 #define OSA_ULFC_MEM_USED_THRES_4K                4096
 
+#define OSA_ULFC_MEM_AVLB_META_SIZE               2048
+
 /* ulfc malloc buffer with/without a (pbuf+)ulpdu header in blocking/non-blocking mode?
  * usage: only for application's exchange data, mostly uplink data.
  */

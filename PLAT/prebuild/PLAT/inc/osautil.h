@@ -23,6 +23,15 @@
  *****************************************************************************
 ******************************************************************************/
 
+/* Need MORE RAM, code better in flash */
+#ifdef FEATURE_MORERAM_ENABLE
+#define OSAUTIL_FM_RAMCODE
+#else
+#define OSAUTIL_FM_RAMCODE      PLAT_FM_RAMCODE
+#endif
+
+
+
 #ifndef OsaBit1Set
 /*
  * set bit B to 1 in D

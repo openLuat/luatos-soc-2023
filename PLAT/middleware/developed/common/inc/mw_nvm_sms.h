@@ -1,4 +1,4 @@
-#ifdef FEATURE_PS_SMS_AT_ENABLE
+#if defined FEATURE_PS_SMS_AT_ENABLE || defined FEATURE_SMS_API_ENABLE
 #ifndef __MW_NVM_SMS_H__
 #define __MW_NVM_SMS_H__
 /****************************************************************************

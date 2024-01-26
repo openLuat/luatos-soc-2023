@@ -145,6 +145,7 @@ typedef enum _EPAT_PsConfigParamId_Enum
     CERRC_CFG_ENABLE_TTIBUNDLING,                   /* TV,  BOOL ttiBundling */
     CERRC_CFG_MEAS_ADJUST_SETTING,                  /* TLV, CerrcCcmMeasAdjustConfig, AT+ECMEASCFG */
     CERRC_CFG_CFUN_CLEAR_BARCELL,                   /* TV,  BOOL cfunClrBarCell */
+    CERRC_CFG_ENABLE_LOGGED_MDT,                    /* TV,  BOOL enableLoggedMDT */
     /*
      * !!!!  PARAM ID !!!!
      * 1> Only allowed

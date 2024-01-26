@@ -112,7 +112,7 @@ const AudioConfig_t audio_cfg_default =
 	    .num = 1,
 	    .params = {
 		    { 	
-		    	.type = IIR_BIQUARD_HPF,
+		    	.type = IIR_BIQUARD_QTY,
 		    	.filt = { .design = { 500, 0, 5790 } }
 		    },// can Add more filters
 	    },

@@ -149,18 +149,29 @@
 #define ALIGNED_128KB CAT_UP_DATA          //__ALIGNED(0x20000)
 #endif
 #endif
+
 #ifdef __USER_CODE__
 #define NETFAST_FM_RAMCODE  PS_FM_RAMCODE
+#define PS_CODE_IN_RAM      PS_FM_RAMCODE
+#define NETFAST_MAY_RAMCODE     PS_FM_RAMCODE
+#define PS_CODE_MAY_IN_RAM  PS_FM_RAMCODE
 #else
+/*
+ * Code in RAM
+*/
 #if (defined OPEN_CPU_MODE)
 #define NETFAST_FM_RAMCODE
 #else
 #define NETFAST_FM_RAMCODE  PS_FM_RAMCODE
 #endif
+
+/* Need MORE RAM, code better in flash */
+#ifdef FEATURE_MORERAM_ENABLE
+#define NETFAST_MAY_RAMCODE
+#else
+#define NETFAST_MAY_RAMCODE     PS_FM_RAMCODE   /* the code with high pri into RAM, if RAM size is allowed */
 #endif
-/*
- * Code in RAM
-*/
+
 #ifndef PS_CODE_IN_RAM
 #ifdef WIN32
 #define PS_CODE_IN_RAM
@@ -168,6 +179,15 @@
 //#define PS_CODE_IN_RAM  __attribute__((__section__(".ramCode2")))
 #define PS_CODE_IN_RAM      PS_FM_RAMCODE       /* FM: Full image, MSMB */
 #endif
+#endif
+
+/* Need MORE RAM, code better in flash */
+#ifdef FEATURE_MORERAM_ENABLE
+#define PS_CODE_MAY_IN_RAM
+#else
+#define PS_CODE_MAY_IN_RAM  PS_FM_RAMCODE   /* the code with high pri into RAM, if RAM size is allowed */
+#endif
+
 #endif
 
 #ifndef PS_SLP2_ZI

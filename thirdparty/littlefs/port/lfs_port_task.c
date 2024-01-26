@@ -234,8 +234,11 @@ static int block_device_prog(const struct lfs_config *cfg, lfs_block_t block,
     retValue = FLASH_writeSafe((uint8_t *)buffer, (FLASH_FS_REGION_START + block * cfg->block_size + off), size);
     #endif
 
-
-    LFS_ASSERT(retValue == QSPI_OK);
+    if(retValue != QSPI_OK)
+    {
+        lfs_setAssertFlag(EC_FS_ASSERT_FLASH_RESET_FLAG);
+        LFS_ASSERT(0);
+    }
 
     return (retValue == QSPI_OK) ? LFS_ERR_OK: LFS_ERR_IO;
 }
@@ -263,8 +266,11 @@ static int block_device_erase(const struct lfs_config *cfg, lfs_block_t block)
     retValue = FLASH_eraseSafe(FLASH_FS_REGION_START + block * cfg->block_size, LFS_BLOCK_DEVICE_ERASE_SIZE);
     #endif
 
-
-    LFS_ASSERT(retValue == QSPI_OK);
+    if(retValue != QSPI_OK)
+    {
+        lfs_setAssertFlag(EC_FS_ASSERT_FLASH_RESET_FLAG);
+        LFS_ASSERT(0);
+    }
 
     return (retValue == QSPI_OK) ? LFS_ERR_OK: LFS_ERR_IO;
 }
@@ -552,7 +558,7 @@ static void LFS_createDaemonTaskAndQueue(void)
     taskAttr.cb_mem = &gLfsDaemonTask;         // task control block
     taskAttr.cb_size = sizeof(StaticTask_t);   // size of task control block
     #elif defined FEATURE_LITEOS_ENABLE
-    taskAttr.priority = osPriorityRealtime1;   // lower priority after system initialization phase	
+    taskAttr.priority = osPriorityRealtime1;   // lower priority after system initialization phase
     #endif
     gLfsDaemonTaskthreadId = osThreadNew(LFS_daemonTaskEntry, NULL, &taskAttr);
 
@@ -800,6 +806,7 @@ static void LFS_daemonTaskEntry(void *arg)
                 case LFS_REQUEST_DIR_CREATE:
                     ret = lfs_mkdir(&lfs, (const char *)request.data[0]);
                     LFS_reply(request.threadId, ret);
+
                     break;
 #endif
                 default :
@@ -930,6 +937,12 @@ int LFS_fileOpen(lfs_file_t *file, const char *path, int flags)
 #endif
 
     ret = LFS_waitForCompletion(LFS_REQUEST_FILE_OPEN, file, (uint32_t)path, flags);
+
+    if(ret == LFS_ERR_ISDIR)
+    {
+        ECOMM_TRACE(UNILOG_LFS, LFS_fileOpen, P_ERROR, 1, "LFS_FileOpen, ret: %d", ret);
+        lfs_assert(false);
+    }
 
     return ret;
 
@@ -1099,7 +1112,15 @@ int LFS_removeUnsafe(const char *path)
 
 int LFS_fileOpenUnsafe(lfs_file_t *file, const char *path, int flags)
 {
-    return lfs_file_open(&lfs, file, path, flags);
+    int ret = lfs_file_open(&lfs, file, path, flags);
+
+    if(ret == LFS_ERR_ISDIR)
+    {
+        ECOMM_TRACE(UNILOG_LFS, LFS_fileOpenUnsafe, P_ERROR, 1, "LFS_fileOpenUnsafe, ret: %d", ret);
+        lfs_assert(false);
+    }
+
+    return ret;
 }
 
 int LFS_fileCloseUnsafe(lfs_file_t *file)

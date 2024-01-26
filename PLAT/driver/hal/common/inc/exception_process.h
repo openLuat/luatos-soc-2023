@@ -28,7 +28,21 @@
 #include "sys_record.h"
 #include "stdbool.h"
 #endif
-
+#if (PSRAM_EXIST==1)
+#if defined TYPE_EC718S
+#include "mem_map_718s.h"
+#elif defined TYPE_EC718H
+#include "mem_map_718h.h"
+#elif defined TYPE_EC718P
+#include "mem_map_718p.h"
+#elif defined TYPE_EC718U
+#include "mem_map_718u.h"
+#elif defined TYPE_EC716S
+#include "mem_map_716s.h"
+#else
+#error "Need define chip type"
+#endif
+#endif
 /*----------------------------------------------------------------------------*
  *                    MACROS                                                  *
  *----------------------------------------------------------------------------*/
@@ -56,13 +70,6 @@
 #define EC_REG_HFSR             (*(volatile unsigned int *) (0xE000ED2Cu))
 #define EC_REG_DFSR             (*(volatile unsigned int *) (0xE000ED30u))
 #define EC_REG_AFSR             (*(volatile unsigned int *) (0xE000ED3Cu))
-
-// magic number for fs assert indication "FS_Assert_sF", 12bytes/3 words 0x46535F41 0x73736572 0x745F7346
-#define EC_FS_ASSERT_MAGIC_NUMBER0     (0x46535F41)
-#define EC_FS_ASSERT_MAGIC_NUMBER1     (0x73736572)
-#define EC_FS_ASSERT_MAGIC_NUMBER2     (0x745F7346)
-
-#define EC_FS_ASSERT_REFORMAT_THRESHOLD     (10)
 
 #define AT_PORT_UART_INSTANCE     (1)
 #define RESET_REASON_MAGIC        (0xACD20E00)
@@ -100,8 +107,8 @@
 #define EC_CP_125M_RAM_RW_LEN                  (EC_CP_125M_RAM_RW_END_ADDR - EC_CP_125M_RAM_RW_START_ADDR)
 
 #define EC_EXCEPTION_FLASH_BASE                   FLASH_EXCEP_DUMP_ADDR
-#define EC_EXCEPTION_FLASH_BLOCK_NUMBS            FLASH_EXCEP_DUMP_SECTOR_NUM        // (308KB/77 sectors) 
-#define EC_EXCEPTION_FLASH_MAX_LEN                (EC_EXCEPTION_FLASH_BLOCK_NUMBS*EC_EXCEP_COMPRESS_SIZE)        // (308KB) 
+#define EC_EXCEPTION_FLASH_BLOCK_NUMBS            FLASH_EXCEP_DUMP_SECTOR_NUM        // (308KB/77 sectors)
+#define EC_EXCEPTION_FLASH_MAX_LEN                (EC_EXCEPTION_FLASH_BLOCK_NUMBS*EC_EXCEP_COMPRESS_SIZE)        // (308KB)
 
 #define EC_EXCEPTION_AP_RAM_BASE            (0x00000)
 #define EC_EXCEPTION_AP_RAM_END             (0x10000)
@@ -115,18 +122,25 @@
 #define EC_EXCEPTION_APCP_RAM_END             (MSMB_END_ADDR)
 #define EC_EXCEPTION_APCP_RAM_LEN             (EC_EXCEPTION_APCP_RAM_END - EC_EXCEPTION_APCP_RAM_BASE)
 
+#if (PSRAM_EXIST==1)
+#define EC_EXCEPTION_PSRAM_RAM_BASE            (PSRAM_START_ADDR)
+#define EC_EXCEPTION_PSRAM_RAM_END             (PSRAM_END_ADDR)
+#define EC_EXCEPTION_PSRAM_RAM_LEN             (EC_EXCEPTION_PSRAM_RAM_END - EC_EXCEPTION_PSRAM_RAM_BASE)
+#endif
+
 #define EC_EXCEPTION_CP_SHARED_RAM_LEN        (0x14000)
 
 #define EC_EXCEPTION_KEY_INFO_FLASH_BASE                   FLASH_EXCEP_DUMP_ADDR
 
 
-#define EC_SHAREDINFO_RAM_END_ADDR            (IPC_SHAREDMEM_START_ADDR) // (0x53F000)
+#define EC_SHAREDINFO_RAM_END_ADDR            (EXCEPTION_INFO_MEM_END_ADDR) // (0x540000)
 
-#define EC_ASSERT_PC_ADDR               (EC_SHAREDINFO_RAM_END_ADDR-0x20)         // 0x53EFE0
-#define EC_ASSERT_LR_ADDR               (EC_SHAREDINFO_RAM_END_ADDR-0x18)         // 0x53EFE8
-#define EC_EXCEPTION_MAGIC_AP_ADDR      (EC_SHAREDINFO_RAM_END_ADDR-0x10)         // 0x53EFF0
-#define EC_EXCEPTION_MAGIC_CP_ADDR      (EC_SHAREDINFO_RAM_END_ADDR-0x0C)         // 0x53EFF4
-#define EC_EXCEPTION_STORE_RAM_ADDR     (EC_SHAREDINFO_RAM_END_ADDR-0x8)          // 0x53EFF8
+#define EC_ASSERT_PC_ADDR               (EC_SHAREDINFO_RAM_END_ADDR-0x20)         // 0x53FFE0
+#define EC_ASSERT_LR_ADDR               (EC_SHAREDINFO_RAM_END_ADDR-0x18)         // 0x53FFE8
+#define EC_EXCEPTION_MAGIC_AP_ADDR      (EC_SHAREDINFO_RAM_END_ADDR-0x10)         // 0x53FFF0
+#define EC_EXCEPTION_MAGIC_CP_ADDR      (EC_SHAREDINFO_RAM_END_ADDR-0x0C)         // 0x53FFF4
+#define EC_EXCEPTION_STORE_RAM_ADDR     (EC_SHAREDINFO_RAM_END_ADDR-0x8)          // 0x53FFF8
+#define EC_ASSERT_PC_ADDR_OFFSET        (5)                                       // -1:sub odd addr -4:sub lr addr
 
 #define EC_COMPRESS_FLAG_AP_64K      "ec_comp_ap_64k"
 #define EC_COMPRESS_FLAG_AP_125M     "ec_comp_ap_125m"
@@ -207,7 +221,7 @@ typedef struct ec_exception_addr_tag
     uint32_t cp_ram_end_addr;
     uint32_t apcp_ram_start_addr;
     uint32_t apcp_ram_end_addr;
-    
+
     uint32_t ec_stack_start_addr;
     uint32_t ec_stack_end_addr;
     uint32_t ec_code_start_addr;
@@ -387,17 +401,17 @@ enum
 };
 
 typedef enum EXCEPTION_CONFIG_OPTION
-{ 
+{
     EXCEP_OPTION_DUMP_FLASH_EPAT_LOOP,                    /*0 -- dump full exception info to flash and EPAT tool then trapped in endless loop(while(1))*/
-    EXCEP_OPTION_PRINT_RESET,                             /*print necessary exception info, and then reset*/   
+    EXCEP_OPTION_PRINT_RESET,                             /*print necessary exception info, and then reset*/
     EXCEP_OPTION_DUMP_FLASH_RESET,                        /*dump full exception info to flash, and then reset*/
-    EXCEP_OPTION_DUMP_FLASH_EPAT_RESET,                   /*dump full exception info to flash and EPAT tool, and then reset*/  
-    EXCEP_OPTION_SILENT_RESET,                            /*reset directly*/ 
-    EXCEP_OPTION_DUMP_KEY_INFO_SILENT_RESET,              /*dump key info to flash and reset directly*/ 
-    
+    EXCEP_OPTION_DUMP_FLASH_EPAT_RESET,                   /*dump full exception info to flash and EPAT tool, and then reset*/
+    EXCEP_OPTION_SILENT_RESET,                            /*reset directly*/
+    EXCEP_OPTION_DUMP_KEY_INFO_SILENT_RESET,              /*dump key info to flash and reset directly*/
+
     EXCEP_OPTION_DUMP_FLASH_EPAT_LOOP_AND_UART_HELP_DUMP = 10,      /*10 -- enable uart help dump and dump full exception info to flash and EPAT tool then trapped in endless loop(while(1))*/
-    EXCEP_OPTION_DUMP_FLASH_EPAT_RESET_AND_UART_HELP_DUMP = 13,     /*13 -- enable uart help dump and dump full exception info to flash and EPAT tool, and then reset*/  
- 
+    EXCEP_OPTION_DUMP_FLASH_EPAT_RESET_AND_UART_HELP_DUMP = 13,     /*13 -- enable uart help dump and dump full exception info to flash and EPAT tool, and then reset*/
+
     EXCEP_OPTION_MAX
 
 }ExcepConfigOp;
@@ -441,15 +455,15 @@ typedef enum
 {
     EC_CHIP_TYPE_EC616      = 0x616,
     EC_CHIP_TYPE_EC618      = 0x618,
-    EC_CHIP_TYPE_EC718H		= 0x7181,
-    EC_CHIP_TYPE_EC718P		= 0x7182,
-    EC_CHIP_TYPE_EC718S		= 0x7183,
-    EC_CHIP_TYPE_EC718U 	= 0x7184,
-    EC_CHIP_TYPE_EC716H		= 0x7161,
-    EC_CHIP_TYPE_EC716P		= 0x7162,
-    EC_CHIP_TYPE_EC716S		= 0x7163,
-    EC_CHIP_TYPE_EC716U 	= 0x7164,
-    
+    EC_CHIP_TYPE_EC718H     = 0x7181,
+    EC_CHIP_TYPE_EC718P     = 0x7182,
+    EC_CHIP_TYPE_EC718S     = 0x7183,
+    EC_CHIP_TYPE_EC718U     = 0x7184,
+    EC_CHIP_TYPE_EC716H     = 0x7161,
+    EC_CHIP_TYPE_EC716P     = 0x7162,
+    EC_CHIP_TYPE_EC716S     = 0x7163,
+    EC_CHIP_TYPE_EC716U     = 0x7164,
+
 }ecChipType;
 
 #ifdef FEATURE_EXCEPTION_FLASH_DUMP_ENABLE
@@ -465,21 +479,21 @@ typedef enum
 
 typedef enum
 {
-	EC_EXCEP_INFO_PART_1  = 1,
-	EC_EXCEP_INFO_PART_2  = 2,
-	EC_EXCEP_INFO_PART_3  = 3,
-	EC_EXCEP_INFO_PART_4  = 4,
-	EC_EXCEP_INFO_PART_5  = 5,
-	EC_EXCEP_INFO_PART_6  = 6,
-	EC_EXCEP_INFO_PART_7  = 7,
-	EC_EXCEP_INFO_PART_8  = 8,
-	EC_EXCEP_INFO_PART_9  = 9,
-	EC_EXCEP_INFO_PART_10 = 10,
-	EC_EXCEP_INFO_PART_11 = 11,
-	EC_EXCEP_INFO_PART_12 = 12,
-	EC_EXCEP_INFO_PART_13 = 13,
-	EC_EXCEP_INFO_PART_14 = 14,
-	EC_EXCEP_INFO_PART_15 = 15
+    EC_EXCEP_INFO_PART_1  = 1,
+    EC_EXCEP_INFO_PART_2  = 2,
+    EC_EXCEP_INFO_PART_3  = 3,
+    EC_EXCEP_INFO_PART_4  = 4,
+    EC_EXCEP_INFO_PART_5  = 5,
+    EC_EXCEP_INFO_PART_6  = 6,
+    EC_EXCEP_INFO_PART_7  = 7,
+    EC_EXCEP_INFO_PART_8  = 8,
+    EC_EXCEP_INFO_PART_9  = 9,
+    EC_EXCEP_INFO_PART_10 = 10,
+    EC_EXCEP_INFO_PART_11 = 11,
+    EC_EXCEP_INFO_PART_12 = 12,
+    EC_EXCEP_INFO_PART_13 = 13,
+    EC_EXCEP_INFO_PART_14 = 14,
+    EC_EXCEP_INFO_PART_15 = 15
 }EcExcepInfoPart_e;
 
 #define EC_EXCEP_INFO_PART_NUM_PLAT       EC_EXCEP_INFO_PART_3
@@ -490,67 +504,144 @@ typedef enum
 
 typedef enum
 {
-	EC_EXCEP_INFO_TYPE_PLAT   = 0x00,
-	EC_EXCEP_INFO_TYPE_PHY    = 0x10,
-	EC_EXCEP_INFO_TYPE_PS     = 0x20,
-	EC_EXCEP_INFO_TYPE_UNILOG = 0x30,
-	EC_EXCEP_INFO_TYPE_CUST   = 0x40,
-	EC_EXCEP_INFO_TYPE_MAX    = 0x50
+    EC_EXCEP_INFO_TYPE_PLAT   = 0x00,
+    EC_EXCEP_INFO_TYPE_PHY    = 0x10,
+    EC_EXCEP_INFO_TYPE_PS     = 0x20,
+    EC_EXCEP_INFO_TYPE_UNILOG = 0x30,
+    EC_EXCEP_INFO_TYPE_CUST   = 0x40,
+    EC_EXCEP_INFO_TYPE_MAX    = 0x50
 }EcExcepInfoType_e;
+
+typedef enum _EPAT_Flash_Dump_Enums
+{
+    /* PLAT */
+    EPAT_PLAT_EcExcepKeyInfoStore      = 0x1,
+    EPAT_PLAT_ecRecordNodeList         = 0x2,
+    EPAT_PLAT_stack                    = 0x3,
+
+    /* PS */
+    EPAT_PS_MmGlobals                  = 0x4,
+    EPAT_PS_CesmCommInfo               = 0x5,
+    EPAT_PS_CesmTinyCtx                = 0x6,
+    EPAT_PS_CesmBrTinyCtx              = 0x7,
+    EPAT_PS_CesmEpsBrBasic             = 0x8,
+    EPAT_PS_EpsNetworkFeatureSupport   = 0x9,
+
+    /* PS RRC */
+    EPAT_PS_PART8_CeRrcBootContext              = 0xa,
+    EPAT_PS_PART9_CeRrcState_UeId               = 0xb,
+    EPAT_PS_PART10_ServingCellInfo              = 0xc,
+    EPAT_PS_PART11_CerrcCellLockContext         = 0xd,
+    EPAT_PS_PART12_CerrcPlmnSearchContext       = 0xe,
+    EPAT_PS_PART12_CerrcCellSearchContext       = 0xf,
+    EPAT_PS_PART12_CerrcCellReselTargetCellInfo = 0x10,
+    EPAT_PS_PART12_CerrcConnReEstContext        = 0x11,
+    EPAT_PS_PART12_CerrcHandoverContext         = 0x12,
+    EPAT_PS_PART12_CerrcConnReleaseContext      = 0x13,
+    EPAT_PS_PART12_CerrcConnMeasContext         = 0x14,
+    EPAT_PS_PART13_CerrcConnEstContext          = 0x15,
+    EPAT_PS_PART13_CerrcConnContext             = 0x16,
+    EPAT_PS_PART14_CerrcActStatus               = 0x17,
+    EPAT_PS_PART15_CerrcSecurityInfo            = 0x18,
+
+    /* PHY */
+    EPAT_PHY_PhyScellInfo      = 0x19,
+    EPAT_PHY_PhySchdCtrlInfo   = 0x1a,
+    EPAT_PHY_PhyHwTaskCtrlInfo = 0x1b,
+    EPAT_PHY_MacTimerCtr       = 0x1c,
+    EPAT_PHY_PhyTxSchdInfo     = 0x1d,
+}FlashDumpEnums_e;
+
+typedef enum
+{
+    EC_EXCEP_DATA_TYPE_FORMAT     = 0x0000,
+    EC_EXCEP_DATA_TYPE_RAW_CHAR   = 0x4000,
+    EC_EXCEP_DATA_TYPE_RAW_WORD   = 0x8000,
+}EcExcepDataType_e;
+
 
 typedef struct
 {
-	uint32_t ramMap : 2; /* ram mapping : 0:ASMB 1:CSMB 2:MSMB 3:PSRAM */
-	uint32_t addr   : 21; /* 21 bits of addr */
-	uint32_t len_l9 : 9; /* the low 9 bits of length */
+    uint16_t type      : 2;
+    uint16_t structMap : 14;
+}EcDumpPartInfo_bm;
+
+typedef struct
+{
+    EcDumpPartInfo_bm bmPartInfo;
+    uint16_t len;
+}EcDumpHeadInfo_s;
+
+
+typedef struct
+{
+    uint32_t ramMap : 2; /* ram mapping : 0:ASMB 1:CSMB 2:MSMB 3:PSRAM */
+    uint32_t addr   : 21; /* 21 bits of addr */
+    uint32_t len_l9 : 9; /* the low 9 bits of length */
 }EcExcepInfoAddr_bm;
 
 typedef struct
 {
-	uint16_t plat_flag_cnt  : 4;
-	uint16_t phy_flag_cnt   : 4;
-	uint16_t ps_flag_cnt    : 4;
-	uint16_t cust_flag_cnt  : 4;
+    uint16_t plat_flag_cnt  : 4;
+    uint16_t phy_flag_cnt   : 4;
+    uint16_t ps_flag_cnt    : 4;
+    uint16_t cust_flag_cnt  : 4;
 }EcExcepInfoRegFlag_bm;
 
 typedef struct
 {
-	EcExcepInfoAddr_bm PLAT_info[EC_EXCEP_INFO_PART_NUM_PLAT];
-	EcExcepInfoAddr_bm PHY_info[EC_EXCEP_INFO_PART_NUM_PHY];
-	EcExcepInfoAddr_bm PS_info[EC_EXCEP_INFO_PART_NUM_PS];
-	EcExcepInfoAddr_bm Unilog_info[EC_EXCEP_INFO_PART_NUM_UNILOG];
-	EcExcepInfoAddr_bm CUST_info[EC_EXCEP_INFO_PART_NUM_CUST];
-	uint8_t PLAT_store_len[EC_CONSTRUCT_STORE_LEN(EC_EXCEP_INFO_PART_NUM_PLAT)];
-	uint8_t PHY_store_len[EC_CONSTRUCT_STORE_LEN(EC_EXCEP_INFO_PART_NUM_PHY)];
-	uint8_t PS_store_len[EC_CONSTRUCT_STORE_LEN(EC_EXCEP_INFO_PART_NUM_PS)];
-	uint8_t Unilog_store_len[EC_CONSTRUCT_STORE_LEN(EC_EXCEP_INFO_PART_NUM_UNILOG)];
-	uint8_t CUST_store_len[EC_CONSTRUCT_STORE_LEN(EC_EXCEP_INFO_PART_NUM_CUST)];
-	EcExcepInfoRegFlag_bm reg_flag;
+    EcExcepInfoAddr_bm PLAT_info[EC_EXCEP_INFO_PART_NUM_PLAT];
+    EcExcepInfoAddr_bm PHY_info[EC_EXCEP_INFO_PART_NUM_PHY];
+    EcExcepInfoAddr_bm PS_info[EC_EXCEP_INFO_PART_NUM_PS];
+    EcExcepInfoAddr_bm Unilog_info[EC_EXCEP_INFO_PART_NUM_UNILOG];
+    EcExcepInfoAddr_bm CUST_info[EC_EXCEP_INFO_PART_NUM_CUST];
+    uint8_t PLAT_store_len[EC_CONSTRUCT_STORE_LEN(EC_EXCEP_INFO_PART_NUM_PLAT)];
+    uint8_t PHY_store_len[EC_CONSTRUCT_STORE_LEN(EC_EXCEP_INFO_PART_NUM_PHY)];
+    uint8_t PS_store_len[EC_CONSTRUCT_STORE_LEN(EC_EXCEP_INFO_PART_NUM_PS)];
+    uint8_t Unilog_store_len[EC_CONSTRUCT_STORE_LEN(EC_EXCEP_INFO_PART_NUM_UNILOG)];
+    uint8_t CUST_store_len[EC_CONSTRUCT_STORE_LEN(EC_EXCEP_INFO_PART_NUM_CUST)];
+
+    EcDumpPartInfo_bm PLAT_part_info[EC_EXCEP_INFO_PART_NUM_PLAT];
+    EcDumpPartInfo_bm PHY_part_info[EC_EXCEP_INFO_PART_NUM_PHY];
+    EcDumpPartInfo_bm PS_part_info[EC_EXCEP_INFO_PART_NUM_PS];
+    EcDumpPartInfo_bm Unilog_part_info[EC_EXCEP_INFO_PART_NUM_UNILOG];
+    EcDumpPartInfo_bm CUST_part_info[EC_EXCEP_INFO_PART_NUM_CUST];
+    EcExcepInfoRegFlag_bm reg_flag;
 }__attribute__((aligned(1))) EcExcepInfoReg_s;
 
 
 typedef struct
 {
-	uint32_t uiExcepOccured;
-	uint16_t usExceptChipType;
-	uint8_t ucExcepCPUType;
-	uint8_t ucIsUnilogDump;
-	uint32_t uiExcepFlag;
-	uint32_t uiUlgDumpOft;
-	uint16_t usUlgStrOftAddr;
-	uint16_t usUlgStrSpace;
-	ec_m3_exception_regs excep_regs;
-	uint8_t ucCurrTaskName[EC_EXCEP_TASK_NAME_LEN];
+    uint32_t uiExcepOccured;
+    uint16_t usExceptChipType;
+    uint8_t ucExcepCPUType;
+    uint8_t ucIsUnilogDump;
+    uint32_t uiExcepFlag;
+    uint32_t uiUlgDumpOft;
+    uint16_t usUlgStrOftAddr;
+    uint16_t usUlgStrSpace;
+    uint16_t usPlatOffset;
+    uint16_t usPlatSpace;
+    uint16_t usPHYOffset;
+    uint16_t usPHYSpace;
+    uint16_t usPSOffset;
+    uint16_t usPSSpace;
+    uint16_t usUnilogOffset;
+    uint16_t usUnilogSpace;
+    uint16_t usCustOffset;
+    uint16_t usCustSpace;
+    ec_m3_exception_regs excep_regs;
+    uint8_t ucCurrTaskName[EC_EXCEP_TASK_NAME_LEN];
     uint8_t ucEecepAssertBuff[EC_EXCEP_ASSERT_BUFF_LEN];
 
-	struct
-	{
-		uint32_t uiTotalHeapSize;
-		uint32_t uiFreeSize;
-		uint32_t uiMaxFreeBlockSize;
-		uint32_t uiMinEverFreeHeapSize;
-	}heap_info_s;
-}EcExcepKeyInfoStore_s; //ec_excep_key_info_store
+    struct
+    {
+        uint32_t uiTotalHeapSize;
+        uint32_t uiFreeSize;
+        uint32_t uiMaxFreeBlockSize;
+        uint32_t uiMinEverFreeHeapSize;
+    }heap_info_s;
+}EcExcepKeyInfoStore_s;
 
 /*
  * \brief       Get the address and data length info of unilog.
@@ -562,14 +653,15 @@ void ecGetUnilogDumpAddrAndLen(uint32_t *puiAddr, uint32_t *pusLen);
 
 /*
  * \brief       Register the dumped info of PLAT/PHY/PS/CUST
- * 			   and the dumped info is stored with a partition.
+ *             and the dumped info is stored with a partition.
  * \param[in]   eExcepInfoType : should be set like EC_EXCEP_INFO_TYPE_(PLAT/
- *             PHY/PS/CUST)	| EC_EXCEP_INFO_PART_(1~15).
+ *             PHY/PS/CUST) | EC_EXCEP_INFO_PART_(1~15).
  * \param[in]   uiStoreAddr : the address of Dump info stored.
  * \param[in]   usLen       : the data length of the Dump info.
+ * \param[in]   eDataType   : Data type.
  * \returns     bool
  */
-bool excepKeyStoreInfoReg(EcExcepInfoType_e eExcepInfoType, uint32_t uiStoreAddr, uint16_t usLen);
+bool excepKeyStoreInfoReg(EcExcepInfoType_e eExcepInfoType, uint32_t uiStoreAddr, uint16_t usLen, EcExcepDataType_e eDataType);
 
 #endif
 

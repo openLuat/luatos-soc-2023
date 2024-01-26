@@ -276,7 +276,7 @@ BOOL apmuSdkFlashBlockBeWr(APFlashWrReq_e reqID);
 void apmuPreDeepSlpCbRegister(PmuVoteDeepSlpModule module, pmuPreDeepSlpCb_t cb, void *pdata);
 void apmuPostDeepSlpCbRegister(PmuVoteDeepSlpModule module, pmuPostDeepSlpCb_t cb, void *pdata);
 void apmuGetPMUSettings(APSleepState defaultState);
-BOOL apmuBPsVoteToDeepSlpState(void);
+BOOL apmuBNasVoteToDeepSlpState(void);
 bool apmuGetSleepedFlag(void);
 void apmuPrintPostPagingSlowCnt(void);
 uint16_t apmuGetLatchExternalInt(void);

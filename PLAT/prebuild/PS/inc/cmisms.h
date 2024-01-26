@@ -122,6 +122,7 @@ typedef enum
     CMI_SMS_OPER_STORE_UNSENT_MSG,          /* Store the Unsend message, for +CMGW */
     CMI_SMS_OPER_STORE_STATUS_RPT,          /* Store the SMS status report, for (+CDS/+CDSI) */
     CMI_SMS_OPER_STORE_STATUS_RPT_NO_RSP,   /* Store the SMS status report and no need send indication for Mem index */
+    CMI_SMS_OPER_STORE_LIB_API,             /* Store the SMS through lib api */
     CMI_SMS_OPER_DEL_MSG_WITH_INDEX,        /* Deleted a SMS messag with index, for +CMGD and delflag is NULL. */
     CMI_SMS_OPER_DEL_MSG_WITH_STATE,        /* Deleted somes message with the status of SMS message, for +CMGD and delflag is not NULL */
     CMI_SMS_OPER_DEL_ALL_MSG,               /* Deleted all SMS message. for +GMGD, and the delflag is 4. */
@@ -277,7 +278,8 @@ typedef struct CmiSmsCmdRspInfo_Tag
 
 typedef struct CmiSmsSendCommandReq_Tag
 {
-    CmiSmsPdu           pdu;
+    CmiSmsOptAddressInfo    optSca;
+    CmiSmsPdu               pdu;
 }CmiSmsSendCommandReq;
 
 typedef struct CmiSmsSendCommandCnf_Tag

@@ -227,6 +227,27 @@ SECTIONS
   } >ASMB_AREA AT>FLASH_AREA
   Image$$LOAD_PS_FDATA_ASMB$$RW$$Length = SIZEOF(.load_ps_rwdata_asmb);
   
+  .load_ap_zidata_asmb (NOLOAD):
+  {
+   . = ALIGN(4);
+   Image$$LOAD_AP_FDATA_ASMB$$ZI$$Base = .;
+   *(.sect_platFAZIData_bss.*)
+   . = ALIGN(4);
+   Image$$LOAD_AP_FDATA_ASMB$$ZI$$Limit = .;
+   
+   Image$$LOAD_PS_FDATA_ASMB$$ZI$$Base = .;
+   *(.sect_psFAZIData_bss.*)
+   . = ALIGN(4);
+   Image$$LOAD_PS_FDATA_ASMB$$ZI$$Limit = .;
+   *(.sect_platPANoInit_bss.*)
+   *(.sect_psFANoInit_data.*)
+   *(.exceptCheck)
+   *(.decompress)
+  } >ASMB_AREA
+
+  asmb_flex_area = .;
+  // from asmb_flex_area to CP_AONMEMBACKUP_START_ADDR is flexible for customer to store sleep2 retention data
+  
   #if defined FEATURE_FREERTOS_ENABLE
   .load_apos : ALIGN(4)
   {
@@ -265,28 +286,10 @@ SECTIONS
   #endif
   Image$$LOAD_APOS$$Length = SIZEOF(.load_apos);
   #endif
-
-  .load_ap_zidata_asmb (NOLOAD):
-  {
-   . = ALIGN(4);
-   Image$$LOAD_AP_FDATA_ASMB$$ZI$$Base = .;
-   *(.sect_platFAZIData_bss.*)
-   . = ALIGN(4);
-   Image$$LOAD_AP_FDATA_ASMB$$ZI$$Limit = .;
-   
-   Image$$LOAD_PS_FDATA_ASMB$$ZI$$Base = .;
-   *(.sect_psFAZIData_bss.*)
-   . = ALIGN(4);
-   Image$$LOAD_PS_FDATA_ASMB$$ZI$$Limit = .;
-   *(.sect_platPANoInit_bss.*)
-   *(.sect_psFANoInit_data.*)
-   *(.exceptCheck)
-   *(.decompress)
-  } >ASMB_AREA
   
   .unload_cpaon CP_AONMEMBACKUP_START_ADDR (NOLOAD):
   {
-    *(.sect_rawflash_bss.*)
+    KEEP(*(.sect_rawflash_bss.*))		// keep this dummy section for overlay check, cp use this memory
   } >ASMB_AREA
   
   .load_rrcmem ASMB_RRCMEM_START_ADDR (NOLOAD):
@@ -441,6 +444,9 @@ SECTIONS
     *(.stack*)               /* stack should be 4 byte align */  
     Image$$LOAD_DRAM_SHARED$$ZI$$Limit = .;
     *(.USB_NOINIT_DATA_BUF)
+#ifdef FEATURE_EXCEPTION_FLASH_DUMP_ENABLE
+  	*(.sect_dump_unilog.*)
+#endif
   } >MSMB_AREA
 
   
@@ -462,15 +468,22 @@ SECTIONS
 
   PROVIDE(end_up_buffer = . );
   heap_size = start_up_buffer - end_ap_data;
+  asmbFlexSize = CP_AONMEMBACKUP_START_ADDR - asmb_flex_area;
   ASSERT(heap_size>=min_heap_size_threshold,"ap use too much ram, heap less than min_heap_size_threshold!")
   ASSERT(end_up_buffer<=MSMB_APMEM_END_ADDR,"ap use too much ram, exceed to MSMB_APMEM_END_ADDR")
-
-
-
-
+  #if !defined FEATURE_IMS_ENABLE
+  ASSERT(asmbFlexSize>=0x1000, "we should reserve at least 4KB for user")
+  #endif
+  
   .load_xp_sharedinfo XP_SHAREINFO_BASE_ADDR (NOLOAD):
   {
   *(.shareInfo)
+#ifdef FEATURE_EXCEPTION_FLASH_DUMP_ENABLE
+  Image$$SHARE_EXCEP_INFO$$ZI$$Base = .;
+  *(.shareExcepInfo)
+  . = ALIGN(4);
+  Image$$SHARE_EXCEP_INFO$$ZI$$Limit = .;
+#endif
   } >MSMB_AREA
   
   .load_dbg_area XP_DBGRESERVED_BASE_ADDR (NOLOAD):

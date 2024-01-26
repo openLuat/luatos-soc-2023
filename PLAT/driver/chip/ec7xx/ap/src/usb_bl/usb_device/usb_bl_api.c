@@ -70,7 +70,7 @@ int vcom_app_recv_proc(uint8_t vcom_num, uint8_t* rcvbuf_ptr, uint32_t size, uin
 {
     int rxwait_cnt;
     int poll_stat;
-    uint8_t recvd_size = 0;
+    uint32_t recvd_size = 0;
     int byte_cnt = 0;
     uint32_t ticks_tmout = timeout; // 1tick for 1ms
     uint32_t ticks_elapsed = 0;
@@ -164,7 +164,7 @@ int vcom_app_send_proc(uint8_t vcom_num, uint8_t* sndbuf_ptr, uint32_t size, uin
     int txavail_cnt;
     int poll_stat;
     int byte_cnt;
-    uint8_t sended_size = 0;
+    uint32_t sended_size = 0;
     uint32_t ticks_tmout = timeout; // 1tick for 1ms
     uint32_t ticks_elapsed = 0;
     uint32_t ticks_step  = 1;

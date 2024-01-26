@@ -14,13 +14,15 @@
  *                    MACROS                                                  *
  *----------------------------------------------------------------------------*/
 
-#define IS_DMIC             0
-#define MCLK_DIV_FRE        256
-
+//adcInput  单声道ADC输入通道选择是CH1(MIC1P/1N)还是CH2(MIC2P/2N)
+//dacOutput 单声道DAC输出通道选择:默认选择0:L声道,1:R声道
+//mode      产品主从模式选择:默认选择0为SlaveMode,打开为1选择MasterMode
+//fmt       数据格式选择,需要和实际时序匹配
+//bits      数据长度选择,需要和实际时序匹配
 #define ES8374_DEFAULT_CONFIG()                         \
 {                                                       \
-        .adcInput  = CODEC_ADC_INPUT_LINE1,             \
-        .dacOutput = CODEC_DAC_OUTPUT_ALL,              \
+        .adcInput  = CODEC_ADC_INPUT_LINE2,             \
+        .dacOutput = CODEC_DAC_OUTPUT_LINE1,            \
         .codecMode = CODEC_MODE_BOTH,                   \
         .codecIface = {                                 \
             .mode    = CODEC_MODE_SLAVE,                \
@@ -28,45 +30,38 @@
             .samples = CODEC_16K_SAMPLES,               \
             .bits    = CODEC_BIT_LENGTH_16BITS,         \
             .channel = CODEC_MONO,                      \
+            .polarity = 1,                              \
         },                                              \
 };
 
-#define MSMODE_MASTERSELON      0       //0: SlaveMode, 1: MasterMode
-#define RATIO                   256
-#define FORMAT                  0x00
-#define FORMAT_LEN              0x03
-#define SCLK_DIV                4
-#define SCLK_INV                0
-#define ADC_CHANNEL_SEL         2
-#define DAC_CHANNEL_SEL         0
-#define ADC_PGA_DF2SE_15DB      0
-#define ADC_PGA_GAIN            0       //(0~7)
-#define ADC_VOLUME              0       //(0~192),0:0DB,-0.5dB/Step
-#define DAC_VOLUME              0       //(0~192),0:0DB,-0.5dB/Step
-#define DMIC_SELON              0
-#define DMIC_GAIN               0
-#define MICBIASOFF              0
+#define VDDSPK_5V0              0x2B
+#define VDDSPK_4V2              0x2A
+#define VDDSPK_3V3              0x29
+
+#define RATIO                   256                 //实际Ratio=MCLK/LRCK比率，需要和实际时钟比例匹配
+#define SCLK_DIV                4                   //SCLK分频选择:(选择范围1~18),SCLK=MCLK/SCLK_DIV，超过后非等比增加具体对应关系见相应DS说明
+#define SCLK_INV                0                   //默认对齐方式为下降沿,1为上升沿对齐,需要和实际时序匹配
+#define VDDSPK_VOLTAGE          VDDSPK_4V2          //SPK拟电压选择为4V2还是5V0,需要和实际硬件匹配
+#define ADC_PGA_DF2SE_15DB      1                   //ADC模拟固定15dB增益:默认选择关闭0,打开为1
+#define ADC_PGA_GAIN            3                   //ADC模拟增益:(选择范围0~7),具体对应关系见相应DS说明
+#define ADC_VOLUME_MAX          0                   //ADC数字增益:(选择范围0~192),0:0DB,-0.5dB/Step
+#define ADC_VOLUME_MIN          50                  //ADC数字增益:(选择范围0~192),0:0DB,-0.5dB/Step
+#define ADC_VOLUME_MUTE         192                 //ADC数字增益:(选择范围0~192),0:0DB,-0.5dB/Step
+#define ADC_VOLUME_DEFAULT      ADC_VOLUME_MAX      //ADC数字增益:(选择范围0~192),0:0DB,-0.5dB/Step
+#define DAC_VOLUME_MAX          0                   //DAC数字增益:(选择范围0~192),0:0DB,-0.5dB/Step
+#define DAC_VOLUME_MIN          50                  //DAC数字增益:(选择范围0~192),0:0DB,-0.5dB/Step
+#define DAC_VOLUME_MUTE         192                 //DAC数字增益:(选择范围0~192),0:0DB,-0.5dB/Step
+#define DAC_VOLUME_DEFAULT      DAC_VOLUME_MAX      //DAC数字增益:(选择范围0~192),0:0DB,-0.5dB/Step
+#define DMIC_SELON              0                   //DMIC选择:默认选择关闭0,立体声打开为1,单声道需要选择2为H,3为L
+#define DMIC_GAIN               0                   //DMIC增益:(选择范围0~1),6dB/Step
+#define MICBIASOFF              0                   //内部MICBIAS偏置:默认选择关闭1,开启配置为0
+#define PA_VOLUME_DEFAULT       7                   //(0~7),(0db,1.5db,3db,4db,5db,6db,6.75db,7.5db)
+//16K,8K采样率下配置PLL_SET_12288 = 1 可以改善音质，目前只支持256Ratio,其他待更新
+#define PLL_SET_12288           1                   //PLL选择输入频率,单位为KHZ:外部输入XXXXKHZ内部PLL锁成12M288
 
 /*----------------------------------------------------------------------------*
  *                    DATA TYPE DEFINITION                                    *
  *----------------------------------------------------------------------------*/
-
-// Clock coefficient structer
-struct _coeffDiv 
-{
-    uint32_t mclk;          // mclk frequency
-    uint32_t rate;          // sample rate
-    uint8_t preDiv;         // the pre divider with range from 1 to 8
-    uint8_t preMulti;       // the pre multiplier with x1, x2, x4 and x8 selection
-    uint8_t adcDiv;         // adcclk divider
-    uint8_t dacDiv;         // dacclk divider
-    uint8_t fsMode;         // double speed or single speed, =0, ss, =1, ds
-    uint8_t lrckH;          // adclrck divider and daclrck divider
-    uint8_t lrckL;
-    uint8_t bclkDiv;        // sclk divider
-    uint8_t adcOsr;         // adc osr
-    uint8_t dacOsr;         // dac osr
-};
 
 /*----------------------------------------------------------------------------*
  *                      PRIVATE FUNCTION DECLEARATION                         *
@@ -79,6 +74,7 @@ struct _coeffDiv
 // 8374 func list
 HalCodecFuncList_t es8374DefaultHandle = 
 {
+    .codecType                  = ES8374,
     .halCodecInitFunc           = es8374Init,
     .halCodecDeinitFunc         = es8374DeInit,
     .halCodecCtrlStateFunc      = es8374StartStop,
@@ -86,7 +82,7 @@ HalCodecFuncList_t es8374DefaultHandle =
     .halCodecSetMuteFunc        = es8374SetMute,
     .halCodecSetVolumeFunc      = es8374SetVolume,
     .halCodecGetVolumeFunc      = es8374GetVolume,
-    .halCodecEnablePAFunc       = es8374EnablePA,
+    //.halCodecEnablePAFunc       = es8374EnablePA,
     .halCodecSetMicVolumeFunc   = es8374SetMicVolume,
     .halCodecLock               = NULL,
     .handle                     = NULL,
@@ -100,6 +96,9 @@ HalCodecFuncList_t es8374DefaultHandle =
  *----------------------------------------------------------------------------*/
 
 static uint8_t dacVolBak, adcVolBak;
+static bool isHasPA;
+static uint8_t adcInput  = 2;
+static uint8_t dacOutput = 0;
 
 /*----------------------------------------------------------------------------*
  *                      PRIVATE FUNCS                                      *
@@ -111,10 +110,10 @@ static int32_t es8374WriteReg(uint8_t regAddr, uint16_t data)
     ret = codecI2cWrite(ES8374_IICADDR, regAddr, data);
 
 #if 0
-#ifdef FEATURE_OS_ENABLE        
-    DEBUG_PRINT(UNILOG_PLA_DRIVER, es8374WriteReg_1, P_DEBUG, "reg write: reg=%x, data=%x", regAddr, data);
+#ifdef FEATURE_OS_ENABLE
+    DEBUG_PRINT(UNILOG_PLA_DRIVER, es8374WriteReg, P_DEBUG, "[ES8374] [%x] %x", regAddr, data);
 #else      
-    printf("reg write: reg=%02x, data=%02x\n", regAddr, data);
+    printf("[ES8374] [%02X] %02X\r\n", regAddr, data);
 #endif
 #endif
 
@@ -127,60 +126,163 @@ static uint8_t es8374ReadReg(uint8_t regAddr)
 }
 
 // set es8374 into suspend mode
-static void es8374Standby(uint8_t* dacVolB, uint8_t* adcVolB)
+static void es8374Standby(uint8_t* dacVolB, uint8_t* adcVolB)//待机配置--搭配es8374AllResume(void)//恢复配置
 {
-    // DEBUG_PRINT(UNILOG_PLA_DRIVER, es8374suspend_0, P_DEBUG, "Enter into es8374 suspend");
-    // *dacVolB = es8374ReadReg(ES8374_REG_38);
-    // *adcVolB = es8374ReadReg(ES8374_REG_25);
-    // es8374WriteReg(ES8374_REG_38, 0xC0);
-    // es8374WriteReg(ES8374_REG_25, 0xC0);
-    // es8374WriteReg(ES8374_REG_15, 0x00);
-    // es8374WriteReg(ES8374_REG_28, 0x1C);
-    // es8374WriteReg(ES8374_REG_36, 0x20);
-    // es8374WriteReg(ES8374_REG_37, 0x20);
-    // es8374WriteReg(ES8374_REG_6D, 0x00);
-    // es8374WriteReg(ES8374_REG_09, 0x80);
-    // es8374WriteReg(ES8374_REG_1A, 0x08);
-    // es8374WriteReg(ES8374_REG_1C, 0x10);
-    // es8374WriteReg(ES8374_REG_1D, 0x10);
-    // es8374WriteReg(ES8374_REG_24, 0x20);
-    // es8374WriteReg(ES8374_REG_22, 0x00);
-    // es8374WriteReg(ES8374_REG_21, 0xC0);
-    // es8374WriteReg(ES8374_REG_14, 0x16);
-    // es8374WriteReg(ES8374_REG_01, 0x03);
+    *dacVolB = es8374ReadReg(ES8374_REG_38);
+    *adcVolB = es8374ReadReg(ES8374_REG_25);
+
+    es8374WriteReg(ES8374_REG_38, 0xC0);
+    es8374WriteReg(ES8374_REG_25, 0xC0);
+    es8374WriteReg(ES8374_REG_28, 0x1C);
+    es8374WriteReg(ES8374_REG_36, 0x20);
+    es8374WriteReg(ES8374_REG_37, 0x20);
+    es8374WriteReg(ES8374_REG_6D, 0x00);
+    es8374WriteReg(ES8374_REG_09, 0x80);
+    es8374WriteReg(ES8374_REG_1A, 0x08);
+    es8374WriteReg(ES8374_REG_1E, 0x20);
+    delay_us(1000);
+    es8374WriteReg(ES8374_REG_1C, 0x10);
+    es8374WriteReg(ES8374_REG_1D, 0x10);
+    es8374WriteReg(ES8374_REG_1E, 0x40);
+    es8374WriteReg(ES8374_REG_24, 0x20);
+    es8374WriteReg(ES8374_REG_22, 0x00);
+    es8374WriteReg(ES8374_REG_21, 0xC0);
+    es8374WriteReg(ES8374_REG_15, 0xFF);
+    es8374WriteReg(ES8374_REG_14, 0x82);
+    es8374WriteReg(ES8374_REG_01, 0x03);
+
+    DEBUG_PRINT(UNILOG_PLA_DRIVER, es8374Standby, P_DEBUG, "[ES8374] es8374Standby: dacVolB=%d, adcVolB=%d", *dacVolB, *adcVolB);
+}
+
+// set es8374 ADC into suspend mode
+static void es8374AdcStandby(uint8_t* adcVolB)//ADC待机配置--搭配es8374AdcResume
+{
+    *adcVolB = es8374ReadReg(ES8374_REG_25);
+
+    es8374WriteReg(ES8374_REG_25, 0xC0);
+    es8374WriteReg(ES8374_REG_15, 0x00);
+    es8374WriteReg(ES8374_REG_28, 0x1C);
+    es8374WriteReg(ES8374_REG_09, 0x80);
+    delay_us(5000);
+    es8374WriteReg(ES8374_REG_24, 0x20);
+    es8374WriteReg(ES8374_REG_21, 0xC0);
+    es8374WriteReg(ES8374_REG_15, 0x0C);
+    es8374WriteReg(ES8374_REG_01, 0x75);
+
+    DEBUG_PRINT(UNILOG_PLA_DRIVER, es8374AdcStandby, P_DEBUG, "[ES8374] es8374AdcStandby: adcVolB=%d", *adcVolB);
+}
+
+// set es8374 DAC into suspend mode
+static void es8374DacStandby(uint8_t* dacVolB)//DAC待机配置--搭配es8374DacResume
+{
+    *dacVolB = es8374ReadReg(ES8374_REG_38);
+
+    es8374WriteReg(ES8374_REG_38, 0xC0);
+    es8374WriteReg(ES8374_REG_15, 0x00);
+    es8374WriteReg(ES8374_REG_36, 0x20);
+    es8374WriteReg(ES8374_REG_37, 0x20);
+    es8374WriteReg(ES8374_REG_6D, 0x00);
+    es8374WriteReg(ES8374_REG_09, 0x80);
+    es8374WriteReg(ES8374_REG_1A, 0x08);
+    es8374WriteReg(ES8374_REG_1C, 0x10);
+    es8374WriteReg(ES8374_REG_1D, 0x10);
+    es8374WriteReg(ES8374_REG_15, 0x62);
+    es8374WriteReg(ES8374_REG_01, 0x7A);
+
+    DEBUG_PRINT(UNILOG_PLA_DRIVER, es8374DacStandby, P_DEBUG, "[ES8374] es8374DacStandby: dacVolB=%d", *dacVolB);
 }
 
 // set es8374 into resume mode
-static HalCodecSts_e es8374Resume(HalCodecModule_e mode)
+static HalCodecSts_e es8374AllResume(void)//恢复配置(未下电)--搭配es8374Standby(void)
 {
-    // DEBUG_PRINT(UNILOG_PLA_DRIVER, es8374Resume_0, P_DEBUG, "Enter into es8374 resume");
-    // es8374WriteReg(ES8374_REG_01, 0x7F);
-    // es8374WriteReg(ES8374_REG_14, 0x8A);
-    // es8374WriteReg(ES8374_REG_15, 0x40);
-    // es8374WriteReg(ES8374_REG_21, 0x10);
-    // es8374WriteReg(ES8374_REG_22, 0xFF);
-    // es8374WriteReg(ES8374_REG_24, 0x08);
-    // es8374WriteReg(ES8374_REG_1E, 0x20);
-    // delay_us(1000);
-    // es8374WriteReg(ES8374_REG_1E, 0xA0);
-    // es8374WriteReg(ES8374_REG_1D, 0x2B);
-    // es8374WriteReg(ES8374_REG_1C, 0x90);
-    // es8374WriteReg(ES8374_REG_1A, 0xA0);
-    // es8374WriteReg(ES8374_REG_09, 0x41);
-    // es8374WriteReg(ES8374_REG_6D, 0x60);
-    // es8374WriteReg(ES8374_REG_37, 0x00);
-    // es8374WriteReg(ES8374_REG_36, 0x00);
-    // es8374WriteReg(ES8374_REG_28, 0x00);
-    // es8374WriteReg(ES8374_REG_38, dacVolBak);
-    // es8374WriteReg(ES8374_REG_25, adcVolBak);
-    
+    DEBUG_PRINT(UNILOG_PLA_DRIVER, es8374AllResume, P_DEBUG, "[ES8374] es8374AllResume: dacVolBak=%d, adcVolBak=%d", dacVolBak, adcVolBak);
+
+    es8374WriteReg(ES8374_REG_01, 0x7F);
+    es8374WriteReg(ES8374_REG_14, 0x8A + (MICBIASOFF << 4));
+    es8374WriteReg(ES8374_REG_15, 0x00);
+    es8374WriteReg(ES8374_REG_21, 0x50);
+    es8374WriteReg(ES8374_REG_22, ADC_PGA_GAIN + (ADC_PGA_GAIN << 4));
+    es8374WriteReg(ES8374_REG_21, (adcInput << 4) + (ADC_PGA_DF2SE_15DB << 2));
+    es8374WriteReg(ES8374_REG_24, 0x08 + (DMIC_GAIN << 7) + DMIC_SELON);
+    es8374EnablePA(true);
+    es8374WriteReg(ES8374_REG_1D, VDDSPK_VOLTAGE);
+    es8374WriteReg(ES8374_REG_1C, 0x90);
+    es8374WriteReg(ES8374_REG_1A, 0xA0);
+    es8374WriteReg(ES8374_REG_09, 0x41);
+    es8374WriteReg(ES8374_REG_6D, 0x60);
+    es8374WriteReg(ES8374_REG_37, 0x00);
+    es8374WriteReg(ES8374_REG_36, (dacOutput << 6));
+    es8374WriteReg(ES8374_REG_28, 0x00);
+    es8374WriteReg(ES8374_REG_15, 0x40);
+    es8374WriteReg(ES8374_REG_38, dacVolBak);
+    es8374WriteReg(ES8374_REG_25, adcVolBak);
+
+    return CODEC_EOK;
+}
+
+// set es8374 adc into resume mode
+static HalCodecSts_e es8374AdcResume(void)//ADC恢复配置--搭配es8374AdcStandby
+{
+    DEBUG_PRINT(UNILOG_PLA_DRIVER, es8374AdcResume, P_DEBUG, "[ES8374] es8374AdcResume: adcVolBak=%d", adcVolBak);
+
+    es8374WriteReg(ES8374_REG_01, 0x7F);
+    es8374WriteReg(ES8374_REG_15, 0x00);
+    es8374WriteReg(ES8374_REG_21, (adcInput << 4) + (ADC_PGA_DF2SE_15DB << 2));
+    es8374WriteReg(ES8374_REG_24, 0x08 + (DMIC_GAIN << 7) + DMIC_SELON);
+    es8374WriteReg(ES8374_REG_09, 0x41);
+    es8374WriteReg(ES8374_REG_28, 0x00);
+    es8374WriteReg(ES8374_REG_15, 0x40);
+    es8374WriteReg(ES8374_REG_25, adcVolBak);
+
+    return CODEC_EOK;
+}
+
+// set es8374 dac into resume mode
+static HalCodecSts_e es8374DacResume(void)//DAC恢复配置--搭配es8374DacStandby
+{
+    DEBUG_PRINT(UNILOG_PLA_DRIVER, es8374DacResume, P_DEBUG, "[ES8374] es8374DacResume: dacVolBak=%d", dacVolBak);
+
+    es8374WriteReg(ES8374_REG_01, 0x7F);
+    es8374WriteReg(ES8374_REG_15, 0x00);
+    es8374WriteReg(ES8374_REG_21, 0x50);
+    es8374WriteReg(ES8374_REG_1D, VDDSPK_VOLTAGE);
+    es8374WriteReg(ES8374_REG_1C, 0x90);
+    es8374WriteReg(ES8374_REG_1A, 0xA0);
+    es8374WriteReg(ES8374_REG_09, 0x41);
+    es8374WriteReg(ES8374_REG_6D, 0x60);
+    es8374WriteReg(ES8374_REG_37, 0x00);
+    es8374WriteReg(ES8374_REG_36, (dacOutput << 6));
+    es8374WriteReg(ES8374_REG_15, 0x40);
+    es8374WriteReg(ES8374_REG_38, dacVolBak);
+
     return CODEC_EOK;
 }
 
 // set es8374 into powerdown mode
 static HalCodecSts_e es8374PwrDown(HalCodecModule_e mode)
 {
-    DEBUG_PRINT(UNILOG_PLA_DRIVER, es8374pwrDown_0, P_DEBUG, "Enter into es8374 powerdown");
+    DEBUG_PRINT(UNILOG_PLA_DRIVER, es8374PwrDown, P_DEBUG, "[ES8374] es8374PwrDown: mode=%d", mode);
+
+    es8374WriteReg(ES8374_REG_38, 0xC0);
+    es8374WriteReg(ES8374_REG_25, 0xC0);
+    es8374WriteReg(ES8374_REG_15, 0x00);
+    es8374WriteReg(ES8374_REG_28, 0x1C);
+    es8374WriteReg(ES8374_REG_36, 0x20);
+    es8374WriteReg(ES8374_REG_37, 0x20);
+    es8374WriteReg(ES8374_REG_6D, 0x00);
+    es8374WriteReg(ES8374_REG_09, 0x80);
+    es8374WriteReg(ES8374_REG_1A, 0x08);
+    es8374WriteReg(ES8374_REG_1E, 0x20);
+    delay_us(1000);
+    es8374WriteReg(ES8374_REG_1C, 0x10);
+    es8374WriteReg(ES8374_REG_1D, 0x10);
+    es8374WriteReg(ES8374_REG_1E, 0x40);
+    es8374WriteReg(ES8374_REG_24, 0x20);
+    es8374WriteReg(ES8374_REG_22, 0x00);
+    es8374WriteReg(ES8374_REG_21, 0xC0);
+    es8374WriteReg(ES8374_REG_15, 0xFF);
+    es8374WriteReg(ES8374_REG_14, 0x16);
+    es8374WriteReg(ES8374_REG_01, 0x03);
 
     return CODEC_EOK;
 }
@@ -193,64 +295,161 @@ static HalCodecSts_e es8374PwrDown(HalCodecModule_e mode)
 // enable pa power
 void es8374EnablePA(bool enable)
 {
-    es8374WriteReg(ES8374_REG_1E, 0x20);
+    DEBUG_PRINT(UNILOG_PLA_DRIVER, es8374EnablePA, P_DEBUG, "[ES8374] es8374EnablePA: enable=%d", enable);
+
+    es8374WriteReg(ES8374_REG_1E, 0x20);                                                    // spk on
     delay_us(1000);
-    es8374WriteReg(ES8374_REG_1E, ((enable == true) ? 0xA0 : 0x40));
+    es8374WriteReg(ES8374_REG_1E, ((enable == true) ? (0xA0 | PA_VOLUME_DEFAULT) : 0x40));  // spk on
 }
 
 HalCodecSts_e es8374Init(HalCodecCfg_t *codecCfg)
 {
+    DEBUG_PRINT(UNILOG_PLA_DRIVER, es8374Init_1, P_DEBUG, "[ES8374] es8374Init_1: adcInput=%d, dacOutput=%d, codecMode=%d, hasPA=%d",
+                codecCfg->adcInput, codecCfg->dacOutput, codecCfg->codecMode, codecCfg->hasPA);
+    DEBUG_PRINT(UNILOG_PLA_DRIVER, es8374Init_2, P_DEBUG, "[ES8374] es8374Init_2: mode=%d, fmt=%d, samples=%d, bits=%d, channel=%d, polarity=%d",
+                codecCfg->codecIface.mode, codecCfg->codecIface.fmt, codecCfg->codecIface.samples, codecCfg->codecIface.bits, codecCfg->codecIface.channel, codecCfg->codecIface.polarity);
+
     codecI2cInit();
 
-    es8374WriteReg(ES8374_REG_00, 0x3F);
-    es8374WriteReg(ES8374_REG_00, 0x03);
-    es8374WriteReg(ES8374_REG_01, 0x7F);
+    switch (codecCfg->adcInput)
+    {
+        case CODEC_ADC_INPUT_LINE1:
+            adcInput = 1;
+            break;
+
+        case CODEC_ADC_INPUT_LINE2:
+            adcInput = 2;
+            break;
+
+        case CODEC_ADC_INPUT_ALL:
+            adcInput = 3;
+            break;
+
+        case CODEC_ADC_INPUT_DIFFERENCE:
+            break;
+
+        default:
+            break;
+    }
+
+    switch (codecCfg->dacOutput)
+    {
+        case CODEC_DAC_OUTPUT_LINE1:
+            dacOutput = 0;
+            break;
+
+        case CODEC_DAC_OUTPUT_LINE2:
+            dacOutput = 1;
+            break;
+
+        case CODEC_DAC_OUTPUT_ALL:
+            break;
+
+        default:
+            break;
+    }
+
+    es8374WriteReg(ES8374_REG_00, 0x3F);            //IC Rst start
+    es8374WriteReg(ES8374_REG_00, 0x03);            //IC Rst stop
+    es8374WriteReg(ES8374_REG_01, 0x7F);            //IC clk on
     es8374WriteReg(ES8374_REG_02, 0x00);
     es8374WriteReg(ES8374_REG_03, 0x20);
     es8374WriteReg(ES8374_REG_04, 0x00);
-    es8374WriteReg(ES8374_REG_05, 0x11);
-    es8374WriteReg(ES8374_REG_06, (RATIO>>8));
-    es8374WriteReg(ES8374_REG_07, (RATIO & 0xFF));
-    es8374WriteReg(ES8374_REG_10, FORMAT + (FORMAT_LEN<<2));
-    es8374WriteReg(ES8374_REG_11, FORMAT + (FORMAT_LEN<<2));
-    es8374WriteReg(ES8374_REG_0F, (MSMODE_MASTERSELON<<7) + (SCLK_INV<<5) + SCLK_DIV);
-    es8374WriteReg(ES8374_REG_24, 0x08 + (DMIC_GAIN<<7) + DMIC_SELON);
-    es8374WriteReg(ES8374_REG_36, (DAC_CHANNEL_SEL<<6));
-    es8374WriteReg(ES8374_REG_12, 0x30);
-    es8374WriteReg(ES8374_REG_13, 0x20);
+    es8374WriteReg(ES8374_REG_05, 0x11);            //clk div set
+    if(PLL_SET_12288 == 1)
+    {
+        es8374WriteReg(ES8374_REG_6F, 0xA0);        //pll set:mode enable
+        es8374WriteReg(ES8374_REG_72, 0x41);        //pll set:mode set
+        es8374WriteReg(ES8374_REG_09, 0x01);        //pll set:reset on ,set start
+        es8374WriteReg(ES8374_REG_0A, 0x8A);
+        es8374WriteReg(ES8374_REG_0B, 0x0C);
+        es8374WriteReg(ES8374_REG_0C, 0x00);
+        es8374WriteReg(ES8374_REG_0D, 0x00);
+        es8374WriteReg(ES8374_REG_0E, 0x00);
+        es8374WriteReg(ES8374_REG_09, 0x41);        //pll set:reset off ,set stop    
+        es8374WriteReg(ES8374_REG_02, 0x08);        //pll set:use pll
+        es8374WriteReg(ES8374_REG_03, 0x30);        //384 OSR
+        es8374WriteReg(ES8374_REG_04, 0x20);        //384 OSR
+    }
+    es8374WriteReg(ES8374_REG_06, (RATIO >> 8));    //LRCK DIV
+    es8374WriteReg(ES8374_REG_07, (RATIO & 0xFF));  //LRCK DIV
+    es8374SetBitsPerSample(codecCfg->codecIface.bits);
+    es8374ConfigFmt(codecCfg->codecIface.fmt);
+    es8374WriteReg(ES8374_REG_0F, (((codecCfg->codecIface.mode == CODEC_MODE_SLAVE) ? 0 : 1) << 7) + (SCLK_INV<<5) + SCLK_DIV);
+    es8374WriteReg(ES8374_REG_24, 0x08 + (DMIC_GAIN << 7) + DMIC_SELON);    //adc set
+    es8374WriteReg(ES8374_REG_36, (dacOutput << 6));                        //dac set
+    es8374WriteReg(ES8374_REG_12, 0x30);                                    //timming set
+    es8374WriteReg(ES8374_REG_13, 0x20);                                    //timming set
     es8374WriteReg(ES8374_REG_18, 0xFF);
     es8374WriteReg(ES8374_REG_21, 0x50);
-    es8374WriteReg(ES8374_REG_22, ADC_PGA_GAIN + (ADC_PGA_GAIN<<4));
-    es8374WriteReg(ES8374_REG_21, (ADC_CHANNEL_SEL<<4) + (ADC_PGA_DF2SE_15DB<<2));
-    es8374WriteReg(ES8374_REG_00, 0x80);
-    es8374WriteReg(ES8374_REG_14, 0x8A + (MICBIASOFF<<4));
+    es8374WriteReg(ES8374_REG_22, ADC_PGA_GAIN + (ADC_PGA_GAIN << 4));      //adc set
+    es8374WriteReg(ES8374_REG_21, (adcInput << 4) + (ADC_PGA_DF2SE_15DB << 2));
+    es8374WriteReg(ES8374_REG_00, 0x80);                // IC START
+    delay_us(10000);
+    es8374WriteReg(ES8374_REG_14, 0x8A + (MICBIASOFF << 4));
     es8374WriteReg(ES8374_REG_15, 0x40);
-    es8374WriteReg(ES8374_REG_1A, 0xA0);
-    es8374WriteReg(ES8374_REG_1B, 0x19);
+    es8374WriteReg(ES8374_REG_1A, 0xA0);                // monoout set
+    es8374WriteReg(ES8374_REG_1B, 0x19);                //5V 0DB
     es8374WriteReg(ES8374_REG_1C, 0x90);
-    es8374WriteReg(ES8374_REG_1D, 0x2B);
-    es8374WriteReg(ES8374_REG_1F, 0x00);
-    es8374WriteReg(ES8374_REG_20, 0x00);
-    es8374WriteReg(ES8374_REG_1E, 0x20);
-    es8374WriteReg(ES8374_REG_1E, 0xA0);
-    es8374WriteReg(ES8374_REG_28, 0x00);
-    es8374WriteReg(ES8374_REG_25, ADC_VOLUME);
-    es8374WriteReg(ES8374_REG_38, DAC_VOLUME);
-    es8374WriteReg(ES8374_REG_37, 0x00);
-    es8374WriteReg(ES8374_REG_6D, 0x60);
+    es8374WriteReg(ES8374_REG_1D, VDDSPK_VOLTAGE);      //5V 0DB 8R=>1W
+    es8374WriteReg(ES8374_REG_1F, 0x00);                // spk set
+    es8374WriteReg(ES8374_REG_20, 0x00);                // spk set
+    es8374EnablePA(false);                              // spk on
+    es8374WriteReg(ES8374_REG_28, 0x00);                // alc set
+    es8374WriteReg(ES8374_REG_25, ADC_VOLUME_DEFAULT);  // ADCVOLUME  on
+    es8374WriteReg(ES8374_REG_38, DAC_VOLUME_DEFAULT);  // DACVOLUMEL on
+    es8374WriteReg(ES8374_REG_37, 0x00);                // dac set
+    es8374WriteReg(ES8374_REG_6D, 0x60);                // SEL:GPIO1=DMIC CLK OUT+SEL:GPIO2=PLL CLK OUT
+
+    isHasPA = codecCfg->hasPA;
 
     return CODEC_EOK;
 }
 
 void es8374DeInit()
 {
-    //es8374PwrDown(0);
+    DEBUG_PRINT(UNILOG_PLA_DRIVER, es8374DeInit, P_DEBUG, "[ES8374] es8374DeInit");
     codecI2cDeInit();
 }
 
 HalCodecSts_e es8374ConfigFmt(HalCodecIfaceFormat_e fmt)
 {
     HalCodecSts_e ret = CODEC_EOK;
+    uint8_t       adc = es8374ReadReg(ES8374_REG_10) & 0xDC;
+    uint8_t       dac = es8374ReadReg(ES8374_REG_11) & 0xDC;
+
+    DEBUG_PRINT(UNILOG_PLA_DRIVER, es8374ConfigFmt, P_DEBUG, "[ES8374] es8374ConfigFmt: fmt=%d", fmt);
+
+    switch (fmt) 
+    {
+        case CODEC_MSB_MODE:
+        case CODEC_LSB_MODE:
+            DEBUG_PRINT(UNILOG_PLA_DRIVER, es8374fmt_1, P_DEBUG, "[ES8374] left/right Format");
+            adc |= 0x01;
+            dac |= 0x01;
+            break;
+
+        case CODEC_I2S_MODE:          
+            DEBUG_PRINT(UNILOG_PLA_DRIVER, es8374fmt_2, P_DEBUG, "[ES8374] I2S Format");
+            adc |= 0x00;
+            dac |= 0x00;
+            break;
+
+        case CODEC_PCM_MODE:
+            DEBUG_PRINT(UNILOG_PLA_DRIVER, es8374fmt_3, P_DEBUG, "[ES8374] pcm Format");
+            adc |= 0x03;
+            dac |= 0x03;
+            break;
+
+        default:
+            DEBUG_PRINT(UNILOG_PLA_DRIVER, es8374fmt_5, P_DEBUG, "[ES8374] default Format (I2S)");
+            adc |= 0x00;
+            dac |= 0x00;
+            break;
+    }
+
+    ret |= es8374WriteReg(ES8374_REG_10, adc);
+    ret |= es8374WriteReg(ES8374_REG_11, dac);
 
     return ret;
 }
@@ -258,13 +457,52 @@ HalCodecSts_e es8374ConfigFmt(HalCodecIfaceFormat_e fmt)
 HalCodecSts_e es8374SetBitsPerSample(HalCodecIfaceBits_e bits)
 {
     HalCodecSts_e ret = CODEC_EOK;
+    uint8_t       adc = es8374ReadReg(ES8374_REG_10) & 0xE3;
+    uint8_t       dac = es8374ReadReg(ES8374_REG_11) & 0xE3;
+
+    DEBUG_PRINT(UNILOG_PLA_DRIVER, es8374SetBitsPerSample, P_DEBUG, "[ES8374] es8374SetBitsPerSample: bits=%d", bits);
+
+    switch (bits) 
+    {
+        case CODEC_BIT_LENGTH_16BITS:
+            DEBUG_PRINT(UNILOG_PLA_DRIVER, es8374SetBitsPerSample_1, P_DEBUG, "[ES8374] 16 bits");
+            adc |= 0x0C;
+            dac |= 0x0C;
+            break;
+
+        case CODEC_BIT_LENGTH_24BITS:
+            DEBUG_PRINT(UNILOG_PLA_DRIVER, es8374SetBitsPerSample_2, P_DEBUG, "[ES8374] 24 bits");
+            adc |= 0x00;
+            dac |= 0x00;
+            break;
+
+        case CODEC_BIT_LENGTH_32BITS:
+            DEBUG_PRINT(UNILOG_PLA_DRIVER, es8374SetBitsPerSample_3, P_DEBUG, "[ES8374] 32 bits");
+            adc |= 0x10;
+            dac |= 0x10;
+            break;
+
+        default:
+            DEBUG_PRINT(UNILOG_PLA_DRIVER, es8374SetBitsPerSample_5, P_DEBUG, "[ES8374] default bit length (16 bits)");
+            adc |= 0x0C;
+            dac |= 0x0C;
+            break;
+    }
+
+    ret |= es8374WriteReg(ES8374_REG_10, adc);
+    ret |= es8374WriteReg(ES8374_REG_11, dac);
 
     return ret;
 }
 
 HalCodecSts_e es8374Config(HalCodecMode_e mode, HalCodecIface_t *iface)
 {
-    int ret = CODEC_EOK;
+    HalCodecSts_e ret = CODEC_EOK;
+
+    DEBUG_PRINT(UNILOG_PLA_DRIVER, es8374Config, P_DEBUG, "[ES8374] es8374Config: mode=%d, bits=%d, fmt=%d", mode, iface->bits, iface->fmt);
+
+    ret |= es8374SetBitsPerSample(iface->bits);
+    ret |= es8374ConfigFmt(iface->fmt);
 
     return ret;
 }
@@ -272,41 +510,25 @@ HalCodecSts_e es8374Config(HalCodecMode_e mode, HalCodecIface_t *iface)
 HalCodecSts_e es8374StartStop(HalCodecMode_e mode, HalCodecCtrlState_e ctrlState)
 {
     HalCodecSts_e ret = CODEC_EOK;
-    HalCodecModule_e es_mode = MODULE_MIN;
 
-    switch (mode) 
-    {
-        case CODEC_MODE_ENCODE:
-            es_mode  = MODULE_ADC;
-            break;
-        case CODEC_MODE_LINE_IN:
-            es_mode  = MODULE_LINE;
-            break;
-        case CODEC_MODE_DECODE:
-            es_mode  = MODULE_DAC;
-            break;
-        case CODEC_MODE_BOTH:
-            es_mode  = MODULE_ADC_DAC;
-            break;
-        default:
-            es_mode = MODULE_DAC;
-            DEBUG_PRINT(UNILOG_PLA_DRIVER, es8374CtrlState_1, P_DEBUG, "Codec mode not support, default is decode mode");
-            break;
-    }
-
+    DEBUG_PRINT(UNILOG_PLA_DRIVER, es8374StartStop, P_DEBUG, "[ES8374] es8374StartStop: mode=%d, ctrlState=%d", mode, ctrlState);
     switch(ctrlState)
     {
         case CODEC_CTRL_START:
-            ret |= es8374Start(es_mode);
+            ret |= es8374Start(mode);
+            if (isHasPA)
+            {
+                es8374EnablePA(true);
+            }
             break;
         case CODEC_CTRL_STOP:
-            ret |= es8374Stop(es_mode);
+            ret |= es8374Stop(mode);
             break;
         case CODEC_CTRL_RESUME:
-            ret |= es8374Resume(es_mode);
+            ret |= es8374Resume(mode);
             break;
         case CODEC_CTRL_POWERDONW:
-            ret |= es8374PwrDown(es_mode);
+            ret |= es8374PwrDown(mode);
             break;
     }
     
@@ -318,71 +540,170 @@ HalCodecSts_e es8374Start(HalCodecModule_e mode)
 {
     HalCodecSts_e ret = CODEC_EOK;
 
+    DEBUG_PRINT(UNILOG_PLA_DRIVER, es8374Start, P_DEBUG, "[ES8374] es8374Start: mode=%d", mode);
+
     return ret;
 }
 
 HalCodecSts_e es8374Stop(HalCodecModule_e mode)
 {
     HalCodecSts_e ret = CODEC_EOK;
-    es8374Standby(&dacVolBak, &adcVolBak);
+
+    DEBUG_PRINT(UNILOG_PLA_DRIVER, es8374Stop, P_DEBUG, "[ES8374] es8374Stop: mode=%d", mode);
+    switch(mode)
+    {
+        case CODEC_MODE_ENCODE:
+            es8374AdcStandby(&adcVolBak);
+            break;
+
+        case CODEC_MODE_DECODE:
+            es8374DacStandby(&dacVolBak);
+            if (isHasPA)
+            {
+                delay_us(2000);
+                es8374EnablePA(false);
+            }
+            break;
+
+        case CODEC_MODE_BOTH:
+            es8374Standby(&dacVolBak, &adcVolBak);
+            break;
+
+        default:
+        break;
+    }
+
+    return ret;
+}
+
+HalCodecSts_e es8374Resume(HalCodecMode_e mode)
+{
+    HalCodecSts_e ret = CODEC_EOK;
+
+    DEBUG_PRINT(UNILOG_PLA_DRIVER, es8374Resume, P_DEBUG, "[ES8374] es8374Resume: mode=%d", mode);
+    switch(mode)
+    {
+        case CODEC_MODE_ENCODE:
+            es8374AdcResume();
+            break;
+
+        case CODEC_MODE_DECODE:
+            es8374DacResume();
+            if (isHasPA)
+            {
+                es8374EnablePA(true);
+            }
+            break;
+
+        case CODEC_MODE_BOTH:
+            es8374AllResume();
+            break;
+
+        default:
+            break;
+    }
+
     return ret;
 }
 
 HalCodecSts_e es8374SetVolume(int volume)
 {
-    HalCodecSts_e res = CODEC_EOK;
+    uint8_t level = volume;
+    uint8_t value = DAC_VOLUME_MUTE;
 
-    return res;
+    if (level > 0)
+    {
+        level = (level > 100) ? 100 : level;
+        value = DAC_VOLUME_MIN - (level * DAC_VOLUME_MIN / 100);
+    }
+
+    es8374WriteReg(ES8374_REG_38, value);
+    DEBUG_PRINT(UNILOG_PLA_DRIVER, es8374SetVolume, P_DEBUG, "[ES8374] es8374SetVolume: volume=%d, level=%d, value=%d", volume, level, value);
+
+    return CODEC_EOK;
 }
 
 HalCodecSts_e es8374GetVolume(int *volume)
 {
-    HalCodecSts_e res = CODEC_EOK;
+    uint8_t level = 0;
+    uint8_t value = es8374ReadReg(ES8374_REG_38);
 
-    return res;
+    if (value <= DAC_VOLUME_MIN)
+    {
+        level = 100 - (value * 100 / DAC_VOLUME_MIN);
+        level = (level == 0) ? 1 : level;
+    }
+
+    *volume = level;
+    DEBUG_PRINT(UNILOG_PLA_DRIVER, es8374GetVolume, P_DEBUG, "[ES8374] es8374GetVolume: value=%d, level=%d", value, level);
+
+    return CODEC_EOK;
 }
 
 HalCodecSts_e es8374SetMute(bool enable)
-{ 
+{
+    DEBUG_PRINT(UNILOG_PLA_DRIVER, es8374SetMute, P_DEBUG, "[ES8374] es8374SetMute: enable=%d", enable);
+
+    if (enable == true)
+    {
+        es8374WriteReg(ES8374_REG_36, 0x20);
+    }
+    else
+    {
+        es8374WriteReg(ES8374_REG_36, (dacOutput << 6));
+    }
+
     return CODEC_EOK;
 }
 
 HalCodecSts_e es8374GetVoiceMute(int *mute)
 {
-    HalCodecSts_e res = CODEC_EOK;
+    *mute = (es8374ReadReg(ES8374_REG_36) >> 5) & 0x01;
 
-    return res;
+    DEBUG_PRINT(UNILOG_PLA_DRIVER, es8374GetVoiceMute, P_DEBUG, "[ES8374] es8374GetVoiceMute: mute=%d", *mute);
+
+    return CODEC_EOK;
 }
 
-HalCodecSts_e es8374SetMicVolume(int micVolume)
+HalCodecSts_e es8374SetMicVolume(uint8_t micGain, int micVolume)
 {
-    HalCodecSts_e res = CODEC_EOK;
+    uint8_t level = micVolume;
+    uint8_t value = ADC_VOLUME_MUTE;
 
-    return res;
+    if (level > 0)
+    {
+        level = (level > 100) ? 100 : level;
+        value = ADC_VOLUME_MIN - (level * ADC_VOLUME_MIN / 100);
+    }
+
+    es8374WriteReg(ES8374_REG_25, value);
+    DEBUG_PRINT(UNILOG_PLA_DRIVER, es8374SetMicVolume, P_DEBUG, "[ES8374] es8374SetMicVolume: micVolume=%d, level=%d, value=%d", micVolume, level, value);
+
+    return CODEC_EOK;
 }
 
 void es8374ReadAll()
 {
 #ifdef FEATURE_OS_ENABLE        
-    DEBUG_PRINT(UNILOG_PLA_DRIVER, es8374ReadAll_1, P_DEBUG, "now read 8374 all");
+    DEBUG_PRINT(UNILOG_PLA_DRIVER, es8374ReadAll_1, P_DEBUG, "[ES8374] es8374ReadAll Begin");
 #else      
-    printf("now read 8374 all\n");
+    printf("[ES8374] es8374ReadAll Begin\r\n");
 #endif
 
-    for (int i = 0; i < 0x4A; i++) 
+    for (int i = 0; i < 0x6E; i++) 
     {
         uint8_t reg = es8374ReadReg(i);
 #ifdef FEATURE_OS_ENABLE        
-        DEBUG_PRINT(UNILOG_PLA_DRIVER, es8374ReadAll_2, P_DEBUG, "REG:%x, %x", reg, i);
+        DEBUG_PRINT(UNILOG_PLA_DRIVER, es8374ReadAll_2, P_DEBUG, "[ES8374] [%x] %x", reg, i);
 #else      
-        printf("reg = 0x%02x, val = 0x%02x\n", i, reg);
+        printf("[ES8374] [%02X] %02X\r\n", i, reg);
 #endif
     }
 
 #ifdef FEATURE_OS_ENABLE        
-    DEBUG_PRINT(UNILOG_PLA_DRIVER, es8374ReadAll_3, P_DEBUG, "now read 8374 all end");
+    DEBUG_PRINT(UNILOG_PLA_DRIVER, es8374ReadAll_3, P_DEBUG, "[ES8374] es8374ReadAll End");
 #else      
-    printf("now read 8374 all end\n");
+    printf("[ES8374] es8374ReadAll End\r\n");
 #endif
 }
 

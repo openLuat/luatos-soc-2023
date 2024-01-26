@@ -19,6 +19,7 @@
 #include "imicc.h"
 #include "imireg.h"
 #endif
+#include "ps_sms_if.h"
 
 /******************************************************************************
  *****************************************************************************
@@ -38,6 +39,15 @@
 
 
 #define PS_APN_MAX_SIZE             (CMI_PS_MAX_APN_LEN+1)
+
+#define SMS_MAX_ADDR_LEN                20
+
+/*
+ * 1> DCS 7bit, max size is 160, IRA
+ * 2> DCS 8bit, max size is 140, HEX string type
+ * 3> DCS UCS2, max size is 280, HEX string type
+*/
+#define SMS_MAX_MSG_LEN                 280
 
 /******************************************************************************
  *****************************************************************************
@@ -682,6 +692,85 @@ typedef ImiCcListCurrCallCnf ListCurrCallInfo;
 
 
 #endif
+
+#ifdef FEATURE_SMS_API_ENABLE
+typedef enum SmsFormatModeTag
+{
+    SMS_FORMAT_PDU_MODE = 0,
+    SMS_FORMAT_TXT_MODE = 1
+}SmsFormatMode;
+
+typedef enum SmsMessageTypeTag
+{
+    SMS_TYPE_DELIVER = 0,       /* SMS-Deliver PDU */
+    SMS_TYPE_DELIVER_REPORT,    /* SMS-Deliver Report PDU */
+    SMS_TYPE_STATUS_REPORT,     /* SMS-Status Report PDU */
+    SMS_TYPE_CB_ETWS_CMAS,      /* CB SMS */
+    SMS_TYPE_SUBMIT,            /* SMS-SUBMIT */
+    SMS_TYPE_COMMAND,           /* SMS-COMMAND */
+    SMS_TYPE_RESERVE
+}SmsMessageType;
+
+typedef enum SmsMsgCodingTypeTag
+{
+    SMS_MSG_CODING_DEFAULT_7BIT = 0x00,
+    SMS_MSG_CODING_8BIT         = 0x01,
+    SMS_MSG_CODING_UCS2         = 0x02,
+}SmsMsgCodingType;
+
+typedef struct SmsInfoTag
+{
+    UINT8 smsType;                          /* enum SmsMessageType */
+    UINT8 addrStr[SMS_MAX_ADDR_LEN + 1];    /* originating or destination address string */
+    UINT8 msgCoding;                        /* enum SmsMsgCodingType */
+    UINT8 msgStr[SMS_MAX_MSG_LEN + 1];      /* message body buffer text/pdu string */
+}SmsInfo;
+
+typedef enum SmsTypeOfAddressTag
+{
+    SMS_TOA_NUMBER_RESTRICTED       = 0x80,   /* 128, Unknown type, unknown number format */
+    SMS_TOA_NUMBER_UNKNOWN          = 0x81,   /* 129, Unknown type, IDSN format number */
+    SMS_TOA_NUMBER_INTERNATIONAL    = 0x91,   /* 145, International number type, ISDN format */
+    SMS_TOA_NUMBER_NATIONAL         = 0xA1,   /* 161, National number type, IDSN format */
+    SMS_TOA_NUMBER_NETWORK_SPECIFIC = 0xB1,   /* 177, Network specific number, ISDN format */
+    SMS_TOA_NUMBER_DEDICATED        = 0xC1,   /* 193, Subscriber number, ISDN format */
+    SMS_TOA_NUMBER_EXTENSION        = 0xF1,   /* 241, extension, ISDN format */
+    SMS_TOA_NUMBER_INVALID
+}SmsTypeOfAddress;
+
+typedef enum SmsStoreMemTypeTag
+{
+    SMS_STOR_MEM_TYPE_ME   = 1, /* ME message storage */
+    SMS_STOR_MEM_TYPE_SM   = 2, /* (U)SIM message storage */
+    SMS_STOR_MEM_TYPE_BM   = 3, /* broadcast message storage  */
+    SMS_STOR_MEM_TYPE_MT   = 4, /* Any of the storage associated whit ME */
+    SMS_STOR_MEM_TYPE_TA   = 5, /* TA message storage */
+    SMS_STOR_MEM_TYPE_SR   = 6, /* status report storage */
+    SMS_STOR_MEM_TYPE_END
+}SmsStoreMemType;
+
+typedef enum SmsRecStorStatusTag
+{
+    SMS_STOR_STATUS_REC_UNREAD = 0, /* Received unread message, i.e new message */
+    SMS_STOR_STATUS_REC_READ   = 1, /* Received read message */
+    SMS_STOR_STATUS_STO_UNSENT = 2, /* Stored unsent message only applicable to SMs */
+    SMS_STOR_STATUS_STO_SENT   = 3, /* Stored sent message only applicable to SMs */
+    SMS_STOR_STATUS_ALL        = 4, /* All message, only applicable to +CGML command */
+    SMS_STOR_STATUS_END
+}SmsRecStorStatus;
+
+typedef enum SmsDelFlagTag
+{
+    SMS_DEL_FLAG_INDEX    = 0,  /* delete the message specified in index*/
+    SMS_DEL_FLAG_STATUS_1 = 1,  /* delete all Read message from the message storage */
+    SMS_DEL_FLAG_STATUS_2 = 2,  /* delete all Read message and sent mobile originated message */
+    SMS_DEL_FLAG_STATUS_3 = 3,  /* delete all read message, sent MO message and unsent mobile originated message */
+    SMS_DEL_FLAG_ALL      = 4,  /* delete all message */
+    SMS_DEL_FLAG_UNKNOWN
+}SmsDelFlag;
+
+#endif
+
 /******************************************************************************
  *****************************************************************************
  * API
@@ -807,6 +896,13 @@ void appSetSIMHotSwapNotify(BOOL bSimPlugIn);
 
 CmsRetId appTriggerTau(UINT8 epsUpdateType);
 
+/**
+  \fn          CmsRetId appTriggerRel()
+  \brief       Send cmi request to trigger RRC local Release
+  \returns     CmsRetId CMS_RET_SUCC: RRC connection local release is triggered
+               CMS_FAIL: RRC connection local release is not triggered
+*/
+CmsRetId appTriggerRel();
 
 /**
   \fn          appSetECSIMCFGSync
@@ -1189,6 +1285,94 @@ CmsRetId appSetVTDSync(UINT16 duration);
 */
 CmsRetId appGetVTDSync(UINT16 *pDuration);
 
+#endif
+
+#ifdef FEATURE_SMS_API_ENABLE
+/**
+  \fn          CmsRetId appSendSms
+  \brief       Send cmi request to send SMS
+  \param[in]   UINT8 smsFormat, Text/PDU Mode, see SmsFormatMode
+  \param[in]   CHAR *da, see 27.005 <da>, Text Mode only
+  \param[in]   UINT8 toda, see 27.005 <toda>, Text Mode only
+  \param[in]   CHAR *inputStr,
+  \                Text Mode: text string if dcs is GSM 7bit; hex string if dcs is 8-bit or UCS2
+  \                PDU Mode: SC address followed by TPDU in hex format
+  \param[in]   UINT32 guardTimerSec, guard timer for sending SMS in second
+  \param[out]  UINT8 *pMsgRef, TP-Message-Reference, see 27.005 <mr>
+  \returns     CmsRetId
+*/
+CmsRetId appSendSmsSync(BOOL bTextMode, CHAR *da, UINT8 toda,
+                        CHAR *inputStr, UINT32 guardTimerSec, UINT8 *pMsgRef);
+
+/**
+  \fn          CmsRetId appSendMtSmsRsp
+  \brief       Send ack after receiving MT SMS
+  \param[in]   UINT8 smsId, smsId is received in PS_URC_ID_NEW_SMS
+  \param[in]   bRcvOk, TRUE: MT SMS handling is OK, response RP-ACK to NW;
+  \                    FALSE: MT SMS handling is fail, response RP-ERROR to NW
+  \returns     CmsRetId
+*/
+void appSendMtSmsRsp(UINT8 smsId, BOOL bRcvOk);
+
+/**
+  \fn          CmsRetId appSmsSetTextModeParaSync
+  \brief       Set SMS parameters used in Text mode
+  \param[in]   UINT8 cfgMask, bit mask, set to 1 if the config is present,
+  \                           bit 0: fo; bit 1: vp; bit 2: pid; bit 3: dcs;
+  \param[in]   UINT8 fo, see 27.005 <fo>
+  \param[in]   UINT8 vp, when vpf is RELATIVE format, see 27.005 <vp>
+  \param[in]   CHAR *vpStr, when vpf is not RELATIVE format, see 27.005 <vp>
+  \param[in]   UINT8 pid, see 27.005 <pid>
+  \param[in]   UINT8 dcs, see 27.005 <dcs>
+  \returns     CmsRetId
+*/
+CmsRetId appSmsSetTextModeParaSync(UINT8 cfgMask, UINT8 fo, UINT8 vp, CHAR *vpStr, UINT8 pid, UINT8 dcs);
+
+/**
+  \fn          CmsRetId appSmsWriteTextSmsToStorageSync
+  \brief       Save SMS to NVM or SIM, Text Mode
+  \param[in]   CHAR *da, see 27.005 <da>, Text Mode only
+  \param[in]   UINT8 toda, see 27.005 <toda>, Text Mode only, Enum SmsTypeOfAddress
+  \param[in]   CHAR *inputStr, text string if dcs is GSM 7bit; hex string if dcs is 8-bit or UCS2
+  \param[in]   UINT8 smsMsgType, SMS message type, Enum SmsMessageType
+  \param[in]   UINT8 smsMemType, see 27.005 <mem1>/<mem2>/<mem3>, Enum SmsStoreMemType
+  \param[in]   UINT8 smsRecStatus, see 27.005 <stat>, Enum SmsRecStorStatus
+  \param[out]  UINT8 *pMemIndex, index of the Memory
+  \returns     CmsRetId
+*/
+CmsRetId appSmsWriteTextSmsToStorageSync(CHAR *da, UINT8 toda, CHAR *inputStr, UINT8 smsMsgType,
+                                         UINT8 smsMemType, UINT8 smsRecStatus, UINT8 *pMemIndex);
+
+/**
+  \fn          CmsRetId appSmsWritePduSmsToStorageSync
+  \brief       Save SMS to NVM or SIM, PDU Mode
+  \param[in]   CHAR *inputStr, PDU hex string
+  \param[in]   UINT8 smsMemType, see 27.005 <mem1>/<mem2>/<mem3>, Enum SmsStoreMemType
+  \param[in]   UINT8 smsRecStatus, see 27.005 <stat>, Enum SmsRecStorStatus
+  \param[out]  UINT8 *pMemIndex, index of the Memory
+  \returns     CmsRetId
+*/
+CmsRetId appSmsWritePduSmsToStorageSync(CHAR *inputStr, UINT8 smsMemType, UINT8 smsRecStatus, UINT8 *pMemIndex);
+
+/**
+  \fn          CmsRetId appSmsReadTextSmsFromStorageSync
+  \brief       Read SMS from NVM or SIM
+  \param[in]   UINT8 smsMemType, see 27.005 <mem1>/<mem2>/<mem3>, Enum SmsStoreMemType
+  \param[in]   UINT8 memIndex, index of the Memory
+  \param[out]  SmsInfo *pSmsInfo, SMS info
+  \returns     CmsRetId
+*/
+CmsRetId appSmsReadTextSmsFromStorageSync(UINT8 smsMemType, UINT8 memIndex, SmsInfo *pSmsInfo);
+
+/**
+  \fn          CmsRetId appSmsDeleteSmsFromStorageSync
+  \brief       Save text SMS to NVM or SIM
+  \param[in]   UINT8 smsMemType, SMS message preferred storage memory type PsilSmsStoreMemType
+  \param[in]   UINT8 delFlag, see 27.005 <delflag>, Enum SmsDelFlag
+  \param[out]  UINT8 delIndex, index of the Memory
+  \returns     CmsRetId
+*/
+CmsRetId appSmsDeleteSmsFromStorageSync(UINT8 smsMemType, UINT8 delFlag, UINT8 delIndex);
 #endif
 
 #endif

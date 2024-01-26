@@ -350,6 +350,7 @@ int luat_audio_set_bus_type(uint8_t multimedia_id,uint8_t bus_type)
 	prv_audio_config.bus_type = bus_type;
 	if (bus_type == AUSTREAM_BUS_I2S){
 		prv_audio_config.bus_type = AUSTREAM_BUS_I2S;
+		prv_audio_config.codec_conf.multimedia_id = multimedia_id;
 		if (prv_audio_config.codec_conf.codec_opts->init(&prv_audio_config.codec_conf,LUAT_CODEC_MODE_SLAVE)){
 			DBG("no codec %s",prv_audio_config.codec_conf.codec_opts->name);
 			return -1;

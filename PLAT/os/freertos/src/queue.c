@@ -362,6 +362,11 @@ Queue_t * const pxQueue = ( Queue_t * ) xQueue;
 			/* Allocate enough space to hold the maximum number of items that
 			can be in the queue at any time. */
 			xQueueSizeInBytes = ( size_t ) ( uxQueueLength * uxItemSize ); /*lint !e961 MISRA exception as the casts are only redundant for some ports. */
+
+            /*add after NVD checking,CVE-2021-31571, check for multiplication overflow*/
+            configASSERT(uxQueueLength == (xQueueSizeInBytes/uxItemSize));
+            /*check for addtion overflow*/
+            configASSERT((sizeof(Queue_t) + xQueueSizeInBytes) > xQueueSizeInBytes);
 		}
 
 		pxNewQueue = ( Queue_t * ) pvPortMalloc( sizeof( Queue_t ) + xQueueSizeInBytes );

@@ -103,7 +103,7 @@
 #define ATC_ECCFG_1_POWERLEVEL_VAL_MIN               0
 #define ATC_ECCFG_1_POWERLEVEL_VAL_MAX               4
 #define ATC_ECCFG_1_POWERLEVEL_VAL_DEFAULT           (-1)
-#define ATC_ECCFG_1_REL_VERSION_VAL_MIN              13
+#define ATC_ECCFG_1_REL_VERSION_VAL_MIN              9
 #define ATC_ECCFG_1_REL_VERSION_VAL_MAX              14
 #define ATC_ECCFG_1_REL_VERSION_VAL_DEFAULT          13
 #define ATC_ECCFG_1_ROHC_VAL_MIN                     0
@@ -276,6 +276,11 @@
 #define ATC_ECCFG_1_CFUN_CLEAR_BARCELL_VAL_MIN       (0)
 #define ATC_ECCFG_1_CFUN_CLEAR_BARCELL_VAL_MAX       (1)
 #define ATC_ECCFG_1_CFUN_CLEAR_BARCELL_VAL_DEFAULT   (0)
+
+//AT+ECCFG="EnableLoggedMDT"
+#define ATC_ECCFG_1_ENABLE_LOGGED_MDT_VAL_MIN       (0)
+#define ATC_ECCFG_1_ENABLE_LOGGED_MDT_VAL_MAX       (1)
+#define ATC_ECCFG_1_ENABLE_LOGGED_MDT_VAL_DEFAULT   (0)
 
 #define ATEC_ECCFG_GET_RSP_STR_LEN           512
 

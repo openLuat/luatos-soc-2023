@@ -131,8 +131,8 @@ typedef struct
  */
 int32_t i2sCreate(I2sDevConf_t *i2sConf);
 
-int32_t i2sDevRecv(uint8_t type);
-int32_t i2sDevDeInit();
+int32_t i2sDevRecv(uint8_t type, uint8_t isCodecNeedInit);
+int32_t i2sDevDeInit(bool isHangup);
 int32_t i2sDevPlay(CcioDevice_t *chdev);
 int32_t i2sStopHandle(uint8_t stopType);
 
@@ -147,7 +147,7 @@ int32_t i2sStopHandle(uint8_t stopType);
  * @param sampleRateUse    If use 8k samplerate, set it to 8000; If use 16k samplerate, set it to 16000;
  * @return null
  */
-void i2sChangeRingTone(uint8_t* toneSrc, uint32_t toneSize, uint16_t dmaTrunkSize, uint32_t sampleRateUse);
+void i2sChangeRingTone(uint8_t* toneSrc, uint32_t toneSize, uint16_t dmaTrunkSize, uint8_t sampleRateUse);
 
 
 

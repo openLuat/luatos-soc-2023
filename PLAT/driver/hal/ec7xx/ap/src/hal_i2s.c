@@ -2,7 +2,7 @@
  *
  * Copy right:   2019-, Copyrigths of AirM2M Ltd.
  * File name:    hal_i2s.c
- * Description:  EC618 i2s hal driver source file
+ * Description:  EC7xx i2s hal driver source file
  * History:      Rev1.0   2021-9-18
  *
  ****************************************************************************/
@@ -115,52 +115,15 @@ uint32_t halI2sGetTrunkNum()
 	return i2sDrv->getTrunkCnt();
 }
 
-
-void halI2sSetSampleRate(I2sRole_e i2sRole, uint32_t sampleRate)
+void halI2sSetSampleRate(I2sRole_e i2sRole, I2sSampleRate_e sampleRate)
 {
-    I2sSampleRate_e sampleRateIndex = 0;
-    
-    switch (sampleRate)
-    {
-        case 8000:
-            sampleRateIndex = SAMPLERATE_8K;
-        break;
-
-        case 16000:
-            sampleRateIndex = SAMPLERATE_16K;
-        break;
-
-        case 22050:
-            sampleRateIndex = SAMPLERATE_22_05K;
-        break;
-
-        case 32000:
-            sampleRateIndex = SAMPLERATE_32K;
-        break;
-
-        case 44100:
-            sampleRateIndex = SAMPLERATE_44_1K;
-        break;
-
-        case 48000:
-            sampleRateIndex = SAMPLERATE_48K;
-        break;
-
-        case 96000:
-            sampleRateIndex = SAMPLERATE_96K;
-        break;
-
-        default:
-            break;
-    }
-    
     if (i2sRole == I2S_SLAVE_MODE) // Codec act as master
     {
-        i2sDrv->ctrl(I2S_CTRL_SAMPLE_RATE_SLAVE, sampleRateIndex); // I2S Set sample rate in slave role
+        i2sDrv->ctrl(I2S_CTRL_SAMPLE_RATE_SLAVE, sampleRate); // I2S Set sample rate in slave role
     }
     else
     {
-        i2sDrv->ctrl(I2S_CTRL_SAMPLE_RATE_MASTER, sampleRateIndex); // I2S Set sample rate in master role
+        i2sDrv->ctrl(I2S_CTRL_SAMPLE_RATE_MASTER, sampleRate); // I2S Set sample rate in master role
     }
 }
 

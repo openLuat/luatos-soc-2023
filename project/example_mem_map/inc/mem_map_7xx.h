@@ -69,15 +69,42 @@ flash xip address(from ap/cp view): 0x00800000---0x00a00000
 #define AP_FLASH_LOAD_UNZIP_SIZE        (AP_FLASH_LOAD_SIZE + 0x10000)//AP_FLASH_LOAD_SIZE+64KB ,for ld
 #endif //undef AP_FLASH_LOAD_SIZE
 
+
+/*temp add here, need handle from caller !!!!*/
+//hib bakcup addr and size
+#define FLASH_HIB_BACKUP_EXIST          (0)
+#define FLASH_MEM_BACKUP_ADDR           0x0
+#define FLASH_MEM_BACKUP_NONXIP_ADDR    0x0
+#define FLASH_MEM_BLOCK_SIZE            0x0
+#define FLASH_MEM_BLOCK_CNT             0x0
+#define FLASH_MEM_BACKUP_SIZE           0x0
 //fs addr and size
 #define FLASH_FS_REGION_START           (0x1a6000)
 #define FLASH_FS_REGION_END             (0x1b2000)
 #define FLASH_FS_REGION_SIZE            (FLASH_FS_REGION_END-FLASH_FS_REGION_START) // 48KB
 
-//fota addr and size
 #define FLASH_FOTA_REGION_START         (0x1b2000)
 #define FLASH_FOTA_REGION_LEN           (0x40000)//256KB
 #define FLASH_FOTA_REGION_END           (0x1f2000)
+
+#if 0	//需要HIB参考这个配置
+#define FLASH_HIB_BACKUP_EXIST          (1)
+#define FLASH_MEM_BACKUP_ADDR           (AP_FLASH_XIP_ADDR+FLASH_MEM_BACKUP_NONXIP_ADDR)
+#define FLASH_MEM_BACKUP_NONXIP_ADDR    (0x1a6000)
+#define FLASH_MEM_BACKUP_SIZE           (0x18000)//96KB
+#define FLASH_MEM_BLOCK_SIZE            (0x6000)
+#define FLASH_MEM_BLOCK_CNT             (0x4)
+
+//fs addr and size
+#define FLASH_FS_REGION_START           (0x1be000)
+#define FLASH_FS_REGION_END             (0x1ca000)
+#define FLASH_FS_REGION_SIZE            (FLASH_FS_REGION_END-FLASH_FS_REGION_START) // 48KB
+
+#define FLASH_FOTA_REGION_START         (0x1ca000)
+#define FLASH_FOTA_REGION_LEN           (0x28000)   //160KB
+#define FLASH_FOTA_REGION_END           (0x1f2000)
+
+#endif
 
 // mapdef
 #ifndef AP_PKGIMG_LIMIT_SIZE
@@ -246,15 +273,43 @@ flash xip address(from ap/cp view): 0x00800000---0x00a00000
 #define AP_FLASH_LOAD_UNZIP_SIZE        (AP_FLASH_LOAD_SIZE + 0x10000)//AP_FLASH_LOAD_SIZE+64KB ,for ld
 #endif //undef AP_FLASH_LOAD_SIZE
 
+/*temp add here, need handle from caller !!!!*/
+//hib bakcup addr and size
+
+#define FLASH_HIB_BACKUP_EXIST          (0)
+#define FLASH_MEM_BACKUP_ADDR           0x0
+#define FLASH_MEM_BACKUP_NONXIP_ADDR    0x0
+#define FLASH_MEM_BLOCK_SIZE            0x0
+#define FLASH_MEM_BLOCK_CNT             0x0
+#define FLASH_MEM_BACKUP_SIZE           0x0
+
 //fs addr and size
 #define FLASH_FS_REGION_START           (0x1a6000)
 #define FLASH_FS_REGION_END             (0x1b2000)
 #define FLASH_FS_REGION_SIZE            (FLASH_FS_REGION_END-FLASH_FS_REGION_START) // 48KB
 
-//fota addr and size
 #define FLASH_FOTA_REGION_START         (0x1b2000)
 #define FLASH_FOTA_REGION_LEN           (0x40000)//256KB
 #define FLASH_FOTA_REGION_END           (0x1f2000)
+
+#if 0	//需要HIB参考这个配置
+#define FLASH_HIB_BACKUP_EXIST          (1)
+#define FLASH_MEM_BACKUP_ADDR           (AP_FLASH_XIP_ADDR+FLASH_MEM_BACKUP_NONXIP_ADDR)
+#define FLASH_MEM_BACKUP_NONXIP_ADDR    (0x1a6000)
+#define FLASH_MEM_BACKUP_SIZE           (0x18000)//96KB
+#define FLASH_MEM_BLOCK_SIZE            (0x6000)
+#define FLASH_MEM_BLOCK_CNT             (0x4)
+
+//fs addr and size
+#define FLASH_FS_REGION_START           (0x1be000)
+#define FLASH_FS_REGION_END             (0x1ca000)
+#define FLASH_FS_REGION_SIZE            (FLASH_FS_REGION_END-FLASH_FS_REGION_START) // 48KB
+
+#define FLASH_FOTA_REGION_START         (0x1ca000)
+#define FLASH_FOTA_REGION_LEN           (0x28000)   //160KB
+#define FLASH_FOTA_REGION_END           (0x1f2000)
+
+#endif
 
 // mapdef
 #ifndef AP_PKGIMG_LIMIT_SIZE

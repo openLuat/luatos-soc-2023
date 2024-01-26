@@ -85,6 +85,7 @@ typedef struct CerrcCcmMeasAdjustConfig_Tag
 typedef UINT8 AsReleaseType_t;
 typedef enum _EPAT_AsReleaseType_Tag
 {
+    AsRelease_9 = 9,    //rel 9 is only used in RRC internal code (fill UeCapabilityInformation with rel9 if AT+ECCFG="relVesion",9)
     AsRelease_13 = 13,
     AsRelease_14,
     AsRelease_15,

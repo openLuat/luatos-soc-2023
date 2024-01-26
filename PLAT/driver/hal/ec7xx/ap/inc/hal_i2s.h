@@ -5,7 +5,7 @@
 * All Rights Reserved
 
 ******************************************************************************
-*  Filename: audioDrv.h
+*  Filename: Hal_i2s.h
 *
 *  Description:
 *
@@ -40,10 +40,11 @@ typedef enum
     SAMPLERATE_8K           = 0,        ///< Sample rate 8k
     SAMPLERATE_16K          = 1,        ///< Sample rate 16k
     SAMPLERATE_22_05K       = 2,        ///< Sample rate 22.05k
-    SAMPLERATE_32K          = 3,        ///< Sample rate 32k
-    SAMPLERATE_44_1K        = 4,        ///< Sample rate 44.1k
-    SAMPLERATE_48K          = 5,        ///< Sample rate 48k
-    SAMPLERATE_96K          = 6,        ///< Sample rate 96k
+    SAMPLERATE_24K	        = 3,        ///< Sample rate 24k
+    SAMPLERATE_32K          = 4,        ///< Sample rate 32k
+    SAMPLERATE_44_1K        = 5,        ///< Sample rate 44.1k
+    SAMPLERATE_48K          = 6,        ///< Sample rate 48k
+    SAMPLERATE_96K          = 7,        ///< Sample rate 96k
 }I2sSampleRate_e;
 
 typedef enum
@@ -194,6 +195,7 @@ void halI2sSetTotalNum(uint32_t totalNum);
 */
 uint32_t halI2sGetTotalNum(void);
 
+
 /**
   \brief Set dma descriptor chain num.  
   \param[in] direc     Tx/Rx.
@@ -223,7 +225,7 @@ void halI2sSrcAdjustVolumn(int16_t* srcBuf, uint32_t srcTotalNum, uint16_t volSc
   \param[in] sampleRate     samplerate.
   \return  null.            
 */
-void halI2sSetSampleRate(I2sRole_e i2sRole, uint32_t sampleRate);
+void halI2sSetSampleRate(I2sRole_e i2sRole, I2sSampleRate_e sampleRate);
 
 /**
   \brief Set i2s mono or dual channel.  

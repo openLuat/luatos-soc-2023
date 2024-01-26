@@ -3,11 +3,11 @@
   "flashloadAddr": "AP_FLASH_LOAD_ADDR",
   "flashloadSize": "AP_FLASH_LOAD_SIZE",
   "flashxipEnding": "flashXIPLimit",
-  "unzipGrpMaxSize": 176128,
+  "unzipGrpMaxSize": "AP_UNZIP_GRP_MAX_SIZE",
   "sectGrp":[
     {
       "grpId":0,
-      "grpSize":24576,
+      "grpSize":"AP_GRP0_SIZE_IN_JSON",
       "sect":[
         {
           "secname":"load_apos",
@@ -48,7 +48,7 @@
     },
     {
       "grpId":1,
-      "grpSize":98304,
+      "grpSize":"AP_GRP1_SIZE_IN_JSON",
       "sect":[
         {
           "secname":"load_ap_firam_msmb",

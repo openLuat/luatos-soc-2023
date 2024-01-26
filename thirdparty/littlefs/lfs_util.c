@@ -5,10 +5,23 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 #include "lfs_util.h"
+#include "plat_config.h"
+#include DEBUG_LOG_HEADER_FILE
+
 
 // Only compile if user does not provide custom config
 #ifndef LFS_CONFIG
 
+#if defined CHIP_EC618 || defined CHIP_EC618_Z0
+uint8_t BSP_QSPI_SWReset(void);
+uint8_t BSP_QSPI_XIP_Mode_Disable(void);
+uint8_t BSP_QSPI_XIP_Mode_Enable(void);
+#else
+extern void FLASH_clrStatus( void );
+#endif
+
+
+static uint32_t gLFSAssertFlag = 0;
 
 // Software CRC implementation with small lookup table
 uint32_t lfs_crc(uint32_t crc, const void *buffer, size_t size) {
@@ -55,5 +68,43 @@ uint32_t lfs_crc(uint32_t crc, const void *buffer, size_t size) {
     return crc;
 }
 
+void lfs_setAssertFlag(uint32_t flag)
+{
+    gLFSAssertFlag |= flag;
+}
+
+void lfs_assert(bool test)
+{
+    if(test == 0)
+    {
+        // shall be atomic op below
+        __disable_irq();
+
+        if (gLFSAssertFlag & EC_FS_ASSERT_FLASH_RESET_FLAG)
+        {
+#if defined CHIP_EC618 || defined CHIP_EC618_Z0
+            BSP_QSPI_XIP_Mode_Disable();
+            BSP_QSPI_SWReset();
+            BSP_QSPI_XIP_Mode_Enable();
+#else
+            FLASH_clrStatus();
+#endif
+        }
+
+        uint32_t excepFsAssertCount = BSP_GetFSAssertCount();
+        BSP_SetFSAssertCount(++excepFsAssertCount);
+
+        ECPLAT_PRINTF(UNILOG_LFS, lfs_assert_0, P_ERROR, "lfs assert count:%d", excepFsAssertCount);
+
+        if(excepFsAssertCount && ((excepFsAssertCount % EC_FS_ASSERT_REFORMAT_THRESHOLD) == 0))
+        {
+            ECPLAT_PRINTF(UNILOG_LFS, lfs_assert_1, P_ERROR, "!!!File System and Plat config will be clear!!!");
+        }
+
+
+        EC_ASSERT(0, 0, 0, 0);
+    }
+
+}
 
 #endif

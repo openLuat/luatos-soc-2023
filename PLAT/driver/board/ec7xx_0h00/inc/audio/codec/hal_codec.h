@@ -48,6 +48,7 @@ extern "C" {
 // Codec I2C address
 #define ES8388_IICADDR                      0x11
 #define ES8311_IICADDR                      0x18
+#define ES8374_IICADDR                      0x10
 
 #ifdef FEATURE_OS_ENABLE
 #define HAL_CODEC_CHECK_NULL(a, format, b, ...) \

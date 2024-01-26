@@ -1512,6 +1512,52 @@ IRQ_HANDLE:
 #endif
     }
 
+    // RX water level
+    if(isr_reg & USART_ISR_RXFIFO_WL_Msk)
+    {
+        current_cnt = info->xfer.rx_cnt;
+        total_cnt = info->xfer.rx_num;
+
+        left_to_recv = total_cnt - current_cnt;
+
+        bytes_in_fifo = usart->reg->FSR >> USART_FSR_RXFIFO_WL_Pos;
+
+        // leave at least one byte in fifo to trigger timeout interrupt
+        i = bytes_in_fifo - 1;
+
+        if(i == 0)
+            i = 1;
+
+        i = MIN(i, left_to_recv);
+
+        while(i--)
+        {
+            info->xfer.rx_buf[current_cnt++] = usart->reg->RDR;
+        }
+
+        // The clear action has no effect when enters irqHandler since the water level holds, let's clear twice here since we've moved data from FIFO
+        usart->reg->ICR = USART_ICR_RXFIFO_WL_Msk;
+
+        info->xfer.rx_cnt = current_cnt;
+
+        if(current_cnt == total_cnt)
+        {
+            // Clear RX busy flag and set receive transfer complete event
+            event |= ARM_USART_EVENT_RECEIVE_COMPLETE;
+
+            usart->reg->IER &= ~(USART_IER_RX_START_Msk      | \
+                                 USART_IER_RX_BREAK_DET_Msk  | \
+                                 USART_IER_RX_FRAME_ERR_Msk  | \
+                                 USART_IER_RX_PARITY_ERR_Msk | \
+                                 USART_IER_RXFIFO_WL_Msk     | \
+                                 USART_IER_RXFIFO_TO_Msk     | \
+                                 USART_IER_RXFIFO_OF_Msk);
+
+            info->rx_status.rx_busy = 0U;
+        }
+
+    }
+
     // RX timeout
     if(isr_reg & USART_ISR_RXFIFO_TO_Msk)
     {
@@ -1564,52 +1610,6 @@ IRQ_HANDLE:
 
         info->rx_status.rx_busy = 0U;
 
-
-    }
-
-    // RX water level
-    if(isr_reg & USART_ISR_RXFIFO_WL_Msk)
-    {
-        current_cnt = info->xfer.rx_cnt;
-        total_cnt = info->xfer.rx_num;
-
-        left_to_recv = total_cnt - current_cnt;
-
-        bytes_in_fifo = usart->reg->FSR >> USART_FSR_RXFIFO_WL_Pos;
-
-        // leave at least one byte in fifo to trigger timeout interrupt
-        i = bytes_in_fifo - 1;
-
-        if(i == 0)
-            i = 1;
-
-        i = MIN(i, left_to_recv);
-
-        while(i--)
-        {
-            info->xfer.rx_buf[current_cnt++] = usart->reg->RDR;
-        }
-
-        // The clear action has no effect when enters irqHandler since the water level holds, let's clear twice here since we've moved data from FIFO
-        usart->reg->ICR = USART_ICR_RXFIFO_WL_Msk;
-
-        info->xfer.rx_cnt = current_cnt;
-
-        if(current_cnt == total_cnt)
-        {
-            // Clear RX busy flag and set receive transfer complete event
-            event |= ARM_USART_EVENT_RECEIVE_COMPLETE;
-
-            usart->reg->IER &= ~(USART_IER_RX_START_Msk      | \
-                                 USART_IER_RX_BREAK_DET_Msk  | \
-                                 USART_IER_RX_FRAME_ERR_Msk  | \
-                                 USART_IER_RX_PARITY_ERR_Msk | \
-                                 USART_IER_RXFIFO_WL_Msk     | \
-                                 USART_IER_RXFIFO_TO_Msk     | \
-                                 USART_IER_RXFIFO_OF_Msk);
-
-            info->rx_status.rx_busy = 0U;
-        }
 
     }
 

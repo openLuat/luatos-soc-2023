@@ -125,6 +125,18 @@ typedef enum atecMoSmsType_enum
 #define ATC_ADDR_TYPE_OCT_MAX                   255
 #define ATC_ADDR_TYPE_OCT_DEFAULT               PSIL_SMS_TOA_NUMBER_UNKNOWN
 
+
+/* AT+CMGC */
+#define ATC_CMGC_0_FO_VAL_MIN                   0
+#define ATC_CMGC_0_FO_VAL_MAX                   255
+#define ATC_CMGC_1_CT_VAL_MIN                   0
+#define ATC_CMGC_1_CT_VAL_MAX                   255
+#define ATC_CMGC_2_PID_VAL_MIN                  0
+#define ATC_CMGC_2_PID_VAL_MAX                  255
+#define ATC_CMGC_3_MN_VAL_MIN                   0
+#define ATC_CMGC_3_MN_VAL_MAX                   255
+
+
 /* AT+CMGW for PDU mode */
 #define ATC_CMGW_0_PDU_LENGTH_MIN               1
 #define ATC_CMGW_0_PDU_LENGTH_MAX               PSIL_SMS_MAX_PDU_SIZE

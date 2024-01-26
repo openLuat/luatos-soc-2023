@@ -134,6 +134,8 @@
 #define PSIL_SMS_INVALID_MEM_INDEX              255
 #define PSIL_BITS_NUMBER_OF_DIGIT               4
 
+#define PSIL_SMS_MAX_CMD_SIZE                   157 * 2
+
 /*
  * Service Centre address, refer to TS-24.011 8.2.5.1
  * +----------------+
@@ -194,6 +196,9 @@
 #define PSIL_MSG_VP_DEFAULT             ((UINT8)167)        /* 24 hours - refer to TS-23.040 */
 #define PSIL_MSG_PID_DEFAULT            ((UINT8)0)          /* Refer to TS-23.040 9.2.3.9 */
 #define PSIL_MSG_REF_DEFAULT            ((UINT8)0)          /* Reference = 0 */
+#define PSIL_MSG_FO_COMMAND_DEFAULT     ((UINT8)0x02)
+#define PSIL_MSG_CT_DEFAULT             ((UINT8)0)
+#define PSIL_MSG_MN_DEFAULT             ((UINT8)0)
 
 /*
  * SMS-SUBMIT T-PDU format/basic element, refer to TS-23.040 9.2.2.2
@@ -476,6 +481,11 @@ typedef struct PsilSmsSendInfo_Tag
     UINT8               maxNum;
     UINT8               seqNum;
 
+    UINT8               fo;
+    UINT8               ct;
+    UINT8               pid;
+    UINT8               mn;
+
     UINT16              inputOffset;
     BOOL                bCommand;       /* Whether is AT+CMGC command */
     UINT8               gardTimerSec;   /* Guard timer for sending SMS */
@@ -692,7 +702,8 @@ UINT16 smsPduDecodeUserData(UINT8                 *pUserData,
                             UINT16                *pSmsLength,
                             UINT16                dstBufSize,
                             UdhIe                 *pUdhIe);
-
+CmsRetId smsSubmitText2Pdu(PsilSmsSendInfo *pSendInfo, CmiSmsPdu *pCmiTpdu);
+CmsRetId smsDeliverText2Pdu(PsilSmsSendInfo *pDeliverInfo, CmiSmsPdu *pCmiTpdu);
 CmsRetId smsSendSms(UINT8 smsFormat, PsilSmsSendInfo *pSendInfo);
 CmsRetId smsWriteSms(UINT8 smsFormat, PsilSmsWriteInfo *pWriteInfo, UINT8 smsMemType, UINT8* memIndex);
 CmsRetId smsSendStoredSms(UINT32 atHandle, BOOL daPresent, CmiSmsAddressInfo *pDestAddrInfo, PsilSmsStoreItemInfo *pSendInfo, UINT8 gardTimerSec);
@@ -734,6 +745,7 @@ BOOL SmsSubmitRptPduToText(AtecSubmitRptSmsInfo *pSubmitRptInfo, CmiSmsPdu *pPdu
 void smsPduDecodeCbsDCS(UINT8 *pduData, UINT8 *pOffset, PsilCbsDcsInfo *pDcsInfo);
 void smsSendNewMsgRsp(UINT32 reqHandle, UINT8 smsId, UINT32 reply, UINT8 tpCause, UINT16 ackPduLen, UINT8 *ackPdu);
 CmsRetId smsSrvCenterAddrToText(CHAR *smscBuf, UINT8 smscBufLen, CmiSmsAddressInfo *scAddrInfo);
+BOOL SmsTimeStrToSemiOctArray(CHAR *pTimeStr, UINT8 *pSemiOctArray);
 
 #endif
 

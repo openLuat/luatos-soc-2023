@@ -2,19 +2,27 @@
  *                    INCLUDES                                                *
  *----------------------------------------------------------------------------*/
 #include <stdint.h>
-#include <stdio.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include "mem_map.h"
 #include "cmsis_os2.h"
+#include "sctdef.h"
 #include "nvram.h"
 #include "fota_sal.h"
 #include "fota_utils.h"
 #include "fota_chksum.h"
+#include "fota_custom.h"
 #include "fota_nvm.h"
 
 /*----------------------------------------------------------------------------*
  *                    MACROS                                                  *
  *----------------------------------------------------------------------------*/
+#ifdef FEATURE_BOOTLOADER_PROJECT_ENABLE
+#define FOTA_IS_CPFLASH_DISABLED()     1
+#else
+#define FOTA_IS_CPFLASH_DISABLED()     apmuIsCpSleeped()
+#endif
+
 #define FOTA_NVM_SECTOR_SIZE           FOTA_BUF_SIZE_4K
 #define FOTA_NVM_BLOCK_SIZE            FOTA_BUF_SIZE_32K
 
@@ -46,11 +54,7 @@
 
 #define FOTA_NVM_DELTA_BACKUP_ADDR     (FOTA_NVM_DELTA_ADDR + FOTA_NVM_DELTA_DOWNLOAD_SIZE)
 #if defined CHIP_EC718 || defined CHIP_EC716
-#if defined TYPE_EC718P
-#define FOTA_NVM_DELTA_BACKUP_SIZE     (FOTA_BUF_SIZE_1K * 96)
-#else
 #define FOTA_NVM_DELTA_BACKUP_SIZE     (FOTA_BUF_SIZE_1K * 44)
-#endif
 #else
 #define FOTA_NVM_DELTA_BACKUP_SIZE     (FOTA_BUF_SIZE_32K)
 #endif
@@ -60,11 +64,7 @@
 #define FOTA_NVM_REAL_BACKUP_ADDR      (FOTA_NVM_DELTA_BACKUP_ADDR)
 #define FOTA_NVM_REAL_BACKUP_SIZE      (FOTA_NVM_DELTA_BACKUP_SIZE + FOTA_NVM_BACKUP_MUX_SIZE)
 #if defined CHIP_EC718 || defined CHIP_EC716
-#if defined TYPE_EC718P
-#define FOTA_NVM_BACKUP_MUX_SIZE       0
-#else
 #define FOTA_NVM_BACKUP_MUX_SIZE       (NVRAM_PHYSICAL_SIZE)
-#endif
 #else
 #define FOTA_NVM_BACKUP_MUX_SIZE       0
 #endif
@@ -655,7 +655,7 @@ static int32_t fotaNvmCheckDeltaState(FotaDefChkDeltaState_t *chkDelta)
     return FOTA_EOK;
 }
 
-PLAT_BL_CIRAM_FLASH_TEXT static int32_t fotaIsImageIdentical(FotaDefIsImageIdentical_t *isIdent)
+PLAT_BL_CIRAM_FLASH_TEXT static int32_t fotaNvmIsImageIdentical(FotaDefIsImageIdentical_t *isIdent)
 {
     memset(gFotaHash, 0, FOTA_SHA256_HASH_LEN);
 
@@ -685,9 +685,11 @@ PLAT_BL_CIRAM_FLASH_TEXT static int32_t fotaIsImageIdentical(FotaDefIsImageIdent
 static int32_t fotaNvmCheckBaseImage(FotaDefChkBaseImage_t *chkImage)
 {
     uint32_t                  offset = 0;
+    uint16_t                bmFwAttr = 0;
     CustFotaParHdr_t            parh;
     CustFotaPkgHdr_t            pkgh;
     FotaDefIsImageIdentical_t  ident;
+    FotaDefChkBootState_t       boot;
 
     if(chkImage == NULL) return FOTA_EARGS;
 
@@ -716,10 +718,20 @@ static int32_t fotaNvmCheckBaseImage(FotaDefChkBaseImage_t *chkImage)
         fotaNvmRead(FOTA_NVM_ZONE_DELTA, offset, (uint8_t*)&pkgh, sizeof(CustFotaPkgHdr_t));
         if(!pkgh.pkgLen) return FOTA_EPERM;
 
+        bmFwAttr |= (1 << pkgh.fwAttr);
+
         ident.zid  = FOTA_convToZoneId(pkgh.fwAttr);
         ident.size = pkgh.baseFwSize;
         ident.hash = pkgh.baseFwHash;
-        if(FOTA_EOK != fotaIsImageIdentical(&ident)) return FOTA_EFWNIDENT;
+        if(FOTA_EOK != fotaNvmIsImageIdentical(&ident)) return FOTA_EFWNIDENT;
+    }
+
+    /* check system head bin exists or not if security boot is enabled! */
+    fotaDoExtension(FOTA_DEF_CHK_BOOT_STATE, &boot);
+    if(boot.isSigned && (!parh.psigned || !(bmFwAttr & (1 << FOTA_FA_SYSH))))
+    {
+        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_CHK_IMAGE_4, P_WARNING, "image: no signed bin(0x%x) err, psigned(%d)!\n", bmFwAttr, parh.psigned);
+        return FOTA_EPERM;
     }
 
     chkImage->isMatched = 1;
@@ -1085,7 +1097,7 @@ int32_t fotaNvmDoExtension(uint32_t flags, void *args)
             retCode = fotaNvmCheckBaseImage((FotaDefChkBaseImage_t*)args);
             break;
         case FOTA_DEF_IS_IMAGE_IDENTICAL:
-            retCode = fotaIsImageIdentical((FotaDefIsImageIdentical_t*)args);
+            retCode = fotaNvmIsImageIdentical((FotaDefIsImageIdentical_t*)args);
             break;
         case FOTA_DEF_SET_DOWNLOAD_OVER:
             break;

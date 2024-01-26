@@ -1382,6 +1382,46 @@ IRQ_HANDLE:
 #endif
     }
 
+    // RX water level
+    if(isr_reg & USART_ISR_RXFIFO_WL_Msk)
+    {
+        current_cnt = info->xfer.rx_cnt;
+        total_cnt = info->xfer.rx_num;
+
+        left_to_recv = total_cnt - current_cnt;
+
+        bytes_in_fifo = lpusart->core_regs->FSR >> USART_FSR_RXFIFO_WL_Pos;
+
+        // leave at least one byte in fifo to trigger timeout interrupt
+        i = bytes_in_fifo - 1;
+
+        if(i == 0)
+            i = 1;
+
+        i = MIN(i, left_to_recv);
+
+        while(i--)
+        {
+            info->xfer.rx_buf[current_cnt++] = lpusart->core_regs->RDR;
+        }
+
+        // The clear action has no effect when enters irqHandler since the water level holds, let's clear twice here since we've moved data from FIFO
+        lpusart->core_regs->ICR = USART_ICR_RXFIFO_WL_Msk;
+
+        info->xfer.rx_cnt = current_cnt;
+
+        if(current_cnt == total_cnt)
+        {
+            // Clear RX busy flag and set receive transfer complete event
+            event |= ARM_USART_EVENT_RECEIVE_COMPLETE;
+
+            lpusart->core_regs->IER &= ~(LPUSART_RX_COMMON_IRQ_ENABLE_MASK);
+
+            info->rx_status.rx_busy = 0U;
+        }
+
+    }
+
     // RX timeout, only valid during auto baud
     if(isr_reg & USART_ISR_RX_TO_Msk)
     {
@@ -1469,46 +1509,6 @@ IRQ_HANDLE:
         }
 
         info->rx_status.rx_busy = 0U;
-    }
-
-    // RX water level
-    if(isr_reg & USART_ISR_RXFIFO_WL_Msk)
-    {
-        current_cnt = info->xfer.rx_cnt;
-        total_cnt = info->xfer.rx_num;
-
-        left_to_recv = total_cnt - current_cnt;
-
-        bytes_in_fifo = lpusart->core_regs->FSR >> USART_FSR_RXFIFO_WL_Pos;
-
-        // leave at least one byte in fifo to trigger timeout interrupt
-        i = bytes_in_fifo - 1;
-
-        if(i == 0)
-            i = 1;
-
-        i = MIN(i, left_to_recv);
-
-        while(i--)
-        {
-            info->xfer.rx_buf[current_cnt++] = lpusart->core_regs->RDR;
-        }
-
-        // The clear action has no effect when enters irqHandler since the water level holds, let's clear twice here since we've moved data from FIFO
-        lpusart->core_regs->ICR = USART_ICR_RXFIFO_WL_Msk;
-
-        info->xfer.rx_cnt = current_cnt;
-
-        if(current_cnt == total_cnt)
-        {
-            // Clear RX busy flag and set receive transfer complete event
-            event |= ARM_USART_EVENT_RECEIVE_COMPLETE;
-
-            lpusart->core_regs->IER &= ~(LPUSART_RX_COMMON_IRQ_ENABLE_MASK);
-
-            info->rx_status.rx_busy = 0U;
-        }
-
     }
 
     // CTS state changed

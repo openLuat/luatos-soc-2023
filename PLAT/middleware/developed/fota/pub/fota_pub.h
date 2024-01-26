@@ -180,7 +180,8 @@ typedef enum
     FOTA_DEF_CLOSING_DFU,
     FOTA_DEF_ADJ_ZONE_SIZE,
     FOTA_DEF_SET_XOBJ_ZONE,
-    FOTA_DEF_CHK_HLS_STATE
+    FOTA_DEF_CHK_HLS_STATE,
+    FOTA_DEF_CHK_BOOT_STATE
 }FotaDoExtensionFlags_e;
 
 /* FOTA_DEF_US_DELAY */
@@ -323,6 +324,12 @@ typedef struct
     uint8_t  rsvd[3];
 }FotaDefChkHlsState_t;
 
+/* FOTA_DEF_CHK_BOOT_STATE */
+typedef struct
+{
+    uint8_t  isSigned; /* 0/1: security boot or not? */
+    uint8_t  rsvd[3];
+}FotaDefChkBootState_t;
 
 /*
  * definition of 'pmagic': ec-delta/diff-fw
@@ -338,12 +345,14 @@ typedef struct
 
 typedef struct
 {
-    uint8_t   pmagic[2];  /* 0xEC,0xDF */
-    uint16_t  rsvd0;
-    uint16_t  pcap   :3;  /* fota capacity(total size of images) in every single patching, 2^pcap(MB) */
-    uint16_t  rsvdBit:13;
+    uint8_t   pmagic[2];   /* 0xEC,0xDF */
+    uint8_t   rsvd0;
+    uint8_t   rsvdBit0:7;
+    uint8_t   psigned :1;  /* 0/1: is system signed bin included or not? */
+    uint16_t  pcap    :3;  /* fota capacity(total size of images) in every single patching, 2^pcap(MB) */
+    uint16_t  rsvdBit1:13;
     uint16_t  rsvd1;
-    uint32_t  parLen;     /* including hdr len */
+    uint32_t  parLen;      /* including hdr len */
     uint8_t   parHash[FOTA_SHA256_HASH_LEN];
 #if !defined(__CC_ARM)
     uint8_t   retention[0];

@@ -19,7 +19,7 @@ SECTIONS
 {
   .vector BOOTLOADER_FLASH_LOAD_ADDR:
   {
-    *(.isr_vector)
+    KEEP(*(.isr_vector))
   } >FLASH_AREA
   
   .unload_uncompress_flashcode :
