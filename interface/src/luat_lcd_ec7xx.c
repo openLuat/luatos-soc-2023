@@ -4,9 +4,10 @@
 #include "driver_usp.h"
 #include "driver_gpio.h"
 #include "cmsis_gcc.h"
-
+#include "luat_mem.h"
 typedef struct
 {
+	uint8_t mem_type;
 	uint64_t wait_bytes;
 	uint64_t done_bytes;
 	HANDLE task_handle;
@@ -80,7 +81,7 @@ static void prvLCD_Task(void* params)
 				luat_lcd_IF_draw(draw->conf, draw->x1, draw->y1, draw->x2, draw->y2, data);
 			}
 			size = draw->size;
-			free(draw);
+			luat_heap_opt_free(g_s_lcd.mem_type, draw);
 			if (!is_static_buf)
 			{
 				g_s_lcd.done_bytes += size;
@@ -106,6 +107,7 @@ void luat_lcd_service_init(uint32_t pro)
 {
 	if (!g_s_lcd.task_handle)
 	{
+		g_s_lcd.mem_type = LUAT_HEAP_AUTO;
 		g_s_lcd.task_handle = create_event_task(prvLCD_Task, NULL, 2048, pro, 0, "lcdSer");
 	}
 }
@@ -121,13 +123,13 @@ int luat_lcd_service_draw(luat_lcd_conf_t* conf, int16_t x1, int16_t y1, int16_t
 	uint32_t size = (x2 - x1 + 1) * (y2 - y1 + 1) * sizeof(luat_color_t);
 	if (is_static_buf)
 	{
-		draw = malloc(sizeof(lcd_service_draw_t));
+		draw = luat_heap_opt_malloc(g_s_lcd.mem_type, sizeof(lcd_service_draw_t));
 		if (!draw) return -ERROR_NO_MEMORY;
 		draw->static_buf = data;
 	}
 	else
 	{
-		draw = malloc(sizeof(lcd_service_draw_t) + size);
+		draw = luat_heap_opt_malloc(g_s_lcd.mem_type, sizeof(lcd_service_draw_t) + size);
 		if (!draw) return -ERROR_NO_MEMORY;
 		memcpy(draw->data, data, size);
 		draw->static_buf = 0;
@@ -142,6 +144,16 @@ int luat_lcd_service_draw(luat_lcd_conf_t* conf, int16_t x1, int16_t y1, int16_t
 	send_event_to_task(g_s_lcd.task_handle, NULL, SERVICE_LCD_DRAW, (uint32_t)draw, 0, 0, 0);
 
 	return ERROR_NONE;
+}
+
+int luat_lcd_service_set_mem_type(uint8_t type)
+{
+	if (type < LUAT_HEAP_AUTO || type > LUAT_HEAP_PSRAM)
+	{
+		return -1;
+	}
+	g_s_lcd.mem_type = type;
+	return 0;
 }
 
 uint32_t luat_lcd_service_cache_len(void)

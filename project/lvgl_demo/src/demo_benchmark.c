@@ -179,6 +179,7 @@ void lvgl_init(void)
 #endif
 	luat_gpio_cfg_t gpio_cfg;
 	luat_lcd_service_init(60);
+	luat_lcd_service_set_mem_type(LUAT_HEAP_SRAM);
 	luat_rtos_task_create(&g_s_lvgl.h_lvgl_task, 8192, 90, "lvgl", lvgl_task, NULL, 16);
 	g_s_lvgl.h_lvgl_timer = luat_create_rtos_timer(lvgl_flush_timer_cb, NULL, NULL);
 	luat_gpio_set_default_cfg(&gpio_cfg);

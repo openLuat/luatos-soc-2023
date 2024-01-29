@@ -11,7 +11,7 @@ target(TARGET_NAME)
     -- 此demo默认添加了benchmark和widgets demo，且在lv_conf.h中已打开对应功能宏
     -- 默认演示benchmark demo
     -- 若需使用其他demo，请将下面一行代码注释，自行添加源文件，并在lv_conf.h内修打开对应功能宏
-    add_files("./src/show.c",{public = true})
+    add_files("./src/demo_benchmark.c",{public = true})
 
     -- 将下面注释打开并将上一行代码注释，即可演示widgets demo
     -- add_files("./src/demo_widgets.c",{public = true})

@@ -30,10 +30,10 @@
 
 //如果不使用低功耗，或者硬件上已经有配了上下拉电阻，可以不使用AONIO
 #define SPI_LCD_RST_PIN HAL_GPIO_36
-#define SPI_LCD_BL_PIN  HAL_GPIO_14	//不考虑低功耗的话，BL也可以省掉
+#define SPI_LCD_BL_PIN  HAL_GPIO_25	//不考虑低功耗的话，BL也可以省掉
 
-#define TP_RST_PIN  HAL_GPIO_6
-#define TP_INT_PIN  HAL_GPIO_7
+#define TP_RST_PIN  HAL_GPIO_24
+#define TP_INT_PIN  HAL_GPIO_22
 
 #define SPI_LCD_W	320
 #define SPI_LCD_H	480
@@ -43,7 +43,7 @@
 
 #define SPI_LCD_RAM_CACHE_MAX	(SPI_LCD_W * SPI_LCD_H)
 #define LVGL_FLUSH_TIME	(30)
-#define LVGL_FLUSH_BUF_LINE	(20) //buf开到20行大小，也可以自行修改
+#define LVGL_FLUSH_BUF_LINE	(100) //buf开到100行大小，也可以自行修改，buf开得越大，演示越流畅，但剩余内存也越小
 #define LVGL_FLUSH_WAIT_TIME (5)
 
 enum
@@ -160,9 +160,11 @@ static void tp_task(void *param)
 	luat_gpio_open(&cfg);
 	cfg.pin = TP_INT_PIN;
 	cfg.mode = LUAT_GPIO_IRQ;
-	cfg.pull = LUAT_GPIO_PULLDOWN;
-	cfg.irq_type = LUAT_GPIO_RISING_IRQ;
+	cfg.pull = LUAT_GPIO_PULLUP;
+	cfg.irq_type = LUAT_GPIO_FALLING_IRQ;
 	cfg.irq_cb = tp_int_cb;
+	luat_mcu_iomux_ctrl(LUAT_MCU_PERIPHERAL_I2C, I2C_ID, 23, 2, 0);
+    luat_mcu_iomux_ctrl(LUAT_MCU_PERIPHERAL_I2C, I2C_ID, 24, 2, 0);
 	luat_gpio_open(&cfg);
 	luat_gpio_set(TP_RST_PIN, 0);
 	luat_rtos_task_sleep(10);
@@ -264,7 +266,6 @@ static void lvgl_draw_init(void)
 static void lvgl_task(void *param)
 {
 	luat_event_t event;
-	luat_debug_set_fault_mode(LUAT_DEBUG_FAULT_HANG);
 	lvgl_lcd_init();
 	lv_init();
 	lvgl_draw_init();
@@ -288,7 +289,10 @@ void lvgl_init(void)
 	g_s_lvgl.h_lvgl_timer = luat_create_rtos_timer(lvgl_flush_timer_cb, NULL, NULL);
 	luat_gpio_set_default_cfg(&gpio_cfg);
 	gpio_cfg.pin = SPI_LCD_RST_PIN;
+	gpio_cfg.mode = LUAT_GPIO_OUTPUT;
+	gpio_cfg.output_level = 1;
 	luat_gpio_open(&gpio_cfg);
+	gpio_cfg.output_level = 0;
 	gpio_cfg.pin = SPI_LCD_BL_PIN;
 	luat_gpio_open(&gpio_cfg);
 }
