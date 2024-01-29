@@ -83,6 +83,12 @@ option("lspd_mode")
 option_end()
 add_options("lspd_mode")
 
+option("denoise_force")
+    set_default("disable")
+    set_showmenu(true)
+    set_description("Enable or disable denoise_force, force to use audio module to support noise reduction ,disable is auto detect ")
+option_end()
+add_options("denoise_force")
 
 if chip_target then
     CHIP = "ec718"

@@ -2,15 +2,17 @@
 local SDK_PATH = os.projectdir()
 local USER_PROJECT_NAME = USER_PROJECT_NAME
 local LIB_PS_PLAT = nil
-if has_config("chip_target") and has_config("lspd_mode") then 
+if has_config("chip_target") and has_config("lspd_mode") and has_config("denoise_force") then 
     chip_target = get_config("chip_target") 
     LIB_PS_PLAT = "full"
     if get_config("lspd_mode")=="enable" then
         if chip_target == "ec718pv" then
-        LIB_FW = "audio"
-        LIB_PS_PLAT = "ims"
+            LIB_FW = "audio"
+            LIB_PS_PLAT = "ims"
+        elseif chip_target == "ec718p" and get_config("lspd_mode")=="enable" then
+            LIB_FW = "audio"
         else 
-        LIB_PS_PLAT = "oc"
+            LIB_PS_PLAT = "oc"
         end
     else 
         if chip_target == "ec718p" or chip_target == "ec718e" then
@@ -18,6 +20,8 @@ if has_config("chip_target") and has_config("lspd_mode") then
         elseif chip_target == "ec718pv" then
             LIB_FW = "audio"
             LIB_PS_PLAT = "ims"
+        elseif chip_target == "ec718p" or chip_target == "ec718e" and get_config("lspd_mode")=="enable" then
+            LIB_FW = "audio"
         else
             add_defines("MID_FEATURE_MODE")
             LIB_PS_PLAT = "mid"
