@@ -977,7 +977,7 @@ void luat_mobile_get_last_nas_info(uint8_t *type, uint16_t *cause, uint16_t *phy
 }
 //VOLTE相关
 
-#if defined (FEATURE_AMR_CP_ENABLE) || defined (FEATURE_VEM_CP_ENABLE)
+#if defined FEATURE_IMS_ENABLE
 
 void luat_mobile_get_last_call_num(char *buf, uint8_t buf_len)
 {
@@ -1020,5 +1020,35 @@ int luat_mobile_speech_init(uint8_t multimedia_id,void *callback)
 int luat_mobile_speech_upload(uint8_t *data, uint32_t len)
 {
 	return soc_mobile_speech_upload(data, len);
+}
+#else
+void luat_mobile_get_last_call_num(char *buf, uint8_t buf_len)
+{
+
+}
+
+int luat_mobile_make_call(uint8_t sim_id, char *number, uint8_t len)
+{
+	return -1;
+}
+
+void luat_mobile_hangup_call(uint8_t sim_id)
+{
+
+}
+
+int luat_mobile_answer_call(uint8_t sim_id)
+{
+	return -1;
+}
+
+int luat_mobile_speech_init(uint8_t multimedia_id,void *callback)
+{
+	return -1;
+}
+
+int luat_mobile_speech_upload(uint8_t *data, uint32_t len)
+{
+	return -1;
 }
 #endif
