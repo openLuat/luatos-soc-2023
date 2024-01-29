@@ -43,11 +43,12 @@
 #define CAMERA_TEST_CAPTURE		//按下KEY2（GPIO_20）摄像拍照并转成jpeg图片输出给电脑，
 //#define CAMERA_TEST_VIDEO		//摄像从USB串口输出到电脑
 //#define CAMERA_TEST_ONLY		//只测试摄像头没有输出足够的数据
+//#define LCD_ENABLE
+
 #ifdef CAMERA_TEST_QRCODE
 #undef CAMERA_TEST_CAPTURE
 #undef CAMERA_TEST_VIDEO
 #undef CAMERA_TEST_ONLY
-//#define LCD_ENABLE
 #endif
 
 #ifdef CAMERA_TEST_CAPTURE
@@ -55,7 +56,6 @@
 #undef CAMERA_TEST_VIDEO
 #undef CAMERA_TEST_ONLY
 #define USB_UART_ENABLE
-//#define LCD_ENABLE
 #endif
 #ifdef CAMERA_TEST_VIDEO
 #undef CAMERA_TEST_QRCODE
@@ -750,7 +750,7 @@ static camera_reg_t g_s_gc032a_reg_table[] =
 };
 
 #ifdef LCD_ENABLE
-#if 0
+
 #define SPI_LCD_BUS_ID	0
 #define SPI_LCD_SPEED	25600000
 //#define SPI_LCD_CS_PIN	HAL_GPIO_24
@@ -768,7 +768,6 @@ static camera_reg_t g_s_gc032a_reg_table[] =
 #define SPI_LCD_X_OFFSET	0
 #define SPI_LCD_Y_OFFSET	0
 #define SPI_LCD_RAM_CACHE_MAX	(SPI_LCD_W * SPI_LCD_H * 2)
-
 
 static spi_lcd_ctrl_t g_s_spi_lcd =
 {
@@ -825,7 +824,6 @@ static int luat_spi_lcd_init(uint8_t *data, uint32_t len)
 	spi_lcd_init_gc9306x(&g_s_spi_lcd);
 }
 
-#endif
 #endif
 
 #ifdef USB_UART_ENABLE

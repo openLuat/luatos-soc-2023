@@ -69,10 +69,16 @@ if has_config("chip_target") and has_config("lspd_mode") and has_config("denoise
             add_defines("MID_FEATURE_MODE")
             LIB_PS_PLAT = "mid"
             LIB_FW = "wifi"
+            
         end
     end
+    if LIB_PS_PLAT == "mid" then
+        add_defines("DHCPD_ENABLE_DEFINE=0")
+    else 
+        add_defines("DHCPD_ENABLE_DEFINE=1")
+    end
 
-    add_includedirs("$(projectdir)/PLAT/tools/"..(chip_target=="ec718e"and"ec718p"or chip_target))
+    add_includedirs("$(projectdir)/PLAT/tools/"..(chip_target=="ec718e"and"ec718p"or chip_target)..(LIB_PS_PLAT=="mid"and"-mid"or""))
 
 end
 
@@ -111,7 +117,6 @@ add_defines("LUAT_BSP_VERSION=\""..LUAT_BSP_VERSION.."\"",
             "LUAT_EC7XX_CSDK",
             "LUAT_USE_STD_STRING",
             "LUAT_LOG_NO_NEWLINE",
-            "DHCPD_ENABLE_DEFINE=1",
             "FEATURE_PS_SMS_AT_ENABLE",
             "DEBUG_LOG_HEADER_FILE=\"debug_log_ap.h\"")
 add_defines("sprintf=sprintf_",
@@ -236,7 +241,7 @@ target(USER_PROJECT_NAME..".elf")
     if chip_target then
         add_linkdirs("$(projectdir)/PLAT/prebuild/PS/lib/gcc/"..(chip_target=="ec718e"and"ec718p"or chip_target):sub(1,6).."/"..LIB_PS_PLAT)
         add_linkdirs("$(projectdir)/PLAT/prebuild/PLAT/lib/gcc/"..(chip_target=="ec718e"and"ec718p"or chip_target):sub(1,6).."/"..LIB_PS_PLAT)
-        add_linkdirs("$(projectdir)/PLAT/libs/"..(chip_target=="ec718e"and"ec718p"or chip_target))
+        add_linkdirs("$(projectdir)/PLAT/libs/"..(chip_target=="ec718e"and"ec718p"or chip_target)..(LIB_PS_PLAT=="mid"and"-mid"or""))
         if chip_target=="ec718pv" then
             add_linkgroups("imsnv","ims", {whole = true})
         end
@@ -248,7 +253,7 @@ target(USER_PROJECT_NAME..".elf")
 
     add_linkgroups("ps","psl1","psif","psnv","tcpipmgr","lwip","osa","ccio","deltapatch",
                     "middleware_ec","middleware_ec_private","driver_private","usb_private",
-                    "startup","core_airm2m","lzma","fota","csdk",{whole = true})
+                    "startup","core_airm2m","lzma","fota","csdk",{whole = true,group = true})
 
     add_linkgroups(USER_PROJECT_NAME, {whole = true})
 
