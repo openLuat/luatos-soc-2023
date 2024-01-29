@@ -9,8 +9,10 @@ if has_config("chip_target") and has_config("lspd_mode") and has_config("denoise
         if chip_target == "ec718pv" then
             LIB_FW = "audio"
             LIB_PS_PLAT = "ims"
-        elseif chip_target == "ec718p" and get_config("lspd_mode")=="enable" then
+            add_defines("FEATURE_AMR_CP_ENABLE","FEATURE_VEM_CP_ENABLE")
+        elseif chip_target == "ec718p" and get_config("denoise_force")=="enable" then
             LIB_FW = "audio"
+            add_defines("FEATURE_AMR_CP_ENABLE","FEATURE_VEM_CP_ENABLE")
         else 
             LIB_PS_PLAT = "oc"
         end
@@ -20,15 +22,14 @@ if has_config("chip_target") and has_config("lspd_mode") and has_config("denoise
         elseif chip_target == "ec718pv" then
             LIB_FW = "audio"
             LIB_PS_PLAT = "ims"
-        elseif chip_target == "ec718p" or chip_target == "ec718e" and get_config("lspd_mode")=="enable" then
+            add_defines("FEATURE_AMR_CP_ENABLE","FEATURE_VEM_CP_ENABLE")
+        elseif chip_target == "ec718p" or chip_target == "ec718e" and get_config("denoise_force")=="enable" then
             LIB_FW = "audio"
+            add_defines("FEATURE_AMR_CP_ENABLE","FEATURE_VEM_CP_ENABLE")
         else
             add_defines("MID_FEATURE_MODE")
             LIB_PS_PLAT = "mid"
         end
-    end
-    if chip_target == "ec718pv" then
-        add_defines("FEATURE_AMR_CP_ENABLE","FEATURE_VEM_CP_ENABLE")
     end
 end
 

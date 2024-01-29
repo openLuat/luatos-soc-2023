@@ -251,7 +251,7 @@
 #define LUAT_HEAP_SIZE (250*1024)
 #endif
 
-#if defined TYPE_EC718P && (defined (FEATURE_AMR_CP_ENABLE) || defined (FEATURE_VEM_CP_ENABLE))
+#if defined TYPE_EC718P && defined (FEATURE_IMS_ENABLE)
 #if LUAT_HEAP_SIZE > (160*1024)
 #undef LUAT_HEAP_SIZE
 #define LUAT_HEAP_SIZE (160*1024)
@@ -336,7 +336,7 @@
 #define LUAT_USE_HMETA 1
 #endif
 
-#if defined TYPE_EC718P && (defined (FEATURE_AMR_CP_ENABLE) || defined (FEATURE_VEM_CP_ENABLE))
+#if defined TYPE_EC718P && defined (FEATURE_IMS_ENABLE)
 #define LUAT_USE_VOLTE
 
 #undef LUAT_USE_LVGL
