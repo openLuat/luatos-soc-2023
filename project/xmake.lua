@@ -69,7 +69,6 @@ if has_config("chip_target") and has_config("lspd_mode") and has_config("denoise
             add_defines("MID_FEATURE_MODE")
             LIB_PS_PLAT = "mid"
             LIB_FW = "wifi"
-            
         end
     end
     if LIB_PS_PLAT == "mid" then
@@ -334,7 +333,7 @@ target(USER_PROJECT_NAME..".elf")
         os.cp("$(buildir)/"..USER_PROJECT_NAME.."/*.bin", out_path)
 		os.cp("$(buildir)/"..USER_PROJECT_NAME.."/*.map", out_path)
 		os.cp("$(buildir)/"..USER_PROJECT_NAME.."/*.elf", out_path)
-		os.cp("./PLAT/tools/"..(chip_target=="ec718e"and"ec718p"or chip_target).."/comdb.txt", out_path)
+		os.cp("./PLAT/tools/"..(chip_target=="ec718e"and"ec718p"or chip_target)..(LIB_PS_PLAT=="mid"and"-mid"or"").."/comdb.txt", out_path)
         os.cp("$(buildir)/"..USER_PROJECT_NAME.."/" .. USER_PROJECT_NAME .. ".bin", "$(buildir)/"..USER_PROJECT_NAME.."/ap.bin")
         ---------------------------------------------------------
         -------------- 这部分尚不能跨平台 -------------------------
@@ -422,8 +421,8 @@ target(USER_PROJECT_NAME..".elf")
             json.savefile(out_path.."/pack/info.json", info_table)
             os.cp(out_path.."/"..USER_PROJECT_NAME..".binpkg", out_path.."/pack")
             os.cp(out_path.."/"..USER_PROJECT_NAME..".elf", out_path.."/pack")
-            os.cp("./PLAT/tools/"..(chip_target=="ec718e"and"ec718p"or chip_target).."/comdb.txt", out_path.."/pack")
-            os.cp(out_path.."/".."mem_map.txt", out_path.."/pack")
+            os.cp(out_path.."/comdb.txt", out_path.."/pack")
+            os.cp(out_path.."/mem_map.txt", out_path.."/pack")
             os.cp("$(projectdir)/project/luatos/inc/luat_conf_bsp.h", out_path.."/pack")
             local ret = archive.archive(out_path.."/"..USER_PROJECT_NAME..".7z", out_path.."/pack/*",options)
             if not ret then
@@ -441,8 +440,8 @@ target(USER_PROJECT_NAME..".elf")
             json.savefile(out_path.."/pack/info.json", info_table)
             os.cp(out_path.."/"..USER_PROJECT_NAME..".binpkg", out_path.."/pack")
             os.cp(out_path.."/"..USER_PROJECT_NAME..".elf", out_path.."/pack")
-            os.cp("./PLAT/tools/"..(chip_target=="ec718e"and"ec718p"or chip_target).."/comdb.txt", out_path.."/pack")
-            os.cp(out_path.."/".."mem_map.txt", out_path.."/pack")
+            os.cp(out_path.."/comdb.txt", out_path.."/pack")
+            os.cp(out_path.."/mem_map.txt", out_path.."/pack")
             local ret = archive.archive(out_path.."/"..USER_PROJECT_NAME..".7z", out_path.."/pack/*",options)
             if not ret then
                 print("pls install p7zip-full in linux/mac , or 7zip in windows.")
