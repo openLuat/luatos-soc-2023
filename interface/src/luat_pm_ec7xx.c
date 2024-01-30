@@ -96,6 +96,13 @@ int luat_pm_dtimer_check(int id) {
     return slpManDeepSlpTimerIsRunning(id);
 }
 
+uint32_t luat_pm_dtimer_remain(int id){
+    if (id < 0 || id > DEEPSLP_TIMER_ID6) {
+        return -1;
+    }
+	return slpManDeepSlpTimerRemainMs(id);
+}
+
 int luat_pm_last_state(int *lastState, int *rtcOrPad) {
     *lastState = firstSlpstate;
     *rtcOrPad = wakeupSrc;
