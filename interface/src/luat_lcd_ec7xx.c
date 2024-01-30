@@ -7,10 +7,10 @@
 #include "luat_mem.h"
 typedef struct
 {
-	uint8_t mem_type;
 	uint64_t wait_bytes;
 	uint64_t done_bytes;
 	HANDLE task_handle;
+	uint8_t mem_type;
 }lcd_service_t;
 
 static lcd_service_t g_s_lcd;
