@@ -175,7 +175,11 @@ void luat_pm_init(void) {
         firstSlpstate = LUAT_PM_SLEEP_MODE_NONE;
         LLOGI("poweron: Power/Reset");
     }
+#if defined TYPE_EC718P
     apmuSetDeepestSleepMode(AP_STATE_HIBERNATE);
+#else
+    apmuSetDeepestSleepMode(AP_STATE_SLEEP2);
+#endif
     slpManRegisterUsrSlpDepthCb(luat_user_slp_state);
 
 }
