@@ -52,6 +52,7 @@ if has_config("chip_target") and has_config("lspd_mode") and has_config("denoise
         elseif chip_target == "ec718p" and get_config("denoise_force")=="enable" then
             LIB_FW = "audio"
             add_defines("FEATURE_AMR_CP_ENABLE","FEATURE_VEM_CP_ENABLE")
+			LIB_PS_PLAT = "oc"
         else 
             LIB_PS_PLAT = "oc"
         end

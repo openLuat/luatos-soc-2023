@@ -62,6 +62,21 @@ void luat_audio_play_file_default_fun(void *param);
 void luat_audio_play_tts_default_fun(void *param);
 
 /**
+ * @brief 音频播放初始化，可以选择是否启用TTS，文件播放功能，用来节省flash空间
+ *
+ * @param event_cb 播放时event回调函数
+ * @param data_cb 数据解码回调函数，如果是直接播放原始数据流就不会用到
+ * @param play_file_fun 播放文件的具体处理函数，选择luat_audio_play_file_default_fun进行处理，或者写NULL不启用播放文件的功能
+ * @param play_tts_fun 播放TTS的具体处理函数，选择luat_audio_play_tts_default_fun进行处理，或者写NULL不启用播放TTS的功能
+ * @param user_param 回调函数的用户参数
+ */
+void luat_audio_play_global_init(
+		audio_play_event_cb_fun_t event_cb,
+		audio_play_data_cb_fun_t data_cb,
+		audio_play_default_fun_t play_file_fun,
+		audio_play_default_fun_t play_tts_fun,
+		void *user_param);
+/**
  * @brief 音频播放初始化，可以选择是否启用TTS，文件播放功能，用来节省flash空间，可以配置audio任务优先级
  *
  * @param event_cb 播放时event回调函数
@@ -184,6 +199,9 @@ void *luat_audio_play_get_stream(uint8_t multimedia_id);
  * @return onoff =0允许结束 其他不允许结束
  */
 void luat_audio_play_set_user_lock(uint8_t multimedia_id, uint8_t onoff);
-
+void luat_audio_inter_amr_init(uint8_t is_wb, uint8_t quality);
+int luat_audio_inter_amr_encode(const uint16_t *pcm_buf, uint8_t *amr_buf, uint8_t *amr_len);
+int luat_audio_inter_amr_decode(uint16_t *pcm_buf, const uint8_t *amr_buf, uint8_t *amr_len);
+void luat_audio_inter_amr_deinit(void);
 /**@}*/
 #endif

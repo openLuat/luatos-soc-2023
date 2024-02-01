@@ -40,7 +40,27 @@
 #include "driver_usp.h"
 #include "luat_fs.h"
 #include "luat_audio_play.h"
+#include "ccio_misc.h"
+#include "hal_voice_eng.h"
+#include "hal_voice_eng_mem.h"
 
+typedef struct
+{
+	HalVoiceEncodeReq encode_req;
+	HalVoiceDecodeReq decode_req;
+	HalVoiceEncodeCnf encode_cnf;
+	HalVoiceDecodeCnf decode_cnf;
+	uint16_t *bit_table;
+	uint8_t *byte_table;
+	uint8_t max_frame_type;
+	uint8_t wait_flag;
+}ec7xx_voice_eng_ctrl_t;
+static __ALIGNED(4) PS_FM_VOICE_NOINIT uint8_t voice_pcm[640];
+static __ALIGNED(4) PS_FM_VOICE_NOINIT uint8_t voice_amr[64];
+static const uint16_t  amr_nb_bit_len[]  = {95, 103, 118, 134, 148, 159, 204, 244, 39};
+static const uint8_t  amr_nb_byte_len[] = {12, 13, 15, 17, 19, 20, 26, 31, 5};
+static const uint16_t  amr_wb_bit_len[]  = {132, 177, 253, 285, 317, 365, 397, 461, 477, 40};
+static const uint8_t  amr_wb_byte_len[] = {17, 23, 32, 36, 40, 46, 50, 58, 60, 5};
 
 extern void audio_play_file_default_fun(void *param);
 extern void audio_play_tts_default_fun(void *param);
@@ -199,8 +219,20 @@ void luat_audio_global_init(void)
 #endif
 	prv_audio_config.pa_delay_timer = luat_create_rtos_timer(app_pa_on, NULL, NULL);
 	prv_audio_config.soft_vol = 100;
+	prv_audio_config.hardware_data = NULL;
 }
 
+#else
+void luat_audio_play_global_init(audio_play_event_cb_fun_t event_cb, audio_play_data_cb_fun_t data_cb, audio_play_default_fun_t play_file_fun, audio_play_default_fun_t play_tts_fun, void *user_param)
+{
+	if (event_cb || data_cb || play_file_fun || play_tts_fun)
+	{
+		audio_play_global_init_ex(event_cb, data_cb, play_file_fun, play_tts_fun, user_param);
+	}
+	prv_audio_config.soft_vol = 100;
+	prv_audio_config.pa_delay_timer = luat_create_rtos_timer(app_pa_on, NULL, NULL);
+	prv_audio_config.hardware_data = NULL;
+}
 #endif
 static void luat_audio_prepare(void)
 {
@@ -387,6 +419,7 @@ void luat_audio_play_global_init_with_task_priority(audio_play_event_cb_fun_t ev
 	}
 	prv_audio_config.soft_vol = 100;
 	prv_audio_config.pa_delay_timer = luat_create_rtos_timer(app_pa_on, NULL, NULL);
+	prv_audio_config.hardware_data = NULL;
 }
 
 
@@ -780,7 +813,7 @@ int luat_audio_play_blank(uint8_t multimedia_id)
 
 int luat_audio_standby(uint8_t multimedia_id)
 {
-	luat_gpio_set(prv_audio_config.codec_conf.pa_pin, !prv_audio_config.codec_conf.pa_on_level);
+//	luat_gpio_set(prv_audio_config.codec_conf.pa_pin, !prv_audio_config.codec_conf.pa_on_level);
 	luat_audio_play_blank(multimedia_id);
 
 }
@@ -790,7 +823,6 @@ int luat_audio_record_and_play(uint8_t multimedia_id, uint32_t sample_rate, cons
 	luat_i2s_conf_t *i2s = luat_i2s_get_config(prv_audio_config.codec_conf.i2s_id);
 	prv_audio_config.record_mode = 1;
 	i2s->is_full_duplex = 1;
-
 	if (I2S_IsWorking(prv_audio_config.codec_conf.i2s_id))
 	{
 		I2S_Stop(prv_audio_config.codec_conf.i2s_id);
@@ -878,5 +910,208 @@ int luat_audio_speech_stop(uint8_t multimedia_id)
 	i2s_conf->cb_rx_len  = prv_audio_config.i2s_rx_cb_save;
 	DBG("load rx len %d", i2s_conf->cb_rx_len);
 }
+
+#if defined (FEATURE_AMR_CP_ENABLE) || defined (FEATURE_VEM_CP_ENABLE)
+static void amrEngCallback(uint32_t msgId, void *msg)
+{
+	ec7xx_voice_eng_ctrl_t *eng = (ec7xx_voice_eng_ctrl_t *)prv_audio_config.hardware_data;
+    HalVoiceEncodeCnf *msgEn  = (HalVoiceEncodeCnf *)msg;
+    HalVoiceDecodeCnf *msgDe  = (HalVoiceDecodeCnf *)msg;
+    switch (msgId)
+    {
+        case HAL_VOICE_ENCODE_CNF:
+        	eng->encode_cnf = *msgEn;
+            break;
+        case HAL_VOICE_DECODE_CNF:
+        	eng->decode_cnf = *msgDe;
+            break;
+        case HAL_VOICE_ENG_START_CNF:
+        case HAL_VOICE_ENG_STOP_CNF:
+        case HAL_VOICE_CODEC_CONFIG_CNF:
+        	break;
+        default:
+            return;
+    }
+	if (eng->wait_flag == msgId)
+	{
+		eng->wait_flag = 0;
+	}
+}
+
+static uint8_t luat_audio_inter_amr_wait(ec7xx_voice_eng_ctrl_t *eng)
+{
+    uint8_t timeout = 15;
+    while(eng->wait_flag)
+    {
+    	luat_rtos_task_sleep(1);
+    	timeout--;
+    	if (!timeout)
+    	{
+    		return -1;
+    	}
+
+    }
+    return 0;
+}
+
+void luat_audio_inter_amr_init(uint8_t is_wb, uint8_t quality)
+{
+	ec7xx_voice_eng_ctrl_t *eng = NULL;
+	if (!prv_audio_config.hardware_data)
+	{
+		eng = luat_heap_zalloc(sizeof(ec7xx_voice_eng_ctrl_t));
+		prv_audio_config.hardware_data = eng;
+
+	}
+	else
+	{
+		eng = (ec7xx_voice_eng_ctrl_t *)prv_audio_config.hardware_data;
+	}
+	HalVoiceCodecConfigReq  codecCfg = {0};
+    is_wb = is_wb?HAL_VC_AMR_WB:HAL_VC_AMR_NB;
+    codecCfg.codecType = is_wb;
+    memset(&eng->encode_req, 0, sizeof(HalVoiceEncodeReq));
+    memset(&eng->decode_req, 0, sizeof(HalVoiceDecodeReq));
+    eng->encode_req.codecType =  codecCfg.codecType;
+    eng->decode_req.codecType =  codecCfg.codecType;
+    if (is_wb)
+    {
+    	if (quality > HAL_AMR_WB_FT_8) {quality = HAL_AMR_WB_FT_8;}
+    	eng->bit_table = amr_wb_bit_len;
+    	eng->byte_table = amr_wb_byte_len;
+    }
+    else
+    {
+    	if (quality > HAL_AMR_NB_FT_7) {quality = HAL_AMR_NB_FT_7;}
+    	eng->bit_table = amr_nb_bit_len;
+    	eng->byte_table = amr_nb_byte_len;
+    }
+    eng->max_frame_type = quality + 1;
+    codecCfg.encBitRate = quality;
+    codecCfg.encOutBitOffset = 0;
+    eng->encode_req.bitRate = quality;
+    eng->encode_req.pcmBitWidth = 16;
+    eng->encode_req.pcmLen = (codecCfg.codecType + 1) * 320;
+    eng->decode_req.pcmBitWidth = 16;
+    eng->decode_req.pcmBufLen = (codecCfg.codecType + 1) * 320;
+	eng->encode_req.amrBufSize = 64;
+	eng->encode_req.pAmrData = voice_amr;
+	eng->decode_req.pPcmData = voice_pcm;
+
+	if ((uint32_t)luat_mcu_tick64_ms() < 650)
+	{
+		luat_rtos_task_sleep(650 - (uint32_t)(luat_mcu_tick64_ms()));
+		DBG("need wait cp ready");
+	}
+    halSetVoiceEngRetCallback(amrEngCallback);
+    eng->wait_flag = HAL_VOICE_ENG_START_CNF;
+    halVoiceEngStartReq();
+    if (luat_audio_inter_amr_wait(eng))
+    {
+    	DBG("failed!");
+    }
+    eng->wait_flag = HAL_VOICE_CODEC_CONFIG_CNF;
+    halVoiceCodecConfigReq(&codecCfg);
+    if (luat_audio_inter_amr_wait(eng))
+    {
+    	DBG("failed!");
+    }
+}
+
+void luat_audio_inter_amr_deinit(void)
+{
+	ec7xx_voice_eng_ctrl_t *eng = (ec7xx_voice_eng_ctrl_t *)prv_audio_config.hardware_data;
+	eng->wait_flag = HAL_VOICE_ENG_STOP_CNF;
+	halVoiceEngStopReq();
+	luat_audio_inter_amr_wait(eng);
+}
+
+int luat_audio_inter_amr_encode(const uint16_t *pcm_buf, uint8_t *amr_buf, uint8_t *amr_len)
+{
+	uint8_t out_len = 0;
+	ec7xx_voice_eng_ctrl_t *eng = (ec7xx_voice_eng_ctrl_t *)prv_audio_config.hardware_data;
+	eng->encode_req.pPcmData = (uint8_t *)pcm_buf;
+	eng->encode_req.sn++;
+	eng->wait_flag = HAL_VOICE_ENCODE_CNF;
+	halVoiceEncodeReq(&eng->encode_req);
+    if (luat_audio_inter_amr_wait(eng))
+    {
+    	DBG("failed!");
+    	return -1;
+    }
+    else
+    {
+
+    	if (eng->encode_cnf.rc)
+    	{
+//			DBG("%d,%d,%d,%d,%d,%d,%x,%x,%x,%x,%x", eng->encode_cnf.rc, eng->encode_cnf.codecType, eng->encode_cnf.sn,
+//					 eng->encode_cnf.frameType,eng->encode_cnf.outBitOffset,eng->encode_cnf.amrBitLen,
+//					 eng->encode_cnf.pAmrData, eng->encode_cnf.pPcmData, eng->encode_cnf.pPostVemPcmData, eng->encode_cnf.pExtra0, eng->encode_cnf.pExtra1);
+    		out_len = 1;
+    		amr_buf[0] = (0xf << 3)|0x04;
+    	}
+    	else
+    	{
+
+    		if (eng->encode_cnf.frameType > eng->max_frame_type)
+    		{
+        		out_len = 1;
+        		amr_buf[0] = (0xf << 3)|0x04;
+    		}
+    		else
+    		{
+    			out_len = eng->byte_table[eng->encode_cnf.frameType] + 1;
+    			amr_buf[0] = (eng->encode_cnf.frameType << 3)|0x04;
+    			memcpy(amr_buf + 1, voice_amr, eng->byte_table[eng->encode_cnf.frameType]);
+    		}
+    	}
+    }
+	eng->wait_flag = 0;
+	*amr_len = out_len;
+	return 0;
+}
+
+int luat_audio_inter_amr_decode(uint16_t *pcm_buf, const uint8_t *amr_buf, uint8_t *amr_len)
+{
+	ec7xx_voice_eng_ctrl_t *eng = (ec7xx_voice_eng_ctrl_t *)prv_audio_config.hardware_data;
+	uint8_t q = (amr_buf[0] >> 3);
+	if (q > eng->max_frame_type)
+	{
+		eng->decode_req.amrBitLen = 0;
+		*amr_len = 1;
+		voice_amr[0] = 0;
+	}
+	else
+	{
+		eng->decode_req.amrBitLen = eng->bit_table[q];
+		*amr_len = 1 + eng->byte_table[q];
+		memcpy(voice_amr, amr_buf + 1, eng->byte_table[q]);
+	}
+
+	eng->decode_req.pPcmData = voice_pcm;
+	eng->decode_req.pAmrData = voice_amr;
+	eng->decode_req.sn++;
+
+	eng->wait_flag = HAL_VOICE_DECODE_CNF;
+	halVoiceDecodeReq(&eng->decode_req);
+    if (luat_audio_inter_amr_wait(eng))
+    {
+    	DBG("failed!");
+    	return -1;
+    }
+    else
+    {
+    	memcpy(pcm_buf, eng->decode_req.pPcmData, eng->decode_cnf.pcmDataLen);
+    }
+	eng->wait_flag = 0;
+
+	return 0;
+}
+#else
+void luat_audio_inter_amr_init(uint8_t is_wb, uint8_t quality) {;}
+void luat_audio_inter_amr_deinit(void) {;}
+int luat_audio_inter_amr_encode(const uint16_t *pcm_buf, uint8_t *amr_buf, uint8_t *amr_len) {return -1;}
+int luat_audio_inter_amr_decode(uint16_t *pcm_buf, const uint8_t *amr_buf, uint8_t *amr_len) {return -1;}
+#endif
 
 
