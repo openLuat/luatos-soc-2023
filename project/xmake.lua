@@ -203,7 +203,8 @@ target("csdk")
     add_files(LUATOS_ROOT .."/components/network/adapter/luat_network_adapter.c",
             LUATOS_ROOT .."/components/ethernet/common/dns_client.c"
             )
-
+    -- multimedia
+    add_files(LUATOS_ROOT.."/components/multimedia/luat_multimedia_audio.c")
     -- mbedtls
     add_files(LUATOS_ROOT .."/components/mbedtls/library/*.c")
     -- crypto

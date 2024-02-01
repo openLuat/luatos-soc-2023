@@ -626,12 +626,6 @@ luat_audio_conf_t *luat_audio_get_config(uint8_t multimedia_id){
     else return NULL;
 }
 
-int luat_audio_setup_codec(uint8_t multimedia_id, const luat_audio_codec_conf_t *codec_conf)
-{
-	prv_audio_config.codec_conf = *codec_conf;
-	return 0;
-}
-
 int luat_audio_init_codec(uint8_t multimedia_id, uint16_t init_vol, uint16_t init_mic_vol)
 {
 	luat_audio_play_blank(0);
