@@ -672,10 +672,13 @@ static void LFS_daemonTaskEntry(void *arg)
                     lfsStatus =  (lfs_status_t *)request.data[0];
                     lfsStatus->total_block = lfs_cfg.block_count;
                     lfsStatus->block_size = lfs_cfg.block_size;
-
+#ifdef __USER_CODE__
+                    lfsStatus->block_used = lfs_fs_size(&lfs);
+                    LFS_reply(request.threadId, 0);
+#else
                     ret = lfs_fs_traverse(&lfs, lfs_statfs_count, &(lfsStatus->block_used));
                     LFS_reply(request.threadId, ret);
-
+#endif
                     break;
 
                 case LFS_REQUEST_SAVE_MONITOR_RESULT:
