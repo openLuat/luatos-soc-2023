@@ -23,7 +23,7 @@
 #include "dec_if.h"
 //AIR780EP和AIR780EPV支持内置编解码amr，同时默认在编码时开启降噪功能，在build.bat里设置set DENOISE_FORCE=enable 或者 set CHIP_TARGET=ec718pv
 //开启内置降噪功能后，会使能宏定义FEATURE_AMR_CP_ENABLE和FEATURE_VEM_CP_ENABLE
-//AIR780EP音频开发板配置，如果用的ES8311而且要低功耗的，不建议用LDO_CTL，换成AGPIO，不换AGPIO的话，需要看休眠演示，在唤醒后重新初始化codec
+//AIR780EP音频扩展板配置，如果用的ES8311而且要低功耗的，不建议用LDO_CTL，换成AGPIO，不换AGPIO的话，需要看休眠演示，在唤醒后重新初始化codec
 #define CODEC_PWR_PIN HAL_GPIO_16
 #define CODEC_PWR_PIN_ALT_FUN	4
 #ifndef CHIP_EC716
@@ -34,10 +34,15 @@
 #define PA_PWR_PIN_ALT_FUN	0
 #endif
 
-#define TEST_I2C_ID I2C_ID1
+#define TEST_I2C_ID I2C_ID0
 #define TEST_I2S_ID I2S_ID0
 #define TEST_USE_ES8311	1
 #define TEST_USE_TM8211 0
+
+#define MULTIMEDIA_ID 	0	//多媒体id，用于区分不同多媒体硬件
+#define TEST_VOL		70	// 测试音量调节
+#define TEST_MIC_VOL	75	// 测试麦克风音量调节
+
 #if defined FEATURE_IMS_ENABLE	//VOLTE固件才支持通话测试
 //#define CALL_TEST		//通话测试会关闭掉其他测试，防止冲突
 #endif
@@ -106,6 +111,14 @@ static const luat_i2s_conf_t luat_i2s_conf_tm8211 =
 	.luat_i2s_event_callback = record_cb,
 };
 
+#if (TEST_USE_ES8311 == 1)
+const luat_i2s_conf_t *i2s_conf = &luat_i2s_conf_es8311;
+const luat_audio_codec_conf_t *codec_conf = &luat_audio_codec_es8311;
+#else
+const luat_i2s_conf_t *i2s_conf = &luat_i2s_conf_tm8211;
+const luat_audio_codec_conf_t *codec_conf = &luat_audio_codec_tm8211;
+#endif
+
 extern void download_file();
 
 enum
@@ -155,13 +168,13 @@ static void record_encode_amr(uint8_t *data, uint32_t len)
 
 static void record_stop_encode_amr(uint8_t *data, uint32_t len)
 {
-	luat_audio_record_stop(0);
+	luat_audio_record_stop(MULTIMEDIA_ID);
 
 #if defined (FEATURE_AMR_CP_ENABLE) || defined (FEATURE_VEM_CP_ENABLE)
-	luat_audio_standby(0);
+	luat_audio_standby(MULTIMEDIA_ID);
 	luat_audio_inter_amr_deinit();
 #else
-	luat_audio_sleep(0, 1);
+	luat_audio_sleep(MULTIMEDIA_ID, 1);
 	Encoder_Interface_exit(g_s_amr_encoder_handler);
 	g_s_amr_encoder_handler = NULL;
 #endif
@@ -203,7 +216,7 @@ void audio_event_cb(uint32_t event, void *param)
 	switch(event)
 	{
 	case LUAT_MULTIMEDIA_CB_AUDIO_DECODE_START:
-		luat_audio_check_ready(0);
+		luat_audio_check_ready(MULTIMEDIA_ID);
 		break;
 	case LUAT_MULTIMEDIA_CB_AUDIO_OUTPUT_START:
 		break;
@@ -211,18 +224,18 @@ void audio_event_cb(uint32_t event, void *param)
 		break;
 	case LUAT_MULTIMEDIA_CB_DECODE_DONE:
 	case LUAT_MULTIMEDIA_CB_TTS_DONE:
-		if (!luat_audio_play_get_last_error(0))
+		if (!luat_audio_play_get_last_error(MULTIMEDIA_ID))
 		{
-			luat_audio_play_write_blank_raw(0, 1, 0);
+			luat_audio_play_write_blank_raw(MULTIMEDIA_ID, 1, 0);
 		}
 		break;
 	case LUAT_MULTIMEDIA_CB_AUDIO_DONE:
-		LUAT_DEBUG_PRINT("audio play done, result=%d!", luat_audio_play_get_last_error(0));
-		luat_audio_standby(0);
+		LUAT_DEBUG_PRINT("audio play done, result=%d!", luat_audio_play_get_last_error(MULTIMEDIA_ID));
+		luat_audio_standby(MULTIMEDIA_ID);
 		//如果追求极致的功耗，用luat_audio_sleep代替luat_audio_standby
-		//luat_audio_sleep(0, 1);
+		//luat_audio_sleep(MULTIMEDIA_ID, 1);
 		//通知一下用户task播放完成了
-		luat_rtos_event_send(g_s_task_handle, AUDIO_EVENT_PLAY_DONE, luat_audio_play_get_last_error(0), 0, 0, 0);
+		luat_rtos_event_send(g_s_task_handle, AUDIO_EVENT_PLAY_DONE, luat_audio_play_get_last_error(MULTIMEDIA_ID), 0, 0, 0);
 		break;
 	}
 }
@@ -314,19 +327,13 @@ static void demo_task(void *arg)
 	luat_audio_play_global_init_with_task_priority(audio_event_cb, audio_data_cb, luat_audio_play_file_default_fun, luat_audio_play_tts_default_fun, NULL, 50);
 	tts_config();
 #endif
-	if (TEST_USE_ES8311)
-	{
+	if (TEST_USE_ES8311){
 		luat_i2c_setup(luat_audio_codec_es8311.i2c_id, 1);
-		luat_i2s_setup(&luat_i2s_conf_es8311);
-		luat_audio_setup_codec(0, &luat_audio_codec_es8311);
-		luat_audio_init_codec(0, 70, 75);
 	}
-	if (TEST_USE_TM8211)
-	{
-		luat_i2s_setup(&luat_i2s_conf_tm8211);
-		luat_audio_setup_codec(0, &luat_audio_codec_tm8211);
-		luat_audio_init_codec(0, 100, 0);
-	}
+
+	luat_i2s_setup(i2s_conf);
+	luat_audio_setup_codec(MULTIMEDIA_ID, codec_conf);
+	luat_audio_init_codec(MULTIMEDIA_ID, TEST_VOL, TEST_MIC_VOL);
 
 #if defined FEATURE_IMS_ENABLE	//VOLTE固件不支持TTS
 #else
@@ -344,9 +351,9 @@ static void demo_task(void *arg)
 	download_file();
 #endif
 #ifdef CALL_TEST
-	//luat_audio_sleep(0, 1);
+	//luat_audio_sleep(MULTIMEDIA_ID, 1);
     luat_rtos_event_recv(g_s_task_handle, VOLTE_EVENT_CALL_READY, &event, NULL, LUAT_WAIT_FOREVER);
-    // luat_mobile_make_call(0, "xxxxxxxxxxx", 11);
+    // luat_mobile_make_call(MULTIMEDIA_ID, "xxxxxxxxxxx", 11);
 #endif
 
     while(1)
@@ -362,9 +369,9 @@ static void demo_task(void *arg)
 				if (!event.param1)
 				{
 					is_call_uplink_on = 0;
-					luat_audio_speech_stop(0);
+					luat_audio_speech_stop(MULTIMEDIA_ID);
 					//如果后续还要播放其他音频，或者PA无法控制的，用luat_audio_standby();
-					//luat_audio_sleep(0, 1);
+					//luat_audio_sleep(MULTIMEDIA_ID, 1);
 				}
 				luat_meminfo_opt_sys(LUAT_HEAP_PSRAM, &total, &alloc, &peak);
 				LUAT_DEBUG_PRINT("psram total %u, used %u, max used %u", total, alloc, peak);
@@ -373,7 +380,7 @@ static void demo_task(void *arg)
 				break;
 			case VOLTE_EVENT_RECORD_VOICE_START:
 				is_call_uplink_on = 1;
-				luat_audio_speech(0, 0, event.param1, NULL, 0, 1);
+				luat_audio_speech(MULTIMEDIA_ID, 0, event.param1, NULL, 0, 1);
 				break;
 			case VOLTE_EVENT_RECORD_VOICE_UPLOAD:
 				if (is_call_uplink_on)
@@ -382,10 +389,10 @@ static void demo_task(void *arg)
 				}
 				break;
 			case VOLTE_EVENT_PLAY_VOICE:
-				luat_audio_speech(0, 1, event.param3, (uint8_t *)event.param1, event.param2, 1);
+				luat_audio_speech(MULTIMEDIA_ID, 1, event.param3, (uint8_t *)event.param1, event.param2, 1);
 				break;
 			case VOLTE_EVENT_HANGUP:
-				luat_mobile_hangup_call(0);
+				luat_mobile_hangup_call(MULTIMEDIA_ID);
 				break;
 			}
 		}
@@ -410,13 +417,13 @@ static void demo_task(void *arg)
 		amr_info[4].address = (uint32_t)amr_yuan_data;
 		amr_info[4].rom_data_len = sizeof(amr_yuan_data);
 
-		luat_audio_play_multi_files(0, mp3_info, 4);
+		luat_audio_play_multi_files(MULTIMEDIA_ID, mp3_info, 4);
 		luat_rtos_event_recv(g_s_task_handle, AUDIO_EVENT_PLAY_DONE, &event, NULL, LUAT_WAIT_FOREVER);
 		luat_meminfo_opt_sys(LUAT_HEAP_PSRAM, &total, &alloc, &peak);
 		LUAT_DEBUG_PRINT("psram total %u, used %u, max used %u", total, alloc, peak);
 		luat_meminfo_opt_sys(LUAT_HEAP_SRAM, &total, &alloc, &peak);
 		LUAT_DEBUG_PRINT("sram total %u, used %u, max used %u", total, alloc, peak);
-		luat_audio_play_multi_files(0, amr_info, 5);
+		luat_audio_play_multi_files(MULTIMEDIA_ID, amr_info, 5);
 		luat_rtos_event_recv(g_s_task_handle, AUDIO_EVENT_PLAY_DONE, &event, NULL, LUAT_WAIT_FOREVER);
 		luat_meminfo_opt_sys(LUAT_HEAP_PSRAM, &total, &alloc, &peak);
 		LUAT_DEBUG_PRINT("psram total %u, used %u, max used %u", total, alloc, peak);
@@ -426,7 +433,7 @@ static void demo_task(void *arg)
 
 #if defined FEATURE_IMS_ENABLE	//VOLTE固件不支持TTS
 #else
-		luat_audio_play_tts_text(0, tts_string, sizeof(tts_string));
+		luat_audio_play_tts_text(MULTIMEDIA_ID, tts_string, sizeof(tts_string));
 		luat_rtos_event_recv(g_s_task_handle, AUDIO_EVENT_PLAY_DONE, &event, NULL, LUAT_WAIT_FOREVER);
 		luat_meminfo_opt_sys(LUAT_HEAP_PSRAM, &total, &alloc, &peak);
 		LUAT_DEBUG_PRINT("psram total %u, used %u, max used %u", total, alloc, peak);
@@ -439,7 +446,7 @@ static void demo_task(void *arg)
 		{
 			LUAT_DEBUG_PRINT("record test start");
 #if defined (FEATURE_AMR_CP_ENABLE) || defined (FEATURE_VEM_CP_ENABLE)
-			luat_audio_inter_amr_init(0, 7);
+			luat_audio_inter_amr_init(MULTIMEDIA_ID, 7);
 #else
 			g_s_amr_encoder_handler = Encoder_Interface_init(0);
 #endif
@@ -447,7 +454,7 @@ static void demo_task(void *arg)
 			g_s_amr_rom_file.Pos = 0;
 			OS_BufferWrite(&g_s_amr_rom_file, "#!AMR\n", 6);
 			g_s_test_only_record = 1;
-			luat_audio_record_and_play(0, 8000, NULL, 3200, 2); //放音buffer填NULL，就是喇叭静音
+			luat_audio_record_and_play(MULTIMEDIA_ID, 8000, NULL, 3200, 2); //放音buffer填NULL，就是喇叭静音
 #if defined (FEATURE_AMR_CP_ENABLE) || defined (FEATURE_VEM_CP_ENABLE)
 			luat_rtos_task_sleep((RECORD_TIME + 1) * 2000);
 #else
@@ -456,7 +463,7 @@ static void demo_task(void *arg)
 			g_s_test_only_record = 0;
 			amr_info[0].address = (uint32_t)g_s_amr_rom_file.Data;
 			amr_info[0].rom_data_len = g_s_amr_rom_file.Pos;
-			luat_audio_play_multi_files(0, amr_info, 1);
+			luat_audio_play_multi_files(MULTIMEDIA_ID, amr_info, 1);
 			luat_rtos_event_recv(g_s_task_handle, AUDIO_EVENT_PLAY_DONE, &event, NULL, LUAT_WAIT_FOREVER);
 			luat_meminfo_opt_sys(LUAT_HEAP_PSRAM, &total, &alloc, &peak);
 			LUAT_DEBUG_PRINT("psram total %u, used %u, max used %u", total, alloc, peak);
@@ -491,7 +498,7 @@ static void demo_task(void *arg)
 			LUAT_DEBUG_PRINT("sram total %u, used %u, max used %u", total, alloc, peak);
 #if defined (FEATURE_AMR_CP_ENABLE) || defined (FEATURE_VEM_CP_ENABLE)
 			//内部amr编解码可以用16K，这里演示16K
-			luat_audio_record_and_play(0, 16000, buff, 640 * RECORD_ONCE_LEN, 4);
+			luat_audio_record_and_play(MULTIMEDIA_ID, 16000, buff, 640 * RECORD_ONCE_LEN, 4);
 			while (speech_test)
 			{
 				luat_rtos_event_recv(g_s_task_handle, 0, &event, NULL, LUAT_WAIT_FOREVER);
@@ -533,10 +540,10 @@ static void demo_task(void *arg)
 						{
 							speech_test = 0;
 							LUAT_DEBUG_PRINT("test stop");
-							luat_audio_record_stop(0);
-							luat_audio_standby(0);
+							luat_audio_record_stop(MULTIMEDIA_ID);
+							luat_audio_standby(MULTIMEDIA_ID);
 							//如果追求极致的功耗，用luat_audio_sleep代替luat_audio_standby
-							//luat_audio_sleep(0, 1);
+							//luat_audio_sleep(MULTIMEDIA_ID, 1);
 							luat_heap_free(buff);
 							buff = NULL;
 							luat_heap_free(amr_buff);
@@ -551,7 +558,7 @@ static void demo_task(void *arg)
 				}
 			}
 #else
-			luat_audio_record_and_play(0, 8000, buff, 320 * RECORD_ONCE_LEN, 4);
+			luat_audio_record_and_play(MULTIMEDIA_ID, 8000, buff, 320 * RECORD_ONCE_LEN, 4);
 			while (speech_test)
 			{
 				luat_rtos_event_recv(g_s_task_handle, 0, &event, NULL, LUAT_WAIT_FOREVER);
@@ -594,10 +601,10 @@ static void demo_task(void *arg)
 						{
 							speech_test = 0;
 							LUAT_DEBUG_PRINT("test stop");
-							luat_audio_record_stop(0);
-							luat_audio_standby(0);
+							luat_audio_record_stop(MULTIMEDIA_ID);
+							luat_audio_standby(MULTIMEDIA_ID);
 							//如果追求极致的功耗，用luat_audio_sleep代替luat_audio_standby
-							//luat_audio_sleep(0, 1);
+							//luat_audio_sleep(MULTIMEDIA_ID, 1);
 							luat_heap_opt_free(LUAT_HEAP_AUTO, buff);
 							buff = NULL;
 							luat_heap_opt_free(LUAT_HEAP_AUTO, amr_buff);
@@ -620,7 +627,7 @@ static void demo_task(void *arg)
 
 
 		//演示一下休眠
-		luat_audio_sleep(0, 1);
+		luat_audio_sleep(MULTIMEDIA_ID, 1);
 		luat_pm_power_ctrl(LUAT_PM_POWER_USB, 0);	//没接USB的，只需要在开始的时候关闭一次USB就行了
 		luat_pm_request(LUAT_PM_SLEEP_MODE_LIGHT);
 		luat_rtos_task_sleep(10000);
@@ -628,8 +635,8 @@ static void demo_task(void *arg)
 		luat_pm_power_ctrl(LUAT_PM_POWER_USB, 1);
 		if (TEST_USE_ES8311)
 		{
-			luat_audio_init_codec(0, 70, 75);	//如果没有AGPIO来控制，需要重新初始化ES8311，如果用AGPIO来控制的，就不需要重新初始化
-			luat_audio_sleep(0, 0);
+			luat_audio_init_codec(MULTIMEDIA_ID, TEST_VOL, TEST_MIC_VOL);	//如果没有AGPIO来控制，需要重新初始化ES8311，如果用AGPIO来控制的，就不需要重新初始化
+			luat_audio_sleep(MULTIMEDIA_ID, 0);
 		}
 #endif
     }
@@ -720,7 +727,7 @@ void mobile_voice_data_input(uint8_t *input, uint32_t len, uint32_t sample_rate,
 static void test_audio_demo_init(void)
 {
 	luat_mobile_event_register_handler(mobile_event_cb);
-	luat_mobile_speech_init(0,mobile_voice_data_input);
+	luat_mobile_speech_init(MULTIMEDIA_ID,mobile_voice_data_input);
 	luat_gpio_cfg_t gpio_cfg;
 	luat_gpio_set_default_cfg(&gpio_cfg);
 
