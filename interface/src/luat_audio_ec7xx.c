@@ -68,7 +68,10 @@ extern void audio_play_tts_set_resource_ex(void *address, void *sdk_id, void *re
 extern void audio_play_global_init_ex(audio_play_event_cb_fun_t event_cb, audio_play_data_cb_fun_t data_cb, audio_play_default_fun_t play_file_fun, audio_play_default_fun_t play_tts_fun, void *user_param);
 extern void audio_play_global_init_with_task_priority(audio_play_event_cb_fun_t event_cb, audio_play_data_cb_fun_t data_cb, audio_play_default_fun_t play_file_fun, audio_play_default_fun_t play_tts_fun, void *user_param, uint8_t priority);
 extern int audio_play_write_blank_raw_ex(uint32_t multimedia_id, uint8_t cnt, uint8_t add_font);
-static luat_audio_conf_t prv_audio_config;
+static luat_audio_conf_t prv_audio_config = {
+	.codec_conf.power_pin = LUAT_CODEC_PA_NONE,
+    .codec_conf.pa_pin = LUAT_CODEC_PA_NONE,
+};
 int luat_audio_play_blank(uint8_t multimedia_id);
 static void app_pa_on(uint32_t arg)
 {
