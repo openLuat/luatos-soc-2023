@@ -2,6 +2,8 @@
 #include "luat_rtos.h"
 #include "luat_audio_play.h"
 #include "luat_i2s.h"
+#include "luat_audio.h"
+#include "luat_multimedia.h"
 #include "ivTTSSDKID_all.h"
 #include "ivTTS.h"
 #include "amr_alipay_data.h"
@@ -332,8 +334,10 @@ static void demo_task(void *arg)
 	}
 
 	luat_i2s_setup(i2s_conf);
-	luat_audio_setup_codec(MULTIMEDIA_ID, codec_conf);
-	luat_audio_init_codec(MULTIMEDIA_ID, TEST_VOL, TEST_MIC_VOL);
+
+	luat_audio_set_bus_type(MULTIMEDIA_ID,MULTIMEDIA_AUDIO_BUS_I2S);	//设置音频总线类型
+	luat_audio_setup_codec(MULTIMEDIA_ID, codec_conf);					//设置音频codec
+	luat_audio_init_codec(MULTIMEDIA_ID, TEST_VOL, TEST_MIC_VOL);		//初始化音频codec
 
 #if defined FEATURE_IMS_ENABLE	//VOLTE固件不支持TTS
 #else

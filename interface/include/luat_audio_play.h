@@ -27,6 +27,8 @@
 #include "audio_play.h"
 #include "luat_audio.h"
 #include "luat_audio_codec.h"
+#include "luat_multimedia.h"
+
 /**
  * @defgroup luatos_audio 音频接口
  * @{
