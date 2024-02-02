@@ -6,6 +6,8 @@
 
 **本代码库在2023.12.27执行过重置histroy的操作,如果无法pull,请重新clone本代码库**
 
+**注意：luatos-soc-2022仓库代码无法直接使用，查看本仓库demo的xmake.lua进行修改并参考主库csdk api进行修改才可使用！！！**
+
 ## 使用前须知！！！
 
 1. **强烈推荐使用git来下载本代码库**, 不会命令行操作git可以用 [tortoiseGit](https://tortoisegit.org/download/)
@@ -34,9 +36,9 @@ CSDK for ABCDEGF, 适用于所有基于ABCDEGF的合宙模组, 包括衍生型�
 
 ## 编译说明
 
-1. 安装xmake, **选取加入PATH**；
-   xmake下载地址：https://xmake.io/#/guide/installation
-   windows下可以直接访问：https://github.com/xmake-io/xmake/releases ,下载系统对应的xmake-x.x.x-win32.exe或者xmake-x.x.x-win64.exe即可. 建议使用最新版.
+1. 安装xmake, **Windows安装时注意选取加入PATH**. 
+   xmake下载地址：https://github.com/xmake-io/xmake/releases
+   windows下载系统对应的xmake-x.x.x-win32.exe或者xmake-x.x.x-win64.exe安装即可. 建议使用最新版.
 
    **注意：环境变量需重启电脑生效**
 
@@ -44,7 +46,10 @@ CSDK for ABCDEGF, 适用于所有基于ABCDEGF的合宙模组, 包括衍生型�
 
    本地下载地址: https://pan.air32.cn/s/DJTr?path=%2F%E5%B8%B8%E7%94%A8%E5%B7%A5%E5%85%B7
    
-2. 如果编译example的话在本代码库的根目录执行`build.bat example`进行编译，**注意：默认编译ec718p，如需编译*ec718s*或 *ec716s*需要自行修改build.bat中的*CHIP_TARGET*变量**
+   linux和macos安装请自行参考,但并不建议,因为macos无法打包,并且Luatools只支持windows
+   安装教程: https://xmake.io/#/guide/installation
+
+2. 如果编译example的话在本代码库的根目录执行`build.bat example`进行编译，**注意：默认编译ec718p，如需编译*ec718s*或 *ec716s*需要自行修改build.bat中的*CHIP_TARGET*变量** 其他设置参考 `build.bat`中的注释说明
 
 4. 生成的binpkg位于`out`目录, 日志数据库文件位于`PLAT`目录
 
