@@ -25,33 +25,38 @@
 #include "luat_mobile.h"
 #include "luat_i2c.h"
 #include "luat_i2s.h"
+#include "luat_audio.h"
+#include "luat_multimedia.h"
 #include "luat_rtos.h"
 #include "luat_debug.h"
 #include "luat_mem.h"
 #include "luat_mcu.h"
 #include "luat_audio.h"
 
+//AIR780EP音频扩展板配置
+
 //demo 配置带ES8311硬件的云喇叭开发板，编译时需要把build.bat里的CHIP_TARGET改成ec718pv
 #define CODEC_PWR_PIN HAL_GPIO_16
 #define CODEC_PWR_PIN_ALT_FUN	4
 #define PA_PWR_PIN HAL_GPIO_25
 #define PA_PWR_PIN_ALT_FUN	0
-#define PA_ON_LEVEL 0
+
+#define PA_ON_LEVEL 1
+#define PWR_ON_LEVEL 1
+
 //#define SPEECH_RECORD_ENABLE	//通话录音，由于上行语音都是用户自己采集的，这里演示如果采集下行的语音
 
-#define I2C_ID	1
+#define I2C_ID	0
 #define I2S_ID	0
 
 #define VOICE_VOL   70
 #define MIC_VOL     65
 
+#define MULTIMEDIA_ID 0
+
 static luat_audio_codec_conf_t luat_audio_codec = {
     .i2c_id = I2C_ID,
     .i2s_id = I2S_ID,
-    .pa_pin = PA_PWR_PIN,
-    .pa_on_level = PA_ON_LEVEL,
-    // .dummy_time_len,
-    // .pa_delay_time, 
     .codec_opts = &codec_opts_es8311,
 };
 
@@ -355,32 +360,23 @@ static void volte_task(void *param)
 	luat_i2s_setup(&i2s_conf);
     g_s_i2s_conf = luat_i2s_get_config(I2S_ID);
 
-	luat_rtos_task_sleep(50);
-	luat_gpio_set(CODEC_PWR_PIN, 1);
-	luat_rtos_task_sleep(100);
-	luat_gpio_set(PA_PWR_PIN, PA_PWR_PIN);
-
 	luat_rtos_timer_create(&g_s_delay_timer);
 
 	size_t total, alloc, peak;
 	luat_event_t event;
 
-    int ret = luat_audio_codec.codec_opts->init(&luat_audio_codec,LUAT_CODEC_MODE_SLAVE);
+	luat_audio_set_bus_type(MULTIMEDIA_ID,MULTIMEDIA_AUDIO_BUS_I2S);	//设置音频总线类型
+	luat_audio_setup_codec(MULTIMEDIA_ID, &luat_audio_codec);			//设置音频codec
+	luat_audio_config_pa(MULTIMEDIA_ID, PA_PWR_PIN, PA_ON_LEVEL, 0, 0);//配置音频pa
+	luat_audio_config_dac(MULTIMEDIA_ID, CODEC_PWR_PIN, PWR_ON_LEVEL, 0);//配置音频dac_power
+
+
+    int ret = luat_audio_init_codec(MULTIMEDIA_ID, VOICE_VOL, MIC_VOL);
     if (ret){
-		LUAT_DEBUG_PRINT("no es8311");
 		while (1){
 			luat_rtos_event_recv(g_s_task_handle, 0, &event, NULL, LUAT_WAIT_FOREVER);
 		}
     }else{
-		LUAT_DEBUG_PRINT("find es8311");
-
-        luat_audio_codec.codec_opts->control(&luat_audio_codec,LUAT_CODEC_SET_RATE,16000);
-        luat_audio_codec.codec_opts->control(&luat_audio_codec,LUAT_CODEC_SET_BITS,16);
-		luat_audio_codec.codec_opts->control(&luat_audio_codec,LUAT_CODEC_SET_FORMAT,LUAT_CODEC_FORMAT_I2S);
-
-        luat_audio_codec.codec_opts->control(&luat_audio_codec,LUAT_CODEC_SET_VOICE_VOL,VOICE_VOL);
-        luat_audio_codec.codec_opts->control(&luat_audio_codec,LUAT_CODEC_SET_MIC_VOL,MIC_VOL);
-
         // luat_audio_codec.codec_opts->control(&luat_audio_codec,LUAT_CODEC_MODE_STANDBY,LUAT_CODEC_MODE_ALL);
         luat_audio_codec.codec_opts->stop(&luat_audio_codec);
     }

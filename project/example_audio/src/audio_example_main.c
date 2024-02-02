@@ -35,6 +35,8 @@
 #define PA_PWR_PIN HAL_GPIO_20
 #define PA_PWR_PIN_ALT_FUN	0
 #endif
+#define PA_ON_LEVEL 1
+#define PWR_ON_LEVEL 1
 
 #define TEST_I2C_ID I2C_ID0
 #define TEST_I2S_ID I2S_ID0
@@ -60,27 +62,24 @@ static uint32_t g_s_record_time;
 static Buffer_Struct g_s_amr_rom_file;
 static uint8_t g_s_test_only_record = 0;
 
+#if (TEST_USE_ES8311 == 1)
+#define PA_DELAY		200
+#define PWR_ON_DELAY	10
+#define PWR_SLEEP_DELAY	600
+#else
+#define PA_DELAY		100
+#define PWR_ON_DELAY	0
+#define PWR_SLEEP_DELAY	400
+#endif
+
 static const luat_audio_codec_conf_t luat_audio_codec_es8311 = {
     .i2c_id = TEST_I2C_ID,
     .i2s_id = TEST_I2S_ID,
-    .pa_pin = PA_PWR_PIN,
-    .pa_on_level = 1,
-	.power_pin = CODEC_PWR_PIN,
-	.power_on_level = 1,
-	.power_on_delay_ms = 10,
-	.pa_delay_time = 200,
-	.after_sleep_ready_time = 600,
     .codec_opts = &codec_opts_es8311,
 };
 
 static const luat_audio_codec_conf_t luat_audio_codec_tm8211 = {
     .i2s_id = TEST_I2S_ID,
-    .pa_pin = PA_PWR_PIN,
-    .pa_on_level = 1,
-	.power_pin = CODEC_PWR_PIN,
-	.power_on_level = 1,
-	.pa_delay_time = 100,
-	.after_sleep_ready_time = 400,
     .codec_opts = &codec_opts_tm8211,
 };
 
@@ -114,11 +113,11 @@ static const luat_i2s_conf_t luat_i2s_conf_tm8211 =
 };
 
 #if (TEST_USE_ES8311 == 1)
-const luat_i2s_conf_t *i2s_conf = &luat_i2s_conf_es8311;
-const luat_audio_codec_conf_t *codec_conf = &luat_audio_codec_es8311;
+static const luat_i2s_conf_t *i2s_conf = &luat_i2s_conf_es8311;
+static const luat_audio_codec_conf_t *codec_conf = &luat_audio_codec_es8311;
 #else
-const luat_i2s_conf_t *i2s_conf = &luat_i2s_conf_tm8211;
-const luat_audio_codec_conf_t *codec_conf = &luat_audio_codec_tm8211;
+static const luat_i2s_conf_t *i2s_conf = &luat_i2s_conf_tm8211;
+static const luat_audio_codec_conf_t *codec_conf = &luat_audio_codec_tm8211;
 #endif
 
 extern void download_file();
@@ -332,11 +331,12 @@ static void demo_task(void *arg)
 	if (TEST_USE_ES8311){
 		luat_i2c_setup(luat_audio_codec_es8311.i2c_id, 1);
 	}
-
 	luat_i2s_setup(i2s_conf);
-
+	
 	luat_audio_set_bus_type(MULTIMEDIA_ID,MULTIMEDIA_AUDIO_BUS_I2S);	//设置音频总线类型
 	luat_audio_setup_codec(MULTIMEDIA_ID, codec_conf);					//设置音频codec
+	luat_audio_config_pa(MULTIMEDIA_ID, PA_PWR_PIN, PA_ON_LEVEL, PWR_SLEEP_DELAY, PA_DELAY);//配置音频pa
+	luat_audio_config_dac(MULTIMEDIA_ID, CODEC_PWR_PIN, PWR_ON_LEVEL, 0);//配置音频dac_power
 	luat_audio_init_codec(MULTIMEDIA_ID, TEST_VOL, TEST_MIC_VOL);		//初始化音频codec
 
 #if defined FEATURE_IMS_ENABLE	//VOLTE固件不支持TTS
@@ -626,10 +626,7 @@ static void demo_task(void *arg)
 				}
 			}
 #endif
-
 		}
-
-
 		//演示一下休眠
 		luat_audio_sleep(MULTIMEDIA_ID, 1);
 		luat_pm_power_ctrl(LUAT_PM_POWER_USB, 0);	//没接USB的，只需要在开始的时候关闭一次USB就行了
