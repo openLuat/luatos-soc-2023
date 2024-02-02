@@ -142,6 +142,7 @@ add_includedirs("$(projectdir)/thirdparty/littlefs",
 add_defines("LUAT_USE_FS_VFS","MBEDTLS_CONFIG_FILE=\"mbedtls_ec7xx_config.h\"")
 -- CSDK相关头文件引用
 add_includedirs(LUATOS_ROOT .. "/luat/include",
+                LUATOS_ROOT .. "/components/common",
                 LUATOS_ROOT .. "/components/mobile",
                 LUATOS_ROOT .. "/components/printf",
                 LUATOS_ROOT .. "/components/ethernet/common",
@@ -203,7 +204,8 @@ target("csdk")
     add_files(LUATOS_ROOT .."/components/network/adapter/luat_network_adapter.c",
             LUATOS_ROOT .."/components/ethernet/common/dns_client.c"
             )
-
+    -- multimedia
+    add_files(LUATOS_ROOT.."/components/multimedia/luat_multimedia_audio.c")
     -- mbedtls
     add_files(LUATOS_ROOT .."/components/mbedtls/library/*.c")
     -- crypto

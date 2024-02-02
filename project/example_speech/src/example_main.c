@@ -3,6 +3,8 @@
 #include "luat_mobile.h"
 #include "luat_i2c.h"
 #include "luat_i2s.h"
+#include "luat_audio.h"
+#include "luat_multimedia.h"
 #include "luat_rtos.h"
 #include "luat_debug.h"
 #include "luat_mem.h"
@@ -12,16 +14,18 @@
 
 #include "interf_enc.h"
 #include "interf_dec.h"
-//demo配合云喇叭开发实现一边录音一边放音功能，无限循环，来模拟实现对讲功能，无软件降噪算法，MIC和喇叭尽量远离
-//AIR780EP音频开发板配置
+//demo配合音频扩展板开发实现一边录音一边放音功能，无限循环，来模拟实现对讲功能，无软件降噪算法，MIC和喇叭尽量远离
+//AIR780EP音频扩展板配置
 
 #define CODEC_PWR_PIN HAL_GPIO_16
 #define CODEC_PWR_PIN_ALT_FUN	4
 #define PA_PWR_PIN HAL_GPIO_25
 #define PA_PWR_PIN_ALT_FUN	0
-#define PA_ON_LEVEL 0
 
-#define TEST_I2C_ID I2C_ID1
+#define PA_ON_LEVEL 1
+#define PWR_ON_LEVEL 1
+
+#define TEST_I2C_ID I2C_ID0
 #define TEST_I2S_ID I2S_ID0
 
 #define VOICE_VOL   65
@@ -31,13 +35,11 @@
 #define TEST_MAX_TIME	0		//单次测试时间，如果是0就是无限长，单位是录音回调次数
 //#define ONLY_RECORD			//如果只想录音不想放音，可以打开这个宏
 
+#define MULTIMEDIA_ID 0
+
 static luat_audio_codec_conf_t luat_audio_codec = {
     .i2c_id = TEST_I2C_ID,
     .i2s_id = TEST_I2S_ID,
-    .pa_pin = PA_PWR_PIN,
-    .pa_on_level = PA_ON_LEVEL,
-    // .dummy_time_len,
-    // .pa_delay_time, 
     .codec_opts = &codec_opts_es8311,
 };
 
@@ -75,15 +77,12 @@ static void speech_demo_task(void *arg)
 	luat_gpio_cfg_t gpio_cfg;
 	luat_gpio_set_default_cfg(&gpio_cfg);
 
-
 	gpio_cfg.pin = PA_PWR_PIN;
 	luat_gpio_open(&gpio_cfg);
 
 	gpio_cfg.pin = CODEC_PWR_PIN;
 	gpio_cfg.alt_fun = CODEC_PWR_PIN_ALT_FUN;
 	luat_gpio_open(&gpio_cfg);
-	luat_gpio_set(CODEC_PWR_PIN, 1);
-	luat_gpio_set(PA_PWR_PIN, 1);
 
 	luat_i2c_setup(TEST_I2C_ID, 0);
 	luat_i2c_set_polling_mode(TEST_I2C_ID, 1);
@@ -113,26 +112,25 @@ static void speech_demo_task(void *arg)
 	HANDLE amr_encoder_handler = Encoder_Interface_init(0);
 	HANDLE amr_decoder_handler = Decoder_Interface_init();
 
-	int ret = luat_audio_codec.codec_opts->init(&luat_audio_codec,LUAT_CODEC_MODE_SLAVE);
+	luat_audio_set_bus_type(MULTIMEDIA_ID,MULTIMEDIA_AUDIO_BUS_I2S);	//设置音频总线类型
+	luat_audio_setup_codec(MULTIMEDIA_ID, &luat_audio_codec);			//设置音频codec
+	luat_audio_config_pa(MULTIMEDIA_ID, PA_PWR_PIN, PA_ON_LEVEL, 0, 0);//配置音频pa
+	luat_audio_config_dac(MULTIMEDIA_ID, CODEC_PWR_PIN, PWR_ON_LEVEL, 0);//配置音频dac_power
+
+	int ret = luat_audio_init_codec(MULTIMEDIA_ID, VOICE_VOL, MIC_VOL);
     if (ret){
-		LUAT_DEBUG_PRINT("no es8311");
 		while (1){
 			luat_rtos_task_sleep(500000);
 		}
     }else{
-		LUAT_DEBUG_PRINT("find es8311");
-
-		luat_audio_codec.codec_opts->control(&luat_audio_codec,LUAT_CODEC_SET_RATE,16000);
-		luat_audio_codec.codec_opts->control(&luat_audio_codec,LUAT_CODEC_SET_BITS,16);
-		luat_audio_codec.codec_opts->control(&luat_audio_codec,LUAT_CODEC_SET_FORMAT,LUAT_CODEC_FORMAT_I2S);
-
-        luat_audio_codec.codec_opts->control(&luat_audio_codec,LUAT_CODEC_SET_VOICE_VOL,VOICE_VOL);
-        luat_audio_codec.codec_opts->control(&luat_audio_codec,LUAT_CODEC_SET_MIC_VOL,MIC_VOL);
-
-
 		//1秒最高音质的AMRNB编码是1600
 		luat_i2s_modify(TEST_I2S_ID, LUAT_I2S_CHANNEL_RIGHT, LUAT_I2S_BITS_16, 8000);
 		luat_i2s_transfer_loop(TEST_I2S_ID, buff, 320 * RECORD_ONCE_LEN, 4, 0);
+
+		luat_audio_conf_t* luat_audio_conf = luat_audio_get_config(MULTIMEDIA_ID);	//获取音频结构体
+		luat_audio_codec_conf_t* codec_conf = &luat_audio_conf->codec_conf;			//获取音频codec结构体
+		codec_conf->codec_opts->control(codec_conf,LUAT_CODEC_SET_PA,PA_ON_LEVEL);	//打开pa
+		
 		cur_play_buf = 0;
 		run_cnt = 0;
 		while(1)
