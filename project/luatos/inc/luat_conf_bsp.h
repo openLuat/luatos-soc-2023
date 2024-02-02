@@ -22,7 +22,7 @@
 #define LUAT_USE_OTP 1
 #define LUAT_USE_WLAN 1
 #define LUAT_USE_SMS 1
-
+#define LUAT_MCU_IOMUX_CTRL 1
 #define LUAT_USE_HMETA 1
 
 #define LUAT_USE_IOTAUTH 1
