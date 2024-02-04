@@ -172,10 +172,10 @@ static void record_stop_encode_amr(uint8_t *data, uint32_t len)
 	luat_audio_record_stop(MULTIMEDIA_ID);
 
 #if defined (FEATURE_AMR_CP_ENABLE) || defined (FEATURE_VEM_CP_ENABLE)
-	luat_audio_standby(MULTIMEDIA_ID);
+	luat_audio_pm_request(MULTIMEDIA_ID,AUDIO_PM_MODE_STANDBY);
 	luat_audio_inter_amr_deinit();
 #else
-	luat_audio_sleep(MULTIMEDIA_ID, 1);
+	luat_audio_pm_request(multimedia_id,AUDIO_PM_MODE_SHUTDOWN);
 	Encoder_Interface_exit(g_s_amr_encoder_handler);
 	g_s_amr_encoder_handler = NULL;
 #endif
@@ -232,9 +232,9 @@ void audio_event_cb(uint32_t event, void *param)
 		break;
 	case LUAT_MULTIMEDIA_CB_AUDIO_DONE:
 		LUAT_DEBUG_PRINT("audio play done, result=%d!", luat_audio_play_get_last_error(MULTIMEDIA_ID));
-		luat_audio_standby(MULTIMEDIA_ID);
-		//如果追求极致的功耗，用luat_audio_sleep代替luat_audio_standby
-		//luat_audio_sleep(MULTIMEDIA_ID, 1);
+		luat_audio_pm_request(MULTIMEDIA_ID,AUDIO_PM_MODE_STANDBY);
+		//如果追求极致的功耗，用AUDIO_PM_MODE_SHUTDOWN代替AUDIO_PM_MODE_STANDBY
+		//luat_audio_pm_request(multimedia_id,AUDIO_PM_MODE_SHUTDOWN);
 		//通知一下用户task播放完成了
 		luat_rtos_event_send(g_s_task_handle, AUDIO_EVENT_PLAY_DONE, luat_audio_play_get_last_error(MULTIMEDIA_ID), 0, 0, 0);
 		break;
@@ -357,7 +357,7 @@ static void demo_task(void *arg)
 	download_file();
 #endif
 #ifdef CALL_TEST
-	//luat_audio_sleep(MULTIMEDIA_ID, 1);
+	//luat_audio_pm_request(multimedia_id,AUDIO_PM_MODE_SHUTDOWN);
     luat_rtos_event_recv(g_s_task_handle, VOLTE_EVENT_CALL_READY, &event, NULL, LUAT_WAIT_FOREVER);
     // luat_mobile_make_call(MULTIMEDIA_ID, "xxxxxxxxxxx", 11);
 #endif
@@ -377,7 +377,7 @@ static void demo_task(void *arg)
 					is_call_uplink_on = 0;
 					luat_audio_speech_stop(MULTIMEDIA_ID);
 					//如果后续还要播放其他音频，或者PA无法控制的，用luat_audio_standby();
-					//luat_audio_sleep(MULTIMEDIA_ID, 1);
+					//luat_audio_pm_request(multimedia_id,AUDIO_PM_MODE_SHUTDOWN);
 				}
 				luat_meminfo_opt_sys(LUAT_HEAP_PSRAM, &total, &alloc, &peak);
 				LUAT_DEBUG_PRINT("psram total %u, used %u, max used %u", total, alloc, peak);
@@ -547,9 +547,9 @@ static void demo_task(void *arg)
 							speech_test = 0;
 							LUAT_DEBUG_PRINT("test stop");
 							luat_audio_record_stop(MULTIMEDIA_ID);
-							luat_audio_standby(MULTIMEDIA_ID);
-							//如果追求极致的功耗，用luat_audio_sleep代替luat_audio_standby
-							//luat_audio_sleep(MULTIMEDIA_ID, 1);
+							luat_audio_pm_request(MULTIMEDIA_ID,AUDIO_PM_MODE_STANDBY);
+							//如果追求极致的功耗，用AUDIO_PM_MODE_SHUTDOWN代替AUDIO_PM_MODE_STANDBY
+							//luat_audio_pm_request(multimedia_id,AUDIO_PM_MODE_SHUTDOWN);
 							luat_heap_free(buff);
 							buff = NULL;
 							luat_heap_free(amr_buff);
@@ -608,9 +608,9 @@ static void demo_task(void *arg)
 							speech_test = 0;
 							LUAT_DEBUG_PRINT("test stop");
 							luat_audio_record_stop(MULTIMEDIA_ID);
-							luat_audio_standby(MULTIMEDIA_ID);
-							//如果追求极致的功耗，用luat_audio_sleep代替luat_audio_standby
-							//luat_audio_sleep(MULTIMEDIA_ID, 1);
+							luat_audio_pm_request(MULTIMEDIA_ID,AUDIO_PM_MODE_STANDBY);
+							//如果追求极致的功耗，用AUDIO_PM_MODE_SHUTDOWN代替AUDIO_PM_MODE_STANDBY
+							//luat_audio_pm_request(multimedia_id,AUDIO_PM_MODE_SHUTDOWN);
 							luat_heap_opt_free(LUAT_HEAP_AUTO, buff);
 							buff = NULL;
 							luat_heap_opt_free(LUAT_HEAP_AUTO, amr_buff);
@@ -630,7 +630,7 @@ static void demo_task(void *arg)
 #endif
 		}
 		//演示一下休眠
-		luat_audio_sleep(MULTIMEDIA_ID, 1);
+		luat_audio_pm_request(MULTIMEDIA_ID,AUDIO_PM_MODE_SHUTDOWN);
 		luat_pm_power_ctrl(LUAT_PM_POWER_USB, 0);	//没接USB的，只需要在开始的时候关闭一次USB就行了
 		luat_pm_request(LUAT_PM_SLEEP_MODE_LIGHT);
 		luat_rtos_task_sleep(10000);
@@ -639,7 +639,7 @@ static void demo_task(void *arg)
 		if (TEST_USE_ES8311)
 		{
 			luat_audio_init_codec(MULTIMEDIA_ID, TEST_VOL, TEST_MIC_VOL);	//如果没有AGPIO来控制，需要重新初始化ES8311，如果用AGPIO来控制的，就不需要重新初始化
-			luat_audio_sleep(MULTIMEDIA_ID, 0);
+			luat_audio_pm_request(MULTIMEDIA_ID,AUDIO_PM_MODE_RESUME);			//工作模式
 		}
 #endif
     }
