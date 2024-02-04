@@ -339,6 +339,8 @@ static void demo_task(void *arg)
 	luat_audio_config_dac(MULTIMEDIA_ID, CODEC_PWR_PIN, PWR_ON_LEVEL, 0);//配置音频dac_power
 	luat_audio_init_codec(MULTIMEDIA_ID, TEST_VOL, TEST_MIC_VOL);		//初始化音频codec
 
+	luat_audio_pm_request(MULTIMEDIA_ID,AUDIO_PM_MODE_RESUME);			//工作模式
+
 #if defined FEATURE_IMS_ENABLE	//VOLTE固件不支持TTS
 #else
 	// 中文测试用下面的

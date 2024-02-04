@@ -126,10 +126,7 @@ static void speech_demo_task(void *arg)
 		//1秒最高音质的AMRNB编码是1600
 		luat_i2s_modify(TEST_I2S_ID, LUAT_I2S_CHANNEL_RIGHT, LUAT_I2S_BITS_16, 8000);
 		luat_i2s_transfer_loop(TEST_I2S_ID, buff, 320 * RECORD_ONCE_LEN, 4, 0);
-
-		luat_audio_conf_t* luat_audio_conf = luat_audio_get_config(MULTIMEDIA_ID);	//获取音频结构体
-		luat_audio_codec_conf_t* codec_conf = &luat_audio_conf->codec_conf;			//获取音频codec结构体
-		codec_conf->codec_opts->control(codec_conf,LUAT_CODEC_SET_PA,PA_ON_LEVEL);	//打开pa
+		luat_audio_pm_request(MULTIMEDIA_ID,AUDIO_PM_MODE_RESUME);			//工作模式
 		
 		cur_play_buf = 0;
 		run_cnt = 0;
