@@ -762,6 +762,7 @@ int luat_audio_speech(uint8_t multimedia_id, uint8_t is_downlink, uint8_t type, 
 		{
 			prv_audio_config.speech_uplink_type = type;
 			luat_i2s_conf_t *i2s_conf = luat_i2s_get_config(prv_audio_config.codec_conf.i2s_id);
+			if (prv_audio_config.i2s_rx_cb_save) DBG("already save rx len %d", prv_audio_config.i2s_rx_cb_save);
 			prv_audio_config.i2s_rx_cb_save = i2s_conf->cb_rx_len;
 			i2s_conf->cb_rx_len = 320 * prv_audio_config.speech_uplink_type;
 			DBG("save rx len %d", prv_audio_config.i2s_rx_cb_save);
@@ -785,8 +786,12 @@ int luat_audio_speech_stop(uint8_t multimedia_id)
 	prv_audio_config.speech_uplink_type = 0;
 	luat_i2s_close(prv_audio_config.codec_conf.i2s_id);
 	luat_i2s_conf_t *i2s_conf = luat_i2s_get_config(prv_audio_config.codec_conf.i2s_id);
-	i2s_conf->cb_rx_len  = prv_audio_config.i2s_rx_cb_save;
-	DBG("load rx len %d", i2s_conf->cb_rx_len);
+	if (prv_audio_config.i2s_rx_cb_save)
+	{
+		i2s_conf->cb_rx_len  = prv_audio_config.i2s_rx_cb_save;
+		DBG("load rx len %d", i2s_conf->cb_rx_len);
+	}
+	prv_audio_config.i2s_rx_cb_save = 0;
 }
 
 #if defined (FEATURE_AMR_CP_ENABLE) || defined (FEATURE_VEM_CP_ENABLE)
