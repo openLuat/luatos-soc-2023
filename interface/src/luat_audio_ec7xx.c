@@ -925,6 +925,7 @@ int luat_audio_inter_amr_encode(const uint16_t *pcm_buf, uint8_t *amr_buf, uint8
 //			DBG("%d,%d,%d,%d,%d,%d,%x,%x,%x,%x,%x", eng->encode_cnf.rc, eng->encode_cnf.codecType, eng->encode_cnf.sn,
 //					 eng->encode_cnf.frameType,eng->encode_cnf.outBitOffset,eng->encode_cnf.amrBitLen,
 //					 eng->encode_cnf.pAmrData, eng->encode_cnf.pPcmData, eng->encode_cnf.pPostVemPcmData, eng->encode_cnf.pExtra0, eng->encode_cnf.pExtra1);
+    		DBG("encode error %d", eng->encode_cnf.rc);
     		out_len = 1;
     		amr_buf[0] = (0xf << 3)|0x04;
     	}
@@ -933,6 +934,10 @@ int luat_audio_inter_amr_encode(const uint16_t *pcm_buf, uint8_t *amr_buf, uint8
 
     		if (eng->encode_cnf.frameType > eng->max_frame_type)
     		{
+    			if (eng->encode_cnf.frameType != 15)
+    			{
+    				DBG("encode frametype %d", eng->encode_cnf.frameType);
+    			}
         		out_len = 1;
         		amr_buf[0] = (0xf << 3)|0x04;
     		}
@@ -979,7 +984,19 @@ int luat_audio_inter_amr_decode(uint16_t *pcm_buf, const uint8_t *amr_buf, uint8
     }
     else
     {
-    	memcpy(pcm_buf, eng->decode_req.pPcmData, eng->decode_cnf.pcmDataLen);
+    	if (eng->decode_cnf.rc)
+    	{
+//			DBG("%d,%d,%d,%d,%d,%d,%x,%x,%x,%x,%x", eng->encode_cnf.rc, eng->encode_cnf.codecType, eng->encode_cnf.sn,
+//					 eng->encode_cnf.frameType,eng->encode_cnf.outBitOffset,eng->encode_cnf.amrBitLen,
+//					 eng->encode_cnf.pAmrData, eng->encode_cnf.pPcmData, eng->encode_cnf.pPostVemPcmData, eng->encode_cnf.pExtra0, eng->encode_cnf.pExtra1);
+    		DBG("decode error %d", eng->decode_cnf.rc);
+    		memset(pcm_buf, 0, (eng->decode_req.codecType + 1) * 320);
+    	}
+    	else
+    	{
+    		memcpy(pcm_buf, eng->decode_req.pPcmData, eng->decode_cnf.pcmDataLen);
+    	}
+
     }
 	eng->wait_flag = 0;
 
