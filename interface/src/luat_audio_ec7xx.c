@@ -933,18 +933,4 @@ int luat_audio_inter_amr_encode(const uint16_t *pcm_buf, uint8_t *amr_buf, uint8
 int luat_audio_inter_amr_decode(uint16_t *pcm_buf, const uint8_t *amr_buf, uint8_t *amr_len) {return -1;}
 #endif
 
-int luat_audio_pm_request(uint8_t multimedia_id,luat_audio_pm_mode_t mode){
-	if (prv_audio_config.codec_conf.codec_opts->no_control) return 0;
-	int result;
-	switch (mode)
-	{
-	case AUDIO_PM_MODE_RESUME:
-		result = prv_audio_config.codec_conf.codec_opts->control(&prv_audio_config.codec_conf,LUAT_CODEC_MODE_RESUME,LUAT_CODEC_MODE_ALL);
-		if (result)
-		{
-			return -1;
-		}
-		return 0;
-	}
-	return -1;
-}
+
