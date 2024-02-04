@@ -116,8 +116,7 @@ static void play_tone(uint8_t param)
 		if (g_s_codec_is_on)
 		{
 			g_s_codec_is_on = 0;
-            luat_audio_codec.codec_opts->stop(&luat_audio_codec);
-            // luat_audio_codec.codec_opts->control(&luat_audio_codec,LUAT_CODEC_MODE_STANDBY,LUAT_CODEC_MODE_ALL);
+            luat_audio_pm_request(MULTIMEDIA_ID,AUDIO_PM_MODE_STANDBY);			//待机模式
 		}
 		g_s_i2s_conf->is_full_duplex = 0;
         luat_rtos_timer_stop(g_s_delay_timer);
@@ -176,8 +175,7 @@ static void play_tone(uint8_t param)
 		luat_i2s_transfer_loop(I2S_ID, callAlertRing16k, 4872, 12, 0);
 	}
 	g_s_codec_is_on = 1;
-	luat_audio_codec.codec_opts->control(&luat_audio_codec,LUAT_CODEC_MODE_NORMAL,LUAT_CODEC_MODE_ALL);
-    // luat_audio_codec.codec_opts->start(&luat_audio_codec);
+	luat_audio_pm_request(MULTIMEDIA_ID,AUDIO_PM_MODE_RESUME);			//工作模式
     luat_rtos_timer_start(g_s_delay_timer, NO_ANSWER_AUTO_HANGUP_TIME, 0, hangup_delay, NULL);
 }
 
@@ -376,9 +374,6 @@ static void volte_task(void *param)
 		while (1){
 			luat_rtos_event_recv(g_s_task_handle, 0, &event, NULL, LUAT_WAIT_FOREVER);
 		}
-    }else{
-        // luat_audio_codec.codec_opts->control(&luat_audio_codec,LUAT_CODEC_MODE_STANDBY,LUAT_CODEC_MODE_ALL);
-        luat_audio_codec.codec_opts->stop(&luat_audio_codec);
     }
     
     LUAT_DEBUG_PRINT("es8311 init ret :%d",ret);
@@ -413,8 +408,7 @@ static void volte_task(void *param)
 			g_s_i2s_conf->cb_rx_len = 320 * g_s_record_type;
 			luat_i2s_modify(I2S_ID, LUAT_I2S_CHANNEL_RIGHT, LUAT_I2S_BITS_16, g_s_record_type * 8000);
 			luat_i2s_transfer_loop(I2S_ID, NULL, 3200, 2, 0);	//address传入空地址就是播放空白音
-            // luat_audio_codec.codec_opts->start(&luat_audio_codec);
-			luat_audio_codec.codec_opts->control(&luat_audio_codec,LUAT_CODEC_MODE_NORMAL,LUAT_CODEC_MODE_ALL);
+			luat_audio_pm_request(MULTIMEDIA_ID,AUDIO_PM_MODE_RESUME);			//工作模式
             luat_rtos_timer_stop(g_s_delay_timer);
 			break;
 		case VOLTE_EVENT_RECORD_VOICE_UPLOAD:
@@ -441,10 +435,8 @@ static void volte_task(void *param)
 				if (!g_s_codec_is_on)
 				{
 					g_s_codec_is_on = 1;
-                    // luat_audio_codec.codec_opts->start(&luat_audio_codec);
-					luat_audio_codec.codec_opts->control(&luat_audio_codec,LUAT_CODEC_MODE_NORMAL,LUAT_CODEC_MODE_ALL);
+                	luat_audio_pm_request(MULTIMEDIA_ID,AUDIO_PM_MODE_RESUME);			//工作模式
 				}
-
 			}
 			else
 			{
