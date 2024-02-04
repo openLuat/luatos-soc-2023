@@ -422,13 +422,14 @@ static void demo_task(void *arg)
 		amr_info[4].path = NULL;
 		amr_info[4].address = (uint32_t)amr_yuan_data;
 		amr_info[4].rom_data_len = sizeof(amr_yuan_data);
-
+		luat_audio_pm_request(MULTIMEDIA_ID,AUDIO_PM_MODE_RESUME);			//工作模式
 		luat_audio_play_multi_files(MULTIMEDIA_ID, mp3_info, 4);
 		luat_rtos_event_recv(g_s_task_handle, AUDIO_EVENT_PLAY_DONE, &event, NULL, LUAT_WAIT_FOREVER);
 		luat_meminfo_opt_sys(LUAT_HEAP_PSRAM, &total, &alloc, &peak);
 		LUAT_DEBUG_PRINT("psram total %u, used %u, max used %u", total, alloc, peak);
 		luat_meminfo_opt_sys(LUAT_HEAP_SRAM, &total, &alloc, &peak);
 		LUAT_DEBUG_PRINT("sram total %u, used %u, max used %u", total, alloc, peak);
+		luat_audio_pm_request(MULTIMEDIA_ID,AUDIO_PM_MODE_RESUME);			//工作模式
 		luat_audio_play_multi_files(MULTIMEDIA_ID, amr_info, 5);
 		luat_rtos_event_recv(g_s_task_handle, AUDIO_EVENT_PLAY_DONE, &event, NULL, LUAT_WAIT_FOREVER);
 		luat_meminfo_opt_sys(LUAT_HEAP_PSRAM, &total, &alloc, &peak);
@@ -439,6 +440,7 @@ static void demo_task(void *arg)
 
 #if defined FEATURE_IMS_ENABLE	//VOLTE固件不支持TTS
 #else
+		luat_audio_pm_request(MULTIMEDIA_ID,AUDIO_PM_MODE_RESUME);			//工作模式
 		luat_audio_play_tts_text(MULTIMEDIA_ID, tts_string, sizeof(tts_string));
 		luat_rtos_event_recv(g_s_task_handle, AUDIO_EVENT_PLAY_DONE, &event, NULL, LUAT_WAIT_FOREVER);
 		luat_meminfo_opt_sys(LUAT_HEAP_PSRAM, &total, &alloc, &peak);
@@ -460,6 +462,7 @@ static void demo_task(void *arg)
 			g_s_amr_rom_file.Pos = 0;
 			OS_BufferWrite(&g_s_amr_rom_file, "#!AMR\n", 6);
 			g_s_test_only_record = 1;
+			luat_audio_pm_request(MULTIMEDIA_ID,AUDIO_PM_MODE_RESUME);			//工作模式
 			luat_audio_record_and_play(MULTIMEDIA_ID, 8000, NULL, 3200, 2); //放音buffer填NULL，就是喇叭静音
 #if defined (FEATURE_AMR_CP_ENABLE) || defined (FEATURE_VEM_CP_ENABLE)
 			luat_rtos_task_sleep((RECORD_TIME + 1) * 2000);
