@@ -53,12 +53,9 @@ EXCEP_DUMP_DATA uint32_t tDataInfoCell [][2]=
     {EC_EXCEPTION_AP_RAM_BASE,      EC_EXCEPTION_AP_RAM_LEN},
     {EC_EXCEPTION_CP_RAM_BASE,      EC_EXCEPTION_CP_RAM_LEN},
     {EC_EXCEPTION_APCP_RAM_BASE,    EC_EXCEPTION_APCP_RAM_LEN},
-#ifdef __USER_CODE__	//luatools not support,wait support
-#else
     #if (PSRAM_EXIST==1)
     {EC_EXCEPTION_PSRAM_RAM_BASE,   EC_EXCEPTION_PSRAM_RAM_LEN},
     #endif
-#endif
 };
 
 extern void delay_us(uint32_t us);
