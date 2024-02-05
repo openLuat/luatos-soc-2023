@@ -337,7 +337,7 @@ static void demo_task(void *arg)
 	luat_audio_setup_codec(MULTIMEDIA_ID, codec_conf);					//设置音频codec
 	luat_audio_config_pa(MULTIMEDIA_ID, PA_PWR_PIN, PA_ON_LEVEL, PWR_SLEEP_DELAY, PA_DELAY);//配置音频pa
 	luat_audio_config_dac(MULTIMEDIA_ID, CODEC_PWR_PIN, PWR_ON_LEVEL, 0);//配置音频dac_power
-	luat_audio_init_codec(MULTIMEDIA_ID, TEST_VOL, TEST_MIC_VOL);		//初始化音频codec
+	luat_audio_init(MULTIMEDIA_ID, TEST_VOL, TEST_MIC_VOL);		//初始化音频
 
 #if defined FEATURE_IMS_ENABLE	//VOLTE固件不支持TTS
 #else
@@ -635,7 +635,7 @@ static void demo_task(void *arg)
 		luat_pm_power_ctrl(LUAT_PM_POWER_USB, 1);
 		if (TEST_USE_ES8311)
 		{
-			luat_audio_init_codec(MULTIMEDIA_ID, TEST_VOL, TEST_MIC_VOL);	//如果没有AGPIO来控制，需要重新初始化ES8311，如果用AGPIO来控制的，就不需要重新初始化
+			luat_audio_init(MULTIMEDIA_ID, TEST_VOL, TEST_MIC_VOL);	//如果没有AGPIO来控制，需要重新初始化ES8311，如果用AGPIO来控制的，就不需要重新初始化
 		}
 #endif
     }

@@ -118,7 +118,7 @@ static void speech_demo_task(void *arg)
 	luat_audio_config_pa(MULTIMEDIA_ID, PA_PWR_PIN, PA_ON_LEVEL, 0, 0);//配置音频pa
 	luat_audio_config_dac(MULTIMEDIA_ID, CODEC_PWR_PIN, PWR_ON_LEVEL, 0);//配置音频dac_power
 
-	int ret = luat_audio_init_codec(MULTIMEDIA_ID, VOICE_VOL, MIC_VOL);
+	int ret = luat_audio_init(MULTIMEDIA_ID, VOICE_VOL, MIC_VOL);
     if (ret){
 		while (1){
 			luat_rtos_task_sleep(500000);

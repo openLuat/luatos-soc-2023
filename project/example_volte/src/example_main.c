@@ -369,7 +369,7 @@ static void volte_task(void *param)
 	luat_audio_config_dac(MULTIMEDIA_ID, CODEC_PWR_PIN, PWR_ON_LEVEL, 0);//配置音频dac_power
 
 
-    int ret = luat_audio_init_codec(MULTIMEDIA_ID, VOICE_VOL, MIC_VOL);
+    int ret = luat_audio_init(MULTIMEDIA_ID, VOICE_VOL, MIC_VOL);
     if (ret){
 		while (1){
 			luat_rtos_event_recv(g_s_task_handle, 0, &event, NULL, LUAT_WAIT_FOREVER);
