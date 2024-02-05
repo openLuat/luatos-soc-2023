@@ -93,32 +93,33 @@ static void audio_event_cb(uint32_t event, void *param){
 	rtos_msg_t msg = {0};
 	switch(event)
 	{
-	case MULTIMEDIA_CB_AUDIO_DECODE_START:
+	case LUAT_MULTIMEDIA_CB_AUDIO_DECODE_START:
 		luat_audio_check_ready(0);
 		break;
-	case MULTIMEDIA_CB_AUDIO_OUTPUT_START:
+	case LUAT_MULTIMEDIA_CB_AUDIO_OUTPUT_START:
 		break;
-	case MULTIMEDIA_CB_AUDIO_NEED_DATA:
+	case LUAT_MULTIMEDIA_CB_AUDIO_NEED_DATA:
 		if (prv_audio_config.raw_mode)
 		{
 			msg.handler = l_multimedia_raw_handler;
-			msg.arg1 = MULTIMEDIA_CB_AUDIO_NEED_DATA;
+			msg.arg1 = LUAT_MULTIMEDIA_CB_AUDIO_NEED_DATA;
 			msg.arg2 = (int)param;
 			luat_msgbus_put(&msg, 1);
 		}
 		break;
-	case MULTIMEDIA_CB_TTS_INIT:
+	case LUAT_MULTIMEDIA_CB_TTS_INIT:
 		break;
-	case MULTIMEDIA_CB_TTS_DONE:
+	case LUAT_MULTIMEDIA_CB_TTS_DONE:
 		if (!audio_play_get_last_error(0))
 		{
 			audio_play_write_blank_raw_ex(0, 1, 0);
 		}
 		break;
-	case MULTIMEDIA_CB_AUDIO_DONE:
-		luat_audio_pm_request(0,AUDIO_PM_MODE_STANDBY);
+	case LUAT_MULTIMEDIA_CB_AUDIO_DONE:
+		luat_audio_play_blank(0);
+		// luat_audio_pm_request(0,LUAT_AUDIO_PM_STANDBY);
 		msg.handler = l_multimedia_raw_handler;
-		msg.arg1 = MULTIMEDIA_CB_AUDIO_DONE;
+		msg.arg1 = LUAT_MULTIMEDIA_CB_AUDIO_DONE;
 		msg.arg2 = (int)param;
 		luat_msgbus_put(&msg, 1);
 		break;
@@ -238,17 +239,17 @@ void luat_audio_play_global_init(audio_play_event_cb_fun_t event_cb, audio_play_
 	prv_audio_config.hardware_data = NULL;
 }
 #endif
-static void luat_audio_prepare(void)
+static void luat_audio_prepare(uint8_t multimedia_id)
 {
 	if (prv_audio_config.is_sleep)
 	{
-		luat_audio_pm_request(0,AUDIO_PM_MODE_RESUME);
+		luat_audio_pm_request(multimedia_id,LUAT_AUDIO_PM_RESUME);
 	}
 }
 
 int luat_audio_play_file(uint8_t multimedia_id, const char *path)
 {
-	luat_audio_prepare();
+	luat_audio_prepare(multimedia_id);
 	prv_audio_config.raw_mode = 0;
 	audio_play_info_t play_info[1];
 	play_info[0].path = path;
@@ -264,7 +265,7 @@ uint8_t luat_audio_is_finish(uint8_t multimedia_id)
 
 int luat_audio_start_raw(uint8_t multimedia_id, uint8_t audio_format, uint8_t num_channels, uint32_t sample_rate, uint8_t bits_per_sample, uint8_t is_signed)
 {
-	luat_audio_prepare();
+	luat_audio_prepare(multimedia_id);
 	prv_audio_config.raw_mode = 1;
 	return audio_play_start_raw(prv_audio_config.codec_conf.i2s_id, audio_format, num_channels, sample_rate, bits_per_sample, is_signed);
 }
@@ -451,7 +452,7 @@ int luat_audio_play_tts_text(uint32_t multimedia_id, void *text, uint32_t text_b
 		}
 	}
 #endif
-	luat_audio_prepare();
+	luat_audio_prepare(multimedia_id);
 	prv_audio_config.raw_mode = 0;
 	return audio_play_tts_text(multimedia_id, text, text_bytes);
 }
@@ -465,7 +466,7 @@ int luat_audio_play_tts_set_param(uint32_t multimedia_id, uint32_t param_id, uin
 #else
 int luat_audio_play_tts_text(uint8_t multimedia_id, void *text, uint32_t text_bytes)
 {
-	luat_audio_prepare();
+	luat_audio_prepare(multimedia_id);
 	prv_audio_config.raw_mode = 0;
 	return audio_play_tts_text(prv_audio_config.codec_conf.i2s_id, text, text_bytes);
 }
@@ -515,7 +516,7 @@ int luat_audio_play_write_blank_raw(uint8_t multimedia_id, uint8_t cnt, uint8_t 
 
 int luat_audio_play_start_raw(uint8_t multimedia_id, uint8_t audio_format, uint8_t num_channels, uint32_t sample_rate, uint8_t bits_per_sample, uint8_t is_signed)
 {
-	luat_audio_prepare();
+	luat_audio_prepare(multimedia_id);
 	prv_audio_config.raw_mode = 1;
 	return audio_play_start_raw(prv_audio_config.codec_conf.i2s_id, audio_format, num_channels, sample_rate, bits_per_sample, is_signed);
 }
@@ -533,7 +534,7 @@ int luat_audio_play_stop_raw(uint8_t multimedia_id)
 #ifdef __LUATOS__
 int luat_audio_play_multi_files(uint8_t multimedia_id, uData_t *info, uint32_t files_num, uint8_t error_stop)
 {
-	luat_audio_prepare();
+	luat_audio_prepare(multimedia_id);
 	prv_audio_config.raw_mode = 0;
 	uint32_t i;
 	if (files_num > 256) files_num = 256;
@@ -549,7 +550,7 @@ int luat_audio_play_multi_files(uint8_t multimedia_id, uData_t *info, uint32_t f
 #else
 int luat_audio_play_multi_files(uint8_t multimedia_id, luat_audio_play_info_t info[], uint32_t files_num)
 {
-	luat_audio_prepare();
+	luat_audio_prepare(multimedia_id);
 	prv_audio_config.raw_mode = 0;
 	return audio_play_multi_files(prv_audio_config.codec_conf.i2s_id, (audio_play_info_t*)info, files_num);
 }
@@ -632,7 +633,7 @@ int luat_audio_record_and_play(uint8_t multimedia_id, uint32_t sample_rate, cons
 	{
 		luat_gpio_set(prv_audio_config.codec_conf.pa_pin, prv_audio_config.codec_conf.pa_on_level);
 	}
-	luat_audio_prepare();
+	luat_audio_prepare(multimedia_id);
 }
 
 int luat_audio_record_stop(uint8_t multimedia_id)
@@ -695,8 +696,7 @@ int luat_audio_speech(uint8_t multimedia_id, uint8_t is_downlink, uint8_t type, 
 			luat_i2s_modify(prv_audio_config.codec_conf.i2s_id, i2s_conf->channel_format, LUAT_I2S_BITS_16, prv_audio_config.speech_uplink_type * 8000);
 			I2S_TransferLoop(prv_audio_config.codec_conf.i2s_id, NULL, 3200, 2, 0);	//address传入空地址就是播放空白音
 		}
-		luat_audio_pm_request(multimedia_id,AUDIO_PM_MODE_RESUME);
-		luat_gpio_set(prv_audio_config.codec_conf.pa_pin, prv_audio_config.codec_conf.pa_on_level);
+		luat_audio_pm_request(multimedia_id,LUAT_AUDIO_PM_RESUME);
 	}
 	return 0;
 }

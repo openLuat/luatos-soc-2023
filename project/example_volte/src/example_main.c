@@ -116,7 +116,7 @@ static void play_tone(uint8_t param)
 		if (g_s_codec_is_on)
 		{
 			g_s_codec_is_on = 0;
-            luat_audio_pm_request(MULTIMEDIA_ID,AUDIO_PM_MODE_STANDBY);			//待机模式
+            luat_audio_pm_request(MULTIMEDIA_ID,LUAT_AUDIO_PM_STANDBY);			//待机模式
 		}
 		g_s_i2s_conf->is_full_duplex = 0;
         luat_rtos_timer_stop(g_s_delay_timer);
@@ -175,7 +175,7 @@ static void play_tone(uint8_t param)
 		luat_i2s_transfer_loop(I2S_ID, callAlertRing16k, 4872, 12, 0);
 	}
 	g_s_codec_is_on = 1;
-	luat_audio_pm_request(MULTIMEDIA_ID,AUDIO_PM_MODE_RESUME);			//工作模式
+	luat_audio_pm_request(MULTIMEDIA_ID,LUAT_AUDIO_PM_RESUME);			//工作模式
     luat_rtos_timer_start(g_s_delay_timer, NO_ANSWER_AUTO_HANGUP_TIME, 0, hangup_delay, NULL);
 }
 
@@ -363,7 +363,7 @@ static void volte_task(void *param)
 	size_t total, alloc, peak;
 	luat_event_t event;
 
-	luat_audio_set_bus_type(MULTIMEDIA_ID,MULTIMEDIA_AUDIO_BUS_I2S);	//设置音频总线类型
+	luat_audio_set_bus_type(MULTIMEDIA_ID,LUAT_MULTIMEDIA_AUDIO_BUS_I2S);	//设置音频总线类型
 	luat_audio_setup_codec(MULTIMEDIA_ID, &luat_audio_codec);			//设置音频codec
 	luat_audio_config_pa(MULTIMEDIA_ID, PA_PWR_PIN, PA_ON_LEVEL, 0, 0);//配置音频pa
 	luat_audio_config_dac(MULTIMEDIA_ID, CODEC_PWR_PIN, PWR_ON_LEVEL, 0);//配置音频dac_power
@@ -408,7 +408,7 @@ static void volte_task(void *param)
 			g_s_i2s_conf->cb_rx_len = 320 * g_s_record_type;
 			luat_i2s_modify(I2S_ID, LUAT_I2S_CHANNEL_RIGHT, LUAT_I2S_BITS_16, g_s_record_type * 8000);
 			luat_i2s_transfer_loop(I2S_ID, NULL, 3200, 2, 0);	//address传入空地址就是播放空白音
-			luat_audio_pm_request(MULTIMEDIA_ID,AUDIO_PM_MODE_RESUME);			//工作模式
+			luat_audio_pm_request(MULTIMEDIA_ID,LUAT_AUDIO_PM_RESUME);			//工作模式
             luat_rtos_timer_stop(g_s_delay_timer);
 			break;
 		case VOLTE_EVENT_RECORD_VOICE_UPLOAD:
@@ -435,7 +435,7 @@ static void volte_task(void *param)
 				if (!g_s_codec_is_on)
 				{
 					g_s_codec_is_on = 1;
-                	luat_audio_pm_request(MULTIMEDIA_ID,AUDIO_PM_MODE_RESUME);			//工作模式
+                	luat_audio_pm_request(MULTIMEDIA_ID,LUAT_AUDIO_PM_RESUME);			//工作模式
 				}
 			}
 			else

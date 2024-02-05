@@ -45,21 +45,6 @@ typedef struct
 	uint8_t dummy[3];
 }luat_audio_play_info_t;
 
-enum
-{
-	LUAT_MULTIMEDIA_CB_AUDIO_DECODE_START = MULTIMEDIA_CB_AUDIO_DECODE_START,	/**< 开始解码文件 */
-	LUAT_MULTIMEDIA_CB_AUDIO_OUTPUT_START,	/**< 开始输出解码后的音数据 */
-	LUAT_MULTIMEDIA_CB_AUDIO_NEED_DATA,		/**< 底层驱动播放播放完一部分数据，需要更多数据 */
-	LUAT_MULTIMEDIA_CB_AUDIO_DONE,			/**< 底层驱动播放完全部数据了 */
-	LUAT_MULTIMEDIA_CB_DECODE_DONE,			/**< 音频解码完成 */
-	LUAT_MULTIMEDIA_CB_TTS_INIT,				/**< TTS做完了必要的初始化，用户可以通过audio_play_tts_set_param做个性化配置 */
-	LUAT_MULTIMEDIA_CB_TTS_DONE,				/**< TTS编码完成了。注意不是播放完成 */
-
-	LUAT_AUDIO_BUS_DAC=0,
-	LUAT_AUDIO_BUS_I2S,
-	LUAT_AUDIO_BUS_SOFT_DAC
-};
-
 void luat_audio_play_file_default_fun(void *param);
 void luat_audio_play_tts_default_fun(void *param);
 

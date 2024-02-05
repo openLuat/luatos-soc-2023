@@ -57,6 +57,7 @@ static luat_rtos_task_handle g_s_task_handle;
 
 __USER_FUNC_IN_RAM__ int record_cb(uint8_t id ,luat_i2s_event_t event, uint8_t *rx_data, uint32_t rx_len, void *param)
 {
+	LUAT_DEBUG_PRINT("record_cb event %d",event);
 	switch(event)
 	{
 	case LUAT_I2S_EVENT_RX_DONE:
@@ -112,7 +113,7 @@ static void speech_demo_task(void *arg)
 	HANDLE amr_encoder_handler = Encoder_Interface_init(0);
 	HANDLE amr_decoder_handler = Decoder_Interface_init();
 
-	luat_audio_set_bus_type(MULTIMEDIA_ID,MULTIMEDIA_AUDIO_BUS_I2S);	//设置音频总线类型
+	luat_audio_set_bus_type(MULTIMEDIA_ID,LUAT_MULTIMEDIA_AUDIO_BUS_I2S);	//设置音频总线类型
 	luat_audio_setup_codec(MULTIMEDIA_ID, &luat_audio_codec);			//设置音频codec
 	luat_audio_config_pa(MULTIMEDIA_ID, PA_PWR_PIN, PA_ON_LEVEL, 0, 0);//配置音频pa
 	luat_audio_config_dac(MULTIMEDIA_ID, CODEC_PWR_PIN, PWR_ON_LEVEL, 0);//配置音频dac_power
@@ -126,7 +127,7 @@ static void speech_demo_task(void *arg)
 		//1秒最高音质的AMRNB编码是1600
 		luat_i2s_modify(TEST_I2S_ID, LUAT_I2S_CHANNEL_RIGHT, LUAT_I2S_BITS_16, 8000);
 		luat_i2s_transfer_loop(TEST_I2S_ID, buff, 320 * RECORD_ONCE_LEN, 4, 0);
-		luat_audio_pm_request(MULTIMEDIA_ID,AUDIO_PM_MODE_RESUME);			//工作模式
+		luat_audio_pm_request(MULTIMEDIA_ID,LUAT_AUDIO_PM_RESUME);			//工作模式
 		
 		cur_play_buf = 0;
 		run_cnt = 0;
