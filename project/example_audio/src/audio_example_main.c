@@ -47,6 +47,16 @@
 #define TEST_VOL		70	// 测试音量调节
 #define TEST_MIC_VOL	75	// 测试麦克风音量调节
 
+#if (TEST_USE_ES8311 == 1)
+#define PA_DELAY		200
+#define PWR_ON_DELAY	10
+#define PWR_SLEEP_DELAY	600
+#else
+#define PA_DELAY		100
+#define PWR_ON_DELAY	0
+#define PWR_SLEEP_DELAY	400
+#endif
+
 #if defined FEATURE_IMS_ENABLE	//VOLTE固件才支持通话测试
 //#define CALL_TEST		//通话测试会关闭掉其他测试，防止冲突
 #endif
@@ -63,28 +73,8 @@ static Buffer_Struct g_s_amr_rom_file;
 static uint8_t g_s_test_only_record = 0;
 
 #if (TEST_USE_ES8311 == 1)
-#define PA_DELAY		200
-#define PWR_ON_DELAY	10
-#define PWR_SLEEP_DELAY	600
-#else
-#define PA_DELAY		100
-#define PWR_ON_DELAY	0
-#define PWR_SLEEP_DELAY	400
-#endif
 
-static const luat_audio_codec_conf_t luat_audio_codec_es8311 = {
-    .i2c_id = TEST_I2C_ID,
-    .i2s_id = TEST_I2S_ID,
-    .codec_opts = &codec_opts_es8311,
-};
-
-static const luat_audio_codec_conf_t luat_audio_codec_tm8211 = {
-    .i2s_id = TEST_I2S_ID,
-    .codec_opts = &codec_opts_tm8211,
-};
-
-static const luat_i2s_conf_t luat_i2s_conf_es8311 =
-{
+static const luat_i2s_conf_t luat_i2s_conf_es8311 ={
 	.id = TEST_I2S_ID,
 	.mode = LUAT_I2S_MODE_MASTER,
 	.channel_format = LUAT_I2S_CHANNEL_RIGHT,
@@ -100,6 +90,16 @@ static const luat_i2s_conf_t luat_i2s_conf_es8311 =
 	.luat_i2s_event_callback = record_cb,
 };
 
+static const luat_audio_codec_conf_t luat_audio_codec_es8311 = {
+    .i2c_id = TEST_I2C_ID,
+    .i2s_id = TEST_I2S_ID,
+    .codec_opts = &codec_opts_es8311,
+};
+
+static const luat_i2s_conf_t *i2s_conf = &luat_i2s_conf_es8311;
+static const luat_audio_codec_conf_t *codec_conf = &luat_audio_codec_es8311;
+#else
+
 static const luat_i2s_conf_t luat_i2s_conf_tm8211 =
 {
 	.id = TEST_I2S_ID,
@@ -112,10 +112,11 @@ static const luat_i2s_conf_t luat_i2s_conf_tm8211 =
 	.luat_i2s_event_callback = record_cb,
 };
 
-#if (TEST_USE_ES8311 == 1)
-static const luat_i2s_conf_t *i2s_conf = &luat_i2s_conf_es8311;
-static const luat_audio_codec_conf_t *codec_conf = &luat_audio_codec_es8311;
-#else
+static const luat_audio_codec_conf_t luat_audio_codec_tm8211 = {
+    .i2s_id = TEST_I2S_ID,
+    .codec_opts = &codec_opts_tm8211,
+};
+
 static const luat_i2s_conf_t *i2s_conf = &luat_i2s_conf_tm8211;
 static const luat_audio_codec_conf_t *codec_conf = &luat_audio_codec_tm8211;
 #endif
