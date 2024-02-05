@@ -14,6 +14,14 @@
 
 #include "interf_enc.h"
 #include "interf_dec.h"
+
+
+//注意:此demo 已经废弃，后面会删除，统一看example_audio !!!
+//注意:此demo 已经废弃，后面会删除，统一看example_audio !!!
+//注意:此demo 已经废弃，后面会删除，统一看example_audio !!!
+
+
+
 //demo配合音频扩展板开发实现一边录音一边放音功能，无限循环，来模拟实现对讲功能，无软件降噪算法，MIC和喇叭尽量远离
 //AIR780EP音频扩展板配置
 

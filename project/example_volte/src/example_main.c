@@ -33,6 +33,11 @@
 #include "luat_mcu.h"
 #include "luat_audio.h"
 
+//注意:此demo 已经废弃，后面会删除，统一看example_audio !!!
+//注意:此demo 已经废弃，后面会删除，统一看example_audio !!!
+//注意:此demo 已经废弃，后面会删除，统一看example_audio !!!
+
+
 //AIR780EP音频扩展板配置
 
 //demo 配置带ES8311硬件的云喇叭开发板，编译时需要把build.bat里的CHIP_TARGET改成ec718pv

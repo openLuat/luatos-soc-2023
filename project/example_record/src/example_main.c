@@ -9,6 +9,13 @@
 #include "interf_enc.h"
 #include "luat_uart.h"
 #include "luat_mem.h"
+
+//注意:此demo 已经废弃，后面会删除，统一看example_audio !!!
+//注意:此demo 已经废弃，后面会删除，统一看example_audio !!!
+//注意:此demo 已经废弃，后面会删除，统一看example_audio !!!
+
+
+
 //本demo的I2S用法是了为了兼容AIR780E的代码，使用的旧方法，只能做为参考，推荐看example_audio内的录音代码
 //AIR780EP音频开发板配置
 #define MIC_VOL_EN	HAL_GPIO_26
