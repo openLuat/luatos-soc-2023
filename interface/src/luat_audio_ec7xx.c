@@ -69,22 +69,12 @@ extern void audio_play_tts_set_resource_ex(void *address, void *sdk_id, void *re
 extern void audio_play_global_init_ex(audio_play_event_cb_fun_t event_cb, audio_play_data_cb_fun_t data_cb, audio_play_default_fun_t play_file_fun, audio_play_default_fun_t play_tts_fun, void *user_param);
 extern void audio_play_global_init_with_task_priority(audio_play_event_cb_fun_t event_cb, audio_play_data_cb_fun_t data_cb, audio_play_default_fun_t play_file_fun, audio_play_default_fun_t play_tts_fun, void *user_param, uint8_t priority);
 extern int audio_play_write_blank_raw_ex(uint32_t multimedia_id, uint8_t cnt, uint8_t add_font);
-static luat_audio_conf_t prv_audio_config = {
-	.codec_conf.power_pin = LUAT_CODEC_PA_NONE,
-    .codec_conf.pa_pin = LUAT_CODEC_PA_NONE,
-};
+static luat_audio_conf_t prv_audio_config = {0};
 
-static void app_pa_on(uint32_t arg)
-{
-	prv_audio_config.pa_on_enable = 1;
-	luat_gpio_set(prv_audio_config.codec_conf.pa_pin, prv_audio_config.codec_conf.pa_on_level);
-}
 #ifdef __LUATOS__
 extern const unsigned char ivtts_16k[];
 extern const unsigned char ivtts_8k[];
 extern int l_multimedia_raw_handler(lua_State *L, void* ptr);
-
-
 
 static void audio_event_cb(uint32_t event, void *param){
 	if (prv_audio_config.debug_on_off){
@@ -222,7 +212,6 @@ void luat_audio_global_init(void)
 #else
 	audio_play_global_init_with_task_priority(audio_event_cb, audio_data_cb, PLAY_FILE, NULL, NULL, 90);
 #endif
-	prv_audio_config.pa_delay_timer = luat_create_rtos_timer(app_pa_on, NULL, NULL);
 	prv_audio_config.soft_vol = 100;
 	prv_audio_config.hardware_data = NULL;
 }
@@ -235,7 +224,6 @@ void luat_audio_play_global_init(audio_play_event_cb_fun_t event_cb, audio_play_
 		audio_play_global_init_ex(event_cb, data_cb, play_file_fun, play_tts_fun, user_param);
 	}
 	prv_audio_config.soft_vol = 100;
-	prv_audio_config.pa_delay_timer = luat_create_rtos_timer(app_pa_on, NULL, NULL);
 	prv_audio_config.hardware_data = NULL;
 }
 #endif
@@ -363,7 +351,6 @@ void luat_audio_play_global_init_with_task_priority(audio_play_event_cb_fun_t ev
 		audio_play_global_init_with_task_priority(event_cb, data_cb, play_file_fun, play_tts_fun, user_param, priority);
 	}
 	prv_audio_config.soft_vol = 100;
-	prv_audio_config.pa_delay_timer = luat_create_rtos_timer(app_pa_on, NULL, NULL);
 	prv_audio_config.hardware_data = NULL;
 }
 
@@ -602,7 +589,7 @@ ENABLE_PA:
 		{
 			rest = prv_audio_config.codec_conf.pa_delay_time - ((uint32_t)(luat_mcu_tick64_ms() - prv_audio_config.last_wakeup_time_ms));
 			if (prv_audio_config.debug_on_off) DBG("pa enable need %dms", rest);
-			luat_start_rtos_timer(prv_audio_config.pa_delay_timer, rest, 0);
+			luat_audio_pa(multimedia_id,1, rest);
 		}
 	}
 	return 0;
