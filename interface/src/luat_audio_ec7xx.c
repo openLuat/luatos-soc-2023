@@ -282,6 +282,7 @@ int luat_audio_stop_raw(uint8_t multimedia_id)
 void luat_audio_config_pa(uint8_t multimedia_id, uint32_t pin, int level, uint32_t dummy_time_len, uint32_t pa_delay_time){
 	luat_audio_conf_t* audio_conf = luat_audio_get_config(multimedia_id);
 	if (pin < HAL_GPIO_MAX){
+		prv_audio_config.pa_is_control_enable = 1;
 		prv_audio_config.pa_pin = pin;
 		prv_audio_config.pa_on_level = level;
 		GPIO_Config(pin, 0, !level);
@@ -289,7 +290,6 @@ void luat_audio_config_pa(uint8_t multimedia_id, uint32_t pin, int level, uint32
 		GPIO_IomuxEC7XX(GPIO_ToPadEC7XX(pin, alt_fun), alt_fun, 0, 0);
 	}else{
 		prv_audio_config.pa_pin = LUAT_GPIO_NONE;
-		prv_audio_config.pa_pin = -1;
 	}
 	prv_audio_config.pa_delay_time = pa_delay_time;
 	prv_audio_config.after_sleep_ready_time = dummy_time_len;
@@ -328,7 +328,6 @@ int luat_audio_set_bus_type(uint8_t multimedia_id,uint8_t bus_type){
 	}
 	return 0;
 }
-int luat_audio_play_blank(uint8_t multimedia_id);
 
 void luat_audio_set_debug(uint8_t on_off)
 {
@@ -363,7 +362,7 @@ int luat_audio_play_fast_stop(uint8_t multimedia_id)
 {
 	if (audio_play_fast_stop(prv_audio_config.codec_conf.i2s_id))
 	{
-		luat_audio_play_blank(multimedia_id);
+		luat_audio_play_blank(multimedia_id, 1);
 		return -1;
 	}
 	return 0;
@@ -469,7 +468,7 @@ int luat_audio_play_stop(uint8_t multimedia_id)
 {
 	if (audio_play_stop(prv_audio_config.codec_conf.i2s_id))
 	{
-		luat_audio_play_blank(multimedia_id);
+		luat_audio_play_blank(multimedia_id, 1);
 		return -1;
 	}
 	return 0;
@@ -595,14 +594,17 @@ ENABLE_PA:
 	return 0;
 }
 
-int luat_audio_play_blank(uint8_t multimedia_id)
+int luat_audio_play_blank(uint8_t multimedia_id, uint8_t on_off)
 {
 	if (I2S_IsWorking(prv_audio_config.codec_conf.i2s_id))
 	{
 		I2S_Stop(prv_audio_config.codec_conf.i2s_id);
 	}
-	I2S_Start(prv_audio_config.codec_conf.i2s_id, 1, 16000, 2);
-	I2S_TransferLoop(prv_audio_config.codec_conf.i2s_id, NULL, 3200, 2, 0);
+	if (on_off)
+	{
+		I2S_Start(prv_audio_config.codec_conf.i2s_id, 1, 16000, 2);
+		I2S_TransferLoop(prv_audio_config.codec_conf.i2s_id, NULL, 3200, 2, 0);
+	}
 }
 
 int luat_audio_record_and_play(uint8_t multimedia_id, uint32_t sample_rate, const uint8_t *play_buffer, uint32_t one_trunk_len, uint32_t total_trunk_cnt)

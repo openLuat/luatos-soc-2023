@@ -38,14 +38,15 @@
 #define PA_ON_LEVEL 1
 #define PWR_ON_LEVEL 1
 
-#define TEST_I2C_ID I2C_ID0
+//#define TEST_I2C_ID I2C_ID0	//音频小板的配置
+#define TEST_I2C_ID I2C_ID1 	//云喇叭是这个配置
 #define TEST_I2S_ID I2S_ID0
-#define TEST_USE_ES8311	1
-#define TEST_USE_TM8211 0
+#define TEST_USE_ES8311	0
+#define TEST_USE_TM8211 1
 
 #define MULTIMEDIA_ID 	0	//多媒体id，用于区分不同多媒体硬件
 #define TEST_VOL		70	// 测试音量调节
-#define TEST_MIC_VOL	75	// 测试麦克风音量调节
+#define TEST_MIC_VOL	65	// 测试麦克风音量调节
 
 #if (TEST_USE_ES8311 == 1)
 #define PA_DELAY		200
@@ -234,8 +235,10 @@ void audio_event_cb(uint32_t event, void *param)
 	case LUAT_MULTIMEDIA_CB_AUDIO_DONE:
 		LUAT_DEBUG_PRINT("audio play done, result=%d!", luat_audio_play_get_last_error(MULTIMEDIA_ID));
 		luat_audio_pm_request(MULTIMEDIA_ID,LUAT_AUDIO_PM_STANDBY);
-		//如果追求极致的功耗，用AUDIO_PM_MODE_SHUTDOWN代替AUDIO_PM_MODE_STANDBY
-		//luat_audio_pm_request(MULTIMEDIA_ID,LUAT_AUDIO_PM_SHUTDOWN);
+//		如果追求极致的功耗，用AUDIO_PM_MODE_SHUTDOWN代替AUDIO_PM_MODE_STANDBY
+//		luat_audio_pm_request(MULTIMEDIA_ID,LUAT_AUDIO_PM_SHUTDOWN);
+//		如果PA无法控制，不可以用pm，直接调用静音来控制爆破音
+//		luat_audio_mute(MULTIMEDIA_ID, 1);
 		//通知一下用户task播放完成了
 		luat_rtos_event_send(g_s_task_handle, AUDIO_EVENT_PLAY_DONE, luat_audio_play_get_last_error(MULTIMEDIA_ID), 0, 0, 0);
 		break;
@@ -730,7 +733,6 @@ static void test_audio_demo_init(void)
 	luat_mobile_speech_init(MULTIMEDIA_ID,mobile_voice_data_input);
 	luat_gpio_cfg_t gpio_cfg;
 	luat_gpio_set_default_cfg(&gpio_cfg);
-
 
 	// pa power ctrl init
 	gpio_cfg.pin = PA_PWR_PIN;
