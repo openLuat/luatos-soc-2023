@@ -229,7 +229,7 @@ void luat_audio_play_global_init(audio_play_event_cb_fun_t event_cb, audio_play_
 #endif
 static void luat_audio_prepare(uint8_t multimedia_id)
 {
-	if (prv_audio_config.is_sleep)
+	if (prv_audio_config.sleep_mode)
 	{
 		luat_audio_pm_request(multimedia_id,LUAT_AUDIO_PM_RESUME);
 	}
