@@ -329,9 +329,9 @@ static void demo_task(void *arg)
 	luat_audio_play_global_init_with_task_priority(audio_event_cb, audio_data_cb, luat_audio_play_file_default_fun, luat_audio_play_tts_default_fun, NULL, 50);
 	tts_config();
 #endif
-	if (TEST_USE_ES8311){
-		luat_i2c_setup(luat_audio_codec_es8311.i2c_id, 1);
-	}
+#if (TEST_USE_ES8311==1)
+	luat_i2c_setup(luat_audio_codec_es8311.i2c_id, 1);
+#endif
 	luat_i2s_setup(i2s_conf);
 	
 	luat_audio_set_bus_type(MULTIMEDIA_ID,LUAT_MULTIMEDIA_AUDIO_BUS_I2S);	//设置音频总线类型
