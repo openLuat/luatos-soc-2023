@@ -11,22 +11,30 @@
 #include "plat_config.h"
 #ifdef __LUATOS__
 #include "luat_msgbus.h"
-#endif
-
 #define LUAT_LOG_TAG "pm"
 #include "luat_log.h"
+#else
+#define LLOGW DBG
+#define LLOGI DBG
+#define LLOGE DBG
+#define LLOGD DBG
+#endif
+
+
 
 static uint8_t lastRequestMode = SLP_IDLE_STATE; // 在APP启动时设置
 static uint8_t wakeupSrc = 0xff;
 static uint8_t firstSlpstate;
 static uint8_t wakeup_deeptimer_id = 0xFF;
-
+static const char *DriverNameText[10]={
+		"uart", "soft uart", "usb", "i2c", "spi", "i2s", "adc", "dma", "timer or pwm", "psram"
+};
 static const char slpStateText[5][5]={{"Actv"},{"Idle"},{"Slp1"},{"Slp2"},{"Hibn"}};
 static const char wakeupSrcStr[3][4] = {{"POR"}, {"RTC"}, {"IO"}};
 extern void soc_set_usb_sleep(uint8_t onoff);
 extern void soc_usb_onoff(uint8_t onoff);
 extern int soc_power_mode(uint8_t main, uint8_t sub);
-
+extern void slpManSlpFailedReasonCheck(slpManSlpState_t *DeepestSlpMode, slpManSlpState_t *psphyVoteState, slpManSlpState_t *appVoteState,  slpManSlpState_t *usrdefSlpMode,  uint32_t *drvVoteMap, uint32_t *drvVoteMask);
 #ifdef __LUATOS__
 static int luat_dtimer_cb(lua_State *L, void* ptr) {
     rtos_msg_t* msg = (rtos_msg_t*)lua_topointer(L, -1);
@@ -121,7 +129,34 @@ int luat_pm_force(int mode) {
 }
 
 int luat_pm_check(void) {
-    
+    slpManSlpState_t DeepestSlpMode;
+    slpManSlpState_t psphyVoteState;
+    slpManSlpState_t appVoteState;
+    slpManSlpState_t usrdefSlpMode;
+    uint32_t drvVoteMap;
+    uint32_t drvVoteMask;
+    slpManSlpState_t final_state = SLP_HIB_STATE;
+
+    slpManSlpFailedReasonCheck(&DeepestSlpMode, &psphyVoteState, &appVoteState, &usrdefSlpMode, &drvVoteMap, &drvVoteMask);
+    if (DeepestSlpMode < final_state) final_state = DeepestSlpMode;
+    if (psphyVoteState < final_state) final_state = psphyVoteState;
+    if (appVoteState < final_state) final_state = appVoteState;
+    if (usrdefSlpMode < final_state) final_state = usrdefSlpMode;
+    LLOGI("bsp sleep mode %d, %s", final_state, slpStateText[final_state]);
+    for(uint32_t i = SLP_VOTE_USART; i < SLP_VOTE_MAX_NUM; i++)
+    {
+    	if ((1 << i) & drvVoteMap)
+    	{
+    		if ((1 << i) & drvVoteMask)
+    		{
+    			LLOGI("bsp driver %s running but ignore", DriverNameText[i]);
+    		}
+    		else
+    		{
+    			LLOGI("bsp driver %s running, mcu can not sleep", DriverNameText[i]);
+    		}
+    	}
+    }
     return lastRequestMode;
 }
 
