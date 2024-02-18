@@ -138,6 +138,7 @@ int luat_pm_check(void) {
     slpManSlpState_t final_state = SLP_HIB_STATE;
 
     slpManSlpFailedReasonCheck(&DeepestSlpMode, &psphyVoteState, &appVoteState, &usrdefSlpMode, &drvVoteMap, &drvVoteMask);
+    LLOGI("bsp sleep state %d, %d, %d, %d, %x, %x", DeepestSlpMode, psphyVoteState, appVoteState, usrdefSlpMode, drvVoteMap, drvVoteMask);
     if (DeepestSlpMode < final_state) final_state = DeepestSlpMode;
     if (psphyVoteState < final_state) final_state = psphyVoteState;
     if (appVoteState < final_state) final_state = appVoteState;
