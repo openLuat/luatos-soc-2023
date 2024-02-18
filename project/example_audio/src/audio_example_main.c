@@ -38,11 +38,12 @@
 #define PA_ON_LEVEL 1
 #define PWR_ON_LEVEL 1
 
-//#define TEST_I2C_ID I2C_ID0	//音频小板的配置
-#define TEST_I2C_ID I2C_ID1 	//云喇叭是这个配置
+#define TEST_I2C_ID I2C_ID0	//音频扩展板的配置
+// #define TEST_I2C_ID I2C_ID1 	//云喇叭板配置
 #define TEST_I2S_ID I2S_ID0
-#define TEST_USE_ES8311	0
-#define TEST_USE_TM8211 1
+
+#define TEST_USE_ES8311	1
+#define TEST_USE_TM8211 0
 
 #define MULTIMEDIA_ID 	0	//多媒体id，用于区分不同多媒体硬件
 #define TEST_VOL		70	// 测试音量调节
