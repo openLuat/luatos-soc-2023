@@ -106,7 +106,7 @@ static void audio_event_cb(uint32_t event, void *param){
 		}
 		break;
 	case LUAT_MULTIMEDIA_CB_AUDIO_DONE:
-		luat_audio_play_blank(0,0);
+		luat_audio_play_blank(0,1);
 		// luat_audio_pm_request(0,LUAT_AUDIO_PM_STANDBY);
 		msg.handler = l_multimedia_raw_handler;
 		msg.arg1 = LUAT_MULTIMEDIA_CB_AUDIO_DONE;
