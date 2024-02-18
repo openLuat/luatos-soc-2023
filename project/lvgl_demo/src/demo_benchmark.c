@@ -15,6 +15,7 @@
 #include "lv_conf.h"
 #include "lvgl.h"
 #include "luat_lcd.h"
+#include "luat_mem.h"
 
 unsigned int luat_lv_benchmark_fps;
 extern void luat_lcd_service_debug(void);
