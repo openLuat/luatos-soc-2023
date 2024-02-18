@@ -288,6 +288,7 @@ void luat_audio_config_pa(uint8_t multimedia_id, uint32_t pin, int level, uint32
 		GPIO_Config(pin, 0, !level);
 		uint8_t alt_fun = (HAL_GPIO_16 == pin)?4:0;
 		GPIO_IomuxEC7XX(GPIO_ToPadEC7XX(pin, alt_fun), alt_fun, 0, 0);
+		luat_rtos_timer_create(&audio_conf->pa_delay_timer);
 	}else{
 		prv_audio_config.pa_pin = LUAT_GPIO_NONE;
 	}
