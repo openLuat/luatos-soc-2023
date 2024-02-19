@@ -454,7 +454,7 @@ static void demo_task(void *arg)
 		{
 			LUAT_DEBUG_PRINT("record test start");
 #if defined (FEATURE_AMR_CP_ENABLE) || defined (FEATURE_VEM_CP_ENABLE)
-			luat_audio_inter_amr_init(MULTIMEDIA_ID, 7);
+			luat_audio_inter_amr_init(0, 7);
 #else
 			g_s_amr_encoder_handler = Encoder_Interface_init(0);
 #endif
