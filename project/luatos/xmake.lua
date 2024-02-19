@@ -63,6 +63,8 @@ target(TARGET_NAME)
         add_files(LUATOS_ROOT.."/components/cc/*.c")
     end
 
+    add_cxflags("-mslow-flash-data",{force=true})
+
     add_defines("__LUATOS__",{public = true})
 
     add_includedirs(LUATOS_ROOT.."/lua/include",{public = true})

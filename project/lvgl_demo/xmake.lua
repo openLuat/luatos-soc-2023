@@ -5,6 +5,8 @@ target(TARGET_NAME)
     set_kind("static")
     set_targetdir(LIB_DIR)
 
+    add_cxflags("-mslow-flash-data",{force=true})
+
     --加入代码和头文件
     add_includedirs("./inc",{public = true})
 
