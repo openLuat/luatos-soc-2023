@@ -28,9 +28,15 @@
 #include "luat_gpio.h"
 #include "slpman.h"
 luat_rtos_task_handle task1_handle;
-//716S和718S开启最低休眠功耗，需要加入mem_map_7xx.h，并且启用"需要HIB参考这个配置"下面相关的配置
-//然后加入下面的函数，底层自动调用
-//void soc_hib_config(void){;}
+
+
+/* 
+    716S和718S受限于FLASH大小，默认最深休眠等级为DEEP模式
+    如果需要开启716S和718S最低休眠功耗功能，参考下面两点
+    1：参考example_mem_map，在本项目加入mem_map_7xx.h, 并且启用"需要HIB参考这个配置"下面相关的配置
+    2: 在本项目中加入下面的函数，底层会自动调用
+        void soc_hib_config(void){;}
+*/
 
 static void task1(void *args)
 {
