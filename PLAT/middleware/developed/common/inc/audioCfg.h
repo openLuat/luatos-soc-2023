@@ -25,6 +25,7 @@
  *----------------------------------------------------------------------------*/
 
 #include <stdint.h>
+#include "cmsis_compiler.h"
 
 
 #ifdef __cplusplus
@@ -36,7 +37,7 @@ extern "C" {
  *                    MACROS                                                  *
  *----------------------------------------------------------------------------*/
 
-#pragma pack(1)
+//#pragma pack(1)
 
 #define TX_AEC
 #define TX_ANS
@@ -62,7 +63,7 @@ extern "C" {
 
 
 
-typedef struct {
+typedef struct _EPAT_AgcConfig_t{
     int8_t     bypass;
     int8_t     targetLevel;
     int8_t     compressionGain;
@@ -70,7 +71,7 @@ typedef struct {
 } AgcConfig_t;
 
 
-typedef struct
+typedef struct _EPAT_DrcConfig_t
 {
     int8_t        bypass;
     int16_t       compThreshold;
@@ -109,33 +110,43 @@ struct IirBiquardState
     int16_t a1, a2, b0, b1, b2;
     int16_t s0, s1, s2;
 };
-typedef struct
+
+
+typedef __PACKED_STRUCT _BiquardParam_raw
+{
+	int16_t a1; int16_t a2; int16_t b0; int16_t b1; int16_t b2;
+}biquardParam_raw;
+
+typedef __PACKED_STRUCT _BiquardParam_design
+{
+	int16_t f0; int16_t gain; int16_t q;
+}biquardParam_design;
+
+ 
+typedef __PACKED_UNION _BiquardParam_filt
+{
+	biquardParam_raw raw;
+	biquardParam_design design;
+}biquardParam_filt;
+
+typedef __PACKED_STRUCT _BiquardParam_t
 {
     enum IIR_BIQUARD_TYPE type;
-    union
-    {
-        struct
-        {
-            int16_t a1; int16_t a2; int16_t b0; int16_t b1; int16_t b2;
-        } raw;
-        struct
-        {
-            int16_t f0; int16_t gain; int16_t q;
-        } design;
-    }filt;
-} BiquardParam;
+    biquardParam_filt filt;
+}BiquardParam;
 
-typedef struct
+
+typedef __PACKED_STRUCT _EPAT_EqConfig_t
 {
     int32_t     bypass;
     int         gain;
     int32_t     num;
     BiquardParam params[MAX_VQE_EQ_BAND];
-} EqConfig_t;
+}EqConfig_t;
 
 
 
-typedef struct {
+typedef struct _EPAT_AnsConfig_t{
     int8_t  bypass;
     int8_t  mode;
 } AnsConfig_t;
@@ -143,7 +154,7 @@ typedef struct {
 
 
 
-typedef struct {
+typedef struct _EPAT_AecConfig_t{
     int8_t      bypass;
     int16_t     delay;
     int8_t      cngMode;
@@ -153,7 +164,7 @@ typedef struct {
 
 
 
-typedef struct {
+typedef struct _EPAT_SpeechConfig_t{
 #if defined(TX_AEC)
     AecConfig_t      CVT_AEC;
 #endif
@@ -186,7 +197,7 @@ typedef struct {
 
 
 
-typedef struct {
+typedef struct _EPAT_AudioConfig_t{
     int8_t          amrEncodeBypass;// whether need to bypass AMR encode, not related to index
     int8_t          amrDecodeBypass;// whether need to bypass AMR decode, not related to index
     int8_t          resv[2];
@@ -196,7 +207,7 @@ typedef struct {
 
 
 
-#pragma pack()
+//#pragma pack()
 
 
 /*----------------------------------------------------------------------------*

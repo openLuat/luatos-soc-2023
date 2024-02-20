@@ -326,6 +326,60 @@ do  \
 #endif
 
 
+/**
+ * Less/optional log, may not print out if need save flash
+*/
+#ifndef FEATURE_LESSLOG_ENABLE
+#define ECOMM_HEX_DUMP_OPT(owenerID, moduleID, subID, debugLevel, format, dumpLen, dump)    \
+    ECOMM_HEX_DUMP(owenerID, moduleID, subID, debugLevel, format, dumpLen, dump)
+
+#define ECOMM_HEX_DUMP_I_OPT(owenerID, moduleID, subID, debugLevel, format, dumpLen, dump)  \
+    ECOMM_HEX_DUMP_I(owenerID, moduleID, subID, debugLevel, format, dumpLen, dump)
+
+#define ECOMM_PRINTF_OPT(ownerId, moduleId, subId, debugLevel, format, ...)     \
+    ECOMM_PRINTF(ownerId, moduleId, subId, debugLevel, format, ##__VA_ARGS__)
+
+#define ECOMM_PRINTF_I_OPT(ownerId, moduleId, subId, debugLevel, format, ...)   \
+    ECOMM_PRINTF_I(ownerId, moduleId, subId, debugLevel, format, ##__VA_ARGS__)
+
+#define ECOMM_TRACE_OPT(moduleId, subId, debugLevel, argLen, format,  ...)      \
+    ECOMM_PRINTF(UNILOG_PLAT_AP, moduleId, subId, debugLevel, format, ##__VA_ARGS__)
+
+#define ECOMM_TRACE_I_OPT(moduleId, subId, debugLevel, argLen, format,  ...)    \
+    ECOMM_PRINTF_I(UNILOG_PLAT_AP, moduleId, subId, debugLevel, format, ##__VA_ARGS__)
+
+#define ECOMM_DUMP_OPT(moduleID, subID, debugLevel, format, dumpLen, dump)      \
+    ECOMM_HEX_DUMP(UNILOG_PLAT_AP, moduleID, subID, debugLevel, format, dumpLen, dump)
+
+#define ECOMM_DUMP_I_OPT(moduleID, subID, debugLevel, format, dumpLen, dump)    \
+    ECOMM_HEX_DUMP_I(UNILOG_PLAT_AP, moduleID, subID, debugLevel, format, dumpLen, dump)
+
+#define ECPLAT_PRINTF_OPT(moduleId, subId, debugLevel, format, ...)             \
+    ECPLAT_PRINTF(moduleId, subId, debugLevel, format, ##__VA_ARGS__)
+
+#define ECPLAT_PRINTF_I_OPT(moduleId, subId, debugLevel, format, ...)           \
+    ECPLAT_PRINTF_I(moduleId, subId, debugLevel, format, ##__VA_ARGS__)
+
+#define ECPLAT_DUMP_OPT(moduleID, subID, debugLevel, format, dumpLen, dump)     \
+    ECPLAT_DUMP(moduleID, subID, debugLevel, format, dumpLen, dump)
+
+#define ECPLAT_DUMP_I_OPT(moduleID, subID, debugLevel, format, dumpLen, dump)   \
+    ECPLAT_DUMP_I_OPT(moduleID, subID, debugLevel, format, dumpLen, dump)
+#else
+#define ECOMM_HEX_DUMP_OPT(owenerID, moduleID, subID, debugLevel, format, dumpLen, dump)
+#define ECOMM_HEX_DUMP_I_OPT(owenerID, moduleID, subID, debugLevel, format, dumpLen, dump)
+#define ECOMM_PRINTF_OPT(ownerId, moduleId, subId, debugLevel, format, ...)
+#define ECOMM_PRINTF_I_OPT(ownerId, moduleId, subId, debugLevel, format, ...)
+#define ECOMM_TRACE_OPT(moduleId, subId, debugLevel, argLen, format,  ...)
+#define ECOMM_TRACE_I_OPT(moduleId, subId, debugLevel, argLen, format,  ...)
+#define ECOMM_DUMP_OPT(moduleID, subID, debugLevel, format, dumpLen, dump)
+#define ECOMM_DUMP_I_OPT(moduleID, subID, debugLevel, format, dumpLen, dump)
+#define ECPLAT_PRINTF_OPT(moduleId, subId, debugLevel, format, ...)
+#define ECPLAT_PRINTF_I_OPT(moduleId, subId, debugLevel, format, ...)
+#define ECPLAT_DUMP_OPT(moduleID, subID, debugLevel, format, dumpLen, dump)
+#define ECPLAT_DUMP_I_OPT(moduleID, subID, debugLevel, format, dumpLen, dump)
+#endif
+
 /*
  * !!! used for customer SDK print !!!
 */

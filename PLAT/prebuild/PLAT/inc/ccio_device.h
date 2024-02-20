@@ -73,6 +73,8 @@ typedef enum _EPAT_CcioDevExecFlagsTag
 
     CCIO_DEF_AUDIO_INIT,
     CCIO_DEF_AUDIO_DEINIT,
+    
+    CCIO_DEF_AUDIO_HANDLE_CODEC,
 
     CCIO_DEF_CUST_RSVD_BEGIN = 0x0DEFC000,
     /*
@@ -556,6 +558,16 @@ typedef struct
 {
     struct CcioDevice *chdev;
 }CcioDsaVolteStartPlay_t;
+
+/* CCIO_VOLTE_HANDLE_CODEC */
+typedef struct
+{
+    uint8_t volumeLevelHandle;
+    uint8_t volumeLevelSet;
+    uint32_t atHandle;
+    struct CcioDevice *chdev;
+}CcioDsaVolteHandleCodec_t;
+
 
 
 

@@ -196,6 +196,7 @@ typedef enum CmsAppLayerId_Enum
     APPL_ECOTA   = 22,
     /*AUDIO:AMR layer ID*/
     APPL_AUDIO_AMR   = 23,
+    APPL_AUDIO_CODEC = 24,
 
 
 
