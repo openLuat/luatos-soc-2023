@@ -1373,6 +1373,17 @@ CmsRetId appSmsReadTextSmsFromStorageSync(UINT8 smsMemType, UINT8 memIndex, SmsI
   \returns     CmsRetId
 */
 CmsRetId appSmsDeleteSmsFromStorageSync(UINT8 smsMemType, UINT8 delFlag, UINT8 delIndex);
+
+/**
+  \fn          CmsRetId appSmsGetMemStorageInfoSync
+  \brief       get SMS preferred storage memory info from NVM or SIM
+  \param[in]   UINT8 smsMemType, SMS message preferred storage memory type PsilSmsStoreMemType
+  \param[out]  UINT8 *pTotalNum, total number of message locations in <smsMemType>
+  \param[out]  UINT8 *pUsedNum, number of messages currently in <smsMemType>
+  \returns     CmsRetId
+*/
+CmsRetId appSmsGetMemStorageInfoSync(UINT8 smsMemType, UINT8 *pTotalNum, UINT8 *pUsedNum);
+
 #endif
 
 #endif

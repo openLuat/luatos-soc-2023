@@ -76,6 +76,34 @@ typedef enum audioPlayTypeTag
     //...add if required
 }AudioPlayType_e;
 
+typedef struct
+{
+    uint8_t  getOrSet;
+    uint32_t atHandle;
+    uint8_t  setVal;
+}AudioCodec_t;
+
+typedef struct
+{
+    uint8_t  getOrSet;
+    int32_t  rspVal;
+}AudioCodecRsp_t;
+
+typedef struct
+{
+    uint8_t  toneType;
+    uint16_t playDua;
+    uint16_t stopDua;
+    uint8_t  ptrOffset;
+    uint8_t  *ptr; // when use ptr, should use ptr+ptrOffset, it points to the current memory
+}AudioCombineTone_t;
+
+#define    CODEC_VAL_SET    (0)
+#define    CODEC_VAL_GET    (1)
+
+#define    CODEC_IND_INDEX  (1)
+
+
 
 /*----------------------------------------------------------------------------*
  *                    PRIVATE FUNCTIONS DECLEARATION                           *
@@ -188,6 +216,7 @@ int audioAppStartRecord(uint8_t codecType);
   \brief      This api is like audioStopRecordVoice in functional, but can only be used by app recoder.
 */
 int audioAppStopRecord(uint8_t codecType);
+void audioFastInit();
 
 
 #ifdef __cplusplus
