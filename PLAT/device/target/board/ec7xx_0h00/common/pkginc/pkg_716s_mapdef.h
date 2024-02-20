@@ -21,11 +21,19 @@
 #define AP_PKGIMG_LIMIT_SIZE (0x16e000)
 #elif defined MID_FEATURE_MODE
 #define AP_PKGIMG_LIMIT_SIZE (0x132000)
+#elif defined FEATURE_MORERAM_ENABLE
+#define AP_PKGIMG_LIMIT_SIZE (0x12E000)
+#elif defined FEATURE_MOREROM_ENABLE
+#if defined FEATURE_LESSLOG_ENABLE //lesslog
+#define AP_PKGIMG_LIMIT_SIZE (0x138000)
+#else
+#define AP_PKGIMG_LIMIT_SIZE (0x134000)
+#endif
 #else
 #define AP_PKGIMG_LIMIT_SIZE (0x134000)
 #endif
 #endif //undefined AP_PKGIMG_LIMIT_SIZE
-#endif
+#endif // __USER_MAP_CONF_FILE__
 #else
 #if defined  GCF_FEATURE_MODE
 #define AP_PKGIMG_LIMIT_SIZE (0x16e000)
@@ -33,6 +41,12 @@
 #define AP_PKGIMG_LIMIT_SIZE (0x132000)
 #elif defined FEATURE_MORERAM_ENABLE
 #define AP_PKGIMG_LIMIT_SIZE (0x12E000)
+#elif defined FEATURE_MOREROM_ENABLE
+#if defined FEATURE_LESSLOG_ENABLE //lesslog
+#define AP_PKGIMG_LIMIT_SIZE (0x138000)
+#else
+#define AP_PKGIMG_LIMIT_SIZE (0x134000)
+#endif
 #else
 #define AP_PKGIMG_LIMIT_SIZE (0x134000)
 #endif
@@ -44,6 +58,14 @@
 #elif defined FEATURE_MORERAM_ENABLE
 #define AP_PKGIMG_LNA (0x00878000)
 #define CP_PKGIMG_LIMIT_SIZE (0x5E000)
+#elif defined FEATURE_MOREROM_ENABLE
+#if defined FEATURE_LESSLOG_ENABLE //lesslog
+#define AP_PKGIMG_LNA (0x0086e000)
+#define CP_PKGIMG_LIMIT_SIZE (0x54000)
+#else
+#define AP_PKGIMG_LNA (0x00872000)
+#define CP_PKGIMG_LIMIT_SIZE (0x58000)
+#endif
 #else
 #define AP_PKGIMG_LNA (0x00872000)
 #define CP_PKGIMG_LIMIT_SIZE (0x58000)

@@ -174,7 +174,7 @@ HalCodecSts_e es8311Config(HalCodecMode_e mode, HalCodecIface_t *iface);
   \return    -CODEC_EOK   -CODEC_ERR
   \note
  */ 
-HalCodecSts_e es8311SetMute(bool enable);
+HalCodecSts_e es8311SetMute(HalCodecCfg_t* codecHalCfg, bool enable);
 
 /**
   \brief    Set voice volume
@@ -182,7 +182,7 @@ HalCodecSts_e es8311SetMute(bool enable);
   \return    -CODEC_EOK   -CODEC_ERR
   \note
  */ 
-HalCodecSts_e es8311SetVolume(int volume);
+HalCodecSts_e es8311SetVolume(HalCodecCfg_t* codecHalCfg, int volume);
 
 /**
   \brief    Get voice volume
@@ -190,7 +190,7 @@ HalCodecSts_e es8311SetVolume(int volume);
   \return    -CODEC_EOK   -CODEC_ERR
   \note
  */ 
-HalCodecSts_e es8311GetVolume(int *volume);
+HalCodecSts_e es8311GetVolume(HalCodecCfg_t* codecHalCfg, int *volume);
 
 /**
   \brief    Configure ES8311 I2S format
