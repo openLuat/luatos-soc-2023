@@ -773,14 +773,16 @@ void luat_audio_inter_amr_init(uint8_t is_wb, uint8_t quality)
     	if (quality > HAL_AMR_WB_FT_8) {quality = HAL_AMR_WB_FT_8;}
     	eng->bit_table = amr_wb_bit_len;
     	eng->byte_table = amr_wb_byte_len;
+    	eng->max_frame_type = HAL_AMR_WB_FT_9;
     }
     else
     {
     	if (quality > HAL_AMR_NB_FT_7) {quality = HAL_AMR_NB_FT_7;}
     	eng->bit_table = amr_nb_bit_len;
     	eng->byte_table = amr_nb_byte_len;
+    	eng->max_frame_type = HAL_AMR_NB_FT_8;
     }
-    eng->max_frame_type = quality + 1;
+
     codecCfg.encBitRate = quality;
     codecCfg.encOutBitOffset = 0;
     eng->encode_req.bitRate = quality;
