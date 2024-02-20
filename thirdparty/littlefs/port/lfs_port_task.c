@@ -830,9 +830,7 @@ void LFS_adjustDaemonTaskPriority(void)
     osThreadSetPriority(gLfsDaemonTaskthreadId, osPriorityNormal2);
     #endif
 }
-#ifdef __USER_CODE__
-int lfs_ready = 0;
-#endif
+
 
 // Initialize
 int LFS_init(void)
@@ -841,7 +839,7 @@ int LFS_init(void)
 
     if(fs_assert_count && ((fs_assert_count % EC_FS_ASSERT_REFORMAT_THRESHOLD) == 0))
     {
-        ECPLAT_PRINTF(UNILOG_EXCEP_PRINT, LFS_Init_0, P_ERROR, "FS region reformat threshold: %d, Current FS assert count:%d", EC_FS_ASSERT_REFORMAT_THRESHOLD, fs_assert_count);
+        //ECPLAT_PRINTF(UNILOG_EXCEP_PRINT, LFS_Init_0, P_ERROR, "FS region reformat threshold: %d, Current FS assert count:%d", EC_FS_ASSERT_REFORMAT_THRESHOLD, fs_assert_count);
 
 
         #if defined CHIP_EC618 || defined CHIP_EC618_Z0
@@ -850,7 +848,7 @@ int LFS_init(void)
         if(FLASH_eraseSafe(FLASH_FS_REGION_START, FLASH_FS_REGION_SIZE) != 0)
         #endif
         {
-            ECPLAT_PRINTF(UNILOG_EXCEP_PRINT, LFS_Init_1, P_ERROR, "FS region reformat failed!!!");
+            //ECPLAT_PRINTF(UNILOG_EXCEP_PRINT, LFS_Init_1, P_ERROR, "FS region reformat failed!!!");
         }
 
         BSP_SetFSAssertCount(0);
@@ -873,9 +871,7 @@ int LFS_init(void)
     }
 
     LFS_createDaemonTaskAndQueue();
-#ifdef __USER_CODE__
-    lfs_ready = 1;
-#endif
+
     return 0;
 }
 
@@ -922,7 +918,7 @@ int LFS_rename(const char *oldpath, const char *newpath)
     int ret;
 
 #ifdef LFS_DEBUG_TRACE
-    ECPLAT_PRINTF(UNILOG_LFS, fs_rename, P_DEBUG, "LFS rename, old path: %s, new path: %s", (uint8_t *)oldpath, (uint8_t *)newpath);
+    //ECPLAT_PRINTF(UNILOG_LFS, fs_rename, P_DEBUG, "LFS rename, old path: %s, new path: %s", (uint8_t *)oldpath, (uint8_t *)newpath);
 #endif
 
     ret = LFS_waitForCompletion(LFS_REQUEST_RENAME, NULL, (uint32_t)oldpath, (uint32_t)newpath);
@@ -943,7 +939,7 @@ int LFS_fileOpen(lfs_file_t *file, const char *path, int flags)
 
     if(ret == LFS_ERR_ISDIR)
     {
-        ECOMM_TRACE(UNILOG_LFS, LFS_fileOpen, P_ERROR, 1, "LFS_FileOpen, ret: %d", ret);
+        //ECOMM_TRACE(UNILOG_LFS, LFS_fileOpen, P_ERROR, 1, "LFS_FileOpen, ret: %d", ret);
         lfs_assert(false);
     }
 
@@ -1021,7 +1017,7 @@ int LFS_fileTruncate(lfs_file_t *file, lfs_off_t size)
     int ret;
 
 #ifdef LFS_DEBUG_TRACE
-    ECPLAT_PRINTF(UNILOG_LFS, fs_file_truncate, P_DEBUG, "LFS file truncate, file name: %s", (file->name) ? (uint8_t *)file->name : (uint8_t *)"unknown name");
+    //ECPLAT_PRINTF(UNILOG_LFS, fs_file_truncate, P_DEBUG, "LFS file truncate, file name: %s", (file->name) ? (uint8_t *)file->name : (uint8_t *)"unknown name");
 #endif
 
     ret = LFS_waitForCompletion(LFS_REQUEST_FILE_TRUNCATE, file, size, 0);
@@ -1043,7 +1039,7 @@ int LFS_fileRewind(lfs_file_t *file)
     int ret;
 
 #ifdef LFS_DEBUG_TRACE
-    ECPLAT_PRINTF(UNILOG_LFS, fs_file_rewind, P_DEBUG, "LFS file rewind, file name: %s", (file->name) ? (uint8_t *)file->name : (uint8_t *)"unknown name");
+    //ECPLAT_PRINTF(UNILOG_LFS, fs_file_rewind, P_DEBUG, "LFS file rewind, file name: %s", (file->name) ? (uint8_t *)file->name : (uint8_t *)"unknown name");
 #endif
 
     ret = LFS_waitForCompletion(LFS_REQUEST_FILE_REWIND, file, 0, 0);
@@ -1119,7 +1115,7 @@ int LFS_fileOpenUnsafe(lfs_file_t *file, const char *path, int flags)
 
     if(ret == LFS_ERR_ISDIR)
     {
-        ECOMM_TRACE(UNILOG_LFS, LFS_fileOpenUnsafe, P_ERROR, 1, "LFS_fileOpenUnsafe, ret: %d", ret);
+        //ECOMM_TRACE(UNILOG_LFS, LFS_fileOpenUnsafe, P_ERROR, 1, "LFS_fileOpenUnsafe, ret: %d", ret);
         lfs_assert(false);
     }
 
