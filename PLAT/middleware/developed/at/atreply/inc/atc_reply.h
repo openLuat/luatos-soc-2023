@@ -218,8 +218,7 @@ typedef enum AtResultCode_Tag
     AT_RC_CIS_ERROR,            //Timer will Stop, +CIS ERROR
     AT_RC_CTM2M_ERROR,          //Timer will Stop, +CTM2M ERROR
     AT_RC_ECOTA_ERROR,           //ECOTA ERROR
-    AT_RC_AUDIOAMR_ERROR,
-    AT_RC_CODECHANDLE_ERR
+    AT_RC_AUDIOAMR_ERROR
 }AtResultCode;
 
 

@@ -70,10 +70,6 @@ extern "C" {
 #define CODEC_PA_PAD_INDEX            (17)
 #define CODEC_PA_PAD_ALT_FUNC         (PAD_MUX_ALT0)
 
-#define DIRECTION_TX         (0)
-#define DIRECTION_RX         (1)
-
-
 /*----------------------------------------------------------------------------*
 *                   DATA TYPE DEFINITION                                     *
 *----------------------------------------------------------------------------*/
@@ -81,32 +77,17 @@ typedef struct
 {
     bool     isDmic;                
     bool     isExPa;              
-    int16_t  exPaGain; 
-    int16_t  txDigGain;     
-    int16_t  txAnaGain; 
+    uint8_t  exPaGain; 
+    uint8_t  txDigGain;     
+    uint8_t  txAnaGain; 
 
-    int16_t  rxDigGain0;     
-    int16_t  rxAnaGain0; 
-    int16_t  rxDigGain50;     
-    int16_t  rxAnaGain50; 
-    int16_t  rxDigGain100;     
-    int16_t  rxAnaGain100; 
+    uint8_t  rxDigGain0;     
+    uint8_t  rxAnaGain0; 
+    uint8_t  rxDigGain50;     
+    uint8_t  rxAnaGain50; 
+    uint8_t  rxDigGain100;     
+    uint8_t  rxAnaGain100; 
 }HalCodecTlvDefault_t;
-
-typedef enum
-{
-    HAND_SET             = 0,
-    HEAD_SET_3_4_POLE    = 1,
-    HEAD_SET             = 2,
-    HANDS_OFF            = 3
-}HalCodecDeviceType_e;
-
-typedef struct
-{
-    int                  slope;
-    int                  offset;
-    HalCodecTlvDefault_t defaultVal;
-}HalCodecVolParam_t;
 
 typedef enum
 {
@@ -117,6 +98,7 @@ typedef enum
     ES7149,
     TM8211
 }HalCodecType_e;
+
 
 // codec status
 typedef enum
@@ -235,15 +217,13 @@ typedef struct
 }HalCodecIface_t;
 
 // Configure media hal for initialization of audio codec chip
-typedef struct
+typedef struct 
 {
-    HalAdcInput_e           adcInput;       // set adc channel 
-    HalDacOutput_e          dacOutput;      // set dac channel 
-    HalCodecMode_e          codecMode;      // select codec mode: adc, dac or both 
-    HalCodecIface_t         codecIface;     // set I2S interface configuration 
-    bool                    hasPA;
-    HalCodecDeviceType_e    codecDeviceType;// codec devie type
-    HalCodecVolParam_t      codecVolParam;  // each codec volume param, include slope and offset
+    HalAdcInput_e   adcInput;       // set adc channel 
+    HalDacOutput_e  dacOutput;      // set dac channel 
+    HalCodecMode_e  codecMode;      // select codec mode: adc, dac or both 
+    HalCodecIface_t codecIface;     // set I2S interface configuration 
+    bool            hasPA;
 }HalCodecCfg_t;
 
 typedef enum
@@ -270,9 +250,9 @@ typedef struct
     void          (*halCodecDeinitFunc)(void);                                                   // deinitialize codec
     HalCodecSts_e (*halCodecCtrlStateFunc)(HalCodecMode_e mode, HalCodecCtrlState_e ctrl_state); // control codec mode and state
     HalCodecSts_e (*halCodecCfgIfaceFunc)(HalCodecMode_e mode, HalCodecIface_t *iface);          // configure i2s interface
-    HalCodecSts_e (*halCodecSetMuteFunc) (HalCodecCfg_t* codecHalCfg,  bool mute);                                            // set codec mute
-    HalCodecSts_e (*halCodecSetVolumeFunc)(HalCodecCfg_t* codecHalCfg, int volume);                                          // set codec volume
-    HalCodecSts_e (*halCodecGetVolumeFunc)(HalCodecCfg_t* codecHalCfg, int *volume);                                         // get codec volume
+    HalCodecSts_e (*halCodecSetMuteFunc) (bool mute);                                            // set codec mute
+    HalCodecSts_e (*halCodecSetVolumeFunc)(int volume);                                          // set codec volume
+    HalCodecSts_e (*halCodecGetVolumeFunc)(int *volume);                                         // get codec volume
     HalCodecSts_e (*halCodecSetMicVolumeFunc)(uint8_t micGain, int volume);                      // set codec mic gain and volume
     //void          (*halCodecEnablePAFunc) (bool enable);                                         // enable pa
     void           *halCodecLock;                                                                // semaphore of codec
@@ -338,7 +318,7 @@ HalCodecSts_e halCodecIfaceCfg(HalCodecFuncList_t* codecHal, HalCodecMode_e mode
   \return    -CODEC_EOK   -CODEC_ERR
   \note
  */
-HalCodecSts_e halCodecSetMute(HalCodecFuncList_t* codecHal, HalCodecCfg_t* codecHalCfg, bool mute, bool needLock);
+HalCodecSts_e halCodecSetMute(HalCodecFuncList_t* codecHal, bool mute, bool needLock);
 
 #if 0
 /**
@@ -360,7 +340,7 @@ HalCodecSts_e halCodecEnablePA(HalCodecFuncList_t* codecHal, bool enable, bool n
   \return    -CODEC_EOK   -CODEC_ERR
   \note
  */
-HalCodecSts_e halCodecSetVolume(HalCodecFuncList_t* codecHal,HalCodecCfg_t* codecHalCfg, int volume, bool needLock);
+HalCodecSts_e halCodecSetVolume(HalCodecFuncList_t* codecHal, int volume, bool needLock);
 
 /**
   \brief    Hal codec get volume
@@ -370,7 +350,7 @@ HalCodecSts_e halCodecSetVolume(HalCodecFuncList_t* codecHal,HalCodecCfg_t* code
   \return    -CODEC_EOK   -CODEC_ERR
   \note
  */
-HalCodecSts_e halCodecGetVolume(HalCodecFuncList_t* codecHal, HalCodecCfg_t* codecHalCfg, int *volume, bool needLock);
+HalCodecSts_e halCodecGetVolume(HalCodecFuncList_t* codecHal, int *volume, bool needLock);
 
 /**
   \brief    Hal codec set mic volume

@@ -824,22 +824,22 @@ uint32_t EcDumpDataFlowUart(void)
 
 uint32_t ecGetDumpStartFlashAddr(void)
 {
-    return FLASH_EXCEP_DUMP_ADDR;
+	return FLASH_EXCEP_DUMP_ADDR;
 }
 
 uint8_t ecGetDumpFlashBlockNums(void)
 {
-    return EC_EXCEP_FLASH_BLOCK_NUMBS;
+	return EC_EXCEP_FLASH_BLOCK_NUMBS;
 }
 
 uint32_t ecGetDumpCUSTSpace(void)
 {
-    return FLASH_EXCEP_DUMP_CUST_SPACE_LIMIT;
+	return FLASH_EXCEP_DUMP_CUST_SPACE_LIMIT;
 }
 
 uint32_t ecGetDumpCUSTAddrOffset(void)
 {
-    return FLASH_EXCEP_DUMP_ADDR_OFFSET_CUST;
+	return FLASH_EXCEP_DUMP_ADDR_OFFSET_CUST;
 }
 
 #ifdef CORE_IS_AP
@@ -851,9 +851,9 @@ static __FORCEINLINE uint16_t __builtin_clz_16(uint16_t usData)
     uint16_t uMask = 0x8000;
 
     if (usData == 0)
-    {
-        return 16;
-    }
+	{
+		return 16;
+	}
 
     while ((usData & uMask) == 0)
     {
@@ -868,50 +868,29 @@ static __FORCEINLINE uint16_t __builtin_clz_16(uint16_t usData)
  * \brief       Check whether Flash dump occured or not.
  * \param[in]   void.
  * \returns     true  : Flash dump occured.
- *              flase : Flash dump doesn't occured.
+ *   			flase : Flash dump doesn't occured.
  */
 bool ecFlashDumpOccuredCheck(void)
 {
-    uint16_t usBitMap = 0;
-    uint8_t ucPartNums = 0;
-    uint32_t uiExcepOccured = 0;
+	uint16_t usBitMap = 0;
+	uint8_t ucPartNums = 0;
+	uint32_t uiExcepOccured = 0;
 
-    FLASH_read((uint8_t *)&usBitMap, ecGetDumpStartFlashAddr(), 2);
+	FLASH_read((uint8_t *)&usBitMap, ecGetDumpStartFlashAddr(), 2);
 
-    ucPartNums = 16 - __builtin_clz_16(usBitMap);
-    if (!ucPartNums)
-    {
-        return false;
-    }
+	ucPartNums = 16 - __builtin_clz_16(usBitMap);
+	if (!ucPartNums)
+	{
+		return false;
+	}
 
-    FLASH_read((uint8_t *)&uiExcepOccured, ecGetDumpStartFlashAddr()+ucPartNums*4+2, 4);
-    if (uiExcepOccured  == EC_EXCEPTION_OCCURED)
-    {
-        return true;
-    }
-    return false;
+	FLASH_read((uint8_t *)&uiExcepOccured, ecGetDumpStartFlashAddr()+ucPartNums*4+2, 4);
+	if (uiExcepOccured  == EC_EXCEPTION_OCCURED)
+	{
+		return true;
+	}
+	return false;
 }
 #endif
-
-#else
-uint32_t ecGetDumpStartFlashAddr(void)
-{
-    return 0;
-}
-
-uint8_t ecGetDumpFlashBlockNums(void)
-{
-    return 0;
-}
-
-uint32_t ecGetDumpCUSTSpace(void)
-{
-    return 0;
-}
-
-uint32_t ecGetDumpCUSTAddrOffset(void)
-{
-    return 0;
-}
 
 #endif

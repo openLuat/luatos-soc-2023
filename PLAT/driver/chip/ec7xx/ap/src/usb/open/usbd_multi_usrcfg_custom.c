@@ -912,7 +912,7 @@ uint8_t usbcustom_multidev_ccinfo_map(usbcust_mdcd_ccinfo_st *p_mdcd_ccinfo)
     if (map_valid==0)
     {
 #ifndef USB_DRV_SMALL_IMAGE
-        ECOMM_TRACE_OPT(UNILOG_PLA_DRIVER, usbcustom_multidev_ccinfo_map_2, P_ERROR, 4, \
+        ECOMM_TRACE(UNILOG_PLA_DRIVER, usbcustom_multidev_ccinfo_map_2, P_ERROR, 4, \
                                 "clstype %d, inst_id %d, maintp %d, subtp %d", \
                                 p_mdcd_ccinfo->cls_type,         \
                                 p_mdcd_ccinfo->inst_id,         \
@@ -1071,7 +1071,7 @@ uint8_t usbcustom_multidev_cmndesc(usbcust_mdcd_cmndesc_st *p_mdcd_cmndesc)
 
 #ifndef USB_DRV_SMALL_IMAGE
 
-                ECPLAT_PRINTF_OPT(UNILOG_PLA_DRIVER, usbcustom_multidev_cmndesc_1, P_DEBUG,             \
+                ECPLAT_PRINTF(UNILOG_PLA_DRIVER, usbcustom_multidev_cmndesc_1, P_DEBUG,             \
                                         "name %s, cls = 0x%x, subcls 0x%x, protocol 0x%x",   \
                                         p_mdcd_cmndesc->p_func_name,                         \
                                         p_cmndesc_data->intf_ctrl_desc.bInterfaceClass,  \
@@ -1087,7 +1087,7 @@ uint8_t usbcustom_multidev_cmndesc(usbcust_mdcd_cmndesc_st *p_mdcd_cmndesc)
 
 #ifndef USB_DRV_SMALL_IMAGE
 
-                ECPLAT_PRINTF_OPT(UNILOG_PLA_DRIVER, usbcustom_multidev_cmndesc_1, P_DEBUG,             \
+                ECPLAT_PRINTF(UNILOG_PLA_DRIVER, usbcustom_multidev_cmndesc_1, P_DEBUG,             \
                                         "name %s, cls = 0x%x, subcls 0x%x, protocol 0x%x",   \
                                         p_mdcd_cmndesc->p_func_name,                         \
                                         p_cmndesc_data->intf_ctrl_desc.bInterfaceClass,  \
@@ -1117,7 +1117,7 @@ uint8_t usbcustom_multidev_cmndesc(usbcust_mdcd_cmndesc_st *p_mdcd_cmndesc)
 
 #ifndef USB_DRV_SMALL_IMAGE
 
-                ECPLAT_PRINTF_OPT(UNILOG_PLA_DRIVER, usbcustom_multidev_cmndesc_1, P_DEBUG,             \
+                ECPLAT_PRINTF(UNILOG_PLA_DRIVER, usbcustom_multidev_cmndesc_1, P_DEBUG,             \
                                         "name %s, cls = 0x%x, subcls 0x%x, protocol 0x%x",   \
                                         p_mdcd_cmndesc->p_func_name,                         \
                                         p_cmndesc_data->intf_ctrl_desc.bInterfaceClass,  \
@@ -1135,7 +1135,7 @@ uint8_t usbcustom_multidev_cmndesc(usbcust_mdcd_cmndesc_st *p_mdcd_cmndesc)
 
 #ifndef USB_DRV_SMALL_IMAGE
 
-                ECPLAT_PRINTF_OPT(UNILOG_PLA_DRIVER, usbcustom_multidev_cmndesc_1, P_DEBUG,             \
+                ECPLAT_PRINTF(UNILOG_PLA_DRIVER, usbcustom_multidev_cmndesc_1, P_DEBUG,             \
                                         "name %s, cls = 0x%x, subcls 0x%x, protocol 0x%x",   \
                                         p_mdcd_cmndesc->p_func_name,                         \
                                         p_cmndesc_data->intf_ctrl_desc.bInterfaceClass,  \

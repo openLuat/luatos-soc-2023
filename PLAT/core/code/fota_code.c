@@ -146,7 +146,11 @@ FOTA_PLAT_SCT_ZI uint8_t  gFotaHash[FOTA_SHA256_HASH_LEN];
  *----------------------------------------------------------------------------*/
 static void fotaNvmSetZone(FotaNvmZoneId_e zid, uint32_t handle, uint32_t size, uint32_t ovhd, uint32_t extras)
 {
-    if(zid >= FOTA_NVM_ZONE_MAXNUM) return;
+    if(zid >= FOTA_NVM_ZONE_MAXNUM)
+    {
+        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_SET, P_ERROR, "set: invalid zid(%d)! max(%d)\n", zid, FOTA_NVM_ZONE_MAXNUM);
+        return;
+    }
 
     gFotaNvmZoneMan.bmZoneId |= 1 << zid ;
     gFotaNvmZoneMan.zone[zid].handle   = handle;
@@ -207,31 +211,42 @@ static int32_t fotaNvmNfsClear(uint32_t zid, uint32_t offset, uint32_t len)
     uint32_t    adjAddr = 0;
     uint32_t    currLen = len;
 
-    if(zid >= FOTA_NVM_ZONE_MAXNUM) return FOTA_EARGS;
-
-    if(!(gFotaNvmZoneMan.bmZoneId & (1 << zid)) || (FLASH_FOTA_ADDR_UNDEF == gFotaNvmZoneMan.zone[zid].handle))
+    if(zid >= FOTA_NVM_ZONE_MAXNUM)
     {
-        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_CLEAR_1, P_WARNING, "clr: no fota zone(%d)? bmZid(0x%x), handle(0x%x)\n",
-                                                    zid, gFotaNvmZoneMan.bmZoneId, gFotaNvmZoneMan.zone[zid].handle);
+        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_CLEAR_0, P_WARNING, "clr: invalid zid(%d)! max(%d)\n",
+                                                                 zid, FOTA_NVM_ZONE_MAXNUM);
+        return FOTA_EARGS;
+    }
+
+    if(!(gFotaNvmZoneMan.bmZoneId & (1 << zid)))
+    {
+        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_CLEAR_1, P_WARNING, "clr: no fota zone(%d)! bmZid(0x%x)\n",
+                                                                 zid, gFotaNvmZoneMan.bmZoneId);
         return FOTA_EUNFOUND;
+    }
+
+    if(FLASH_FOTA_ADDR_UNDEF == gFotaNvmZoneMan.zone[zid].handle)
+    {
+        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_CLEAR_2, P_WARNING, "clr zone(%d): no fota zone?\n", zid);
+        return FOTA_EUNDEF;
     }
 
     if(offset % FOTA_NVM_SECTOR_SIZE)
     {
-        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_CLEAR_2, P_WARNING, "clr zone(%d): offset(%d) unaligned by 4K!\n", zid, offset);
+        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_CLEAR_3, P_WARNING, "clr zone(%d): offset(%d) unaligned by 4K!\n", zid, offset);
         offset = (offset / FOTA_NVM_SECTOR_SIZE) * FOTA_NVM_SECTOR_SIZE;
     }
 
     if(currLen > gFotaNvmZoneMan.zone[zid].size)
     {
-        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_CLEAR_3, P_WARNING, "clr zone(%d): len(%d) ovfl! set it with max(%d)!\n",
+        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_CLEAR_4, P_WARNING, "clr zone(%d): len(%d) ovfl! set it with max(%d)!\n",
                                                                  zid, currLen, gFotaNvmZoneMan.zone[zid].size);
         currLen = gFotaNvmZoneMan.zone[zid].size;
     }
 
     if(offset >= gFotaNvmZoneMan.zone[zid].size)
     {
-        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_CLEAR_4, P_ERROR, "clr zone(%d): invalid offset(%d)! max(%d)\n",
+        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_CLEAR_5, P_ERROR, "clr zone(%d): invalid offset(%d)! max(%d)\n",
                                                                zid, offset, gFotaNvmZoneMan.zone[zid].size);
         return FOTA_EARGS;
     }
@@ -239,7 +254,7 @@ static int32_t fotaNvmNfsClear(uint32_t zid, uint32_t offset, uint32_t len)
     currAddr = ((gFotaNvmZoneMan.zone[zid].handle + offset) & (~ gFotaNvmZoneMan.zone[zid].extras));
     if(currAddr % FOTA_NVM_SECTOR_SIZE)
     {
-        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_CLEAR_5, P_ERROR, "clr zone(%d): addr(%d) unaligned by 4K err!\n", zid, currAddr);
+        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_CLEAR_6, P_ERROR, "clr zone(%d): addr(%d) unaligned by 4K err!\n", zid, currAddr);
         return FOTA_EPERM;
     }
 
@@ -261,7 +276,7 @@ static int32_t fotaNvmNfsClear(uint32_t zid, uint32_t offset, uint32_t len)
 
         if(eraseLen > currLen || eraseLen % FOTA_NVM_SECTOR_SIZE)
         {
-            ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_CLEAR_6, P_ERROR, "clr zone(%d): curr/erase Len(0x%x/0x%x) err!\n",
+            ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_CLEAR_7, P_ERROR, "clr zone(%d): curr/erase Len(0x%x/0x%x) err!\n",
                                                                    zid, currLen, eraseLen);
             return FOTA_EFLERASE;
         }
@@ -317,30 +332,41 @@ static int32_t fotaNvmNfsWrite(uint32_t zid, uint32_t offset, uint8_t *buf, uint
     uint32_t currAddr = 0;
     uint32_t  currLen = bufLen;
 
-    if(zid >= FOTA_NVM_ZONE_MAXNUM) return FOTA_EARGS;
-
-    if(!(gFotaNvmZoneMan.bmZoneId & (1 << zid)) || (FLASH_FOTA_ADDR_UNDEF == gFotaNvmZoneMan.zone[zid].handle))
+    if(zid >= FOTA_NVM_ZONE_MAXNUM)
     {
-        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_WRITE_1, P_WARNING, "wr: no fota zone(%d)? bmZid(0x%x), handle(0x%x)\n",
-                                                   zid, gFotaNvmZoneMan.bmZoneId, gFotaNvmZoneMan.zone[zid].handle);
+        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_WRITE_1, P_WARNING, "wr: invalid zid(%d)! max(%d)\n",
+                                                                 zid, FOTA_NVM_ZONE_MAXNUM);
+        return FOTA_EARGS;
+    }
+
+    if(!(gFotaNvmZoneMan.bmZoneId & (1 << zid)))
+    {
+        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_WRITE_2, P_WARNING, "wr: no fota zone(%d)! bmZid(0x%x)\n",
+                                                                 zid, gFotaNvmZoneMan.bmZoneId);
         return FOTA_EUNFOUND;
+    }
+
+    if(FLASH_FOTA_ADDR_UNDEF == gFotaNvmZoneMan.zone[zid].handle)
+    {
+        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_WRITE_3, P_WARNING, "wr zone(%d): no fota zone?\n", zid);
+        return FOTA_EUNDEF;
     }
 
     if(!currLen)
     {
-        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_WRITE_2, P_WARNING, "wr zone(%d): zero buf len?\n", zid);
+        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_WRITE_4, P_WARNING, "wr zone(%d): zero buf len?\n", zid);
         return FOTA_EOK;
     }
     else if(currLen > gFotaNvmZoneMan.zone[zid].size)
     {
-        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_WRITE_3, P_WARNING, "wr zone(%d): len(%d) ovfl! set it max(%d)!\n",
+        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_WRITE_5, P_WARNING, "wr zone(%d): len(%d) ovfl! set it max(%d)!\n",
                                                                  zid, currLen, gFotaNvmZoneMan.zone[zid].size);
         currLen = gFotaNvmZoneMan.zone[zid].size;
     }
 
     if(offset >= gFotaNvmZoneMan.zone[zid].size)
     {
-        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_WRITE_4, P_ERROR, "wr zone(%d): invalid offset(%d)! max(%d)\n",
+        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_WRITE_6, P_ERROR, "wr zone(%d): invalid offset(%d)! max(%d)\n",
                                                                zid, offset, gFotaNvmZoneMan.zone[zid].size);
         return FOTA_EARGS;
     }
@@ -365,30 +391,41 @@ PLAT_BL_CIRAM_FLASH_TEXT static int32_t fotaNvmNfsRead(uint32_t zid, uint32_t of
     uint32_t currAddr = 0;
     uint32_t  currLen = bufLen;
 
-    if(zid >= FOTA_NVM_ZONE_MAXNUM) return FOTA_EARGS;
-
-    if(!(gFotaNvmZoneMan.bmZoneId & (1 << zid)) || (FLASH_FOTA_ADDR_UNDEF == gFotaNvmZoneMan.zone[zid].handle))
+    if(zid >= FOTA_NVM_ZONE_MAXNUM)
     {
-        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_READ_1, P_WARNING, "rd: no fota zone(%d)? bmZid(0x%x), handle(0x%x)\n",
-                                                  zid, gFotaNvmZoneMan.bmZoneId, gFotaNvmZoneMan.zone[zid].handle);
+        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_READ_1, P_WARNING, "rd: invalid zid(%d)! max(%d)\n",
+                                                                zid, FOTA_NVM_ZONE_MAXNUM);
+        return FOTA_EARGS;
+    }
+
+    if(!(gFotaNvmZoneMan.bmZoneId & (1 << zid)))
+    {
+        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_READ_2, P_WARNING, "rd: no fota zone(%d)! bmZid(0x%x)\n",
+                                                                zid, gFotaNvmZoneMan.bmZoneId);
         return FOTA_EUNFOUND;
+    }
+
+    if(FLASH_FOTA_ADDR_UNDEF == gFotaNvmZoneMan.zone[zid].handle)
+    {
+        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_READ_3, P_WARNING, "rd zone(%d): no fota zone?\n", zid);
+        return FOTA_EUNDEF;
     }
 
     if(!currLen)
     {
-        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_READ_2, P_WARNING, "rd zone(%d): zero buf len?\n", zid);
+        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_READ_4, P_WARNING, "rd zone(%d): zero buf len?\n", zid);
         return FOTA_EOK;
     }
     else if(currLen > gFotaNvmZoneMan.zone[zid].size)
     {
-        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_READ_3, P_WARNING, "rd zone(%d): len(%d) ovfl! set it max(%d)!\n",
+        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_READ_5, P_WARNING, "rd zone(%d): len(%d) ovfl! set it max(%d)!\n",
                                                                 zid, currLen, gFotaNvmZoneMan.zone[zid].size);
         currLen = gFotaNvmZoneMan.zone[zid].size;
     }
 
     if(offset >= gFotaNvmZoneMan.zone[zid].size)
     {
-        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_READ_4, P_ERROR, "rd zone(%d): invalid offset(%d)! max(%d)\n",
+        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_READ_6, P_ERROR, "rd zone(%d): invalid offset(%d)! max(%d)\n",
                                                               zid, offset, gFotaNvmZoneMan.zone[zid].size);
         return FOTA_EARGS;
     }
@@ -422,7 +459,11 @@ static int32_t fotaNvmSetDfuResult(FotaDefDfuResult_t *result)
 {
     uint8_t  buf[4] = {0};
 
-    if(!result) return FOTA_EARGS;
+    if(!result)
+    {
+        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_SET_DFU_0, P_WARNING, "set DFU: null ptr!\n");
+        return FOTA_EARGS;
+    }
 
     if(result->dfuResult == FOTA_DRC_DFU_SUCC)
     {
@@ -454,34 +495,41 @@ PLAT_BL_CIRAM_FLASH_TEXT static int32_t fotaNvmGetDfuResult(FotaDefDfuResult_t *
 {
     uint8_t   buf[4] = {0};
 
-    if(!result) return FOTA_EARGS;
+    if(!result)
+    {
+        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_GET_DFU_0, P_WARNING, "get DFU: null ptr!\n");
+        return FOTA_EARGS;
+    }
 
-    if(!gFotaNvmZoneMan.bmZoneId) fotaNvmInit();
+    if(!gFotaNvmZoneMan.bmZoneId)
+    {
+        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_GET_DFU_1, P_WARNING, "get DFU: init zones!\n");
+        fotaNvmInit();
+    }
 
     if(FOTA_EOK != fotaNvmRead(FOTA_NVM_ZONE_BKUP, 0, buf, 4))
     {
-        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_GET_DFU_1, P_ERROR, "get DFU: rd bkup zone fail!\n");
+        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_GET_DFU_2, P_ERROR, "get DFU: rd bkup zone fail!\n");
         return FOTA_EFLREAD;
     }
 
     if (strncmp((char*)buf, "OK", 2) == 0)
     {
         result->dfuResult = FOTA_DRC_DFU_SUCC;
+        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_GET_DFU_3, P_INFO, "get DFU: 'succ'\n");
     }
     else if (strncmp((char*)buf, "NO", 2) == 0)
     {
         result->dfuResult = FOTA_DRC_DFU_FAIL;
+        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_GET_DFU_4, P_INFO, "get DFU: 'fail'\n");
     }
     else
     {
         result->dfuResult = FOTA_DRC_DFU_UNDEF;
+        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_GET_DFU_5, P_INFO, "get DFU: 'no result'\n");
     }
     /* errno */
     result->deltaState = buf[3];
-
-    ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_GET_DFU_2, P_INFO, "get DFU: %s(%d)\n",
-               (result->dfuResult == FOTA_DRC_DFU_SUCC ? "succ" :
-               (result->dfuResult ? "fail" : "no result")), result->dfuResult);
 
     return FOTA_EOK;
 }
@@ -514,11 +562,15 @@ static int32_t fotaNvmClosingDfu(FotaDefClosingDfu_t *clsDfu)
 
 static int32_t fotaNvmAdjustZoneSize(FotaDefAdjZoneSize_t *adjZone)
 {
-    if(adjZone->zid >= FOTA_NVM_ZONE_MAXNUM) return FOTA_EARGS;
+    if(adjZone->zid >= FOTA_NVM_ZONE_MAXNUM)
+    {
+        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_ADJ_ZONESZ_1, P_ERROR, "adj zone: invalid zid(%d)! max(%d)\n", adjZone->zid, FOTA_NVM_ZONE_MAXNUM);
+        return FOTA_EARGS;
+    }
 
     if(!(gFotaNvmZoneMan.bmZoneId & (1 << adjZone->zid)))
     {
-        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_ADJ_ZONESZ_1, P_ERROR, "adj zone: no fota zone(%d)! bmZid(0x%x)\n", adjZone->zid, gFotaNvmZoneMan.bmZoneId);
+        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_ADJ_ZONESZ_2, P_ERROR, "adj zone: no fota zone(%d)! bmZid(0x%x)\n", adjZone->zid, gFotaNvmZoneMan.bmZoneId);
         return FOTA_EUNFOUND;
     }
 
@@ -526,11 +578,11 @@ static int32_t fotaNvmAdjustZoneSize(FotaDefAdjZoneSize_t *adjZone)
     gFotaNvmZoneMan.zone[adjZone->zid].size = FOTA_MAX(orginSize, adjZone->size);
     if(orginSize != gFotaNvmZoneMan.zone[adjZone->zid].size)
     {
-        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_ADJ_ZONESZ_2, P_INFO, "adj zone(%d): size %d --> %d\n", adjZone->zid, gFotaNvmZoneMan.bmZoneId);
+        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_ADJ_ZONESZ_3, P_INFO, "adj zone(%d): size %d --> %d\n", adjZone->zid, gFotaNvmZoneMan.bmZoneId);
     }
     else
     {
-        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_ADJ_ZONESZ_3, P_INFO, "adj zone(%d): no need change!\n", adjZone->zid);
+        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_ADJ_ZONESZ_4, P_INFO, "adj zone(%d): no need change!\n", adjZone->zid);
     }
 
     return FOTA_EOK;
@@ -644,16 +696,21 @@ static int32_t fotaNvmCheckBaseImage(FotaDefChkBaseImage_t *chkImage)
     chkImage->isMatched = 0;
 
     fotaNvmRead(FOTA_NVM_ZONE_DELTA, offset, (uint8_t*)&parh, sizeof(CustFotaParHdr_t));
-    if(!FOTA_CHECK_PAR_MAGIC(parh.pmagic)) return FOTA_EPAR;
+    if(!FOTA_CHECK_PAR_MAGIC(parh.pmagic))
+    {
+        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_CHK_IMAGE_1, P_SIG, "image: not a *.par! pmagic(%x%x)\n",
+                                                             parh.pmagic[0], parh.pmagic[1]);
+        return FOTA_EPAR;
+    }
 
     if(!parh.parLen || parh.parLen > fotaNvmGetDeltaSize(1))
     {
-        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_CHK_IMAGE_1, P_SIG, "image: *.par len(%d) err, maxsize(%d)\n",
+        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_CHK_IMAGE_2, P_SIG, "image: *.par len(%d) err, maxsize(%d)\n",
                                                              parh.parLen, fotaNvmGetDeltaSize(1));
         return FOTA_EPARSZ;
     }
 
-    ECPLAT_PRINTF(UNILOG_FOTA, FOTA_CHK_IMAGE_2, P_INFO, "image: *.par pcap(%d)\n", parh.pcap);
+    ECPLAT_PRINTF(UNILOG_FOTA, FOTA_CHK_IMAGE_3, P_INFO, "image: *.par pcap(%d)\n", parh.pcap);
 
     offset = sizeof(CustFotaParHdr_t) + (parh.pcap ? FOTA_PAR_RETEN_SIZE_16M : FOTA_PAR_RETEN_SIZE_4M);
     for(; offset + sizeof(CustFotaPkgHdr_t) < parh.parLen; offset += pkgh.pkgLen)
@@ -673,7 +730,7 @@ static int32_t fotaNvmCheckBaseImage(FotaDefChkBaseImage_t *chkImage)
     fotaDoExtension(FOTA_DEF_CHK_BOOT_STATE, &boot);
     if(boot.isSigned && (!parh.psigned || !(bmFwAttr & (1 << FOTA_FA_SYSH))))
     {
-        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_CHK_IMAGE_3, P_WARNING, "image: no signed bin(0x%x) err, psigned(%d)!\n", bmFwAttr, parh.psigned);
+        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_CHK_IMAGE_4, P_WARNING, "image: no signed bin(0x%x) err, psigned(%d)!\n", bmFwAttr, parh.psigned);
         return FOTA_EPERM;
     }
 
@@ -820,7 +877,11 @@ uint32_t fotaNvmGetZoneId(uint32_t addr, uint32_t *size, uint32_t *offset)
     uint32_t   zid = FOTA_NVM_ZONE_DELTA;
     uint32_t   zsz = FOTA_NVM_DELTA_DOWNLOAD_SIZE;
 
-    if(!size) goto GET_ZID_END;
+    if(!size)
+    {
+        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_GET_ZID_1, P_ERROR, "get zid: null size ptr!\n");
+        goto GET_ZID_END;
+    }
 
     if(!addr && !(*size))
     {
@@ -893,11 +954,16 @@ GET_ZID_END:
  ******************************************************************************/
 PLAT_BL_CIRAM_FLASH_TEXT uint32_t fotaNvmGetSize(uint32_t zid, uint8_t isOvhdExcl)
 {
-    if(zid >= FOTA_NVM_ZONE_MAXNUM) return 0;
+    if(zid >= FOTA_NVM_ZONE_MAXNUM)
+    {
+        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_GET_SZ_1, P_WARNING, "get size: invalid zid(%d)! max(%d)\n",
+                                                                  zid, FOTA_NVM_ZONE_MAXNUM);
+        return 0;
+    }
 
     if(!(gFotaNvmZoneMan.bmZoneId & (1 << zid)))
     {
-        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_GET_SZ_1, P_WARNING, "get size: no fota zone(%d)! bmZid(0x%x)\n",
+        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_GET_SZ_2, P_WARNING, "get size: no fota zone(%d)! bmZid(0x%x)\n",
                                                                   zid, gFotaNvmZoneMan.bmZoneId);
         return 0;
     }
@@ -912,7 +978,12 @@ PLAT_BL_CIRAM_FLASH_TEXT uint32_t fotaNvmGetSize(uint32_t zid, uint8_t isOvhdExc
  ******************************************************************************/
 PLAT_BL_CIRAM_FLASH_TEXT int32_t fotaNvmGetHandle(uint32_t zid)
 {
-    if(zid >= FOTA_NVM_ZONE_MAXNUM) return FOTA_EARGS;
+    if(zid >= FOTA_NVM_ZONE_MAXNUM)
+    {
+        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_GET_HNDL_1, P_WARNING, "get handle: invalid zid(%d)! max(%d)\n",
+                                                                    zid, FOTA_NVM_ZONE_MAXNUM);
+        return FOTA_EARGS;
+    }
 
     if(!(gFotaNvmZoneMan.bmZoneId & (1 << zid)))
     {
@@ -931,7 +1002,12 @@ PLAT_BL_CIRAM_FLASH_TEXT int32_t fotaNvmGetHandle(uint32_t zid)
  ******************************************************************************/
 PLAT_BL_CIRAM_FLASH_TEXT int32_t fotaNvmGetExtras(uint32_t zid)
 {
-    if(zid >= FOTA_NVM_ZONE_MAXNUM) return FOTA_EARGS;
+    if(zid >= FOTA_NVM_ZONE_MAXNUM)
+    {
+        ECPLAT_PRINTF(UNILOG_FOTA, FOTA_NVM_GET_XTRAS_1, P_WARNING, "get xtras: invalid zid(%d)! max(%d)\n",
+                                                                     zid, FOTA_NVM_ZONE_MAXNUM);
+        return FOTA_EARGS;
+    }
 
     if(!(gFotaNvmZoneMan.bmZoneId & (1 << zid)))
     {

@@ -110,6 +110,10 @@ uint32_t EcDumpDataFlowUart(void);
 #ifdef FEATURE_EXCEPTION_FLASH_DUMP_ENABLE
 #include "exception_dump_defs.h"
 
+uint32_t ecGetDumpStartFlashAddr(void);
+uint8_t ecGetDumpFlashBlockNums(void);
+uint32_t ecGetDumpCUSTAddrOffset(void);
+uint32_t ecGetDumpCUSTSpace(void);
 #ifdef CORE_IS_AP
 /*
  * \brief       Check whether Flash dump occured or not.
@@ -120,10 +124,4 @@ uint32_t EcDumpDataFlowUart(void);
 bool ecFlashDumpOccuredCheck(void);
 #endif
 #endif
-
-uint32_t ecGetDumpStartFlashAddr(void);
-uint8_t ecGetDumpFlashBlockNums(void);
-uint32_t ecGetDumpCUSTAddrOffset(void);
-uint32_t ecGetDumpCUSTSpace(void);
-
 #endif  /* _EXCEPTION_DUMP_H */

@@ -223,12 +223,12 @@ HalCodecSts_e halCodecIfaceCfg(HalCodecFuncList_t* codecHal, HalCodecMode_e mode
     return ret;
 }
 
-HalCodecSts_e halCodecSetMute(HalCodecFuncList_t* codecHal, HalCodecCfg_t* codecHalCfg, bool mute, bool needLock)
+HalCodecSts_e halCodecSetMute(HalCodecFuncList_t* codecHal, bool mute, bool needLock)
 {
     int32_t ret;
     HAL_CODEC_CHECK_NULL(codecHal, "audio_hal handle is null", -1);
     if (needLock) halCodecLock(codecHal->halCodecLock);
-    ret = codecHal->halCodecSetMuteFunc(codecHalCfg, mute);
+    ret = codecHal->halCodecSetMuteFunc(mute);
     if (needLock) halCodecUnlock(codecHal->halCodecLock);
     return ret;
 }
@@ -245,23 +245,23 @@ HalCodecSts_e halCodecEnablePA(HalCodecFuncList_t* codecHal, bool enable, bool n
 }
 #endif
 
-HalCodecSts_e halCodecSetVolume(HalCodecFuncList_t* codecHal, HalCodecCfg_t* codecHalCfg, int volume, bool needLock)
+HalCodecSts_e halCodecSetVolume(HalCodecFuncList_t* codecHal, int volume, bool needLock)
 {
     int32_t ret;
     HAL_CODEC_CHECK_NULL(codecHal, "audio_hal handle is null", -1);
     if (needLock) halCodecLock(codecHal->halCodecLock);
-    ret = codecHal->halCodecSetVolumeFunc(codecHalCfg, volume);
+    ret = codecHal->halCodecSetVolumeFunc(volume);
     if (needLock) halCodecUnlock(codecHal->halCodecLock);
     return ret;
 }
 
-HalCodecSts_e halCodecGetVolume(HalCodecFuncList_t* codecHal, HalCodecCfg_t* codecHalCfg, int *volume, bool needLock)
+HalCodecSts_e halCodecGetVolume(HalCodecFuncList_t* codecHal, int *volume, bool needLock)
 {
     int32_t ret;
     HAL_CODEC_CHECK_NULL(codecHal, "audio_hal handle is null", -1);
     HAL_CODEC_CHECK_NULL(volume, "Get volume para is null", -1);
     if (needLock) halCodecLock(codecHal->halCodecLock);
-    ret = codecHal->halCodecGetVolumeFunc(codecHalCfg, volume);
+    ret = codecHal->halCodecGetVolumeFunc(volume);
     if (needLock) halCodecUnlock(codecHal->halCodecLock);
     return ret;
 }

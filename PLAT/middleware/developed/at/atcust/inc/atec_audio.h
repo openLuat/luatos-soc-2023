@@ -19,7 +19,7 @@
 
 #include "at_util.h"
 
-#define ATC_ECADCFG_RSP_BUFF_MIN                   220
+#define ATC_ECADCFG_RSP_BUFF_MIN                   200
 
 #define ATC_ECADCFG_SPH_EQ_LEN_MAX                 210
 #define ATC_ECADCFG_SPH_EQ_CONTINUE                     0x88
@@ -46,9 +46,6 @@
 
 #define ATC_ECADCFG_4_PARA_STR_LEN                   (210*2)
 #define ATC_ECADCFG_4_PARA_STR_DEF                   NULL
-
-#define ATC_ECADCFG_4_LOG_CTRL_STR_LEN                   (16)
-#define ATC_ECADCFG_4_LOG_CTRL_STR_DEF                   NULL
 
 #define ATC_ECADCFG_5_VAL_MIN                   0
 #define ATC_ECADCFG_5_VAL_MAX                   1
@@ -252,8 +249,6 @@ CmsRetId ecAudioCfg(const AtCmdInputContext *pAtCmdReq);
 CmsRetId ecAudioSpeechCfg(const AtCmdInputContext *pAtCmdReq);
 CmsRetId ecAudioCfgEqCancel(void);
 CmsRetId  ecAudioCfgEqInputData(UINT8 chanId, UINT8 *pData, INT16 dataLength);
-CmsRetId ecAudioFixedSrcCfg(const AtCmdInputContext *pAtCmdReq);
-CmsRetId ecAudioSetVolume(const AtCmdInputContext *pAtCmdReq);
 
 
 #endif

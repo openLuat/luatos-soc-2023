@@ -240,23 +240,3 @@ PLAT_BL_CIRAM_FLASH_TEXT uint32_t halCrc32(void* input, int len)
 }
 
 
-
-/**
-  \fn        halVoiceEngProcRetWrapper(UINT16 msgId, void *pIpcRet)
-  \brief     used as wrapper API for halVoiceEngProcRet
-             FEATURE_AUDIO_ENABLE could only be used in open source code
-  \note
- */
-
-void halVoiceEngProcRetWrapper(UINT16 msgId, void *pIpcRet)
-{
-    #ifdef FEATURE_AUDIO_ENABLE
-    extern void halVoiceEngProcRet(UINT16 msgId, void *pIpcRet);
-    halVoiceEngProcRet(msgId, pIpcRet);
-    #else
-    return;
-    #endif
-
-}
-
-

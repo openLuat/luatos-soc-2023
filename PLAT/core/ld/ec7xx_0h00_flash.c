@@ -444,7 +444,9 @@ SECTIONS
     *(.stack*)               /* stack should be 4 byte align */  
     Image$$LOAD_DRAM_SHARED$$ZI$$Limit = .;
     *(.USB_NOINIT_DATA_BUF)
+#ifdef FEATURE_EXCEPTION_FLASH_DUMP_ENABLE
   	*(.sect_dump_unilog.*)
+#endif
   } >MSMB_AREA
 
   
@@ -476,10 +478,12 @@ SECTIONS
   .load_xp_sharedinfo XP_SHAREINFO_BASE_ADDR (NOLOAD):
   {
   *(.shareInfo)
+#ifdef FEATURE_EXCEPTION_FLASH_DUMP_ENABLE
   Image$$SHARE_EXCEP_INFO$$ZI$$Base = .;
   *(.shareExcepInfo)
   . = ALIGN(4);
   Image$$SHARE_EXCEP_INFO$$ZI$$Limit = .;
+#endif
   } >MSMB_AREA
   
   .load_dbg_area XP_DBGRESERVED_BASE_ADDR (NOLOAD):

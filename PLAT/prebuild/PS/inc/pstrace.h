@@ -216,45 +216,6 @@ do                                                                              
 }while(0)
 
 
-/**
- * Less/optional log, may not print out if need save flash
-*/
-#ifndef FEATURE_LESSLOG_ENABLE
-#define ECPS_TRACE_OPT(moduleId, subId, debugLevel, argLen, format,  ...)           \
-    ECPS_TRACE(moduleId, subId, debugLevel, argLen, format,  ##__VA_ARGS__)
-
-#define ECPS_PRINTF_OPT(moduleId, subId, debugLevel, format, ...)                   \
-    ECPS_PRINTF(moduleId, subId, debugLevel, format, ##__VA_ARGS__)
-
-#define ECPS_DUMP_OPT(moduleId, subId, debugLevel, format, dumpLen, dump)           \
-    ECPS_DUMP(moduleId, subId, debugLevel, format, dumpLen, dump)
-
-#define ECPS_DUMP_POLLING_OPT(moduleId, subId, debugLevel, format, dumpLen, dump)   \
-    ECPS_DUMP_POLLING(moduleId, subId, debugLevel, format, dumpLen, dump)
-
-#define ECPS_TRACE_X_OPT(moduleId, subId, debugLevel, argLen, format,  ...)           \
-    ECPS_TRACE_X(moduleId, subId, debugLevel, argLen, format,  ##__VA_ARGS__)
-
-#define ECPS_PRINTF_X_OPT(moduleId, subId, debugLevel, format, ...)                   \
-    ECPS_PRINTF_X(moduleId, subId, debugLevel, format, ##__VA_ARGS__)
-
-#define ECPS_DUMP_X_OPT(moduleId, subId, debugLevel, format, dumpLen, dump)           \
-    ECPS_DUMP_X(moduleId, subId, debugLevel, format, dumpLen, dump)
-
-#define ECPS_DUMP_POLLING_X_OPT(moduleId, subId, debugLevel, format, dumpLen, dump)   \
-    ECPS_DUMP_POLLING_X(moduleId, subId, debugLevel, format, dumpLen, dump)
-#else
-#define ECPS_TRACE_OPT(moduleId, subId, debugLevel, argLen, format,  ...)
-#define ECPS_PRINTF_OPT(moduleId, subId, debugLevel, format, ...)
-#define ECPS_DUMP_OPT(moduleId, subId, debugLevel, format, dumpLen, dump)
-#define ECPS_DUMP_POLLING_OPT(moduleId, subId, debugLevel, format, dumpLen, dump)
-#define ECPS_TRACE_X_OPT(moduleId, subId, debugLevel, argLen, format,  ...)
-#define ECPS_PRINTF_X_OPT(moduleId, subId, debugLevel, format, ...)
-#define ECPS_DUMP_X_OPT(moduleId, subId, debugLevel, format, dumpLen, dump)
-#define ECPS_DUMP_POLLING_X_OPT(moduleId, subId, debugLevel, format, dumpLen, dump)
-#endif
-
-
 #endif
 
 /******************************************************************************

@@ -94,7 +94,7 @@ int usb_portmon_init(void)
     }    
 
     usb_wkup_pad_idx = BSP_UsbGetVBUSWkupPad();
-    ECOMM_TRACE_OPT(UNILOG_PLA_DRIVER, usb_portmon_init_1, P_WARNING, 1,"usb_wkup_pad_idx %d", usb_wkup_pad_idx);
+    ECOMM_TRACE(UNILOG_PLA_DRIVER, usb_portmon_init_1, P_WARNING, 1,"usb_wkup_pad_idx %d", usb_wkup_pad_idx);
     
     if (usb_wkup_pad_idx>WAKEUP_PAD_5)
     {

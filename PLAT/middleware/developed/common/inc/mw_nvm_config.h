@@ -101,7 +101,6 @@ typedef enum _EPAT_MidWareCfgParamId_Enum
     MW_CFG_PPP_AUTH_SELECT_PARAM,       /* TV, UINT8 pppAuthSelectMode */
 
     MW_CFG_NET_HSOT_INFO_PARAM,     /* TLV, MWNvmCfgNetHostInfoParam */
-    MW_CFG_DM_CMCC_PARAM2,           /* TLV, MWNvmCfgDmCmccParam2 */
 
     MW_CFG_PARAM_END,
     /* As need a bitmap to record which CFG is set/configed, here limit the MAX ID to 256, than 8 words bitmap is enough  */
@@ -296,17 +295,6 @@ typedef struct _SIG_EPAT_MW_CFG_DM_CMCC_PARAM
     CHAR    secret[MID_WARE_DM_SECRET_LEN];  /* secret string like "j5MOg7I6456971aQN7z6Bl36Xk5wYA5Q"*/
     CHAR    location[MID_WARE_DM_LOCATION_LEN]; /* loacation */
 }MWNvmCfgDmCmccParam;
-
-/*
- * DM CMCC v4.0 ext parameter
-*/
-typedef struct _SIG_EPAT_MW_CFG_DM_CMCC_PARAM_2
-{
-    uint32_t reportTime;
-    uint32_t reportNum;
-    uint16_t retryInter;
-    uint16_t retryNum;
-}MWNvmCfgDmCmccParam2;
 
 /*
  * Voltage low and thermal high alarm
@@ -553,7 +541,6 @@ typedef struct MidWareNvmConfig_Tag
      * used for CMS other sub-mode, ParamId: MW_CFG_NET_HSOT_INFO_PARAM
     */
     MWNvmCfgNetHostInfoParam        netParamHostInfoCfg;      // 16 bytes
-    MWNvmCfgDmCmccParam2     dmCmccParam2;        // 12 bytes
 }MidWareNvmConfig;
 
 
@@ -892,8 +879,6 @@ void mwNvmCfgGetDmCmccParam(MWNvmCfgDmCmccParam *pDmCmccParam);
   \Return       void
 */
 void mwNvmCfgSetAndSaveDmCmccParam(MWNvmCfgDmCmccParam *pDmCmccParam);
-void mwNvmCfgGetDmCmccParam2(MWNvmCfgDmCmccParam2 *pDmCmccParam2);
-void mwNvmCfgSetAndSaveDmCmccParam2(MWNvmCfgDmCmccParam2 *pDmCmccParam2);
 
 void mwNvmCfgGetCtwParamConfig(MWNvmCfgCtwParamCfg *pCtwParam);
 void mwNvmCfgSetAndSaveCtwParamConfig(MWNvmCfgCtwParamCfg *pCtwParam);

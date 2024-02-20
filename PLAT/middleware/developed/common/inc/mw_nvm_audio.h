@@ -7,9 +7,9 @@
  * Description:  middleware NVM SMS header file
  * History:      2021/05/24, Originated by glwu
  ****************************************************************************/
-//#include "osasys.h"
-//#include "mw_common.h"
-//#include "cmisms.h"
+#include "osasys.h"
+#include "mw_common.h"
+#include "cmisms.h"
 #include "audioCfg.h"
 #include "hal_codec.h"
 
@@ -226,21 +226,6 @@ typedef struct AudioParaSphRxEQ_Tag
     AudioParaSphEQBiquard_t    biquardParam[EC_ADCFG_SPEECH_EQ_BIQUARD_NUMB];
 }AudioParaSphRxEQ_t;
 
-typedef struct AudioParaCfgLogControl_Tag
-{
-    UINT8   logCtrlTxBeforeCcio;
-    UINT8   logCtrlTxAfterCcio;
-    UINT8   logCtrlTxBeforeVem;	
-    UINT8   logCtrlTxAfterVem;
-    UINT8   logCtrlTxAfterEncoder;
-	
-    UINT8   logCtrlRxBeforeDecoder;
-    UINT8   logCtrlRxBeforeVem;
-    UINT8   logCtrlRxAfterVem;
-    UINT8   logCtrlRxBeforeCcio;
-    UINT8   logCtrlRxAfterCcio;
-}AudioParaCfgLogControl_t;
-
 typedef struct AudioParaCfgSphTx_Tag
 {
     AudioParaSphTxAEC_t       audioSphTxAEC;
@@ -313,7 +298,6 @@ typedef struct MWNvmAudioCfgStore_Tag
 
 #define NVM_AUDIO_CFG_TX_RX_NUMB_MAX            8
 #define NVM_AUDIO_CFG_TX_RX_MODULE_SHIFT        16
-#define NVM_AUDIO_CFG_CODEC_SHIFT               16
 
 #define EC_ADCFG_COMMON_MODE_VAL_DEF                     0
 #define EC_ADCFG_COMMON_DIR_VAL_DEF                      0
@@ -386,17 +370,6 @@ typedef struct MWNvmAudioCfgStore_Tag
 #define EC_ADCFG_SPEECH_RX_TX_EQ_FILT_VALUE1_VAL_DEF                   500
 #define EC_ADCFG_SPEECH_RX_TX_EQ_FILT_VALUE2_VAL_DEF                   0
 #define EC_ADCFG_SPEECH_RX_TX_EQ_FILT_VALUE3_VAL_DEF                   5790
-
-#define EC_ADCFG_LOG_CTRL_TX_BEFORE_CCIO_VAL_DEF                   0
-#define EC_ADCFG_LOG_CTRL_TX_AFTER_CCIO_VAL_DEF                    0
-#define EC_ADCFG_LOG_CTRL_TX_BEFORE_VEM_VAL_DEF                    0
-#define EC_ADCFG_LOG_CTRL_TX_AFTER_VEM_VAL_DEF                     0
-#define EC_ADCFG_LOG_CTRL_TX_AFTER_ENCODER_VAL_DEF                 0
-#define EC_ADCFG_LOG_CTRL_RX_BEFORE_DECODER_VAL_DEF                0
-#define EC_ADCFG_LOG_CTRL_RX_BEFORE_VEM_VAL_DEF                    0
-#define EC_ADCFG_LOG_CTRL_RX_AFTER_VEM_VAL_DEF                     0
-#define EC_ADCFG_LOG_CTRL_RX_BEFORE_CCIO_VAL_DEF                   0
-#define EC_ADCFG_LOG_CTRL_RX_AFTER_CCIO_VAL_DEF                    0
 
 #define AUDIO_CFG_TLV_TYPE_SHIFT                   8
 
@@ -506,18 +479,6 @@ typedef enum AtcAudioTypeMapping_Tag
     AUDIO_CFG_TLV_SPEECH_RX_EQ_FILT_VALUE2 = 0x100C06,
     AUDIO_CFG_TLV_SPEECH_RX_EQ_FILT_VALUE3 = 0x100C07,
     AUDIO_CFG_TLV_SPEECH_RX_EQ_BIQUARD     = 0x100C08,
-
-    AUDIO_CFG_TLV_LOG_CTRL_TX_BEFORE_CCIO	     = 0x100D00,
-    AUDIO_CFG_TLV_LOG_CTRL_TX_AFTER_CCIO	     = 0x100D01,
-    AUDIO_CFG_TLV_LOG_CTRL_TX_BEFORE_VEM 	     = 0x100D02,
-    AUDIO_CFG_TLV_LOG_CTRL_TX_AFTER_VEM          = 0x100D03,
-    AUDIO_CFG_TLV_LOG_CTRL_TX_AFTER_ENCODER 	 = 0x100D04,
-    AUDIO_CFG_TLV_LOG_CTRL_RX_BEFORE_DECODER     = 0x100D05,
-    AUDIO_CFG_TLV_LOG_CTRL_RX_BEFORE_VEM         = 0x100D06,
-    AUDIO_CFG_TLV_LOG_CTRL_RX_AFTER_VEM          = 0x100D07,
-    AUDIO_CFG_TLV_LOG_CTRL_RX_BEFORE_CCIO	     = 0x100D08,
-    AUDIO_CFG_TLV_LOG_CTRL_RX_AFTER_CCIO         = 0x100D09,
-
 }AtcAudioTypeMap_e;
 
 #pragma pack(1)
@@ -711,21 +672,6 @@ typedef struct EcAudioCfgTlvSphRxEQ_Tag
     EcAudioCfgTlvVariItem_t     biquardParam;
 }EcAudioCfgTlvSphRxEQ_t;
 
-typedef struct EcAudioCfgTlvLogCtrl_Tag
-{	
-    EcAudioCfgTlvUint8Item_t   logCtrlTxBeforeCcio;
-    EcAudioCfgTlvUint8Item_t   logCtrlTxAfterCcio;
-    EcAudioCfgTlvUint8Item_t   logCtrlTxBeforeVem;
-    EcAudioCfgTlvUint8Item_t   logCtrlTxAfterVem;
-    EcAudioCfgTlvUint8Item_t   logCtrlTxAfterEncoder;
-
-    EcAudioCfgTlvUint8Item_t   logCtrlRxBeforeDecoder;
-    EcAudioCfgTlvUint8Item_t   logCtrlRxBeforeVem;
-    EcAudioCfgTlvUint8Item_t   logCtrlRxAfterVem;
-    EcAudioCfgTlvUint8Item_t   logCtrlRxBeforeCcio;
-    EcAudioCfgTlvUint8Item_t   logCtrlRxAfterCcio;
-}EcAudioCfgTlvLogCtrl_t;
-
 typedef struct EcAudioCfgTlvSphTx_Tag
 {
     EcAudioCfgTlvSphTxAEC_t       audioSphTxAEC;
@@ -782,7 +728,7 @@ typedef struct MWNvmAudioCfgTlvStore_Tag
     EcAudioCfgTlvSphRx_t       audioCfgTlvSphRx7;  //mode==1, direct==1 device==3 
     */
     EcAudioCfgTlvSphRx_t       audioCfgTlvSphRx[EC_ADCFG_SPEECH_RX_NUMB];  //EC_ADCFG_SPEECH_RX_NUMB==8   
-    EcAudioCfgTlvLogCtrl_t     audioLogControl;
+    
 }ecAudioCfgTlvStore;
 #pragma pack()
 
@@ -800,8 +746,8 @@ void mwNvmAudioCfgSave(ecAudioCfgTlvStore      *pWriteMwNvmAudioCfg);
 UINT32 mwNvmAudioCfgCommonGet(AudioParaCfgCommon_t *pMwNvmAudioCfgCommon, ecAudioCfgTlvStore *pMwNvmAudioCfg);
 BOOL mwNvmAudioCfgCommonSet(AudioParaCfgCommon_t       *pMwNvmAudioCfgCommon, ecAudioCfgTlvStore *pMwNvmAudioCfg);
 
-UINT32 mwNvmAudioCfgCodecGet(AudioParaCfgCommon_t *pMwNvmAudioCfgCommon, AudioParaCfgCodec_t *pMwNvmAudioCfgCodec, ecAudioCfgTlvStore *pMwNvmAudioCfg);
-BOOL mwNvmAudioCfgCodecSet(AudioParaCfgCommon_t *pMwNvmAudioCfgCommon, AudioParaCfgCodec_t *pMwNvmAudioCfgCodec, ecAudioCfgTlvStore *pMwNvmAudioCfg);
+UINT32 mwNvmAudioCfgCodecGet(AudioParaCfgCodec_t *pMwNvmAudioCfgCodec, ecAudioCfgTlvStore *pMwNvmAudioCfg);
+BOOL mwNvmAudioCfgCodecSet(AudioParaCfgCodec_t *pMwNvmAudioCfgCodec, ecAudioCfgTlvStore *pMwNvmAudioCfg);
 
 UINT32 mwNvmAudioCfgCodecDeviceGet(AudioParaCfgCommon_t         *pMwNvmAudioCfgCommon, AudioParaCfgCodecDev_t         *pMwNvmAudioCfgCodecDev, ecAudioCfgTlvStore *pMwNvmAudioCfg);
     BOOL mwNvmAudioCfgCodecDeviceSet(AudioParaCfgCommon_t         *pMwNvmAudioCfgCommon, AudioParaCfgCodecDev_t *pMwNvmAudioCfgCodecDev, ecAudioCfgTlvStore *pMwNvmAudioCfg);
@@ -837,8 +783,6 @@ BOOL mwNvmAudioCfgSpeechSetRxAGC(AudioParaCfgCommon_t         *pMwNvmAudioCfgCom
 UINT32 mwNvmAudioCfgSpeechGetRxEQ(AudioParaCfgCommon_t         *pMwNvmAudioCfgCommon, EqConfig_t *pMwNvmAudioCfgRxEQ, ecAudioCfgTlvStore *pMwNvmAudioCfg);
 BOOL mwNvmAudioCfgSpeechSetRxEQ(AudioParaCfgCommon_t         *pMwNvmAudioCfgCommon, EqConfig_t *pWriteMwNvmAudioCfgRxEQ, ecAudioCfgTlvStore *pMwNvmAudioCfg);
 UINT32 mwNvmAudioCfgSpeechGetRxEQForAt(AudioParaCfgCommon_t         *pMwNvmAudioCfgCommon, EqConfig_t *pMwNvmAudioCfgRxEQ, ecAudioCfgTlvStore *pMwNvmAudioCfg);
-UINT32 mwNvmAudioCfgLogControlGet(/*AudioParaCfgCommon_t *pMwNvmAudioCfgCommon, */AudioParaCfgLogControl_t        *pMwNvmAudioCfgLogCtrl, ecAudioCfgTlvStore *pMwNvmAudioCfg);
-BOOL mwNvmAudioCfgLogControlSet(/*AudioParaCfgCommon_t *pMwNvmAudioCfgCommon, */AudioParaCfgLogControl_t *pMwNvmAudioCfgLogCtrl, ecAudioCfgTlvStore *pMwNvmAudioCfg);
 
 /**
   \fn           Bool mwNvmGetAudioCfgForCP(AudioConfig_t *readAudioCfgForCp)

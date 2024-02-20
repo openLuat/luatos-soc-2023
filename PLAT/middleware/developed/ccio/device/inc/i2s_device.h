@@ -76,13 +76,12 @@ typedef struct
     uint16_t  totalSize;
     uint8_t   *rxBuffer;
     uint8_t   codecType;
-    uint16_t  freeSize;
     bool      needPlayTone;
     bool      needCodecInitAgain;
     bool      needRecord;
+    uint16_t  freeSize;
     bool      isStopRec;
     bool      isToneOn;
-    bool      isInitDone;
 }I2sDevRxWrap_t;
 
 typedef struct
@@ -149,7 +148,6 @@ int32_t i2sStopHandle(uint8_t stopType);
  * @return null
  */
 void i2sChangeRingTone(uint8_t* toneSrc, uint32_t toneSize, uint16_t dmaTrunkSize, uint8_t sampleRateUse);
-void i2sFastCreate();
 
 
 

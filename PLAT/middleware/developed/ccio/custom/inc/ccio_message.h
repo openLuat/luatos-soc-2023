@@ -87,7 +87,6 @@ typedef enum _EPAT_CcioChanMsgIdTag
     CCIO_CHAN_START_PLAY,
     CCIO_CHAN_STOP_REC,
     CCIO_CHAN_STOP_PLAY,
-    CCIO_CHAN_HANDLE_CODEC,
     CCIO_CHAN_CMSG_MAXID,
     CCIO_CHAN_CMSG_END = (CCIO_CHAN_CMSG_FLAG | CCIO_CHAN_MSG_CODE_MASK),
 
@@ -179,7 +178,6 @@ int32_t ccioBuildMsgVolteStopRec(CcioChanMessage_t *chmsg, CcioChanMessageId_e m
 int32_t ccioBuildMsgVolteStopPlay(CcioChanMessage_t *chmsg, CcioChanMessageId_e msgId, CcioDsaVolteStopPlay_t *stopPlay);
 int32_t ccioBuildMsgVolteStartRec(CcioChanMessage_t *chmsg, CcioChanMessageId_e msgId, CcioDsaVolteStartRec_t *startRec);
 int32_t ccioBuildMsgVolteStartPlay(CcioChanMessage_t *chmsg, CcioChanMessageId_e msgId, CcioDsaVolteStartPlay_t *startPlay);
-int32_t ccioBuildMsgHandleCodec(CcioChanMessage_t *chmsg, CcioChanMessageId_e msgId, CcioDsaVolteHandleCodec_t *handleCodec);
 
 #ifdef __cplusplus
 }
