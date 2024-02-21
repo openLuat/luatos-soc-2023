@@ -203,8 +203,8 @@ int luat_mobile_set_sim_id(int id)
 int luat_mobile_set_sim_pin(int sim_id, uint8_t operation, char pin1[9], char pin2[9])
 {
 	SetPinOperReqParams pPinOperReqParams = {0};
-	memset(pPinOperReqParams.pinStr, pin1, 8);
-	memset(pPinOperReqParams.newPinStr, pin2, 8);
+	memcpy(pPinOperReqParams.pinStr, pin1, 8);
+	memcpy(pPinOperReqParams.newPinStr, pin2, 8);
 	pPinOperReqParams.operMode = operation;
 	return appSetPinOperationSync(&pPinOperReqParams);
 }
