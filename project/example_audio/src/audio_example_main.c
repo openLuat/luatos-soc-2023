@@ -38,10 +38,21 @@
 #define PA_ON_LEVEL 1
 #define PWR_ON_LEVEL 1
 
-#define CODEC_SLEEP_MODE
 //#define LOW_POWER_TEST	//开启低功耗场景测试
-//#define CODEC_NO_CTRL	//codec常开场景
+//#define CODEC_NO_CTRL	//codec常开场景，音频扩展板的配置
 //#define PA_NO_CTRL		//pa常开场景
+
+#define AUDIO_SLEEP_MODE	LUAT_AUDIO_PM_STANDBY	//不追求低功耗的，可以用待机模式，其他模式也可以
+#ifdef LOW_POWER_TEST
+#undef AUDIO_SLEEP_MODE
+#if defined PA_NO_CTRL
+#define AUDIO_SLEEP_MODE  LUAT_AUDIO_PM_STANDBY	//PA无法控制的，大部分情况下应该用待机模式，除非硬件上解决了爆破音
+#elif defined CODEC_NO_CTRL
+#define AUDIO_SLEEP_MODE  LUAT_AUDIO_PM_SHUTDOWN //codec常开的情况下，可以让codec进入shutdown来省电
+#else
+#define AUDIO_SLEEP_MODE  LUAT_AUDIO_PM_POWER_OFF //一般情况用完全断电来省电
+#endif
+#endif
 
 #define TEST_I2C_ID I2C_ID0	//音频扩展板的配置
 // #define TEST_I2C_ID I2C_ID1 	//云喇叭板配置
@@ -52,7 +63,7 @@
 
 #define MULTIMEDIA_ID 	0	//多媒体id，用于区分不同多媒体硬件
 #define TEST_VOL		70	// 测试音量调节
-#define TEST_MIC_VOL	65	// 测试麦克风音量调节
+#define TEST_MIC_VOL	75	// 测试麦克风音量调节
 
 #if (TEST_USE_ES8311 == 1)
 #define PA_DELAY		200
@@ -178,12 +189,14 @@ static void record_encode_amr(uint8_t *data, uint32_t len)
 static void record_stop_encode_amr(uint8_t *data, uint32_t len)
 {
 	luat_audio_record_stop(MULTIMEDIA_ID);
-
+	luat_audio_pm_request(MULTIMEDIA_ID, AUDIO_SLEEP_MODE);
 #if defined (FEATURE_AMR_CP_ENABLE) || defined (FEATURE_VEM_CP_ENABLE)
-	luat_audio_pm_request(MULTIMEDIA_ID,LUAT_AUDIO_PM_STANDBY);
 	luat_audio_inter_amr_deinit();
+#ifdef LOW_POWER_TEST
+	luat_mobile_set_flymode(0, 1);
+#endif
 #else
-	luat_audio_pm_request(MULTIMEDIA_ID,LUAT_AUDIO_PM_SHUTDOWN);
+
 	Encoder_Interface_exit(g_s_amr_encoder_handler);
 	g_s_amr_encoder_handler = NULL;
 #endif
@@ -240,9 +253,7 @@ void audio_event_cb(uint32_t event, void *param)
 		break;
 	case LUAT_MULTIMEDIA_CB_AUDIO_DONE:
 		LUAT_DEBUG_PRINT("audio play done, result=%d!", luat_audio_play_get_last_error(MULTIMEDIA_ID));
-		luat_audio_pm_request(MULTIMEDIA_ID,LUAT_AUDIO_PM_STANDBY);
-//		如果追求极致的功耗，用AUDIO_PM_MODE_SHUTDOWN代替AUDIO_PM_MODE_STANDBY
-//		luat_audio_pm_request(MULTIMEDIA_ID,LUAT_AUDIO_PM_SHUTDOWN);
+		luat_audio_pm_request(MULTIMEDIA_ID, AUDIO_SLEEP_MODE);
 		//通知一下用户task播放完成了
 		luat_rtos_event_send(g_s_task_handle, AUDIO_EVENT_PLAY_DONE, luat_audio_play_get_last_error(MULTIMEDIA_ID), 0, 0, 0);
 		break;
@@ -347,10 +358,17 @@ static void demo_task(void *arg)
 	
 	luat_audio_set_bus_type(MULTIMEDIA_ID,LUAT_MULTIMEDIA_AUDIO_BUS_I2S);	//设置音频总线类型
 	luat_audio_setup_codec(MULTIMEDIA_ID, codec_conf);					//设置音频codec
+#ifdef PA_NO_CTRL
+	luat_audio_config_pa(MULTIMEDIA_ID, 0xff, PA_ON_LEVEL, PWR_SLEEP_DELAY, PA_DELAY);//配置音频pa
+#else
 	luat_audio_config_pa(MULTIMEDIA_ID, PA_PWR_PIN, PA_ON_LEVEL, PWR_SLEEP_DELAY, PA_DELAY);//配置音频pa
+#endif
 	luat_audio_config_dac(MULTIMEDIA_ID, CODEC_PWR_PIN, PWR_ON_LEVEL, 0);//配置音频dac_power
 	luat_audio_init(MULTIMEDIA_ID, TEST_VOL, TEST_MIC_VOL);		//初始化音频
-
+#ifdef PA_NO_CTRL
+	luat_gpio_set(CODEC_PWR_PIN, 1);
+	luat_gpio_set(PA_PWR_PIN, 1);
+#endif
 #if defined FEATURE_IMS_ENABLE	//VOLTE固件不支持TTS
 #else
 	// 中文测试用下面的
@@ -463,6 +481,11 @@ static void demo_task(void *arg)
 		{
 			LUAT_DEBUG_PRINT("record test start");
 #if defined (FEATURE_AMR_CP_ENABLE) || defined (FEATURE_VEM_CP_ENABLE)
+#ifdef LOW_POWER_TEST
+			//内部AMR解码需要确保不在飞行模式，低功耗测试时强制进入了，所以这里需要先退出
+			luat_mobile_set_flymode(0, 0);
+			luat_rtos_task_sleep(1000);
+#endif
 			luat_audio_inter_amr_init(0, 7);
 #else
 			g_s_amr_encoder_handler = Encoder_Interface_init(0);
@@ -486,13 +509,19 @@ static void demo_task(void *arg)
 			LUAT_DEBUG_PRINT("psram total %u, used %u, max used %u", total, alloc, peak);
 			luat_meminfo_opt_sys(LUAT_HEAP_SRAM, &total, &alloc, &peak);
 			LUAT_DEBUG_PRINT("sram total %u, used %u, max used %u", total, alloc, peak);
-			luat_rtos_task_sleep(1000);
+			luat_rtos_task_sleep(2000);
 		}
 		//带ES8311的演示双向对讲，默认演示20秒
 		if (TEST_USE_ES8311)
 		{
+			LUAT_DEBUG_PRINT("speech test start");
 #if defined (FEATURE_AMR_CP_ENABLE) || defined (FEATURE_VEM_CP_ENABLE)
-			luat_audio_inter_amr_init(1, 7);	//
+#ifdef LOW_POWER_TEST
+			//内部AMR解码需要确保不在飞行模式，低功耗测试时强制进入了，所以这里需要先退出
+			luat_mobile_set_flymode(0, 0);
+			luat_rtos_task_sleep(1000);
+#endif
+			luat_audio_inter_amr_init(1, 8);	//
 			buff = luat_heap_opt_zalloc(LUAT_HEAP_SRAM, RECORD_ONCE_LEN * 640 * 4);
 			amr_buff = luat_heap_opt_zalloc(LUAT_HEAP_SRAM, RECORD_ONCE_LEN * 640);
 #else
@@ -558,14 +587,15 @@ static void demo_task(void *arg)
 							speech_test = 0;
 							LUAT_DEBUG_PRINT("test stop");
 							luat_audio_record_stop(MULTIMEDIA_ID);
-							luat_audio_pm_request(MULTIMEDIA_ID,LUAT_AUDIO_PM_STANDBY);
-							//如果追求极致的功耗，用AUDIO_PM_MODE_SHUTDOWN代替AUDIO_PM_MODE_STANDBY
-							//luat_audio_pm_request(MULTIMEDIA_ID,LUAT_AUDIO_PM_SHUTDOWN);
+							luat_audio_pm_request(MULTIMEDIA_ID, AUDIO_SLEEP_MODE);
 							luat_heap_free(buff);
 							buff = NULL;
 							luat_heap_free(amr_buff);
 							amr_buff = NULL;
 							luat_audio_inter_amr_deinit();
+#ifdef LOW_POWER_TEST
+							luat_mobile_set_flymode(0, 1);
+#endif
 							luat_meminfo_opt_sys(LUAT_HEAP_PSRAM, &total, &alloc, &peak);
 							LUAT_DEBUG_PRINT("psram total %u, used %u, max used %u", total, alloc, peak);
 							luat_meminfo_opt_sys(LUAT_HEAP_SRAM, &total, &alloc, &peak);
@@ -619,9 +649,7 @@ static void demo_task(void *arg)
 							speech_test = 0;
 							LUAT_DEBUG_PRINT("test stop");
 							luat_audio_record_stop(MULTIMEDIA_ID);
-							luat_audio_pm_request(MULTIMEDIA_ID,LUAT_AUDIO_PM_STANDBY);
-							//如果追求极致的功耗，用AUDIO_PM_MODE_SHUTDOWN代替AUDIO_PM_MODE_STANDBY
-							//luat_audio_pm_request(MULTIMEDIA_ID,LUAT_AUDIO_PM_SHUTDOWN);
+							luat_audio_pm_request(MULTIMEDIA_ID, AUDIO_SLEEP_MODE);
 							luat_heap_opt_free(LUAT_HEAP_AUTO, buff);
 							buff = NULL;
 							luat_heap_opt_free(LUAT_HEAP_AUTO, amr_buff);
@@ -641,8 +669,15 @@ static void demo_task(void *arg)
 #endif
 		}
 		//演示audio休眠
-		luat_audio_pm_request(MULTIMEDIA_ID,LUAT_AUDIO_PM_SHUTDOWN);
-		luat_rtos_task_sleep(30000);
+
+		LUAT_DEBUG_PRINT("audio shutdown 20 second");
+#ifdef LOW_POWER_TEST
+		luat_audio_pm_request(MULTIMEDIA_ID,AUDIO_SLEEP_MODE);
+#else
+		luat_audio_pm_request(MULTIMEDIA_ID,LUAT_AUDIO_PM_SHUTDOWN);	//LUAT_AUDIO_PM_POWER_OFF也可以
+#endif
+		luat_rtos_task_sleep(20000);
+
 #endif
     }
 }

@@ -620,11 +620,11 @@ int luat_audio_record_and_play(uint8_t multimedia_id, uint32_t sample_rate, cons
 	}
 	luat_i2s_modify(prv_audio_config.codec_conf.i2s_id, i2s->channel_format, i2s->data_bits, sample_rate);
 	I2S_TransferLoop(prv_audio_config.codec_conf.i2s_id, play_buffer, one_trunk_len, total_trunk_cnt, 0);
+	luat_audio_prepare(multimedia_id);
 	if (play_buffer)
 	{
 		luat_audio_pa(multimedia_id,1, 0);
 	}
-	luat_audio_prepare(multimedia_id);
 }
 
 int luat_audio_record_stop(uint8_t multimedia_id)
