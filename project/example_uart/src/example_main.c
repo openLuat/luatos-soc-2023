@@ -21,7 +21,8 @@
 #include "common_api.h"
 #include "luat_rtos.h"
 #include "luat_debug.h"
-
+#include "luat_mobile.h"
+#include "luat_pm.h"
 #include "luat_uart.h"
 #include "plat_config.h"
 /*
@@ -42,14 +43,15 @@
     1.串口复用，默认复用引脚见luat_uart_ec7xx.c, 若需要复用至其他引脚, 参考luat_mcu_iomux_ctrl接口使用
 */
 #define UART_ID 1
-
+//#define LPUART_TEST
 static luat_rtos_task_handle uart_task_handle;
 
 void luat_uart_recv_cb(int uart_id, uint32_t data_len){
     char* data_buff = malloc(data_len+1);
     memset(data_buff,0,data_len+1);
     luat_uart_read(uart_id, data_buff, data_len);
-    LUAT_DEBUG_PRINT("uart_id:%d data:%s data_len:%d",uart_id,data_buff,data_len);
+    LUAT_DEBUG_PRINT("uart_id:%d data_len:%d",uart_id,data_buff,data_len);
+    luat_uart_write(uart_id, data_buff, data_len);
     free(data_buff);
 }
 
@@ -57,8 +59,16 @@ static void task_test_uart(void *param)
 {
     // 除非你已经非常清楚uart0作为普通串口给用户使用所带来的的后果，否则不要打开以下注释掉的代码
     // BSP_SetPlatConfigItemValue(PLAT_CONFIG_ITEM_LOG_PORT_SEL,PLAT_CFG_ULG_PORT_USB);
-    luat_rtos_task_sleep(2000);
     char send_buff[] = "hello LUAT!!!\n";
+#ifdef LPUART_TEST
+    luat_uart_t uart = {
+        .id = UART_ID,
+        .baud_rate = 9600,
+        .data_bits = 8,
+        .stop_bits = 1,
+        .parity    = 0
+    };
+#else
     luat_uart_t uart = {
         .id = UART_ID,
         .baud_rate = 115200,
@@ -66,13 +76,23 @@ static void task_test_uart(void *param)
         .stop_bits = 1,
         .parity    = 0
     };
+#endif
     LUAT_DEBUG_PRINT("setup result %d", luat_uart_setup(&uart));
     LUAT_DEBUG_PRINT("ctrl result %d", luat_uart_ctrl(UART_ID, LUAT_UART_SET_RECV_CALLBACK, luat_uart_recv_cb));
-
+#ifdef LPUART_TEST
+    luat_mobile_set_flymode(0, 1);
+    luat_pm_power_ctrl(LUAT_PM_POWER_USB, 0);
+    luat_pm_request(LUAT_PM_SLEEP_MODE_LIGHT);
+#endif
     while (1)
     {
+#ifdef LPUART_TEST
+        luat_rtos_task_sleep(30000);
+        LUAT_DEBUG_PRINT("send result %d", luat_uart_write(UART_ID, send_buff, strlen(send_buff)));
+#else
         luat_rtos_task_sleep(1000);
         LUAT_DEBUG_PRINT("send result %d", luat_uart_write(UART_ID, send_buff, strlen(send_buff)));
+#endif
     }
     luat_rtos_task_delete(uart_task_handle);
 }

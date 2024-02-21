@@ -38,6 +38,11 @@
 #define PA_ON_LEVEL 1
 #define PWR_ON_LEVEL 1
 
+#define CODEC_SLEEP_MODE
+//#define LOW_POWER_TEST	//开启低功耗场景测试
+//#define CODEC_NO_CTRL	//codec常开场景
+//#define PA_NO_CTRL		//pa常开场景
+
 #define TEST_I2C_ID I2C_ID0	//音频扩展板的配置
 // #define TEST_I2C_ID I2C_ID1 	//云喇叭板配置
 #define TEST_I2S_ID I2S_ID0
@@ -238,8 +243,6 @@ void audio_event_cb(uint32_t event, void *param)
 		luat_audio_pm_request(MULTIMEDIA_ID,LUAT_AUDIO_PM_STANDBY);
 //		如果追求极致的功耗，用AUDIO_PM_MODE_SHUTDOWN代替AUDIO_PM_MODE_STANDBY
 //		luat_audio_pm_request(MULTIMEDIA_ID,LUAT_AUDIO_PM_SHUTDOWN);
-//		如果PA无法控制，不可以用pm，直接调用静音来控制爆破音
-//		luat_audio_mute(MULTIMEDIA_ID, 1);
 		//通知一下用户task播放完成了
 		luat_rtos_event_send(g_s_task_handle, AUDIO_EVENT_PLAY_DONE, luat_audio_play_get_last_error(MULTIMEDIA_ID), 0, 0, 0);
 		break;
@@ -323,7 +326,11 @@ static void demo_task(void *arg)
 
 	HANDLE amr_encoder_handler;
 	HANDLE amr_decoder_handler;
-
+#ifdef LOW_POWER_TEST
+	luat_mobile_set_flymode(0, 1);
+	luat_pm_power_ctrl(LUAT_PM_POWER_USB, 0);	//没接USB的，只需要在开始的时候关闭一次USB就行了
+	luat_pm_request(LUAT_PM_SLEEP_MODE_LIGHT);
+#endif
 	luat_debug_set_fault_mode(LUAT_DEBUG_FAULT_HANG);
 //如果不需要播放文件/TTS，例如只需要录音（amr编码放到自己的task里），或者全双工对讲，可以不需要开启audio_play任务，初始化的调用如下代码，可以节省13KB ram
 //	luat_audio_play_global_init_with_task_priority(NULL, NULL, NULL, NULL, NULL, 50)
@@ -431,13 +438,14 @@ static void demo_task(void *arg)
 		LUAT_DEBUG_PRINT("psram total %u, used %u, max used %u", total, alloc, peak);
 		luat_meminfo_opt_sys(LUAT_HEAP_SRAM, &total, &alloc, &peak);
 		LUAT_DEBUG_PRINT("sram total %u, used %u, max used %u", total, alloc, peak);
+		luat_rtos_task_sleep(2000);
 		luat_audio_play_multi_files(MULTIMEDIA_ID, amr_info, 5);
 		luat_rtos_event_recv(g_s_task_handle, AUDIO_EVENT_PLAY_DONE, &event, NULL, LUAT_WAIT_FOREVER);
 		luat_meminfo_opt_sys(LUAT_HEAP_PSRAM, &total, &alloc, &peak);
 		LUAT_DEBUG_PRINT("psram total %u, used %u, max used %u", total, alloc, peak);
 		luat_meminfo_opt_sys(LUAT_HEAP_SRAM, &total, &alloc, &peak);
 		LUAT_DEBUG_PRINT("sram total %u, used %u, max used %u", total, alloc, peak);
-
+		luat_rtos_task_sleep(2000);
 
 #if defined FEATURE_IMS_ENABLE	//VOLTE固件不支持TTS
 #else
@@ -447,6 +455,7 @@ static void demo_task(void *arg)
 		LUAT_DEBUG_PRINT("psram total %u, used %u, max used %u", total, alloc, peak);
 		luat_meminfo_opt_sys(LUAT_HEAP_SRAM, &total, &alloc, &peak);
 		LUAT_DEBUG_PRINT("sram total %u, used %u, max used %u", total, alloc, peak);
+		luat_rtos_task_sleep(2000);
 #endif
 
 		//带ES8311的演示录音后再放音，录音15秒
@@ -631,17 +640,9 @@ static void demo_task(void *arg)
 			}
 #endif
 		}
-		//演示一下休眠
+		//演示audio休眠
 		luat_audio_pm_request(MULTIMEDIA_ID,LUAT_AUDIO_PM_SHUTDOWN);
-		luat_pm_power_ctrl(LUAT_PM_POWER_USB, 0);	//没接USB的，只需要在开始的时候关闭一次USB就行了
-		luat_pm_request(LUAT_PM_SLEEP_MODE_LIGHT);
-		luat_rtos_task_sleep(10000);
-		luat_pm_request(LUAT_PM_SLEEP_MODE_IDLE);
-		luat_pm_power_ctrl(LUAT_PM_POWER_USB, 1);
-		if (TEST_USE_ES8311)
-		{
-			luat_audio_init(MULTIMEDIA_ID, TEST_VOL, TEST_MIC_VOL);	//如果没有AGPIO来控制，需要重新初始化ES8311，如果用AGPIO来控制的，就不需要重新初始化
-		}
+		luat_rtos_task_sleep(30000);
 #endif
     }
 }

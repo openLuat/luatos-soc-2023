@@ -26,6 +26,7 @@
 #include "common_api.h"
 #include "luat_multimedia.h"
 #include "audio_play.h"
+#include "soc_service.h"
 
 #include "soc_spi.h"
 #include "ivTTSSDKID_all.h"
@@ -925,4 +926,7 @@ int luat_audio_inter_amr_encode(const uint16_t *pcm_buf, uint8_t *amr_buf, uint8
 int luat_audio_inter_amr_decode(uint16_t *pcm_buf, const uint8_t *amr_buf, uint8_t *amr_len) {return -1;}
 #endif
 
-
+void luat_audio_power_keep_ctrl_by_bsp(uint8_t on_off)
+{
+	soc_sys_force_wakeup_on_off(SOC_SYS_CTRL_USER - 1, on_off);
+}
