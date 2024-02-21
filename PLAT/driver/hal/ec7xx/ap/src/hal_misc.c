@@ -247,16 +247,22 @@ PLAT_BL_CIRAM_FLASH_TEXT uint32_t halCrc32(void* input, int len)
              FEATURE_AUDIO_ENABLE could only be used in open source code
   \note
  */
-
+#ifdef __USER_CODE__
+__attribute__((weak))  void halVoiceEngProcRet(UINT16 msgId, void *pIpcRet) {;}
+#endif
 void halVoiceEngProcRetWrapper(UINT16 msgId, void *pIpcRet)
 {
+#ifdef __USER_CODE__
+    extern void halVoiceEngProcRet(UINT16 msgId, void *pIpcRet);
+    halVoiceEngProcRet(msgId, pIpcRet);
+#else
     #ifdef FEATURE_AUDIO_ENABLE
     extern void halVoiceEngProcRet(UINT16 msgId, void *pIpcRet);
     halVoiceEngProcRet(msgId, pIpcRet);
     #else
     return;
     #endif
-
+#endif
 }
 
 
