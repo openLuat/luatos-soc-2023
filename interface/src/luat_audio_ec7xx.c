@@ -688,6 +688,7 @@ int luat_audio_speech(uint8_t multimedia_id, uint8_t is_downlink, uint8_t type, 
 			I2S_TransferLoop(prv_audio_config.codec_conf.i2s_id, NULL, 3200, 2, 0);	//address传入空地址就是播放空白音
 		}
 		luat_audio_pm_request(multimedia_id,LUAT_AUDIO_PM_RESUME);
+		luat_audio_pa(multimedia_id,1, 0);
 	}
 	return 0;
 }
