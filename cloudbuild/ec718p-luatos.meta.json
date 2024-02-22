@@ -207,6 +207,21 @@
             },
             {
                 "icon": "zmdi-puzzle-piece",
+                "name": "@718PV",
+                "content": "语音通话(即VoLTE功能)",
+                "rsize": 0,
+                "children": [
+                    {
+                        "name": "@volte",
+                        "content": "仅Air780EPV系列支持(带V字母), Air780EP系列不要选这个,会无法启动",
+                        "rsize": 600240,
+                        "fsize": 288052,
+                        "dft": false
+                    }
+                ]
+            },
+            {
+                "icon": "zmdi-puzzle-piece",
                 "name": "@NETWORKS",
                 "content": "网络协议相关",
                 "rsize": 0,
