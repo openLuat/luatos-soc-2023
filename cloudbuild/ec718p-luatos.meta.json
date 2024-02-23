@@ -196,7 +196,7 @@
                     },
                     {
                         "name": "sms",
-                        "content": "短信收发,模块插入电信卡是无法收发短信的.",
+                        "content": "短信收发,移动联通均支持,电信卡需要volte支持(Air780EPV)",
                         "rsize": 60240,
                         "fsize": 288052,
                         "dft": false
