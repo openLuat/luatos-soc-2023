@@ -10,7 +10,7 @@
 
 #define MQTT_DEMO_SSL 			1
 #define MQTT_DEMO_AUTOCON 		1
-
+#define MQTT_DEMO_PUB_QOS 		1
 #if (MQTT_DEMO_SSL == 1)
 #define MQTT_HOST    	"airtest.openluat.com"   				// MQTTS服务器的地址和端口号
 #define MQTT_PORT		8883
@@ -132,7 +132,7 @@ static void luat_mqtt_cb(luat_mqtt_ctrl_t *luat_mqtt_ctrl, uint16_t event){
 
 		LUAT_DEBUG_PRINT("publish");
 		uint16_t message_id  = 0;
-		mqtt_publish_with_qos(&(luat_mqtt_ctrl->broker), mqtt_pub_topic, mqtt_send_payload, strlen(mqtt_send_payload), 0, 1, &message_id);
+		mqtt_publish_with_qos(&(luat_mqtt_ctrl->broker), mqtt_pub_topic, mqtt_send_payload, strlen(mqtt_send_payload), 0, MQTT_DEMO_PUB_QOS, &message_id);
 		break;
 	}
 	case MQTT_MSG_PUBLISH : {
@@ -143,6 +143,13 @@ static void luat_mqtt_cb(luat_mqtt_ctrl_t *luat_mqtt_ctrl, uint16_t event){
 		LUAT_DEBUG_PRINT("pub_msg: %.*s",payload_len,ptr);
 		break;
 	}
+	case MQTT_MSG_TCP_TX_DONE:
+		//如果用QOS0发送，可以作为发送成功的初步判断依据
+		if (0 == MQTT_DEMO_PUB_QOS)
+		{
+			LUAT_DEBUG_PRINT("publish send ok");
+		}
+		break;
 	case MQTT_MSG_PUBACK : 
 	case MQTT_MSG_PUBCOMP : {
 		LUAT_DEBUG_PRINT("msg_id: %d",mqtt_parse_msg_id(luat_mqtt_ctrl->mqtt_packet_buffer));
@@ -249,7 +256,7 @@ if (MQTT_DEMO_AUTOCON == 1)
 	while(1){
 		if (luat_mqtt_state_get(luat_mqtt_ctrl) == MQTT_STATE_READY){
 			uint16_t message_id = 0;
-			mqtt_publish_with_qos(&(luat_mqtt_ctrl->broker), mqtt_pub_topic, mqtt_send_payload, strlen(mqtt_send_payload), 0, 1, &message_id);
+			mqtt_publish_with_qos(&(luat_mqtt_ctrl->broker), mqtt_pub_topic, mqtt_send_payload, strlen(mqtt_send_payload), 0, MQTT_DEMO_PUB_QOS, &message_id);
 		}
 		luat_rtos_task_sleep(5000);
 	}
