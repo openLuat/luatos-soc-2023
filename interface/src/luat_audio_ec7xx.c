@@ -256,18 +256,18 @@ int luat_audio_start_raw(uint8_t multimedia_id, uint8_t audio_format, uint8_t nu
 {
 	luat_audio_prepare(multimedia_id);
 	prv_audio_config.raw_mode = 1;
-	return audio_play_start_raw(prv_audio_config.codec_conf.i2s_id, audio_format, num_channels, sample_rate, bits_per_sample, is_signed);
+	return audio_play_start_raw(multimedia_id, audio_format, num_channels, sample_rate, bits_per_sample, is_signed);
 }
 
 
 int luat_audio_pause_raw(uint8_t multimedia_id, uint8_t is_pause)
 {
-	return audio_play_pause_raw(prv_audio_config.codec_conf.i2s_id, is_pause);
+	return audio_play_pause_raw(multimedia_id, is_pause);
 }
 
 int luat_audio_write_raw(uint8_t multimedia_id, uint8_t *data, uint32_t len)
 {
-	int result = audio_play_write_raw(prv_audio_config.codec_conf.i2s_id, data, len);
+	int result = audio_play_write_raw(multimedia_id, data, len);
 	if (!result)
 	{
 		prv_audio_config.raw_mode = 1;
@@ -277,7 +277,7 @@ int luat_audio_write_raw(uint8_t multimedia_id, uint8_t *data, uint32_t len)
 
 int luat_audio_stop_raw(uint8_t multimedia_id)
 {
-	return audio_play_stop_raw(prv_audio_config.codec_conf.i2s_id);
+	return audio_play_stop_raw(multimedia_id);
 }
 
 void luat_audio_config_pa(uint8_t multimedia_id, uint32_t pin, int level, uint32_t dummy_time_len, uint32_t pa_delay_time){
@@ -357,12 +357,12 @@ void luat_audio_play_global_init_with_task_priority(audio_play_event_cb_fun_t ev
 
 uint8_t luat_audio_play_is_finish(uint8_t multimedia_id)
 {
-	return audio_play_is_finish(prv_audio_config.codec_conf.i2s_id);
+	return audio_play_is_finish(multimedia_id);
 }
 
 int luat_audio_play_fast_stop(uint8_t multimedia_id)
 {
-	if (audio_play_fast_stop(prv_audio_config.codec_conf.i2s_id))
+	if (audio_play_fast_stop(multimedia_id))
 	{
 		luat_audio_play_blank(multimedia_id, 1);
 		return -1;
@@ -372,17 +372,17 @@ int luat_audio_play_fast_stop(uint8_t multimedia_id)
 
 int luat_audio_play_clear_stop_flag(uint8_t multimedia_id)
 {
-	return audio_play_clear_stop_flag(prv_audio_config.codec_conf.i2s_id);
+	return audio_play_clear_stop_flag(multimedia_id);
 }
 
 int luat_audio_play_pause_raw(uint8_t multimedia_id, uint8_t is_pause)
 {
-	return audio_play_pause_raw(prv_audio_config.codec_conf.i2s_id, is_pause);
+	return audio_play_pause_raw(multimedia_id, is_pause);
 }
 
 int luat_audio_play_get_last_error(uint8_t multimedia_id)
 {
-	return audio_play_get_last_error(prv_audio_config.codec_conf.i2s_id);
+	return audio_play_get_last_error(multimedia_id);
 }
 
 HANDLE soc_audio_fopen(const char *fname, const char *mode)
@@ -456,19 +456,19 @@ int luat_audio_play_tts_text(uint8_t multimedia_id, void *text, uint32_t text_by
 {
 	luat_audio_prepare(multimedia_id);
 	prv_audio_config.raw_mode = 0;
-	return audio_play_tts_text(prv_audio_config.codec_conf.i2s_id, text, text_bytes);
+	return audio_play_tts_text(multimedia_id, text, text_bytes);
 }
 
 int luat_audio_play_tts_set_param(uint8_t multimedia_id, uint32_t param_id, uint32_t param_value)
 {
-	return audio_play_tts_set_param(prv_audio_config.codec_conf.i2s_id, param_id, param_value);
+	return audio_play_tts_set_param(multimedia_id, param_id, param_value);
 }
 #endif
 
 
 int luat_audio_play_stop(uint8_t multimedia_id)
 {
-	if (audio_play_stop(prv_audio_config.codec_conf.i2s_id))
+	if (audio_play_stop(multimedia_id))
 	{
 		luat_audio_play_blank(multimedia_id, 1);
 		return -1;
@@ -499,24 +499,24 @@ void *luat_audio_play_get_stream(uint8_t multimedia_id)
 
 int luat_audio_play_write_blank_raw(uint8_t multimedia_id, uint8_t cnt, uint8_t add_font)
 {
-	return audio_play_write_blank_raw_ex(prv_audio_config.codec_conf.i2s_id, cnt, add_font);
+	return audio_play_write_blank_raw_ex(multimedia_id, cnt, add_font);
 }
 
 int luat_audio_play_start_raw(uint8_t multimedia_id, uint8_t audio_format, uint8_t num_channels, uint32_t sample_rate, uint8_t bits_per_sample, uint8_t is_signed)
 {
 	luat_audio_prepare(multimedia_id);
 	prv_audio_config.raw_mode = 1;
-	return audio_play_start_raw(prv_audio_config.codec_conf.i2s_id, audio_format, num_channels, sample_rate, bits_per_sample, is_signed);
+	return audio_play_start_raw(multimedia_id, audio_format, num_channels, sample_rate, bits_per_sample, is_signed);
 }
 
 int luat_audio_play_write_raw(uint8_t multimedia_id, uint8_t *data, uint32_t len)
 {
-	return audio_play_write_raw(prv_audio_config.codec_conf.i2s_id, data, len);
+	return audio_play_write_raw(multimedia_id, data, len);
 }
 
 int luat_audio_play_stop_raw(uint8_t multimedia_id)
 {
-	return audio_play_stop_raw(prv_audio_config.codec_conf.i2s_id);
+	return audio_play_stop_raw(multimedia_id);
 }
 
 #ifdef __LUATOS__
@@ -540,7 +540,7 @@ int luat_audio_play_multi_files(uint8_t multimedia_id, luat_audio_play_info_t in
 {
 	luat_audio_prepare(multimedia_id);
 	prv_audio_config.raw_mode = 0;
-	return audio_play_multi_files(prv_audio_config.codec_conf.i2s_id, (audio_play_info_t*)info, files_num);
+	return audio_play_multi_files(multimedia_id, (audio_play_info_t*)info, files_num);
 }
 #endif
 
@@ -555,24 +555,24 @@ int luat_audio_check_ready(uint8_t multimedia_id)
 	uint32_t rest;
 	if (prv_audio_config.wakeup_ready)
 	{
-		luat_audio_play_write_blank_raw(prv_audio_config.codec_conf.i2s_id, 1, 1);
+		luat_audio_play_write_blank_raw(multimedia_id, 1, 1);
 		goto ENABLE_PA;
 	}
 	if ((luat_mcu_tick64_ms() - prv_audio_config.last_wakeup_time_ms) > prv_audio_config.after_sleep_ready_time)
 	{
 		prv_audio_config.wakeup_ready = 1;
-		luat_audio_play_write_blank_raw(prv_audio_config.codec_conf.i2s_id, 1, 1);
+		luat_audio_play_write_blank_raw(multimedia_id, 1, 1);
 		goto ENABLE_PA;
 	}
 	rest = prv_audio_config.after_sleep_ready_time - ((uint32_t)(luat_mcu_tick64_ms() - prv_audio_config.last_wakeup_time_ms));
 	if (prv_audio_config.debug_on_off) DBG("codec wakeup need %dms", rest);
 	if (rest > 100)
 	{
-		luat_audio_play_write_blank_raw(prv_audio_config.codec_conf.i2s_id, rest/100, 1);
+		luat_audio_play_write_blank_raw(multimedia_id, rest/100, 1);
 	}
 	else
 	{
-		luat_audio_play_write_blank_raw(prv_audio_config.codec_conf.i2s_id, 1, 1);
+		luat_audio_play_write_blank_raw(multimedia_id, 1, 1);
 	}
 ENABLE_PA:
 	if (prv_audio_config.pa_on_enable)
