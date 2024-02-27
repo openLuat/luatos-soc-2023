@@ -229,6 +229,34 @@
 
 #endif
 
+// 供本地快速编译Air780EPV时,自动禁用的库, 云编译时会自动删除掉
+#if defined TYPE_EC718P && defined (FEATURE_IMS_ENABLE)
+
+#undef LUAT_USE_LVGL
+#undef LUAT_USE_LCD
+#undef LUAT_USE_TJPGD
+#undef LUAT_USE_EINK
+#undef LUAT_USE_U8G2
+#undef LUAT_USE_FONTS
+
+#undef LUAT_USE_LIBGNSS
+#undef LUAT_USE_BIT64
+#undef LUAT_USE_PROTOBUF
+#undef LUAT_USE_RSA
+#undef LUAT_USE_YMODEM
+#undef LUAT_USE_FATFS
+#undef LUAT_USE_LORA
+#undef LUAT_USE_I2CTOOLS
+#undef LUAT_USE_SENSOR
+#undef LUAT_USE_MINIZ
+#undef LUAT_USE_FDB
+#undef LUAT_USE_HMETA
+#undef LUAT_USE_W5500
+#undef LUAT_USE_IOTAUTH
+#undef LUAT_USE_WEBSOCKET
+#undef LUAT_USE_FTP
+#endif
+
 //-------------------------------------------------------------------------------
 //<-- custom
 //------------------------------------------------------------------------------
@@ -338,30 +366,6 @@
 
 #if defined TYPE_EC718P && defined (FEATURE_IMS_ENABLE)
 #define LUAT_USE_VOLTE
-
-#undef LUAT_USE_LVGL
-#undef LUAT_USE_LCD
-#undef LUAT_USE_TJPGD
-#undef LUAT_USE_EINK
-#undef LUAT_USE_U8G2
-#undef LUAT_USE_FONTS
-
-#undef LUAT_USE_LIBGNSS
-#undef LUAT_USE_BIT64
-#undef LUAT_USE_PROTOBUF
-#undef LUAT_USE_RSA
-#undef LUAT_USE_YMODEM
-#undef LUAT_USE_FATFS
-#undef LUAT_USE_LORA
-#undef LUAT_USE_I2CTOOLS
-#undef LUAT_USE_SENSOR
-#undef LUAT_USE_MINIZ
-#undef LUAT_USE_FDB
-#undef LUAT_USE_HMETA
-#undef LUAT_USE_W5500
-#undef LUAT_USE_IOTAUTH
-#undef LUAT_USE_WEBSOCKET
-#undef LUAT_USE_FTP
 
 #ifndef LUAT_USE_MEDIA
 #define LUAT_USE_MEDIA 1
