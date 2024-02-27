@@ -408,7 +408,7 @@ int soc_audio_fclose(void *fp)
 #ifdef __LUATOS__
 
 #ifdef LUAT_USE_TTS
-int luat_audio_play_tts_text(uint32_t multimedia_id, void *text, uint32_t text_bytes)
+int luat_audio_play_tts_text(uint8_t multimedia_id, void *text, uint32_t text_bytes)
 {
 #ifdef LUAT_USE_TTS_ONCHIP
 #else
@@ -445,7 +445,7 @@ int luat_audio_play_tts_text(uint32_t multimedia_id, void *text, uint32_t text_b
 	return audio_play_tts_text(multimedia_id, text, text_bytes);
 }
 
-int luat_audio_play_tts_set_param(uint32_t multimedia_id, uint32_t param_id, uint32_t param_value)
+int luat_audio_play_tts_set_param(uint8_t multimedia_id, uint32_t param_id, uint32_t param_value)
 {
 	return audio_play_tts_set_param(multimedia_id, param_id, param_value);
 }
