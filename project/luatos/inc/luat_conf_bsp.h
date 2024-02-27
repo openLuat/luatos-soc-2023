@@ -116,7 +116,7 @@
 // ------------------------------
 #define LUAT_USE_MEDIA    1
 #define LUAT_SUPPORT_AMR  1
-// #define LUAT_USE_TTS    1
+#define LUAT_USE_TTS    1
 // #define LUAT_USE_TTS_ONCHIP    1
 // // 仅开启TTS, 禁用AMR/MP3的解码
 // #define LUAT_USE_TTS_ONLY 1
