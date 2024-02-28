@@ -102,7 +102,7 @@ static void task(void *param)
 	network_init_ctrl(sntp_netc, luat_get_current_task(), NULL, NULL);
 	network_set_base_mode(sntp_netc, 0, 10000, 0, 0, 0, 0);
 	network_set_local_port(sntp_netc, 0);
-	network_deinit_tls(sntp_netc);
+//	network_set_debug_onoff(sntp_netc, 1);
     sntp_msg_t smsg = {0};
     
     uint8_t is_break, is_timeout;
@@ -134,6 +134,10 @@ static void task(void *param)
                             uint32_t time = ntptime2u32(p, 1);
                             LUAT_DEBUG_PRINT("ok result %ld", time);
                             is_succ = 1;
+                        }
+                        else
+                        {
+                        	LUAT_DEBUG_PRINT("%d,%d", result, rx_len);
                         }
                     }
                 }
