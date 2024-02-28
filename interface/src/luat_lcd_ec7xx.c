@@ -131,9 +131,7 @@ static void prvLCD_Task(void* params)
 
 			break;
 		case SERVICE_LCD_INIT:
-			DBG("%x ++", event.Param1);
 			luat_lcd_init((luat_lcd_conf_t *)event.Param1);
-			DBG("%x --", event.Param1);
 			break;
 		case SERVICE_RUN_USER_API:
 			callback = (CBDataFun_t)event.Param1;
