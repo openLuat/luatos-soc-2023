@@ -22,7 +22,7 @@
 
 #define FLASH_SPI_ID SPI_ID0
 #define FLASH_SPI_CS HAL_GPIO_8
-#define FALSH_SPI_BR (12500000)
+#define FALSH_SPI_BR (51200000)
 
 #define PA_PWR_PIN HAL_GPIO_25
 #define PA_PWR_PIN_ALT_FUN	0
@@ -159,16 +159,16 @@ static void demo_task(void *arg)
         LUAT_DEBUG_PRINT("sfud_read 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x\n", data[0], data[1], data[2], data[3], data[4], data[5]);
     }
 #else
-	// 校验数据
-	// char tmp = malloc(4096);
-	// for (size_t i = 0; i < 719278; i+=4096)
-	// {
-	// 	// sfud_read(flash, i+FLASH_TTS_ADDR, 4096, tmp);
-	// 	// if (memcmp(tmp, ivtts_16k + i, 4096)) {
-	// 	// 	LUAT_DEBUG_PRINT("flash NOT match");
-	// 	// 	break;
-	// 	// }
-	// }
+	 //校验数据
+	 uint8_t *tmp = malloc(4096);
+	 for (size_t i = 0; i < 719278; i+=4096)
+	 {
+	 	 sfud_read(flash, i+FLASH_TTS_ADDR, 4096, tmp);
+	 	 if (memcmp(tmp, ivtts_16k + i, 4096)) {
+	 	 	LUAT_DEBUG_PRINT("flash NOT match, %x", i);
+	 	 	break;
+	 	 }
+	 }
 #endif
     play_channel_config();
 	ivCStrA sdk_id = AISOUND_SDK_USERID_16K;
@@ -182,7 +182,7 @@ static void demo_task(void *arg)
     while(1)
     {
     	luat_audio_play_tts_text(0, tts_string, sizeof(tts_string));
-    	luat_rtos_task_sleep(30000);
+    	luat_rtos_task_sleep(35000);
     }
 }
 
