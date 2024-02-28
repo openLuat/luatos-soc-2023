@@ -33,9 +33,11 @@ luat_rtos_task_handle task1_handle;
 /* 
     716S和718S受限于FLASH大小，默认最深休眠等级为DEEP模式
     如果需要开启716S和718S最低休眠功耗功能，参考下面两点
-    1：参考example_mem_map，在本项目加入mem_map_7xx.h, 并且启用"需要HIB参考这个配置"下面相关的配置
+    1：参考example_mem_map，在本项目加入mem_map_7xx.h, 在mem_map_7xx.h里启用"需要HIB参考这个配置"下面相关的宏定义，同时注释掉同名的宏定义
     2: 在本项目中加入下面的函数，底层会自动调用
         void soc_hib_config(void){;}
+    3: 编译时，LSPD_MODE必须为disable
+    4: luat_pm_force(LUAT_PM_SLEEP_MODE_STANDBY)代替luat_pm_force(LUAT_PM_SLEEP_MODE_DEEP);
 */
 
 static void task1(void *args)
