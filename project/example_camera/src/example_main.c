@@ -33,17 +33,17 @@
 #include "luat_rtos.h"
 #include "luat_gpio.h"
 #include "luat_debug.h"
-#include "luat_lcd_service.h"
 #include "luat_uart.h"
 #include "luat_i2c.h"
 #include "luat_mem.h"
+#include "luat_lcd.h"
 #include "mem_map.h"
 
 //#define CAMERA_TEST_QRCODE			//扫码
-#define CAMERA_TEST_CAPTURE		//按下KEY2（GPIO_20）摄像拍照并转成jpeg图片输出给电脑，
+//#define CAMERA_TEST_CAPTURE		//按下KEY2（GPIO_20）摄像拍照并转成jpeg图片输出给电脑，
 //#define CAMERA_TEST_VIDEO		//摄像从USB串口输出到电脑
-//#define CAMERA_TEST_ONLY		//只测试摄像头没有输出足够的数据
-//#define LCD_ENABLE
+#define CAMERA_TEST_ONLY		//只测试摄像头没有输出足够的数据
+#define LCD_ENABLE
 
 #ifdef CAMERA_TEST_QRCODE
 #undef CAMERA_TEST_CAPTURE
@@ -64,22 +64,31 @@
 //#define USB_UART_ENABLE
 #endif
 
-#define CAMERA_I2C_ID	I2C_ID0
+#define CAMERA_I2C_ID	I2C_ID1
 #define CAMERA_SPI_ID   CSPI_ID1
 #define CAMERA_PD_PIN	HAL_GPIO_5
 //#define CAMERA_POWER_PIN HAL_GPIO_25	//外部LDO控制
 //#define CAMERA_POWER_PIN_ALT 0
 //内部LDO就是VDD_EXT, 不需要单独控制
 
+#define CAMERA_USE_BFXXXX
+//#define CAMERA_USE_GC032A
+
 #define BF30A2_I2C_ADDRESS	(0x6e)
 #define GC032A_I2C_ADDR		(0x21)
-//#define CAMERA_USE_BFXXXX
-//#define CAMERA_SPEED	25500000
-#define CAMERA_USE_GC032A
+
+#ifdef CAMERA_USE_GC032A
+
 #ifdef CAMERA_TEST_CAPTURE
 #define CAMERA_SPEED	12000000
 #else
 #define CAMERA_SPEED	24000000
+#endif
+
+#else
+
+#define CAMERA_SPEED	24000000
+
 #endif
 //#define PIC_ONLY_Y
 enum
@@ -91,6 +100,7 @@ enum
 
 typedef struct
 {
+	luat_spi_camera_t camera;
 	void *p_cache[2];
 	uint32_t jpeg_data_point;
 	uint16_t image_w;
@@ -750,79 +760,35 @@ static camera_reg_t g_s_gc032a_reg_table[] =
 };
 
 #ifdef LCD_ENABLE
-
-#define SPI_LCD_BUS_ID	0
-#define SPI_LCD_SPEED	25600000
-//#define SPI_LCD_CS_PIN	HAL_GPIO_24
-//#define SPI_LCD_DC_PIN	HAL_GPIO_8
-//#define SPI_LCD_POWER_PIN HAL_GPIO_27
-//#define SPI_LCD_BL_PIN HAL_GPIO_22
-#define SPI_LCD_CS_PIN	HAL_GPIO_8
-#define SPI_LCD_DC_PIN	HAL_GPIO_10
-#define SPI_LCD_POWER_PIN HAL_GPIO_24
-#define SPI_LCD_BL_PIN HAL_GPIO_NONE	//直接接3.3V
-#define SPI_LCD_SDA_PIN HAL_GPIO_9
-#define SPI_LCD_SCL_PIN HAL_GPIO_11
+//CORE开发板上的配置
+#define SPI_LCD_RST_PIN HAL_GPIO_36
+#define SPI_LCD_BL_PIN HAL_GPIO_25	//不考虑低功耗的话，BL也可以省掉
 #define SPI_LCD_W	240
 #define SPI_LCD_H	320
 #define SPI_LCD_X_OFFSET	0
 #define SPI_LCD_Y_OFFSET	0
-#define SPI_LCD_RAM_CACHE_MAX	(SPI_LCD_W * SPI_LCD_H * 2)
 
-static spi_lcd_ctrl_t g_s_spi_lcd =
-{
-		SPI_LCD_W,
-		SPI_LCD_H,
-		SPI_LCD_BUS_ID,
-		SPI_LCD_CS_PIN,
-		SPI_LCD_DC_PIN,
-		SPI_LCD_POWER_PIN,
-		SPI_LCD_BL_PIN,
-		0,
-		SPI_LCD_X_OFFSET,
-		SPI_LCD_Y_OFFSET
+static luat_lcd_conf_t lcd_conf = {
+    .port = LUAT_LCD_HW_ID_0,
+    .opts = &lcd_opts_gc9306x,
+	.pin_dc = 0xff,
+    .pin_rst = SPI_LCD_RST_PIN,
+    .pin_pwr = SPI_LCD_BL_PIN,
+    .direction = 0,
+    .w = SPI_LCD_W,
+    .h = SPI_LCD_H,
+    .xoffset = 0,
+    .yoffset = 0,
+	.interface_mode = LUAT_LCD_IM_4_WIRE_8_BIT_INTERFACE_I,
+	.lcd_cs_pin = 0xff
 };
 
-static int luat_spi_lcd_init(uint8_t *data, uint32_t len)
-{
-
-	luat_gpio_cfg_t gpio_cfg;
-	gpio_cfg.pin = SPI_LCD_CS_PIN;
-	gpio_cfg.output_level = LUAT_GPIO_HIGH;
-	luat_gpio_open(&gpio_cfg);
-	gpio_cfg.pin = SPI_LCD_DC_PIN;
-	gpio_cfg.output_level = LUAT_GPIO_LOW;
-	luat_gpio_open(&gpio_cfg);
-	gpio_cfg.pin = SPI_LCD_POWER_PIN;
-	luat_gpio_open(&gpio_cfg);
-	gpio_cfg.pin = SPI_LCD_BL_PIN;
-	luat_gpio_open(&gpio_cfg);
-
-
-	int result = spi_lcd_detect(SPI_LCD_SDA_PIN, SPI_LCD_SCL_PIN, SPI_LCD_CS_PIN, SPI_LCD_DC_PIN, SPI_LCD_POWER_PIN);
-	if (result < 0)
-	{
-		LUAT_DEBUG_PRINT("no find gc9306x!");
-	}
-	luat_spi_t spi_cfg = {
-			.id = SPI_LCD_BUS_ID,
-			.bandrate = SPI_LCD_SPEED,
-			.CPHA = 0,
-			.CPOL = 0,
-			.mode = 1,
-			.dataw = 8,
-			.cs = SPI_LCD_CS_PIN,
-	};
-	luat_spi_setup(&spi_cfg);
-
-	gpio_cfg.pin = SPI_LCD_CS_PIN;
-	gpio_cfg.output_level = LUAT_GPIO_HIGH;
-	luat_gpio_open(&gpio_cfg);
-	gpio_cfg.pin = SPI_LCD_DC_PIN;
-	luat_gpio_open(&gpio_cfg);
-
-	spi_lcd_init_gc9306x(&g_s_spi_lcd);
-}
+//static void lcd_camera_start_run(uint8_t *data, uint32_t len)
+//{
+//	g_s_camera_app.cur_cache = 0;
+//	luat_camera_start_with_buffer(CAMERA_SPI_ID, g_s_camera_app.p_cache[0]);
+//	g_s_camera_app.is_rx_running = 1;
+//}
 
 #endif
 
@@ -1085,10 +1051,15 @@ static int luat_bfxxxx_init(void)
     	luat_rtos_task_sleep(5000);
     }
 #endif
-
 	g_s_camera_app.cur_cache = 0;
 	luat_camera_start_with_buffer(CAMERA_SPI_ID, g_s_camera_app.p_cache[0]);
 	g_s_camera_app.is_rx_running = 1;
+
+#if (defined LCD_ENABLE) && (defined CAMERA_TEST_ONLY)
+	g_s_camera_app.camera = spi_camera;
+	g_s_camera_app.camera.lcd_conf = &lcd_conf;
+	//luat_lcd_show_camera_in_service(&g_s_camera_app.camera, NULL, 0, 0);
+#endif
 	return 0;
 CAM_OPEN_FAIL:
 	luat_camera_close(CAMERA_SPI_ID);
@@ -1208,9 +1179,18 @@ static void luat_camera_task(void *param)
 	uint32_t all,now_used_block,max_used_block;
 	luat_debug_set_fault_mode(LUAT_DEBUG_FAULT_HANG);
 #ifdef LCD_ENABLE
-#if 0
-	luat_lcd_run_user_api(luat_spi_lcd_init, NULL, 0, 0);
-#endif
+	luat_gpio_cfg_t gpio_cfg;
+	luat_lcd_service_init(60);
+	luat_gpio_set_default_cfg(&gpio_cfg);
+	gpio_cfg.output_level = LUAT_GPIO_HIGH;
+	luat_gpio_open(&gpio_cfg);
+	gpio_cfg.pin = SPI_LCD_RST_PIN;
+	luat_gpio_open(&gpio_cfg);
+	gpio_cfg.pin = SPI_LCD_BL_PIN;
+	luat_gpio_open(&gpio_cfg);
+
+    luat_lcd_IF_init(&lcd_conf);
+    luat_lcd_init_in_service(&lcd_conf);
 #endif
 #ifdef USB_UART_ENABLE
     luat_uart_t uart = {
@@ -1233,7 +1213,7 @@ static void luat_camera_task(void *param)
 #endif
 
 #ifdef CAMERA_USE_BFXXXX
-    luat_pm_iovolt_ctrl(0, 3100);
+    luat_pm_iovolt_ctrl(0, 3200);
     // BF20a6 or BF30a2初始化流程，如果有低功耗休眠要求，在唤醒后需要重新走一遍
     if (luat_bfxxxx_init())
     {
@@ -1323,11 +1303,6 @@ static void luat_camera_task(void *param)
 
 static void camera_demo_init(void)
 {
-#ifdef LCD_ENABLE
-#if 0
-	luat_lcd_service_init(90);
-#endif
-#endif
 	luat_gpio_cfg_t gpio_cfg;
 	luat_gpio_set_default_cfg(&gpio_cfg);
 	gpio_cfg.pin = CAMERA_PD_PIN;

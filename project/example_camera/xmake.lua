@@ -13,4 +13,8 @@ target(TARGET_NAME)
     -- add_files("$(projectdir)/project/" .. TARGET_NAME .. "/src/*.c",{public = true})
     add_linkdirs("$(projectdir)/lib","$(projectdir)/PLAT/core/lib",{public = true})
 	add_linkgroups("image_decoder_0", {whole = true,public = true})
+	--lcd
+	add_includedirs(LUATOS_ROOT.."/components/lcd", {public = true})
+    add_files(LUATOS_ROOT.."/components/lcd/*.c")
+    remove_files(LUATOS_ROOT.."/components/lcd/luat_lib_lcd.c")
 target_end()

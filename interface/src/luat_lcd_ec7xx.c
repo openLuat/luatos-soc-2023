@@ -1,5 +1,7 @@
 #include "luat_base.h"
 #include "luat_lcd.h"
+#include "luat_rtos.h"
+#include "luat_camera.h"
 #include "common_api.h"
 #include "driver_usp.h"
 #include "driver_gpio.h"
@@ -10,6 +12,7 @@ typedef struct
 	uint64_t wait_bytes;
 	uint64_t done_bytes;
 	HANDLE task_handle;
+	HANDLE camera_show_stop_sem;
 	uint8_t mem_type;
 }lcd_service_t;
 
@@ -30,10 +33,15 @@ typedef struct
 enum
 {
 	SERVICE_LCD_DRAW = SERVICE_EVENT_ID_START + 1,
+	SERVICE_LCD_INIT,
+	SERVICE_LCD_SHOW_CAMERA,
 	SERVICE_RUN_USER_API,
 };
 
 #define __SWAP_RB(value) ((value & 0x07e0) | (value >> 11) | (value << 11))
+
+extern int LSPI_StopCameraPreview(uint8_t ID);
+extern int LSPI_StartCameraPreview(uint8_t ID, uint16_t CameraW, uint16_t CameraH, uint16_t ImageW, uint16_t ImageH, uint16_t CutTopLine, uint16_t CutBottomLine, uint16_t CutLeftLine, uint16_t CutRightLine, uint16_t ScaleW, uint16_t ScaleH);
 
 static void prvLCD_Task(void* params)
 {
@@ -41,7 +49,11 @@ static void prvLCD_Task(void* params)
 	uint32_t size;
 	CBDataFun_t callback;
 	lcd_service_draw_t *draw;
+	luat_spi_camera_t *camera;
+	luat_lcd_conf_t* lcd;
+	camera_cut_info_t *cut;
 	uint8_t *data;
+	uint16_t x1,y1,w,h;
 	uint8_t is_static_buf;
 	while(1)
 	{
@@ -81,7 +93,7 @@ static void prvLCD_Task(void* params)
 				luat_lcd_IF_draw(draw->conf, draw->x1, draw->y1, draw->x2, draw->y2, data);
 			}
 			size = draw->size;
-			luat_heap_opt_free(g_s_lcd.mem_type, draw);
+			luat_heap_free(draw);
 			if (!is_static_buf)
 			{
 				g_s_lcd.done_bytes += size;
@@ -91,7 +103,38 @@ static void prvLCD_Task(void* params)
 				}
 			}
 			break;
+		case SERVICE_LCD_SHOW_CAMERA:
+			camera = (luat_spi_camera_t *)event.Param1;
+			lcd = (luat_lcd_conf_t *)camera->lcd_conf;
+			cut = (camera_cut_info_t *)event.Param2;
+			x1 = event.Param3;
+			y1 = event.Param3 >> 16;
+			if (cut)
+			{
+				w = (camera->sensor_width / (cut->w_scale +1)) - (cut->left_cut_lines + cut->right_cut_lines);
+				h = (camera->sensor_height / (cut->h_scale +1)) - (cut->top_cut_lines + cut->bottom_cut_lines);
+				luat_lcd_set_address(lcd, x1, y1, x1+w-1, y1+h-1);
+				LSPI_StartCameraPreview(USP_ID2, camera->sensor_width, camera->sensor_height,
+						w, h, cut->top_cut_lines, cut->bottom_cut_lines, cut->left_cut_lines, cut->right_cut_lines,
+						cut->w_scale, cut->h_scale);
+			}
+			else
+			{
 
+				luat_lcd_set_address(lcd, x1, y1, x1+lcd->w-1, y1+lcd->h-1);
+				LSPI_StartCameraPreview(USP_ID2, camera->sensor_width, camera->sensor_height,
+						lcd->w, lcd->h, 0, 0, 0, 0, 0, 0);
+			}
+
+			OS_MutexLock(g_s_lcd.camera_show_stop_sem);
+			DBG("camera show stop!");
+
+			break;
+		case SERVICE_LCD_INIT:
+			DBG("%x ++", event.Param1);
+			luat_lcd_init((luat_lcd_conf_t *)event.Param1);
+			DBG("%x --", event.Param1);
+			break;
 		case SERVICE_RUN_USER_API:
 			callback = (CBDataFun_t)event.Param1;
 			callback((uint8_t *)event.Param2, event.Param3);
@@ -109,6 +152,7 @@ void luat_lcd_service_init(uint32_t pro)
 	{
 		g_s_lcd.mem_type = LUAT_HEAP_AUTO;
 		g_s_lcd.task_handle = create_event_task(prvLCD_Task, NULL, 2048, pro, 0, "lcdSer");
+		g_s_lcd.camera_show_stop_sem = OS_MutexCreate();
 	}
 }
 
@@ -256,6 +300,35 @@ int luat_lcd_IF_draw(luat_lcd_conf_t* conf, int16_t x1, int16_t y1, int16_t x2, 
 	return 0;
 }
 
+int luat_lcd_init_in_service(luat_lcd_conf_t* conf)
+{
+	return send_event_to_task(g_s_lcd.task_handle, NULL, SERVICE_LCD_INIT, (uint32_t)conf, 0, 0, 0);
+}
+
+int luat_lcd_show_camera_in_service(void *camera_info, camera_cut_info_t *cut_info, uint16_t start_x, uint16_t start_y)
+{
+
+	PV_Union uPV;
+	uPV.u16[0] = start_x;
+	uPV.u16[1] = start_y;
+	if (cut_info)
+	{
+		camera_cut_info_t *cut = malloc(sizeof(camera_cut_info_t));
+		memcpy(cut, cut_info, sizeof(camera_cut_info_t));
+		return send_event_to_task(g_s_lcd.task_handle, NULL, SERVICE_LCD_SHOW_CAMERA, (uint32_t)camera_info, (uint32_t)cut, uPV.u32, 0);
+	}
+	else
+	{
+		return send_event_to_task(g_s_lcd.task_handle, NULL, SERVICE_LCD_SHOW_CAMERA, (uint32_t)camera_info, 0, uPV.u32, 0);
+	}
+}
+
+int luat_lcd_stop_show_camera(void)
+{
+	if (!g_s_lcd.camera_show_stop_sem) return -1;
+	OS_MutexRelease(g_s_lcd.camera_show_stop_sem);
+	return 0;
+}
 
 #ifdef LUAT_USE_LCD_CUSTOM_DRAW
 
