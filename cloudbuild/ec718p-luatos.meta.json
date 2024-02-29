@@ -227,6 +227,13 @@
                 "rsize": 0,
                 "children": [
                     {
+                        "name": "rndis",
+                        "content": "RNDIS功能",
+                        "rsize": 3756,
+                        "fsize": 275108,
+                        "dft": false
+                    },
+                    {
                         "name": "mqtt",
                         "content": "MQTT客户端",
                         "rsize": 6008,
