@@ -391,6 +391,13 @@
                         "dft": false
                     },
                     {
+                        "name": "io_queue",
+                        "content": "IO序列,支持0.1us精度",
+                        "rsize": 0,
+                        "fsize": 287420,
+                        "dft": false
+                    },
+                    {
                         "name": "lora",
                         "content": "lora驱动",
                         "rsize": 13196,
