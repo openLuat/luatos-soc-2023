@@ -143,13 +143,13 @@ int luat_pwm_open(int channel, size_t freq,  size_t pulse, int pnum) {
 	switch(pulse)
 	{
 	case 0:
-		EIGEN_TIMER(channel)->TMR[1] = period;
+		EIGEN_TIMER(channel)->TMR[0] = period;
 		break;
 	case 1000:
-		EIGEN_TIMER(channel)->TMR[1] = period - 1;
+		EIGEN_TIMER(channel)->TMR[0] = period - 1;
 		break;
 	default:
-		EIGEN_TIMER(channel)->TMR[1] = low_cnt?(low_cnt - 1):0;
+		EIGEN_TIMER(channel)->TMR[0] = low_cnt?(low_cnt - 1):0;
 		break;
 	}
 
@@ -257,20 +257,20 @@ int luat_pwm_update_dutycycle(int channel,size_t pulse)
 		while (EIGEN_TIMER(channel)->TACR > 5) {;}
 		EIGEN_TIMER(channel)->TMR[1] = period - 1;
 	}
-	if (pulse && g_s_pwm_table[channel].last_pulse_rate && (g_s_pwm_table[channel].last_pulse_rate != 1000) && (low_cnt < EIGEN_TIMER(channel)->TMR[1]))
+	if (pulse && g_s_pwm_table[channel].last_pulse_rate && (g_s_pwm_table[channel].last_pulse_rate != 1000) && (low_cnt < EIGEN_TIMER(channel)->TMR[0]))
 	{
-		while (EIGEN_TIMER(channel)->TACR <= EIGEN_TIMER(channel)->TMR[1]) {;}
+		while (EIGEN_TIMER(channel)->TACR <= EIGEN_TIMER(channel)->TMR[0]) {;}
 	}
 	switch(pulse)
 	{
 	case 0:
-		EIGEN_TIMER(channel)->TMR[1] = period;
+		EIGEN_TIMER(channel)->TMR[0] = period;
 		break;
 	case 1000:
-		EIGEN_TIMER(channel)->TMR[1] = period - 1;
+		EIGEN_TIMER(channel)->TMR[0] = period - 1;
 		break;
 	default:
-		EIGEN_TIMER(channel)->TMR[1] = low_cnt;
+		EIGEN_TIMER(channel)->TMR[0] = low_cnt;
 		break;
 	}
 	g_s_pwm_table[channel].last_pulse_rate = pulse;
