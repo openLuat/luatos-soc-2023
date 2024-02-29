@@ -254,6 +254,9 @@ static const luaL_Reg loadedlibs[] = {
 #ifdef LUAT_USE_REPL
   {"repl", luaopen_repl},
 #endif
+#ifdef LUAT_USE_IO_QUEUE
+  {"ioqueue", luaopen_io_queue},
+#endif
 #ifdef LUAT_USE_STATEM
   {"statem",    luaopen_statem},
 #endif

@@ -27,7 +27,7 @@
 #define LUAT_USE_IOTAUTH 1
 #define LUAT_USE_MQTT 1
 #define LUAT_USE_WEBSOCKET 1
-
+#define LUAT_USE_IO_QUEUE 1
 // #define LUAT_USE_SOFT_UART 1
 //----------------------------
 // 常用工具库, 按需启用, cjson和pack是强烈推荐启用的

@@ -159,6 +159,7 @@ add_includedirs(LUATOS_ROOT .. "/luat/include",
 				LUATOS_ROOT .. "/components/u8g2",
                 LUATOS_ROOT .. "/components/cjson",
                 LUATOS_ROOT .. "/components/multimedia",
+				LUATOS_ROOT .. "/components/io_queue",
 				"$(projectdir)/interface/include")
 
 includes(USER_PROJECT_DIR or USER_PROJECT_NAME)

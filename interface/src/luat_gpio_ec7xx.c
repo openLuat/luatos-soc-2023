@@ -186,6 +186,8 @@ static luat_gpio_alt_table_t gpio_alt[GPIO_ALT_MAX] = {
 	{HAL_GPIO_19, 0},
 };
 
+__USER_FUNC_IN_RAM__ uint8_t luat_gpio_get_alt(uint8_t GPIO) {return gpio_alt[GPIO - HAL_GPIO_16].alt;}
+
 int luat_gpio_setup(luat_gpio_t *gpio){
 	luat_gpio_cfg_t cfg = {0};
 	cfg.pin = gpio->pin;

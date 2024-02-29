@@ -256,6 +256,8 @@ target(TARGET_NAME)
     add_includedirs(LUATOS_ROOT.."/components/xxtea/include",{public = true})
     add_files(LUATOS_ROOT.."/components/xxtea/src/*.c")
     add_files(LUATOS_ROOT.."/components/xxtea/binding/*.c")
+	-- ioqueue
+	add_files(LUATOS_ROOT.."/components/io_queue/*.c")
     --加入代码和头文件
     add_includedirs("./inc",{public = true})
     add_files("./src/*.c",{public = true})
