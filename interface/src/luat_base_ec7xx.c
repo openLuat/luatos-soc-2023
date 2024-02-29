@@ -413,3 +413,11 @@ int luat_timer_mdelay(size_t ms) {
     return 0;
 }
 #endif
+
+#ifdef LUAT_USE_RNDIS
+uint8_t soc_rndis_is_enable(void)
+{
+	return 1;
+}
+#endif
+
