@@ -22,7 +22,6 @@
 #define LUAT_USE_OTP 1
 #define LUAT_USE_WLAN 1
 #define LUAT_USE_SMS 1
-#define LUAT_MCU_IOMUX_CTRL 1
 #define LUAT_USE_HMETA 1
 
 #define LUAT_USE_IOTAUTH 1
@@ -302,7 +301,6 @@
 // #define LUAT_UART0_FORCE_ALT1     1
 // #define LUAT_UART0_LOG_BR_12M     1
 
-// #define LUAT_COMPILER_NOWEAK
 #define LUAT_GPIO_PIN_MAX 48
 // #define LUAT__UART_TX_NEED_WAIT_DONE
 // // 内存优化: 减少内存消耗, 会稍微减低性能
@@ -363,6 +361,9 @@
 #ifndef LUAT_USE_HMETA
 #define LUAT_USE_HMETA 1
 #endif
+
+// MCU引脚复用
+#define LUAT_MCU_IOMUX_CTRL 1
 
 #if defined TYPE_EC718P && defined (FEATURE_IMS_ENABLE)
 #define LUAT_USE_VOLTE
