@@ -116,8 +116,9 @@ int luat_i2s_setup(const luat_i2s_conf_t *conf)
 		BclkFsCtrl.fsPolarity = conf->channel_format;
 		I2S_FullConfig(conf->id, DataFmt, SlotCtrl,  BclkFsCtrl,  DmaCtrl);
 	}
-	prv_i2s[conf->id] = *conf;
 
+	prv_i2s[conf->id] = *conf;
+	if (!prv_i2s[conf->id].cb_rx_len) prv_i2s[conf->id].cb_rx_len = 4000;
 	return 0;
 }
 
@@ -157,6 +158,7 @@ int luat_i2s_modify(uint8_t id,uint8_t channel_format,uint8_t data_bits,uint32_t
 	}
 	prv_i2s[id].sample_rate = sample_rate;
 	prv_i2s[id].channel_format = channel_format;
+	//DBG("%d,%d,%d,%d,%d", id, prv_i2s[id].mode, sample_rate, channel_format, prv_i2s[id].is_full_duplex);
 	if (LUAT_I2S_MODE_SLAVE == prv_i2s[id].mode)
 	{
 		I2S_Start(id, 0, sample_rate, (channel_format == LUAT_I2S_CHANNEL_STEREO)?2:1);
