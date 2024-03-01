@@ -405,7 +405,7 @@ static void demo_task(void *arg)
 #ifdef CALL_TEST
 	//luat_audio_pm_request(MULTIMEDIA_ID,LUAT_AUDIO_PM_SHUTDOWN);
     luat_rtos_event_recv(g_s_task_handle, VOLTE_EVENT_CALL_READY, &event, NULL, LUAT_WAIT_FOREVER);
-    luat_mobile_make_call(MULTIMEDIA_ID, "15068398077", 11);
+    //luat_mobile_make_call(MULTIMEDIA_ID, "xxxxxxxxxx", 11);
 #endif
 
     while(1)
@@ -422,8 +422,11 @@ static void demo_task(void *arg)
 				{
 					is_call_uplink_on = 0;
 					luat_audio_speech_stop(MULTIMEDIA_ID);
-					//如果后续还要播放其他音频，或者PA无法控制的，用luat_audio_standby();
-					//luat_audio_pm_request(MULTIMEDIA_ID,LUAT_AUDIO_PM_SHUTDOWN);
+#ifdef LOW_POWER_TEST
+					luat_audio_pm_request(MULTIMEDIA_ID,AUDIO_SLEEP_MODE);
+#else
+					luat_audio_pm_request(MULTIMEDIA_ID,LUAT_AUDIO_PM_SHUTDOWN);	//LUAT_AUDIO_PM_POWER_OFF也可以
+#endif
 				}
 				luat_meminfo_opt_sys(LUAT_HEAP_PSRAM, &total, &alloc, &peak);
 				LUAT_DEBUG_PRINT("psram total %u, used %u, max used %u", total, alloc, peak);
