@@ -54,8 +54,6 @@
 #endif
 #endif
 
-#define TEST_I2C_ID I2C_ID0	//音频扩展板的配置
-// #define TEST_I2C_ID I2C_ID1 	//云喇叭板配置
 #define TEST_I2S_ID I2S_ID0
 
 #define TEST_USE_ES8311	1
@@ -76,7 +74,7 @@
 #endif
 
 #if defined FEATURE_IMS_ENABLE	//VOLTE固件才支持通话测试
-//#define CALL_TEST		//通话测试会关闭掉其他测试，防止冲突
+#define CALL_TEST		//通话测试会关闭掉其他测试，防止冲突
 #endif
 
 #define RECORD_ONCE_LEN	10	   //单声道 8K录音单次10个编码块，总共200ms回调 320B 20ms，amr编码要求，20ms一个块
@@ -109,7 +107,7 @@ static const luat_i2s_conf_t luat_i2s_conf_es8311 ={
 };
 
 static const luat_audio_codec_conf_t luat_audio_codec_es8311 = {
-    .i2c_id = TEST_I2C_ID,
+    .i2c_id = 0,
     .i2s_id = TEST_I2S_ID,
     .codec_opts = &codec_opts_es8311,
 };
@@ -352,12 +350,32 @@ static void demo_task(void *arg)
 	tts_config();
 #endif
 #if (TEST_USE_ES8311==1)
-	luat_i2c_setup(luat_audio_codec_es8311.i2c_id, 1);
+	luat_i2c_setup(I2C_ID0, 1);
+	luat_i2c_setup(I2C_ID1, 1);
 #endif
 	luat_i2s_setup(i2s_conf);
 	
 	luat_audio_set_bus_type(MULTIMEDIA_ID,LUAT_MULTIMEDIA_AUDIO_BUS_I2S);	//设置音频总线类型
 	luat_audio_setup_codec(MULTIMEDIA_ID, codec_conf);					//设置音频codec
+
+	uint8_t reg = 0xfd;
+	luat_gpio_set(CODEC_PWR_PIN, 1);
+	luat_rtos_task_sleep(10);
+	if (!luat_i2c_send(I2C_ID0, 0x18, &reg, 1, 1))
+	{
+		LUAT_DEBUG_PRINT("ES8311 use i2c0");
+	}
+	else if (!luat_i2c_send(I2C_ID1, 0x18, &reg, 1, 1))
+	{
+		LUAT_DEBUG_PRINT("ES8311 use i2c1");
+		luat_audio_conf_t* audio_conf = luat_audio_get_config(MULTIMEDIA_ID);
+		audio_conf->codec_conf.i2c_id = I2C_ID1;
+	}
+	else
+	{
+		LUAT_DEBUG_PRINT("NO ES8311!!!");
+	}
+
 #ifdef PA_NO_CTRL
 	luat_audio_config_pa(MULTIMEDIA_ID, 0xff, PA_ON_LEVEL, PWR_SLEEP_DELAY, PA_DELAY);//配置音频pa
 #else
@@ -387,7 +405,7 @@ static void demo_task(void *arg)
 #ifdef CALL_TEST
 	//luat_audio_pm_request(MULTIMEDIA_ID,LUAT_AUDIO_PM_SHUTDOWN);
     luat_rtos_event_recv(g_s_task_handle, VOLTE_EVENT_CALL_READY, &event, NULL, LUAT_WAIT_FOREVER);
-    // luat_mobile_make_call(MULTIMEDIA_ID, "xxxxxxxxxxx", 11);
+    luat_mobile_make_call(MULTIMEDIA_ID, "15068398077", 11);
 #endif
 
     while(1)
