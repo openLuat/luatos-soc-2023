@@ -87,7 +87,7 @@
 
 #else
 
-#define CAMERA_SPEED	24000000
+#define CAMERA_SPEED	25500000
 
 #endif
 //#define PIC_ONLY_Y
@@ -783,12 +783,12 @@ static luat_lcd_conf_t lcd_conf = {
 	.lcd_cs_pin = 0xff
 };
 
-//static void lcd_camera_start_run(uint8_t *data, uint32_t len)
-//{
-//	g_s_camera_app.cur_cache = 0;
-//	luat_camera_start_with_buffer(CAMERA_SPI_ID, g_s_camera_app.p_cache[0]);
-//	g_s_camera_app.is_rx_running = 1;
-//}
+static void lcd_camera_start_run(void)
+{
+	g_s_camera_app.cur_cache = 0;
+	luat_camera_start_with_buffer(CAMERA_SPI_ID, g_s_camera_app.p_cache[0]);
+	g_s_camera_app.is_rx_running = 1;
+}
 
 #endif
 
@@ -965,6 +965,8 @@ static int luat_bfxxxx_init(void)
 #else
 			.only_y = 0,
 #endif
+			.sensor_width = 240,
+			.sensor_height = 320,
 			.rowScaleRatio = 0,
 			.colScaleRatio  = 0,
 			.scaleBytes = 0,
@@ -1009,6 +1011,8 @@ static int luat_bfxxxx_init(void)
 	else if (id[0] == 0x20 || id[1] == 0xa6)
 	{
 		LUAT_DEBUG_PRINT("find BF20A6");
+		spi_camera.sensor_width = 640;
+		spi_camera.sensor_height = 480;
 		g_s_camera_app.image_w = 640;
 		g_s_camera_app.image_h = 480;
 		spi_camera.is_two_line_rx = 1;
@@ -1051,14 +1055,12 @@ static int luat_bfxxxx_init(void)
     	luat_rtos_task_sleep(5000);
     }
 #endif
-	g_s_camera_app.cur_cache = 0;
-	luat_camera_start_with_buffer(CAMERA_SPI_ID, g_s_camera_app.p_cache[0]);
-	g_s_camera_app.is_rx_running = 1;
+    lcd_camera_start_run();
 
 #if (defined LCD_ENABLE) && (defined CAMERA_TEST_ONLY)
 	g_s_camera_app.camera = spi_camera;
 	g_s_camera_app.camera.lcd_conf = &lcd_conf;
-	//luat_lcd_show_camera_in_service(&g_s_camera_app.camera, NULL, 0, 0);
+	luat_lcd_show_camera_in_service(&g_s_camera_app.camera, NULL, 0, 0);
 #endif
 	return 0;
 CAM_OPEN_FAIL:
@@ -1149,9 +1151,7 @@ static int luat_gc032a_init(void)
     }
 #endif
 
-	g_s_camera_app.cur_cache = 0;
-	luat_camera_start_with_buffer(CAMERA_SPI_ID, g_s_camera_app.p_cache[0]);
-	g_s_camera_app.is_rx_running = 1;
+    lcd_camera_start_run();
 	return 0;
 CAM_OPEN_FAIL:
 	luat_camera_close(CAMERA_SPI_ID);
