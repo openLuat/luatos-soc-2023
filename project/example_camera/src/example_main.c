@@ -64,15 +64,15 @@
 //#define USB_UART_ENABLE
 #endif
 
-#define CAMERA_I2C_ID	I2C_ID1
+#define CAMERA_I2C_ID	(g_s_camera_app.camera_id)
 #define CAMERA_SPI_ID   CSPI_ID1
 #define CAMERA_PD_PIN	HAL_GPIO_5
 //#define CAMERA_POWER_PIN HAL_GPIO_25	//外部LDO控制
 //#define CAMERA_POWER_PIN_ALT 0
 //内部LDO就是VDD_EXT, 不需要单独控制
 
-#define CAMERA_USE_BFXXXX
-//#define CAMERA_USE_GC032A
+//#define CAMERA_USE_BFXXXX
+#define CAMERA_USE_GC032A
 
 #define BF30A2_I2C_ADDRESS	(0x6e)
 #define GC032A_I2C_ADDR		(0x21)
@@ -110,6 +110,7 @@ typedef struct
 	uint8_t is_rx_running;
 	uint8_t process_while_rx_enable;
 	uint8_t capture_once;
+	uint8_t camera_id;
 }luat_camera_app_t;
 
 static luat_camera_app_t g_s_camera_app;
@@ -756,7 +757,7 @@ static camera_reg_t g_s_gc032a_reg_table[] =
     {0x34, 0xce}, //3.99fps
     {0x3c, 0x10}, //{0x3c,0x00}
     {0xfe, 0x00},
-	{0x44, 0x02},
+	{0x44, 0x03},	//透传到LCD能正常显示颜色需要YCrCb
 };
 
 #ifdef LCD_ENABLE
@@ -982,16 +983,34 @@ static int luat_bfxxxx_init(void)
 	luat_camera_setup(CAMERA_SPI_ID, &spi_camera, luat_camera_irq_callback, NULL);	//输出MCLK供给camera时钟
 	luat_rtos_task_sleep(1);
 
-    luat_i2c_setup(CAMERA_I2C_ID, 1);
+    luat_i2c_setup(0, 1);
+    luat_i2c_setup(1, 1);
+
+
+
 #ifdef CAMERA_POWER_PIN
 	luat_gpio_set(CAMERA_POWER_PIN, LUAT_GPIO_HIGH);
 #endif
 	luat_rtos_task_sleep(1);
 	id[0] = 0xfc;
-	if (luat_i2c_transfer(CAMERA_I2C_ID, BF30A2_I2C_ADDRESS, id, 1, id, 2))
+	if (luat_i2c_transfer(0, BF30A2_I2C_ADDRESS, id, 1, id, 2))
 	{
-		LUAT_DEBUG_PRINT("BF30A2 not i2c response");
-		goto CAM_OPEN_FAIL;
+		if (luat_i2c_transfer(1, BF30A2_I2C_ADDRESS, id, 1, id, 2))
+		{
+			LUAT_DEBUG_PRINT("BF30A2 not i2c response");
+			goto CAM_OPEN_FAIL;
+		}
+		else
+		{
+			DBG("find i2c device in i2c1");
+			g_s_camera_app.camera_id = 1;
+		}
+
+	}
+	else
+	{
+		DBG("find i2c device in i2c0");
+		g_s_camera_app.camera_id = 0;
 	}
 	if (id[0] == 0x3b || id[1] == 0x02)
 	{
@@ -1060,6 +1079,8 @@ static int luat_bfxxxx_init(void)
 #if (defined LCD_ENABLE) && (defined CAMERA_TEST_ONLY)
 	g_s_camera_app.camera = spi_camera;
 	g_s_camera_app.camera.lcd_conf = &lcd_conf;
+	//camera_cut_info_t cut = {60, 60, 20, 20, 0, 0};
+	//luat_lcd_show_camera_in_service(&g_s_camera_app.camera, &cut, 19, 59);
 	luat_lcd_show_camera_in_service(&g_s_camera_app.camera, NULL, 0, 0);
 #endif
 	return 0;
@@ -1103,17 +1124,32 @@ static int luat_gc032a_init(void)
 	g_s_camera_app.process_while_rx_enable = 0;
 	luat_camera_setup(CAMERA_SPI_ID, &spi_camera, luat_camera_irq_callback, NULL);	//输出MCLK供给camera时钟
 	luat_rtos_task_sleep(1);
-    luat_i2c_setup(CAMERA_I2C_ID, 1);
-    luat_i2c_set_polling_mode(CAMERA_I2C_ID, 1);
+    luat_i2c_setup(0, 1);
+    luat_i2c_setup(1, 1);
+
 #ifdef CAMERA_POWER_PIN
 	luat_gpio_set(CAMERA_POWER_PIN, LUAT_GPIO_HIGH);
 #endif
 	luat_rtos_task_sleep(1);
 	id[0] = 0xfc;
-	if (luat_i2c_transfer(CAMERA_I2C_ID, GC032A_I2C_ADDR, id, 1, id, 2))
+	if (luat_i2c_transfer(0, GC032A_I2C_ADDR, id, 1, id, 2))
 	{
-		LUAT_DEBUG_PRINT("gc032a not i2c response");
-		goto CAM_OPEN_FAIL;
+		if (luat_i2c_transfer(1, GC032A_I2C_ADDR, id, 1, id, 2))
+		{
+			LUAT_DEBUG_PRINT("gc032a not i2c response");
+			goto CAM_OPEN_FAIL;
+		}
+		else
+		{
+			DBG("find i2c device in i2c1");
+			g_s_camera_app.camera_id = 1;
+		}
+
+	}
+	else
+	{
+		DBG("find i2c device in i2c0");
+		g_s_camera_app.camera_id = 0;
 	}
 	DBG("%x,%x", id[0], id[1]);
 	for(int i = 0; i < sizeof(g_s_gc032a_reg_table)/sizeof(camera_reg_t); i++)
@@ -1152,6 +1188,12 @@ static int luat_gc032a_init(void)
 #endif
 
     lcd_camera_start_run();
+#if (defined LCD_ENABLE) && (defined CAMERA_TEST_ONLY)
+	g_s_camera_app.camera = spi_camera;
+	g_s_camera_app.camera.lcd_conf = &lcd_conf;
+	camera_cut_info_t cut = {80, 80, 200, 200, 0, 0};	// 640 * 480 在240 * 320居中显示
+	luat_lcd_show_camera_in_service(&g_s_camera_app.camera, &cut, 0, 0);
+#endif
 	return 0;
 CAM_OPEN_FAIL:
 	luat_camera_close(CAMERA_SPI_ID);
@@ -1274,11 +1316,11 @@ static void luat_camera_task(void *param)
 				for(j = i * g_s_camera_app.image_w * 2, k = 0; j < (i + 8) * g_s_camera_app.image_w * 2; j+=4, k+=6)
 				{
 					ycb_cache[k] = p_cache[j];
-					ycb_cache[k + 1] = p_cache[j + 3];
-					ycb_cache[k + 2] = p_cache[j + 1];
+					ycb_cache[k + 1] = p_cache[j + 1];
+					ycb_cache[k + 2] = p_cache[j + 3];
 					ycb_cache[k + 3] = p_cache[j + 2];
-					ycb_cache[k + 4] = p_cache[j + 3];
-					ycb_cache[k + 5] = p_cache[j + 1];
+					ycb_cache[k + 4] = p_cache[j + 1];
+					ycb_cache[k + 5] = p_cache[j + 3];
 				}
 #endif
 				jpeg_encode_run(JPEGEncodeHandle, ycb_cache);
