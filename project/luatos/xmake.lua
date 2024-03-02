@@ -124,6 +124,10 @@ target(TARGET_NAME)
     -- fonts
     add_includedirs(LUATOS_ROOT.."/components/luatfonts",{public = true})
     add_files(LUATOS_ROOT.."/components/luatfonts/*.c")
+    -- gtfont
+    add_includedirs(LUATOS_ROOT.."/components/gtfont",{public = true})
+    add_files(LUATOS_ROOT.."/components/gtfont/*.c")
+    add_links("gt")
     -- eink
     add_includedirs(LUATOS_ROOT.."/components/eink",{public = true})
     add_includedirs(LUATOS_ROOT.."/components/epaper",{public = true})
