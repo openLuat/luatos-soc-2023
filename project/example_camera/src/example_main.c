@@ -40,9 +40,9 @@
 #include "mem_map.h"
 
 //#define CAMERA_TEST_QRCODE			//扫码
-#define CAMERA_TEST_CAPTURE		//按下KEY2（GPIO_20）摄像拍照并转成jpeg图片输出给电脑，
+//#define CAMERA_TEST_CAPTURE		//按下KEY2（GPIO_20）摄像拍照并转成jpeg图片输出给电脑，
 //#define CAMERA_TEST_VIDEO		//摄像从USB串口输出到电脑
-//#define CAMERA_TEST_ONLY		//只测试摄像头没有输出足够的数据
+#define CAMERA_TEST_ONLY		//只测试摄像头没有输出足够的数据
 //#define LCD_ENABLE
 
 #ifdef CAMERA_TEST_QRCODE
