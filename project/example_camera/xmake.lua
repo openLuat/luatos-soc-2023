@@ -16,5 +16,9 @@ target(TARGET_NAME)
 	--lcd
 	add_includedirs(LUATOS_ROOT.."/components/lcd", {public = true})
     add_files(LUATOS_ROOT.."/components/lcd/*.c")
-    remove_files(LUATOS_ROOT.."/components/lcd/luat_lib_lcd.c")
+	remove_files(LUATOS_ROOT.."/components/lcd/luat_lib_lcd.c")
+	--jpeg
+	add_includedirs(LUATOS_ROOT.."/components/tiny_jpeg", {public = true})
+    add_files(LUATOS_ROOT.."/components/tiny_jpeg/*.c")
+    
 target_end()

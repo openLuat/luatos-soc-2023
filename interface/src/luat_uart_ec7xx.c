@@ -462,6 +462,7 @@ int luat_uart_rx_start_notify_enable(int uart_id, uint8_t is_enable)
     return -1;
 }
 
+#if 0
 #ifdef __LUATOS__
 #include "bsp.h"
 #include "timer.h"
@@ -575,4 +576,5 @@ void __CORE_FUNC_IN_RAM__ luat_uart_soft_sleep_enable(uint8_t is_enable)
 {
 	slpManDrvVoteSleep(SLP_VOTE_LPUSART, is_enable?SLP_HIB_STATE:SLP_ACTIVE_STATE);
 }
+#endif
 #endif

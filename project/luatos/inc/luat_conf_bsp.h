@@ -19,6 +19,7 @@
 #define LUAT_USE_PM  1
 #define LUAT_USE_MCU  1
 #define LUAT_USE_RTC 1
+#define LUAT_USE_CAMERA 1
 #define LUAT_USE_OTP 1
 #define LUAT_USE_WLAN 1
 #define LUAT_USE_SMS 1
@@ -28,7 +29,6 @@
 #define LUAT_USE_MQTT 1
 #define LUAT_USE_WEBSOCKET 1
 #define LUAT_USE_IO_QUEUE 1
-// #define LUAT_USE_SOFT_UART 1
 // #define LUAT_USE_RNDIS 1
 
 //----------------------------
@@ -170,7 +170,7 @@
 // 主推的UI库, 功能强大但API繁琐
 // #define LUAT_USE_LVGL
 // #define LUAT_USE_LVGL_DEMO
-#define LUAT_USE_LVGL_JPG 1 // 启用JPG解码支持
+// #define LUAT_USE_LVGL_JPG 1 // 启用JPG解码支持
 // #define LUAT_USE_LVGL_PNG 1 // 启用PNG解码支持
 // #define LUAT_USE_LVGL_BMP 1 // 启用BMP解码支持
 

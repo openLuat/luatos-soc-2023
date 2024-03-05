@@ -50,7 +50,7 @@ target(TARGET_NAME)
         else 
             target:add("linkgroups","aisound50_16K", {whole = true,public = true})
         end
-
+		target:add("linkgroups","image_decoder_0", {whole = true,public = true})
         local LUAT_USE_TLS_DISABLE = conf_data:find("\r#define LUAT_USE_TLS_DISABLE") or conf_data:find("\n#define LUAT_USE_TLS_DISABLE")
         if not LUAT_USE_TLS_DISABLE then
             -- mbedtls
@@ -262,6 +262,10 @@ target(TARGET_NAME)
     add_files(LUATOS_ROOT.."/components/xxtea/binding/*.c")
 	-- ioqueue
 	add_files(LUATOS_ROOT.."/components/io_queue/*.c")
+	-- camera
+	add_includedirs(LUATOS_ROOT.."/components/tiny_jpeg", {public = true})
+	add_files(LUATOS_ROOT.."/components/camera/*.c")
+	add_files(LUATOS_ROOT.."/components/tiny_jpeg/*.c")
     --加入代码和头文件
     add_includedirs("./inc",{public = true})
     add_files("./src/*.c",{public = true})
