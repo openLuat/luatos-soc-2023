@@ -40,10 +40,10 @@
 #include "mem_map.h"
 
 //#define CAMERA_TEST_QRCODE			//扫码
-//#define CAMERA_TEST_CAPTURE		//按下KEY2（GPIO_20）摄像拍照并转成jpeg图片输出给电脑，
+#define CAMERA_TEST_CAPTURE		//按下KEY2（GPIO_20）摄像拍照并转成jpeg图片输出给电脑，
 //#define CAMERA_TEST_VIDEO		//摄像从USB串口输出到电脑
-#define CAMERA_TEST_ONLY		//只测试摄像头没有输出足够的数据
-#define LCD_ENABLE
+//#define CAMERA_TEST_ONLY		//只测试摄像头没有输出足够的数据
+//#define LCD_ENABLE
 
 #ifdef CAMERA_TEST_QRCODE
 #undef CAMERA_TEST_CAPTURE
@@ -784,14 +784,16 @@ static luat_lcd_conf_t lcd_conf = {
 	.lcd_cs_pin = 0xff
 };
 
+
+
+#endif
+
 static void lcd_camera_start_run(void)
 {
 	g_s_camera_app.cur_cache = 0;
 	luat_camera_start_with_buffer(CAMERA_SPI_ID, g_s_camera_app.p_cache[0]);
 	g_s_camera_app.is_rx_running = 1;
 }
-
-#endif
 
 #ifdef USB_UART_ENABLE
 static void luat_usb_recv_cb(int uart_id, uint32_t data_len)

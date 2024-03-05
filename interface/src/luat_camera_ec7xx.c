@@ -109,7 +109,13 @@ int luat_camera_image_decode_get_result(uint8_t *buf)
 
 int luat_camera_start(int id)
 {
+#ifdef __LUATOS__
+	luat_camera_image_decode_init(0, NULL, 0, 0);
+	luat_camera_image_decode_once(NULL, 0, 0, 0, NULL, NULL);
+	return 0;
+#else
 	return -1;
+#endif
 }
 
 int luat_camera_start_with_buffer(int id, void *buf)
@@ -162,7 +168,6 @@ int luat_camera_close(int id)
 }
 
 #ifdef __LUATOS__
-int l_camera_handler(lua_State *L, void* ptr) {return -1;}
 int luat_camera_init(luat_camera_conf_t *conf) {return -1;}
 int luat_camera_capture(int id, uint8_t quality, const char *path) {return -1;}
 #endif
