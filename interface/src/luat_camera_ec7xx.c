@@ -64,7 +64,7 @@ static int luat_image_decode_callback(void *pdata, void *param)
 {
 	uint32_t buffer_sn = (uint32_t)param;
 	uint8_t buf[2500];	//由于解码stack很大，才可以这么用
-//	LUAT_DEBUG_PRINT("buffer %d decode done!", buffer_sn);
+//	DBG("buffer %d decode done!", buffer_sn);
 	if (pdata)
 	{
 		uint32_t len = (uint32_t)pdata;
@@ -116,7 +116,7 @@ static int luat_camera_irq_callback(void *pdata, void *param)
 		{
 			luat_camera_app.is_process_image = 1;
 			luat_camera_app.is_rx_running = 0;
-			luat_rtos_event_send(g_s_task_handle, LUAT_CAMERA_EVENT_FRAME_NEED_PROCESS, 0, 0, 0, 0);
+			luat_rtos_event_send(luat_camera_app.task_handle, LUAT_CAMERA_EVENT_FRAME_NEED_PROCESS, 0, 0, 0, 0);
 		}
 		else
 		{
@@ -141,7 +141,7 @@ static int luat_camera_irq_callback(void *pdata, void *param)
 			if (!luat_camera_app.is_process_image)
 			{
 				luat_camera_app.is_process_image = 1;
-				luat_rtos_event_send(g_s_task_handle, LUAT_CAMERA_EVENT_FRAME_NEED_PROCESS, cur_cache, 0, 0, 0);
+				luat_rtos_event_send(luat_camera_app.task_handle, LUAT_CAMERA_EVENT_FRAME_NEED_PROCESS, cur_cache, 0, 0, 0);
 				luat_camera_app.cur_cache = !luat_camera_app.cur_cache;
 				luat_camera_continue_with_buffer(luat_camera_app.camera_id, luat_camera_app.p_cache[luat_camera_app.cur_cache]);
 			}
@@ -161,7 +161,7 @@ static int luat_camera_irq_callback(void *pdata, void *param)
 		switch ((uint32_t)pdata)
 		{
 		case LUAT_CAMERA_FRAME_START:
-			//luat_rtos_event_send(g_s_task_handle, LUAT_CAMERA_EVENT_FRAME_START, 0, 0, 0, 0);
+			//luat_rtos_event_send(luat_camera_app.task_handle, LUAT_CAMERA_EVENT_FRAME_START, 0, 0, 0, 0);
 			break;
 		case LUAT_CAMERA_FRAME_END:
 			if (!luat_camera_app.is_rx_running && !luat_camera_app.is_process_image)
@@ -175,7 +175,7 @@ static int luat_camera_irq_callback(void *pdata, void *param)
 			{
 				luat_camera_app.is_process_image = 1;
 				luat_camera_app.is_rx_running = 0;
-				luat_rtos_event_send(g_s_task_handle, LUAT_CAMERA_EVENT_FRAME_NEED_PROCESS, 0, 0, 0, 0);
+				luat_rtos_event_send(luat_camera_app.task_handle, LUAT_CAMERA_EVENT_FRAME_NEED_PROCESS, 0, 0, 0, 0);
 			}
 			break;
 		case LUAT_CAMARA_FRAME_ERROR:
@@ -190,14 +190,14 @@ static int luat_camera_irq_callback(void *pdata, void *param)
 	switch ((uint32_t)pdata)
 	{
 	case LUAT_CAMERA_FRAME_START:
-		luat_rtos_event_send(g_s_task_handle, LUAT_CAMERA_EVENT_FRAME_START, cur_cache, 0, 0, 0);
+		luat_rtos_event_send(luat_camera_app.task_handle, LUAT_CAMERA_EVENT_FRAME_START, cur_cache, 0, 0, 0);
 		break;
 	case LUAT_CAMERA_FRAME_END:
 		break;
 	case LUAT_CAMERA_FRAME_RX_DONE:
 		luat_camera_app.cur_cache = !luat_camera_app.cur_cache;
 		luat_camera_continue_with_buffer(luat_camera_app.camera_id, luat_camera_app.p_cache[luat_camera_app.cur_cache]);
-		luat_rtos_event_send(g_s_task_handle, LUAT_CAMERA_EVENT_FRAME_END, cur_cache, 0, 0, 0);
+		luat_rtos_event_send(luat_camera_app.task_handle, LUAT_CAMERA_EVENT_FRAME_END, cur_cache, 0, 0, 0);
 		break;
 	case LUAT_CAMARA_FRAME_ERROR:
 		luat_camera_app.cur_cache = !luat_camera_app.cur_cache;
@@ -367,7 +367,7 @@ static void luat_camera_task(void *param)
     uint32_t i,j,k;
 	while(1)
 	{
-		luat_rtos_event_recv(g_s_task_handle, 0, &event, NULL, LUAT_WAIT_FOREVER);
+		luat_rtos_event_recv(luat_camera_app.task_handle, 0, &event, NULL, LUAT_WAIT_FOREVER);
 		switch(event.id)
 		{
 		case LUAT_CAMERA_EVENT_FRAME_START:
@@ -376,14 +376,15 @@ static void luat_camera_task(void *param)
 			break;
 		case LUAT_CAMERA_EVENT_FRAME_NEED_PROCESS:
 
-			LUAT_DEBUG_PRINT("解码开始 buf%d", event.param1);
+			DBG("解码开始 buf%d", event.param1);
 			luat_camera_image_decode_once(luat_camera_app.p_cache[event.param1], g_s_camera[luat_camera_app.camera_id].image_w, g_s_camera[luat_camera_app.camera_id].image_h, 120, luat_image_decode_callback, event.param1);
 
 			p_cache = luat_camera_app.p_cache[0];
 			luat_camera_app.jpeg_data_point = 0;
-			LUAT_DEBUG_PRINT("转JPEG开始 ");
+			DBG("转JPEG开始 ");
 			luat_camera_app.capture_once = 0;
 			JPEGEncodeHandle = jpeg_encode_init(luat_camera_save_JPEG_data, 0, 1, g_s_camera[luat_camera_app.camera_id].image_w, g_s_camera[luat_camera_app.camera_id].image_h, 3);
+			ycb_cache = malloc(g_s_camera[luat_camera_app.camera_id].image_w * 8 * 3);
 			for(i = 0; i < g_s_camera[luat_camera_app.camera_id].image_h; i+= 8)
 			{
 
@@ -402,6 +403,7 @@ static void luat_camera_task(void *param)
 
 			jpeg_encode_end(JPEGEncodeHandle);
 			free(JPEGEncodeHandle);
+			free(ycb_cache);
 			luat_camera_app.is_process_image = 0;
 
 			break;
