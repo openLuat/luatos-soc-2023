@@ -1,7 +1,7 @@
 local SDK_PATH = os.projectdir()
 local CHIP = CHIP
 local USER_PROJECT_NAME = USER_PROJECT_NAME
-local USER_PROJECT_DIR = USER_PROJECT_DIR
+local project_dir = project_dir
 local LIB_PS_PLAT = nil
 local LIB_FW
 
@@ -162,7 +162,7 @@ add_includedirs(LUATOS_ROOT .. "/luat/include",
 				LUATOS_ROOT .. "/components/io_queue",
 				"$(projectdir)/interface/include")
 
-includes(USER_PROJECT_DIR or USER_PROJECT_NAME)
+includes(project_dir)
 
 target("csdk")
     set_kind("static")
@@ -293,7 +293,7 @@ target(USER_PROJECT_NAME..".elf")
         for _, define_flasg in pairs(target:get("defines")) do
             table.insert(ld_parameter,"-D" .. define_flasg)
             if define_flasg == "__USER_MAP_CONF_FILE__=\"mem_map_7xx.h\"" then
-                for _, filepath in ipairs(os.files("$(projectdir)/project/"..USER_PROJECT_NAME.."/**/mem_map_7xx.h")) do
+                for _, filepath in ipairs(os.files(project_dir.."/**/mem_map_7xx.h")) do
                     if path.filename(filepath) == "mem_map_7xx.h" then
                         user_mem_map = {"-I",path.directory(filepath)}
                         break

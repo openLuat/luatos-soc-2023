@@ -8,7 +8,7 @@ LUATOS_ROOT = "$(projectdir)/../LuatOS"
 LUAT_BSP_VERSION = "V1001"
 USER_PROJECT_NAME = "example"
 chip_target = nil
-USER_PROJECT_DIR = nil
+project_dir = nil
 
 package("gnu_rm")
 	set_kind("toolchain")
@@ -47,9 +47,16 @@ set_languages("gnu11", "cxx11")
 set_warnings("all")
 set_optimize("smallest")
 
+-- 获取项目名称
+if os.getenv("PROJECT_NAME") then
+	USER_PROJECT_NAME = os.getenv("PROJECT_NAME")
+end
+
 if os.getenv("PROJECT_DIR") then
-    USER_PROJECT_DIR = os.getenv("PROJECT_DIR")
-    USER_PROJECT_NAME = USER_PROJECT_DIR:match(".+[/\\]([%w_]+)")
+    project_dir = os.getenv("PROJECT_DIR")
+    USER_PROJECT_NAME = project_dir:match(".+[/\\]([%w_]+)")
+else 
+    project_dir = os.curdir().."/project/"..USER_PROJECT_NAME
 end
 
 option("chip_target")
@@ -61,11 +68,6 @@ option_end()
 add_options("chip_target")
 
 if has_config("chip_target") then chip_target = get_config("chip_target") end
-
--- 获取项目名称
-if os.getenv("PROJECT_NAME") then
-	USER_PROJECT_NAME = os.getenv("PROJECT_NAME")
-end
 
 -- option("project_name")
 --     set_default(true)
@@ -226,10 +228,11 @@ add_includedirs("$(projectdir)/PLAT/device/target/board/common/ARMCM3/inc",
                 "$(projectdir)/PLAT/prebuild/PLAT/inc")
 
 local USER_PROJECT_NAME = USER_PROJECT_NAME
+local project_dir = project_dir
 on_load(function (target)
     local chip_target = get_config("chip_target")
     assert (chip_target == "ec718e" or chip_target == "ec718p" or chip_target == "ec718pv" or chip_target == "ec718s" or chip_target == "ec716s" ,"target only support ec718e/ec718p/ec718pv/ec718s/ec716s")
-    for _, filepath in ipairs(os.files("$(projectdir)/project/"..USER_PROJECT_NAME.."/**/mem_map_7xx.h")) do
+    for _, filepath in ipairs(os.files(project_dir.."/**/mem_map_7xx.h")) do
         if path.filename(filepath) == "mem_map_7xx.h" then
             target:add("defines", "__USER_MAP_CONF_FILE__=\"mem_map_7xx.h\"")
             target:add("includedirs", path.directory(filepath))
