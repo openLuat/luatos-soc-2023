@@ -73,6 +73,8 @@ CSDK for ABCDEGF, 适用于所有基于ABCDEGF的合宙模组, 包括衍生型�
 
 ## 在SDK外存放项目文件的编译方法
 
+**注意：这需要构建单独兼容，不会及时更新所以可能会出现一些问题(移芯构建会用到一些特殊配置操作，一些头文件要构建时候特殊配置)，所以任何时候都不推荐使用此方法，可能会有问题却无法第一时间反映出来**
+
 假设项目路径是 `F:\example_test` , 目录结构如`luatos-soc-2023\project\example`一样，测试可将`luatos-soc-2023\project\example`复制到F:并更名为`example_test`
 
 编译方式:
@@ -84,7 +86,7 @@ rem you can set your outside project
 set PROJECT_DIR=F:\example_test
 ```
 
-随后执行build即可
+随后执行build example_test即可
 
 恢复到默认项目查找逻辑, 将上面`PROJECT_DIR`恢复注释即可
 
