@@ -47,6 +47,11 @@ set_languages("gnu11", "cxx11")
 set_warnings("all")
 set_optimize("smallest")
 
+-- 获取项目名称
+if os.getenv("PROJECT_NAME") then
+	USER_PROJECT_NAME = os.getenv("PROJECT_NAME")
+end
+
 if os.getenv("PROJECT_DIR") then
     USER_PROJECT_DIR = os.getenv("PROJECT_DIR")
     USER_PROJECT_NAME = USER_PROJECT_DIR:match(".+[/\\]([%w_]+)")
@@ -61,11 +66,6 @@ option_end()
 add_options("chip_target")
 
 if has_config("chip_target") then chip_target = get_config("chip_target") end
-
--- 获取项目名称
-if os.getenv("PROJECT_NAME") then
-	USER_PROJECT_NAME = os.getenv("PROJECT_NAME")
-end
 
 -- option("project_name")
 --     set_default(true)
