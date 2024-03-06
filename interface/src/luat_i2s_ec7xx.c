@@ -61,6 +61,11 @@ int luat_i2s_setup(const luat_i2s_conf_t *conf)
 {
 	if (conf->id >= I2S_MAX) return -1;
 
+	I2sDataFmt_t DataFmt;
+	I2sSlotCtrl_t  SlotCtrl;
+	I2sBclkFsCtrl_t BclkFsCtrl;
+	I2sDmaCtrl_t DmaCtrl;
+
 	uint8_t frame_size = I2S_FRAME_SIZE_16_16;
 	if (conf->channel_bits != 16)
 	{
@@ -78,6 +83,18 @@ int luat_i2s_setup(const luat_i2s_conf_t *conf)
 		}
 	}
 	I2S_BaseConfig(conf->id, conf->standard, frame_size);
+	I2S_GetConfig(conf->id, &DataFmt, &SlotCtrl, &BclkFsCtrl, &DmaCtrl);
+	if (conf->data_bits > 16)
+	{
+		DataFmt.txPack = 0;
+		DataFmt.rxPack = 0;
+	}
+	else
+	{
+		DataFmt.txPack = 1;
+		DataFmt.rxPack = 1;
+	}
+	I2S_FullConfig(conf->id, DataFmt, SlotCtrl,  BclkFsCtrl,  DmaCtrl);
 	int pad;
 	switch(conf->id)
 	{
@@ -108,10 +125,7 @@ int luat_i2s_setup(const luat_i2s_conf_t *conf)
 
 	if (conf->channel_format < LUAT_I2S_CHANNEL_STEREO)
 	{
-		I2sDataFmt_t DataFmt;
-		I2sSlotCtrl_t  SlotCtrl;
-		I2sBclkFsCtrl_t BclkFsCtrl;
-		I2sDmaCtrl_t DmaCtrl;
+
 		I2S_GetConfig(conf->id, &DataFmt, &SlotCtrl, &BclkFsCtrl, &DmaCtrl);
 		BclkFsCtrl.fsPolarity = conf->channel_format;
 		I2S_FullConfig(conf->id, DataFmt, SlotCtrl,  BclkFsCtrl,  DmaCtrl);
@@ -120,6 +134,16 @@ int luat_i2s_setup(const luat_i2s_conf_t *conf)
 	prv_i2s[conf->id] = *conf;
 	if (!prv_i2s[conf->id].cb_rx_len) prv_i2s[conf->id].cb_rx_len = 4000;
 	return 0;
+}
+
+static void i2s_bclk_fix(uint8_t id)
+{
+	if (prv_i2s[id].channel_bits > 16)
+	{
+		CLOCK_bclkDisable(id);
+    	CLOCK_setBclkDiv(id, 2); // Second step 2 div
+    	CLOCK_bclkEnable(id); // Enable bclk
+	}
 }
 
 int luat_i2s_modify(uint8_t id,uint8_t channel_format,uint8_t data_bits,uint32_t sample_rate)
@@ -155,6 +179,22 @@ int luat_i2s_modify(uint8_t id,uint8_t channel_format,uint8_t data_bits,uint32_t
 			}
 		}
 		I2S_BaseConfig(id, prv_i2s[id].standard, frame_size);
+		I2sDataFmt_t DataFmt;
+		I2sSlotCtrl_t  SlotCtrl;
+		I2sBclkFsCtrl_t BclkFsCtrl;
+		I2sDmaCtrl_t DmaCtrl;
+		I2S_GetConfig(id, &DataFmt, &SlotCtrl, &BclkFsCtrl, &DmaCtrl);
+		if (data_bits > 16)
+		{
+			DataFmt.txPack = 0;
+			DataFmt.rxPack = 0;
+		}
+		else
+		{
+			DataFmt.txPack = 1;
+			DataFmt.rxPack = 1;
+		}
+		I2S_FullConfig(id, DataFmt, SlotCtrl,  BclkFsCtrl,  DmaCtrl);
 	}
 	prv_i2s[id].sample_rate = sample_rate;
 	prv_i2s[id].channel_format = channel_format;
@@ -166,10 +206,12 @@ int luat_i2s_modify(uint8_t id,uint8_t channel_format,uint8_t data_bits,uint32_t
 	else if (prv_i2s[id].is_full_duplex)
 	{
 		I2S_StartTransfer(id, sample_rate, (channel_format == LUAT_I2S_CHANNEL_STEREO)?2:1, prv_i2s[id].cb_rx_len, prv_i2s_cb, (void *)&prv_i2s[id]);
+		i2s_bclk_fix(id);
 	}
 	else
 	{
 		I2S_Start(id, 1, sample_rate, (channel_format == LUAT_I2S_CHANNEL_STEREO)?2:1);
+		i2s_bclk_fix(id);
 	}
 	prv_i2s[id].state = LUAT_I2S_STATE_RUNING;
 
@@ -186,10 +228,12 @@ static __USER_FUNC_IN_RAM__ void luat_i2s_check_start(id)
 		else if (prv_i2s[id].is_full_duplex)
 		{
 			I2S_StartTransfer(id, prv_i2s[id].sample_rate, (prv_i2s[id].channel_format == LUAT_I2S_CHANNEL_STEREO)?2:1, prv_i2s[id].cb_rx_len, prv_i2s_cb, (void *)&prv_i2s[id]);
+			i2s_bclk_fix(id);
 		}
 		else
 		{
 			I2S_Start(id, 1, prv_i2s[id].sample_rate, (prv_i2s[id].channel_format == LUAT_I2S_CHANNEL_STEREO)?2:1);
+			i2s_bclk_fix(id);
 		}
 		prv_i2s[id].state = LUAT_I2S_STATE_RUNING;
 	}
