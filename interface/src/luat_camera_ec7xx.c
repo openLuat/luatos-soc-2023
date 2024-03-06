@@ -38,6 +38,7 @@ typedef struct
 
 #ifdef __LUATOS__
 #include "luat_msgbus.h"
+#include "luat_mem.h"
 enum
 {
 	LUAT_CAMERA_EVENT_FRAME_QRDECODE = USER_EVENT_ID_START + 100,
@@ -120,7 +121,7 @@ static int luat_camera_irq_callback(void *pdata, void *param)
 				if (!luat_camera_app.is_process_image)
 				{
 					luat_camera_app.is_process_image = 1;
-					luat_rtos_event_send(g_s_task_handle, LUAT_CAMERA_EVENT_FRAME_QRDECODE, cur_cache, 0, 0, 0);
+					luat_rtos_event_send(luat_camera_app.task_handle, LUAT_CAMERA_EVENT_FRAME_QRDECODE, cur_cache, 0, 0, 0);
 					luat_camera_app.cur_cache = !luat_camera_app.cur_cache;
 					luat_camera_continue_with_buffer(luat_camera_app.camera_id, luat_camera_app.p_cache[luat_camera_app.cur_cache]);
 				}
@@ -342,7 +343,7 @@ int luat_camera_close(int id)
 	luat_heap_free(luat_camera_app.p_cache[1]);
 	luat_camera_app.p_cache[0] = NULL;
 	luat_camera_app.p_cache[1] = NULL;
-	OS_DeInitBuffer(luat_camera_app.result_buffer);
+	OS_DeInitBuffer(&luat_camera_app.result_buffer);
 #endif
 	return 0;
 
