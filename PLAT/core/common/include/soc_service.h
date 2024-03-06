@@ -244,4 +244,5 @@ void soc_cp_force_wakeup_on_off(uint32_t mask_bit, uint8_t on_off);
 void soc_sys_force_wakeup_on_off(uint32_t mask_bit, uint8_t on_off);
 void soc_doze_force_wakeup_on_off(uint32_t mask_bit, uint8_t on_off);
 uint8_t soc_user_wfi_mode(void);
+void soc_set_sys_signal_callback(TaskFun_t fun);
 #endif /* CORE_INCLUDE_SOC_SERVICE_H_ */
