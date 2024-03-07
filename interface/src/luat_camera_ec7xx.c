@@ -40,6 +40,8 @@ typedef struct
 #include "luat_msgbus.h"
 #include "luat_mem.h"
 #include "luat_zbuff.h"
+#include "luat_lcd.h"
+extern luat_lcd_conf_t *l_lcd_get_default_conf(void);
 enum
 {
 	LUAT_CAMERA_EVENT_FRAME_QRDECODE = USER_EVENT_ID_START + 100,
@@ -74,6 +76,7 @@ typedef struct
 	uint8_t scan_pause;				//扫码暂停
 	uint8_t preview_on_off;
 	uint8_t camera_id;
+	uint8_t is_work;
 }luat_camera_app_t;
 
 static luat_camera_app_t luat_camera_app;
@@ -82,7 +85,6 @@ static int luat_image_decode_callback(void *pdata, void *param)
 {
 	uint32_t buffer_sn = (uint32_t)param;
 	uint32_t len = (uint32_t)pdata;
-//	DBG("buffer %d decode done!", buffer_sn);
 	if (len)
 	{
 		if (len > luat_camera_app.result_buffer.MaxLen)
@@ -205,15 +207,15 @@ static int luat_camera_dummy_callback(void *pdata, void *param)
 
 int luat_camera_setup(int id, luat_spi_camera_t *conf, void * callback, void *param)
 {
+#ifdef __LUATOS__
+	if (id < 0 || id >= USP_ID2 || !conf ) return -ERROR_PARAM_INVALID;
+	if (g_s_camera[id].is_init) return -ERROR_OPERATION_FAILED;
+#else
 	if (id < 0 || id >= USP_ID2 || !conf || !callback) return -ERROR_PARAM_INVALID;
 	if (g_s_camera[id].is_init) return -ERROR_OPERATION_FAILED;
-
-#ifdef __LUATOS__
-#else
 	g_s_camera[id].callback = callback;
 	g_s_camera[id].param = param;
 #endif
-
 	if (id)
 	{
 		GPIO_IomuxEC7XX(18, 1, 1, 0);
@@ -275,14 +277,20 @@ int luat_camera_start(int id)
 {
 #ifdef __LUATOS__
 	if (!luat_camera_app.task_handle || !g_s_camera[id].is_init) return -1;
+	if (!g_s_camera[id].is_running)
+	{
+		CSPI_Rx(luat_camera_app.camera_id, NULL, luat_camera_app.config.sensor_width, luat_camera_app.config.sensor_height, luat_camera_irq_callback, id);
+		g_s_camera[id].is_running = 1;
+		luat_camera_app.is_work = 1;
+
+	}
 	if (luat_camera_app.scan_mode)
 	{
 		luat_rtos_event_send(luat_camera_app.task_handle, LUAT_CAMERA_EVENT_START, 0, 0, 0, 0);
 	}
-	if (!g_s_camera[id].is_running)
+	else
 	{
-		CSPI_Rx(luat_camera_app.camera_id, NULL, luat_camera_app.config.sensor_width, luat_camera_app.config.sensor_width, luat_camera_irq_callback, id);
-		g_s_camera[id].is_running = 1;
+		luat_rtos_event_send(luat_camera_app.task_handle, LUAT_CAMERA_EVENT_FRAME_NEW, 0, 0, 0, 0);
 	}
 #else
 	return -1;
@@ -341,6 +349,7 @@ int luat_camera_close(int id)
 	luat_camera_app.p_cache[0] = NULL;
 	luat_camera_app.p_cache[1] = NULL;
 	OS_DeInitBuffer(&luat_camera_app.result_buffer);
+	luat_camera_app.is_work = 0;
 #endif
 	return 0;
 
@@ -366,9 +375,26 @@ static void luat_camera_task(void *param)
     uint8_t *file_data;
     uint8_t *p_cache;
     uint32_t i,j,k;
+    int result;
 	while(1)
 	{
-		luat_rtos_event_recv(luat_camera_app.task_handle, 0, &event, NULL, LUAT_WAIT_FOREVER);
+		if (luat_camera_app.is_work)
+		{
+			result = luat_rtos_event_recv(luat_camera_app.task_handle, 0, &event, NULL, 1000);
+			if (result && luat_camera_app.is_work)
+			{
+		        msg.handler = l_camera_handler;
+		        msg.ptr = NULL;
+		        msg.arg1 = 0;
+		        msg.arg2 = 0;
+		        luat_msgbus_put(&msg, 1);
+				continue;
+			}
+		}
+		else
+		{
+			luat_rtos_event_recv(luat_camera_app.task_handle, 0, &event, NULL, LUAT_WAIT_FOREVER);
+		}
 		switch(event.id)
 		{
 		case LUAT_CAMERA_EVENT_FRAME_QRDECODE:
@@ -428,7 +454,7 @@ static void luat_camera_task(void *param)
 				{
 					__zbuff_resize(luat_camera_app.buff, luat_camera_app.jpeg_data_point);
 				}
-				memcpy(luat_camera_app.buff, luat_camera_app.p_cache[1], luat_camera_app.jpeg_data_point);
+				memcpy(luat_camera_app.buff->addr, luat_camera_app.p_cache[1], luat_camera_app.jpeg_data_point);
 				luat_camera_app.buff->used = luat_camera_app.jpeg_data_point;
 			}
 			else
@@ -455,7 +481,7 @@ static void luat_camera_task(void *param)
 		        luat_msgbus_put(&msg, 1);
 			}
 			luat_camera_app.is_process_image = 0;
-
+			luat_camera_app.capture_stage = 0;
 			break;
 		case LUAT_CAMERA_EVENT_FRAME_NEW:
 			break;
@@ -504,6 +530,10 @@ int luat_camera_capture_in_ram(int id, uint8_t quality, void *buffer)
 		luat_camera_app.capture_stage = 1;
 		return 0;
 	}
+	else
+	{
+		DBG("device busy!");
+	}
 	return -1;
 }
 
@@ -525,6 +555,10 @@ int luat_camera_capture(int id, uint8_t quality, const char *path)
 		}
 		luat_camera_app.capture_stage = 1;
 		return 0;
+	}
+	else
+	{
+		DBG("device busy!");
 	}
 	return -1;
 }
@@ -550,7 +584,7 @@ int luat_camera_work_mode(id, mode)
 
 int luat_camera_preview(int id, uint8_t on_off)
 {
-	luat_camera_app.config.lcd_conf = luat_lcd_get_default();
+	luat_camera_app.config.lcd_conf = l_lcd_get_default_conf();
 	if (luat_camera_app.config.lcd_conf)
 	{
 		if (!on_off)
@@ -573,13 +607,12 @@ int luat_camera_preview(int id, uint8_t on_off)
 		}
 		if ((luat_camera_app.config.sensor_width == luat_camera_app.config.lcd_conf->w) && (luat_camera_app.config.sensor_height == luat_camera_app.config.lcd_conf->h))
 		{
-			DBG("full lcd show");
 			luat_lcd_show_camera_in_service(&luat_camera_app.config, 0, 0, 0);
 		}
 		else
 		{
 			uint16_t x,y;
-			camera_cut_info_t cut = {0, 0, 0, 0, 0, 0};
+			camera_cut_info_t cut = {0};
 			if (luat_camera_app.config.sensor_width >= luat_camera_app.config.lcd_conf->w)
 			{
 				x = 0;
@@ -600,8 +633,8 @@ int luat_camera_preview(int id, uint8_t on_off)
 			{
 				y = (luat_camera_app.config.lcd_conf->h - luat_camera_app.config.sensor_height) >> 1;
 			}
-			DBG("lcd show %d,%d,%d,%d,%d,%d",x,y,cut.top_cut_lines,cut.bottom_cut_lines,cut.left_cut_lines,cut.right_cut_lines);
-			luat_lcd_show_camera_in_service(&luat_camera_app.config, &cut, 0, 0);
+			//DBG("%d,%d,%d,%d,%d,%d",x,y,cut.top_cut_lines,cut.bottom_cut_lines,cut.left_cut_lines,cut.right_cut_lines);
+			luat_lcd_show_camera_in_service(&luat_camera_app.config, &cut, x, y);
 		}
 		luat_camera_app.preview_on_off = 1;
 		return 0;
@@ -619,7 +652,6 @@ int luat_camera_get_raw_start(int id, int w, int h, uint8_t *data, uint32_t max_
 	luat_camera_app.raw_buffer = data;
 	luat_camera_app.raw_mode = 1;
 	luat_camera_app.capture_stage = 1;
-	DBG("cap");
 	return 0;
 }
 int luat_camera_get_raw_again(int id)
@@ -628,7 +660,6 @@ int luat_camera_get_raw_again(int id)
 	if (!g_s_camera[id].is_init || !g_s_camera[id].is_running || luat_camera_app.scan_mode || luat_camera_app.capture_stage || luat_camera_app.is_process_image || !luat_camera_app.raw_buffer) return -ERROR_OPERATION_FAILED;
 	luat_camera_app.raw_mode = 1;
 	luat_camera_app.capture_stage = 1;
-	DBG("cap");
 	return 0;
 }
 #else

@@ -463,4 +463,10 @@
 
 #endif
 
+#ifdef LUAT_USE_CAMERA
+#ifndef LUAT_USE_LCD_CUSTOM_DRAW
+#define LUAT_USE_LCD_SERVICE
+#endif
+#endif
+
 #endif

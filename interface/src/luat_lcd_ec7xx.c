@@ -120,7 +120,6 @@ static void prvLCD_Task(void* params)
 			}
 			else
 			{
-
 				luat_lcd_set_address(lcd, x1, y1, x1+lcd->w-1, y1+lcd->h-1);
 				LSPI_StartCameraPreview(USP_ID2, camera->sensor_width, camera->sensor_height,
 						lcd->w, lcd->h, 0, 0, 0, 0, 0, 0);
@@ -492,4 +491,12 @@ static void lcd_service_task_init(void)
 	luat_lcd_service_init(60);
 }
 INIT_TASK_EXPORT(lcd_service_task_init, "1");
+#else
+#ifdef LUAT_USE_LCD_SERVICE
+static void lcd_service_task_init(void)
+{
+	luat_lcd_service_init(90);
+}
+INIT_TASK_EXPORT(lcd_service_task_init, "1");
+#endif
 #endif
