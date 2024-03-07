@@ -78,7 +78,7 @@ enum
 	CAMERA_FRAME_START = USER_EVENT_ID_START,
 	CAMERA_FRAME_END,
 	CAMERA_FRAME_QR_DECODE,
-	CAMERA_FRAME_JPEG_ENCOE,
+	CAMERA_FRAME_JPEG_ENCODE,
 	CAMERA_FRAME_NEW,
 	CAMERA_FRAME_ERROR,
 	PIN_PRESS,
@@ -725,7 +725,7 @@ static int luat_camera_irq_callback(void *pdata, void *param)
 				g_s_camera_app.capture_stage = 2;
 				break;
 			case 2:
-				luat_rtos_event_send(g_s_task_handle, CAMERA_FRAME_JPEG_ENCOE, 0, 0, 0, 0);
+				luat_rtos_event_send(g_s_task_handle, CAMERA_FRAME_JPEG_ENCODE, 0, 0, 0, 0);
 				luat_camera_continue_with_buffer(CAMERA_SPI_ID, 0);	//摄像头数据发送到底层，不传递给用户
 				g_s_camera_app.is_process_image = 1;
 				break;
@@ -1071,7 +1071,7 @@ static void luat_camera_task(void *param)
 			LUAT_DEBUG_PRINT("解码开始 buf%d", event.param1);
 			luat_camera_image_decode_once(g_s_camera_app.p_cache[event.param1], g_s_camera_app.image_w, g_s_camera_app.image_h, 60, luat_image_decode_callback, event.param1);
 			break;
-		case CAMERA_FRAME_JPEG_ENCOE:
+		case CAMERA_FRAME_JPEG_ENCODE:
 			p_cache = g_s_camera_app.p_cache[0];
 			g_s_camera_app.jpeg_data_point = 0;
 			LUAT_DEBUG_PRINT("转JPEG开始 ");
