@@ -256,6 +256,7 @@
 #undef LUAT_USE_IOTAUTH
 #undef LUAT_USE_WEBSOCKET
 #undef LUAT_USE_FTP
+#undef LUAT_USE_CAMERA
 #endif
 
 //-------------------------------------------------------------------------------
