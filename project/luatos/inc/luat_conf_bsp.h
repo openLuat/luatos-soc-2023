@@ -315,7 +315,7 @@
 #define LUA_USE_VFS_FILENAME_OFFSET 1
 // //----------------------------------
 
-// #define LUAT_WS2812B_MAX_CNT	(8)
+#define LUAT_WS2812B_MAX_CNT	(8)
 
 #define LV_DISP_DEF_REFR_PERIOD 30
 #define LUAT_LV_DEBUG 0
