@@ -53,8 +53,8 @@
 //#define CAMERA_POWER_PIN_ALT 0
 //内部LDO就是VDD_EXT, 不需要单独控制
 
-//#define CAMERA_USE_BFXXXX
-#define CAMERA_USE_GC032A
+#define CAMERA_USE_BFXXXX
+//#define CAMERA_USE_GC032A
 
 #define BF30A2_I2C_ADDRESS	(0x6e)
 #define GC032A_I2C_ADDR		(0x21)
@@ -675,20 +675,15 @@ static int luat_camera_irq_callback(void *pdata, void *param)
 				luat_rtos_event_send(g_s_task_handle, CAMERA_FRAME_NEW, cur_cache, 0, 0, 0);
 				return 0;
 			}
-			else
+			if (g_s_camera_app.double_buffer_mode)
 			{
 				if (!g_s_camera_app.rx_to_user)
 				{
-					g_s_camera_app.rx_to_user = 1;
-					g_s_camera_app.cur_cache = 0;
-					luat_camera_continue_with_buffer(CAMERA_SPI_ID, g_s_camera_app.p_cache[0]);	//摄像头数据发送给用户
 					luat_rtos_event_send(g_s_task_handle, CAMERA_FRAME_NEW, cur_cache, 0, 0, 0);
+					luat_camera_continue_with_buffer(CAMERA_SPI_ID, g_s_camera_app.p_cache[0]);
+					g_s_camera_app.rx_to_user = 1;
 					return 0;
 				}
-
-			}
-			if (g_s_camera_app.double_buffer_mode)
-			{
 				//双缓冲模式下，扫码时允许1个解码，另一个接收数据
 				if (!g_s_camera_app.is_process_image)
 				{
@@ -744,7 +739,7 @@ static int luat_camera_irq_callback(void *pdata, void *param)
 		}
 		break;
 	case LUAT_CAMERA_FRAME_ERROR:
-		luat_camera_continue_with_buffer(CAMERA_SPI_ID, g_s_camera_app.p_cache[g_s_camera_app.cur_cache]);
+		luat_rtos_event_send(g_s_task_handle, CAMERA_FRAME_ERROR, 0, 0, 0, 0);
 		break;
 	}
 	return 0;

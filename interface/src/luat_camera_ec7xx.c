@@ -54,16 +54,19 @@ typedef struct
 {
 	luat_spi_camera_t config;
 	luat_rtos_task_handle task_handle;
+	Buffer_Struct result_buffer;
 	void *p_cache[2];
 	uint32_t jpeg_data_point;
-	Buffer_Struct result_buffer;
-	uint8_t cur_cache;					//双buffer运行时的当前的buffer
-	uint8_t is_process_image;			//是否真正进行图像处理
-	uint8_t is_rx_running;				//接收运行中
-	uint8_t process_while_rx_enable;	//小分辨率的摄像头允许接收和图像处理同时进行
+	uint16_t image_w;
+	uint16_t image_h;
+	uint8_t cur_cache;
+	uint8_t is_process_image;
+	uint8_t double_buffer_mode;
+	uint8_t rx_to_user;				//单缓冲区时，当前是否在接收数据到用户区
 	uint8_t scan_mode;					//扫码模式
-	uint8_t capture_mode;				//拍照模式
 	uint8_t raw_mode;					//原始图像模式
+	uint8_t capture_stage;				//拍照流程
+	uint8_t scan_pause;				//扫码暂停
 	uint8_t camera_id;
 }luat_camera_app_t;
 
@@ -101,61 +104,41 @@ static int luat_camera_irq_callback(void *pdata, void *param)
 	uint8_t cur_cache = luat_camera_app.cur_cache;
 	switch ((uint32_t)pdata)
 	{
-//	case LUAT_CAMERA_FRAME_START:
-//		luat_rtos_event_send(luat_camera_app.task_handle, LUAT_CAMERA_EVENT_FRAME_START, 0, 0, 0, 0);
-//		break;
-	case LUAT_CAMERA_FRAME_END:
-		if (!luat_camera_app.is_rx_running)
-		{
-
-		}
-		if (luat_camera_app.process_while_rx_enable)
-		{
-
-		}
-
-		if (luat_camera_app.scan_mode)
-		{
-			if (luat_camera_app.process_while_rx_enable)
-			{
-				if (!luat_camera_app.is_process_image)
-				{
-					luat_camera_app.is_process_image = 1;
-					luat_rtos_event_send(luat_camera_app.task_handle, LUAT_CAMERA_EVENT_FRAME_QRDECODE, cur_cache, 0, 0, 0);
-					luat_camera_app.cur_cache = !luat_camera_app.cur_cache;
-					luat_camera_continue_with_buffer(luat_camera_app.camera_id, luat_camera_app.p_cache[luat_camera_app.cur_cache]);
-				}
-				else
-				{
-					luat_camera_continue_with_buffer(luat_camera_app.camera_id, luat_camera_app.p_cache[luat_camera_app.cur_cache]);
-				}
-			}
-			else
-			{
-				if (!luat_camera_app.is_rx_running && !luat_camera_app.is_process_image)
-				{
-					luat_camera_app.is_rx_running = 1;
-					luat_camera_continue_with_buffer(luat_camera_app.camera_id, NULL);
-				}
-			}
-		}
-		else if (luat_camera_app.capture_mode)
-		{
-			if (!luat_camera_app.is_rx_running && !luat_camera_app.is_process_image)
-			{
-				luat_camera_app.capture_mode = 0;
-				luat_camera_app.is_rx_running = 1;
-				luat_camera_continue_with_buffer(luat_camera_app.camera_id, NULL);
-			}
-		}
-
-
-		break;
 	case LUAT_CAMERA_FRAME_RX_DONE:
 		if (luat_camera_app.scan_mode)
 		{
-			if (luat_camera_app.process_while_rx_enable)
+			if (luat_camera_app.scan_pause)
 			{
+				if (luat_camera_app.rx_to_user)
+				{
+					luat_camera_app.rx_to_user = 0;
+					luat_camera_continue_with_buffer(luat_camera_app.camera_id, 0);	//摄像头数据发送到底层，不传递给用户
+				}
+				luat_rtos_event_send(luat_camera_app.task_handle, LUAT_CAMERA_EVENT_FRAME_NEW, cur_cache, 0, 0, 0);
+				return 0;
+			}
+			else
+			{
+				if (!luat_camera_app.rx_to_user)
+				{
+					luat_camera_app.rx_to_user = 1;
+					luat_camera_app.cur_cache = 0;
+					luat_camera_continue_with_buffer(luat_camera_app.camera_id, luat_camera_app.p_cache[0]);	//摄像头数据发送给用户
+					luat_rtos_event_send(luat_camera_app.task_handle, LUAT_CAMERA_EVENT_FRAME_NEW, cur_cache, 0, 0, 0);
+					return 0;
+				}
+
+			}
+			if (luat_camera_app.double_buffer_mode)
+			{
+				if (!luat_camera_app.rx_to_user)
+				{
+					luat_rtos_event_send(luat_camera_app.task_handle, LUAT_CAMERA_EVENT_FRAME_NEW, 0, 0, 0, 0);
+					luat_camera_continue_with_buffer(luat_camera_app.camera_id, luat_camera_app.p_cache[0]);
+					luat_camera_app.rx_to_user = 1;
+					return 0;
+				}
+				//双缓冲模式下，扫码时允许1个解码，另一个接收数据
 				if (!luat_camera_app.is_process_image)
 				{
 					luat_camera_app.is_process_image = 1;
@@ -172,31 +155,45 @@ static int luat_camera_irq_callback(void *pdata, void *param)
 			{
 				if (!luat_camera_app.is_process_image)
 				{
-					luat_camera_app.is_process_image = 1;
-					luat_camera_app.is_rx_running = 0;
-					luat_rtos_event_send(luat_camera_app.task_handle, LUAT_CAMERA_EVENT_FRAME_QRDECODE, 0, 0, 0, 0);
+					if (luat_camera_app.rx_to_user)	//本次接收数据在用户区，则开始解码，并停止传递给用户区
+					{
+						luat_rtos_event_send(luat_camera_app.task_handle, LUAT_CAMERA_EVENT_FRAME_QRDECODE, 0, 0, 0, 0);
+						luat_camera_continue_with_buffer(luat_camera_app.camera_id, 0);	//摄像头数据发送到底层，不传递给用户
+						luat_camera_app.rx_to_user = 0;
+						luat_camera_app.is_process_image = 1;
+					}
+					else	//本次接收数据不在用户区，则开始传递新的图像数据到用户区
+					{
+						luat_camera_continue_with_buffer(luat_camera_app.camera_id, luat_camera_app.p_cache[0]);
+						luat_camera_app.rx_to_user = 1;
+					}
 				}
 			}
 		}
-		else if (luat_camera_app.capture_mode)
+		else if (luat_camera_app.capture_stage && !luat_camera_app.is_process_image)
 		{
-			luat_camera_app.is_process_image = 1;
-			luat_camera_app.is_rx_running = 0;
-			luat_rtos_event_send(luat_camera_app.task_handle, LUAT_CAMERA_EVENT_FRAME_JPEG_ENCODE, luat_camera_app.cur_cache, 0, 0, 0);
+			switch (luat_camera_app.capture_stage)
+			{
+			case 1:
+				luat_camera_continue_with_buffer(luat_camera_app.camera_id, luat_camera_app.p_cache[0]);
+				luat_camera_app.capture_stage = 2;
+				break;
+			case 2:
+				luat_rtos_event_send(luat_camera_app.task_handle, LUAT_CAMERA_EVENT_FRAME_JPEG_ENCODE, 0, 0, 0, 0);
+				luat_camera_continue_with_buffer(luat_camera_app.camera_id, 0);	//摄像头数据发送到底层，不传递给用户
+				luat_camera_app.is_process_image = 1;
+				break;
+			default:
+				break;
+			}
 		}
 		else
 		{
-			luat_camera_app.cur_cache = !luat_camera_app.cur_cache;
-			luat_camera_continue_with_buffer(luat_camera_app.camera_id, luat_camera_app.p_cache[luat_camera_app.cur_cache]);
-			luat_rtos_event_send(luat_camera_app.task_handle, LUAT_CAMERA_EVENT_FRAME_END, cur_cache, 0, 0, 0);
+			luat_rtos_event_send(luat_camera_app.task_handle, LUAT_CAMERA_EVENT_FRAME_NEW, cur_cache, 0, 0, 0);
 		}
-
-
 		break;
-
 	case LUAT_CAMERA_FRAME_ERROR:
-		luat_rtos_event_send(luat_camera_app.task_handle, LUAT_CAMERA_EVENT_FRAME_ERROR, 0, 0, 0, 0);
-		luat_camera_continue_with_buffer(luat_camera_app.camera_id, NULL);
+		luat_rtos_event_send(luat_camera_app.task_handle, LUAT_CAMERA_EVENT_FRAME_ERROR, cur_cache, 0, 0, 0);
 		break;
 	}
 	return 0;
@@ -247,7 +244,7 @@ int luat_camera_setup(int id, luat_spi_camera_t *conf, void * callback, void *pa
 	luat_camera_app.config = *conf;
 	g_s_camera[id].callback = luat_camera_irq_callback;
 	g_s_camera[id].param = NULL;
-	luat_camera_app.process_while_rx_enable = ((conf->sensor_width * conf->sensor_height) <= 80000 );
+	luat_camera_app.double_buffer_mode = ((conf->sensor_width * conf->sensor_height) <= 80000 );
 	luat_camera_app.p_cache[0] = luat_heap_opt_malloc(LUAT_HEAP_PSRAM, luat_camera_app.config.sensor_width * luat_camera_app.config.sensor_height * 2);
 	luat_camera_app.p_cache[1] = luat_heap_opt_malloc(LUAT_HEAP_PSRAM, luat_camera_app.config.sensor_width * luat_camera_app.config.sensor_height * 2);
 #endif
