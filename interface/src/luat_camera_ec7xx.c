@@ -308,26 +308,16 @@ void luat_camera_continue_with_buffer(int id, void *buf)
 
 int luat_camera_stop(int id)
 {
-	if (id < 0 || id >= USP_ID2) return -1;
-	if (!g_s_camera[id].is_init || !g_s_camera[id].is_running) return -ERROR_OPERATION_FAILED;
-	CSPI_RxStop(id);
-	g_s_camera[id].is_running = 0;
-	return 0;
+#ifdef __LUATOS__
+
+#else
+	return -1;
+#endif
 }
 
 int luat_camera_pause(int id, uint8_t is_pause)
 {
-	if (id < 0 || id >= USP_ID2) return -1;
-	if (is_pause)
-	{
-		XIC_DisableIRQ(id?PXIC0_USP1_IRQn:PXIC0_USP0_IRQn);
-	}
-	else
-	{
-		XIC_EnableIRQ(id?PXIC0_USP1_IRQn:PXIC0_USP0_IRQn);
-		XIC_SuppressOvfIRQ(id?PXIC0_USP1_IRQn:PXIC0_USP0_IRQn);
-	}
-	return 0;
+	return -1;
 }
 
 int luat_camera_close(int id)

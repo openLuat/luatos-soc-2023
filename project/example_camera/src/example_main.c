@@ -27,6 +27,7 @@
  * 根据实际需要开启相关功能
  * 扫码由于PSRAM的硬件限制，8W可以双buffer，30W只能单buffer
  * demo只有2种模式，扫码或者拍照，均默认启用预览，拍照时按下BOOT键启动一次照片并通过USB/UART上传
+ * 扫码demo下，按下BOOT键启动/停止扫码
  */
 
 #include "common_api.h"
@@ -40,7 +41,7 @@
 #include "luat_lcd.h"
 #include "mem_map.h"
 
-//#define CAMERA_TEST_QRCODE			//扫码
+#define CAMERA_TEST_QRCODE			//扫码
 #define LCD_ENABLE						//默认均开启LCD预览
 #define USB_UART_ENABLE
 
@@ -80,6 +81,7 @@ enum
 	CAMERA_FRAME_JPEG_ENCOE,
 	CAMERA_FRAME_NEW,
 	CAMERA_FRAME_ERROR,
+	PIN_PRESS,
 };
 
 typedef struct
@@ -96,6 +98,7 @@ typedef struct
 	uint8_t scan_mode;					//扫码模式
 	uint8_t raw_mode;					//原始图像模式
 	uint8_t capture_stage;				//拍照流程
+	uint8_t scan_pause;				//扫码暂停
 	uint8_t camera_id;
 }luat_camera_app_t;
 
@@ -604,8 +607,8 @@ static luat_lcd_conf_t lcd_conf = {
 static void lcd_camera_start_run(void)
 {
 	g_s_camera_app.cur_cache = 0;
-	g_s_camera_app.rx_to_user = g_s_camera_app.scan_mode;
-	luat_camera_start_with_buffer(CAMERA_SPI_ID, g_s_camera_app.scan_mode?g_s_camera_app.p_cache[0]:NULL);
+	g_s_camera_app.rx_to_user = 0;
+	luat_camera_start_with_buffer(CAMERA_SPI_ID, NULL);
 
 }
 
@@ -662,6 +665,28 @@ static int luat_camera_irq_callback(void *pdata, void *param)
 	case LUAT_CAMERA_FRAME_RX_DONE:
 		if (g_s_camera_app.scan_mode)
 		{
+			if (g_s_camera_app.scan_pause)
+			{
+				if (g_s_camera_app.rx_to_user)
+				{
+					g_s_camera_app.rx_to_user = 0;
+					luat_camera_continue_with_buffer(CAMERA_SPI_ID, 0);	//摄像头数据发送到底层，不传递给用户
+				}
+				luat_rtos_event_send(g_s_task_handle, CAMERA_FRAME_NEW, cur_cache, 0, 0, 0);
+				return 0;
+			}
+			else
+			{
+				if (!g_s_camera_app.rx_to_user)
+				{
+					g_s_camera_app.rx_to_user = 1;
+					g_s_camera_app.cur_cache = 0;
+					luat_camera_continue_with_buffer(CAMERA_SPI_ID, g_s_camera_app.p_cache[0]);	//摄像头数据发送给用户
+					luat_rtos_event_send(g_s_task_handle, CAMERA_FRAME_NEW, cur_cache, 0, 0, 0);
+					return 0;
+				}
+
+			}
 			if (g_s_camera_app.double_buffer_mode)
 			{
 				//双缓冲模式下，扫码时允许1个解码，另一个接收数据
@@ -819,14 +844,7 @@ static int luat_bfxxxx_init(void)
 #ifdef PSRAM_EXIST
     g_s_camera_app.p_cache[0] = luat_heap_opt_malloc(LUAT_HEAP_PSRAM, g_s_camera_app.image_w * g_s_camera_app.image_h * 2);
     g_s_camera_app.p_cache[1] = luat_heap_opt_malloc(LUAT_HEAP_PSRAM, g_s_camera_app.image_w * g_s_camera_app.image_h * 2);
-#ifdef CAMERA_TEST_QRCODE
-    void *stack = malloc(220 * 1024);
-    LUAT_DEBUG_PRINT("ram use %x,%x,%x",g_s_camera_app.p_cache[0], g_s_camera_app.p_cache[1], stack);
-    LUAT_DEBUG_PRINT("decoder init %d", luat_camera_image_decode_init(0, stack, 220 * 1024, 30));
-
-#else
     LUAT_DEBUG_PRINT("psram use %x,%x",g_s_camera_app.p_cache[0], g_s_camera_app.p_cache[1]);
-#endif
 #else
     while(1)
     {
@@ -919,18 +937,9 @@ static int luat_gc032a_init(void)
 	g_s_camera_app.image_h = 480;
 	luat_camera_set_image_w_h(CAMERA_SPI_ID, g_s_camera_app.image_w, g_s_camera_app.image_h);
 #ifdef PSRAM_EXIST
-
     g_s_camera_app.p_cache[0] = luat_heap_opt_malloc(LUAT_HEAP_PSRAM, g_s_camera_app.image_w * g_s_camera_app.image_h * 2);
     g_s_camera_app.p_cache[1] = luat_heap_opt_malloc(LUAT_HEAP_PSRAM, g_s_camera_app.image_w * g_s_camera_app.image_h * 2);
-
-
-#ifdef CAMERA_TEST_QRCODE
-    void *stack = luat_heap_opt_malloc(LUAT_HEAP_PSRAM, 250 * 1024);
-    LUAT_DEBUG_PRINT("ram use %x,%x,%x",g_s_camera_app.p_cache[0], g_s_camera_app.p_cache[1], stack);
-    LUAT_DEBUG_PRINT("decoder init %d", luat_camera_image_decode_init(0, stack, 250 * 1024, 30));
-#else
     LUAT_DEBUG_PRINT("psram use %x,%x",g_s_camera_app.p_cache[0], g_s_camera_app.p_cache[1]);
-#endif
 #else
     while(1)
     {
@@ -964,16 +973,21 @@ static void luat_camera_save_JPEG_data(void *cxt, void *data, int size)
 }
 int gpio_level_irq(void *data, void* args)
 {
-	DBG("!");
+
 	if (!g_s_camera_app.scan_mode && !g_s_camera_app.capture_stage && !g_s_camera_app.is_process_image)
 	{
 		g_s_camera_app.capture_stage = 1;
+	}
+	else if (g_s_camera_app.scan_mode)
+	{
+		luat_rtos_event_send(g_s_task_handle, PIN_PRESS, 0, 0, 0, 0);
 	}
 }
 
 static void luat_camera_task(void *param)
 {
 	luat_event_t event;
+	void *stack = NULL;
 	uint32_t all,now_used_block,max_used_block;
 	luat_debug_set_fault_mode(LUAT_DEBUG_FAULT_HANG);
 #ifdef LCD_ENABLE
@@ -1006,6 +1020,8 @@ static void luat_camera_task(void *param)
 #endif
 #ifdef CAMERA_TEST_QRCODE
     g_s_camera_app.scan_mode = 1;
+    g_s_camera_app.scan_pause = 1;
+    LUAT_DEBUG_PRINT("按下boot开始扫码");
 #else
     LUAT_DEBUG_PRINT("按下boot拍照");
 #endif
@@ -1057,7 +1073,7 @@ static void luat_camera_task(void *param)
 		case CAMERA_FRAME_NEW:
 			break;
 		case CAMERA_FRAME_QR_DECODE:
-			//LUAT_DEBUG_PRINT("解码开始 buf%d", event.param1);
+			LUAT_DEBUG_PRINT("解码开始 buf%d", event.param1);
 			luat_camera_image_decode_once(g_s_camera_app.p_cache[event.param1], g_s_camera_app.image_w, g_s_camera_app.image_h, 60, luat_image_decode_callback, event.param1);
 			break;
 		case CAMERA_FRAME_JPEG_ENCOE:
@@ -1098,9 +1114,36 @@ static void luat_camera_task(void *param)
 			luat_rtos_task_sleep(1000);
 			g_s_camera_app.is_process_image = 0;
 			g_s_camera_app.capture_stage = 0;
-			luat_meminfo_sys(&all, &now_used_block, &max_used_block);
-			LUAT_DEBUG_PRINT("meminfo %d,%d,%d",all,now_used_block,max_used_block);
+			luat_meminfo_opt_sys(LUAT_HEAP_SRAM, &all, &now_used_block, &max_used_block);
+			LUAT_DEBUG_PRINT("sram %d,%d,%d",all,now_used_block,max_used_block);
+			luat_meminfo_opt_sys(LUAT_HEAP_PSRAM, &all, &now_used_block, &max_used_block);
+			LUAT_DEBUG_PRINT("prsam %d,%d,%d",all,now_used_block,max_used_block);
 			LUAT_DEBUG_PRINT("按下boot拍照");
+			break;
+		case PIN_PRESS:
+			if (g_s_camera_app.scan_pause)
+			{
+				stack = luat_heap_opt_malloc(LUAT_HEAP_AUTO, 250 * 1024);
+				luat_camera_image_decode_init(0, stack, 250 * 1024, 10);
+				LUAT_DEBUG_PRINT("扫码启动完成，按下boot关闭扫码");
+				g_s_camera_app.scan_pause = 0;
+				luat_meminfo_opt_sys(LUAT_HEAP_SRAM, &all, &now_used_block, &max_used_block);
+				LUAT_DEBUG_PRINT("sram %d,%d,%d",all,now_used_block,max_used_block);
+				luat_meminfo_opt_sys(LUAT_HEAP_PSRAM, &all, &now_used_block, &max_used_block);
+				LUAT_DEBUG_PRINT("prsam %d,%d,%d",all,now_used_block,max_used_block);
+			}
+			else
+			{
+				LUAT_DEBUG_PRINT("开始关闭扫码");
+				luat_camera_image_decode_deinit();
+				luat_heap_free(stack);
+				g_s_camera_app.scan_pause = 1;
+				LUAT_DEBUG_PRINT("关闭扫码完成，按下boot启动扫码");
+				luat_meminfo_opt_sys(LUAT_HEAP_SRAM, &all, &now_used_block, &max_used_block);
+				LUAT_DEBUG_PRINT("sram %d,%d,%d",all,now_used_block,max_used_block);
+				luat_meminfo_opt_sys(LUAT_HEAP_PSRAM, &all, &now_used_block, &max_used_block);
+				LUAT_DEBUG_PRINT("prsam %d,%d,%d",all,now_used_block,max_used_block);
+			}
 			break;
 		case CAMERA_FRAME_ERROR:
 			LUAT_DEBUG_PRINT("camera spi error!");
