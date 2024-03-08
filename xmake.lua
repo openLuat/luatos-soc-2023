@@ -5,7 +5,7 @@ add_rules("mode.debug", "mode.release")
 set_defaultmode("debug")
 
 LUATOS_ROOT = "$(projectdir)/../LuatOS"
-LUAT_BSP_VERSION = "V1001"
+LUAT_BSP_VERSION = "V1002"
 USER_PROJECT_NAME = "example"
 chip_target = nil
 project_dir = nil
