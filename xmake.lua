@@ -50,13 +50,17 @@ set_optimize("smallest")
 -- 获取项目名称
 if os.getenv("PROJECT_NAME") then
 	USER_PROJECT_NAME = os.getenv("PROJECT_NAME")
+    set_values("project_name", os.getenv("PROJECT_NAME"))
 end
 
 if os.getenv("PROJECT_DIR") then
     project_dir = os.getenv("PROJECT_DIR")
+    set_values("project_dir", project_dir)
     USER_PROJECT_NAME = project_dir:match(".+[/\\]([%w_]+)")
+    set_values("project_name", USER_PROJECT_NAME)
 else 
     project_dir = os.curdir().."/project/"..USER_PROJECT_NAME
+    set_values("project_dir", project_dir)
 end
 
 option("chip_target")
@@ -227,12 +231,10 @@ add_includedirs("$(projectdir)/PLAT/device/target/board/common/ARMCM3/inc",
                 "$(projectdir)/PLAT/prebuild/PS/inc",
                 "$(projectdir)/PLAT/prebuild/PLAT/inc")
 
-local USER_PROJECT_NAME = USER_PROJECT_NAME
-local project_dir = project_dir
 on_load(function (target)
     local chip_target = get_config("chip_target")
     assert (chip_target == "ec718e" or chip_target == "ec718p" or chip_target == "ec718pv" or chip_target == "ec718s" or chip_target == "ec716s" ,"target only support ec718e/ec718p/ec718pv/ec718s/ec716s")
-    for _, filepath in ipairs(os.files(project_dir.."/**/mem_map_7xx.h")) do
+    for _, filepath in ipairs(os.files(target:values("project_dir").."/**/mem_map_7xx.h")) do
         if path.filename(filepath) == "mem_map_7xx.h" then
             target:add("defines", "__USER_MAP_CONF_FILE__=\"mem_map_7xx.h\"")
             target:add("includedirs", path.directory(filepath))

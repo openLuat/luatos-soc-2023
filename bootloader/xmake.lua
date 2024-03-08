@@ -1,7 +1,5 @@
 
 local SDK_PATH = os.projectdir()
-local USER_PROJECT_NAME = USER_PROJECT_NAME
-local project_dir = project_dir
 local LIB_PS_PLAT = nil
 if has_config("chip_target") and has_config("lspd_mode") and has_config("denoise_force") then 
     chip_target = get_config("chip_target") 
@@ -125,7 +123,7 @@ target("ap_bootloader.elf")
         for _, define_flasg in pairs(target:get("defines")) do
             table.insert(ld_parameter,"-D" .. define_flasg)
             if define_flasg == "__USER_MAP_CONF_FILE__=\"mem_map_7xx.h\"" then
-                for _, filepath in ipairs(os.files(project_dir.."/**/mem_map_7xx.h")) do
+                for _, filepath in ipairs(os.files(target:values("project_dir").."/**/mem_map_7xx.h")) do
                     if path.filename(filepath) == "mem_map_7xx.h" then
                         user_mem_map = {"-I",path.directory(filepath)}
                         break

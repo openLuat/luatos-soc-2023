@@ -1,7 +1,5 @@
 local SDK_PATH = os.projectdir()
 local CHIP = CHIP
-local USER_PROJECT_NAME = USER_PROJECT_NAME
-local project_dir = project_dir
 local LIB_PS_PLAT = nil
 local LIB_FW
 
@@ -267,7 +265,7 @@ target(USER_PROJECT_NAME..".elf")
     add_ldflags("-T$(projectdir)/PLAT/core/ld/ec7xx_0h00_flash.ld","-Wl,-Map,$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME.."_$(mode).map",{force = true})
     
     before_link(function(target)
-        out_path = SDK_PATH .. "/out/" ..USER_PROJECT_NAME
+        out_path = SDK_PATH .. "/out/" ..target:values("project_name")
 		if not os.exists(out_path) then
 			os.mkdir(SDK_PATH .. "/out/")
 			os.mkdir(out_path)
@@ -293,7 +291,7 @@ target(USER_PROJECT_NAME..".elf")
         for _, define_flasg in pairs(target:get("defines")) do
             table.insert(ld_parameter,"-D" .. define_flasg)
             if define_flasg == "__USER_MAP_CONF_FILE__=\"mem_map_7xx.h\"" then
-                for _, filepath in ipairs(os.files(project_dir.."/**/mem_map_7xx.h")) do
+                for _, filepath in ipairs(os.files(target:values("project_dir").."/**/mem_map_7xx.h")) do
                     if path.filename(filepath) == "mem_map_7xx.h" then
                         user_mem_map = {"-I",path.directory(filepath)}
                         break
@@ -305,6 +303,7 @@ target(USER_PROJECT_NAME..".elf")
     end)
 
 	after_build(function(target)
+        local project_name = target:values("project_name")
         local mem_parameter = {}
         for _, cx_flasg in pairs(target:get("cxflags")) do
             table.insert(mem_parameter,cx_flasg)
@@ -314,42 +313,41 @@ target(USER_PROJECT_NAME..".elf")
             table.insert(mem_parameter,"-I" .. includedirs_flasg)
         end
         os.execv(toolchains .. "/arm-none-eabi-gcc",table.join(mem_parameter, {"-o",out_path .. "/mem_map.txt","-"}),{stdin = SDK_PATH .. "/PLAT/device/target/board/ec7xx_0h00/common/inc/mem_map.h"})
-        os.cp(out_path .. "/mem_map.txt", "$(buildir)/"..USER_PROJECT_NAME.."/mem_map.txt")
-		-- io.writefile("$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".list", os.iorun(toolchains .. "/arm-none-eabi-objdump -h -S $(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".elf"))
-        -- io.writefile("$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".size", os.iorun(toolchains .. "/arm-none-eabi-size $(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".elf"))
-		os.exec(toolchains .. "/arm-none-eabi-objcopy -O binary $(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".elf $(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".bin")
-		os.exec(toolchains .."/arm-none-eabi-size $(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".elf")
-        os.cp("$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".bin", "$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME.."_unZip.bin")
+        os.cp(out_path .. "/mem_map.txt", "$(buildir)/"..project_name.."/mem_map.txt")
+		
+        os.exec(toolchains .. "/arm-none-eabi-objcopy -O binary $(buildir)/"..project_name.."/"..project_name..".elf $(buildir)/"..project_name.."/"..project_name..".bin")
+		os.exec(toolchains .."/arm-none-eabi-size $(buildir)/"..project_name.."/"..project_name..".elf")
+        os.cp("$(buildir)/"..project_name.."/"..project_name..".bin", "$(buildir)/"..project_name.."/"..project_name.."_unZip.bin")
 
-        io.writefile("$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".size", os.iorun(toolchains .. "/arm-none-eabi-objdump -h $(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".elf"))
-        local size_file = io.open("$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".size", "a")
-        size_file:write(os.iorun(toolchains .. "/arm-none-eabi-size -G $(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME..".elf"))
+        io.writefile("$(buildir)/"..project_name.."/"..project_name..".size", os.iorun(toolchains .. "/arm-none-eabi-objdump -h $(buildir)/"..project_name.."/"..project_name..".elf"))
+        local size_file = io.open("$(buildir)/"..project_name.."/"..project_name..".size", "a")
+        size_file:write(os.iorun(toolchains .. "/arm-none-eabi-size -G $(buildir)/"..project_name.."/"..project_name..".elf"))
         size_file:write(os.iorun(toolchains .. "/arm-none-eabi-size -t -G $(buildir)/csdk/libcsdk.a"))
-        size_file:write(os.iorun(toolchains .. "/arm-none-eabi-size -t -G $(buildir)/"..USER_PROJECT_NAME.."/lib"..USER_PROJECT_NAME..".a"))
+        size_file:write(os.iorun(toolchains .. "/arm-none-eabi-size -t -G $(buildir)/"..project_name.."/lib"..project_name..".a"))
         for _, filepath in ipairs(os.files("$(projectdir)/PLAT/libs/"..(chip_target=="ec718e"and"ec718p"or chip_target).."/*.a")) do
             size_file:write(os.iorun(toolchains .. "/arm-none-eabi-size -t -G " .. filepath))
         end
         size_file:close()
 
 
-        os.exec((is_plat("windows") and "./PLAT/tools/fcelf.exe " or "./PLAT/tools/fcelf ").."-C -bin ".."$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME.."_unZip.bin".. " -cfg ".. SDK_PATH .. "/PLAT/device/target/board/ec7xx_0h00/ap/gcc/sectionInfo_"..(chip_target=="ec718e"and"ec718p"or chip_target):sub(1,6)..".json".. " -map ".."$(buildir)/"..USER_PROJECT_NAME.."/"..USER_PROJECT_NAME.. "_debug.map".." -out ".."$(buildir)/"..USER_PROJECT_NAME.."/" .. USER_PROJECT_NAME .. ".bin")
+        os.exec((is_plat("windows") and "./PLAT/tools/fcelf.exe " or "./PLAT/tools/fcelf ").."-C -bin ".."$(buildir)/"..project_name.."/"..project_name.."_unZip.bin".. " -cfg ".. SDK_PATH .. "/PLAT/device/target/board/ec7xx_0h00/ap/gcc/sectionInfo_"..(chip_target=="ec718e"and"ec718p"or chip_target):sub(1,6)..".json".. " -map ".."$(buildir)/"..project_name.."/"..project_name.. "_debug.map".." -out ".."$(buildir)/"..project_name.."/" .. project_name .. ".bin")
 
-        os.cp("$(buildir)/"..USER_PROJECT_NAME.."/*.bin", out_path)
-		os.cp("$(buildir)/"..USER_PROJECT_NAME.."/*.map", out_path)
-		os.cp("$(buildir)/"..USER_PROJECT_NAME.."/*.elf", out_path)
+        os.cp("$(buildir)/"..project_name.."/*.bin", out_path)
+		os.cp("$(buildir)/"..project_name.."/*.map", out_path)
+		os.cp("$(buildir)/"..project_name.."/*.elf", out_path)
 		os.cp("./PLAT/tools/"..(chip_target=="ec718e"and"ec718p"or chip_target)..(LIB_PS_PLAT=="mid"and"-mid"or"").."/comdb.txt", out_path)
-        os.cp("$(buildir)/"..USER_PROJECT_NAME.."/" .. USER_PROJECT_NAME .. ".bin", "$(buildir)/"..USER_PROJECT_NAME.."/ap.bin")
+        os.cp("$(buildir)/"..project_name.."/" .. project_name .. ".bin", "$(buildir)/"..project_name.."/ap.bin")
         ---------------------------------------------------------
         -------------- 这部分尚不能跨平台 -------------------------
         local binpkg = (is_plat("windows") and "./PLAT/tools/fcelf.exe " or "./PLAT/tools/fcelf ")..
                         "-M -input ./build/ap_bootloader/ap_bootloader.bin -addrname BL_PKGIMG_LNA -flashsize BOOTLOADER_PKGIMG_LIMIT_SIZE \
-                        -input $(buildir)/"..USER_PROJECT_NAME.."/ap.bin -addrname AP_PKGIMG_LNA -flashsize AP_PKGIMG_LIMIT_SIZE \
+                        -input $(buildir)/"..project_name.."/ap.bin -addrname AP_PKGIMG_LNA -flashsize AP_PKGIMG_LIMIT_SIZE \
                         -input ./PLAT/prebuild/FW/lib/gcc/"..(chip_target=="ec718e"and"ec718p"or chip_target):sub(1,6).."/"..LIB_FW.."/cp-demo-flash.bin -addrname CP_PKGIMG_LNA -flashsize CP_PKGIMG_LIMIT_SIZE \
                         -pkgmode 1 \
                         -banoldtool 1 \
                         -productname "..(chip_target=="ec718e"and"ec718p"or chip_target):sub(1,6):upper().."_PRD \
                         -def "..out_path .. "/mem_map.txt \
-                        -outfile " .. out_path.."/"..USER_PROJECT_NAME..".binpkg"
+                        -outfile " .. out_path.."/"..project_name..".binpkg"
 
         -- 如果所在平台没有fcelf, 可注释掉下面的行, 没有binpkg生成. 
         -- 仍可使用其他工具继续刷机
@@ -368,9 +366,9 @@ target(USER_PROJECT_NAME..".elf")
         end
         os.cp("tools/pack/", out_path)
         local info_table = json.loadfile(out_path.."/pack/info.json")
-        info_table["rom"]["file"] = USER_PROJECT_NAME..".binpkg"
+        info_table["rom"]["file"] = project_name..".binpkg"
 
-        if USER_PROJECT_NAME == 'luatos' then
+        if project_name == 'luatos' then
             local LUAT_BSP_VERSION = ""
             local conf_data = io.readfile("$(projectdir)/project/luatos/inc/luat_conf_bsp.h")
             for _, define_flasg in pairs(target:get("defines")) do
@@ -379,7 +377,7 @@ target(USER_PROJECT_NAME..".elf")
                 end
             end
             local VM_64BIT = conf_data:find("\r#define LUAT_CONF_VM_64bit") or conf_data:find("\n#define LUAT_CONF_VM_64bit")
-            local mem_map_data = io.readfile("$(buildir)/"..USER_PROJECT_NAME.."/mem_map.txt")
+            local mem_map_data = io.readfile("$(buildir)/"..project_name.."/mem_map.txt")
             local FLASH_FOTA_REGION_START = tonumber(mem_map_data:match("#define FLASH_FOTA_REGION_START%s+%((%g+)%)"))
             local FLASH_FOTA_REGION_END = tonumber(mem_map_data:match("#define FLASH_FOTA_REGION_END%s+%((%g+)%)"))
             local FLASH_FS_REGION_START = tonumber(mem_map_data:match("#define FLASH_FS_REGION_START%s+%((%g+)%)"))
@@ -423,43 +421,43 @@ target(USER_PROJECT_NAME..".elf")
                 info_table["fota"]["fota_len"] = fota_len
             end
             json.savefile(out_path.."/pack/info.json", info_table)
-            os.cp(out_path.."/"..USER_PROJECT_NAME..".binpkg", out_path.."/pack")
-            os.cp(out_path.."/"..USER_PROJECT_NAME..".elf", out_path.."/pack")
-            os.cp(out_path.."/"..USER_PROJECT_NAME.."*.map", out_path.."/pack")
+            os.cp(out_path.."/"..project_name..".binpkg", out_path.."/pack")
+            os.cp(out_path.."/"..project_name..".elf", out_path.."/pack")
+            os.cp(out_path.."/"..project_name.."*.map", out_path.."/pack")
             os.cp(out_path.."/comdb.txt", out_path.."/pack")
             os.cp(out_path.."/mem_map.txt", out_path.."/pack")
             os.cp("$(projectdir)/project/luatos/inc/luat_conf_bsp.h", out_path.."/pack")
-            local ret = archive.archive(out_path.."/"..USER_PROJECT_NAME..".7z", out_path.."/pack/*",options)
+            local ret = archive.archive(out_path.."/"..project_name..".7z", out_path.."/pack/*",options)
             if not ret then
                 print("pls install p7zip-full in linux/mac.")
                 return
             end
-            local ret = archive.archive(out_path.."/"..USER_PROJECT_NAME..".7z", out_path.."/pack/*",options)
+            local ret = archive.archive(out_path.."/"..project_name..".7z", out_path.."/pack/*",options)
             if not ret then
                 print("pls install p7zip-full in linux/mac.")
                 return
             end
-            os.mv(out_path.."/"..USER_PROJECT_NAME..".7z", out_path.."/LuatOS-SoC_"..LUAT_BSP_VERSION.."_".. chip_target:upper() ..".soc")
+            os.mv(out_path.."/"..project_name..".7z", out_path.."/LuatOS-SoC_"..LUAT_BSP_VERSION.."_".. chip_target:upper() ..".soc")
             os.rm(out_path.."/pack")
         else 
             json.savefile(out_path.."/pack/info.json", info_table)
-            os.cp(out_path.."/"..USER_PROJECT_NAME..".binpkg", out_path.."/pack")
-            os.cp(out_path.."/"..USER_PROJECT_NAME..".elf", out_path.."/pack")
-            os.cp(out_path.."/"..USER_PROJECT_NAME.."*.map", out_path.."/pack")
+            os.cp(out_path.."/"..project_name..".binpkg", out_path.."/pack")
+            os.cp(out_path.."/"..project_name..".elf", out_path.."/pack")
+            os.cp(out_path.."/"..project_name.."*.map", out_path.."/pack")
             os.cp(out_path.."/comdb.txt", out_path.."/pack")
             os.cp(out_path.."/mem_map.txt", out_path.."/pack")
-            local ret = archive.archive(out_path.."/"..USER_PROJECT_NAME..".7z", out_path.."/pack/*",options)
+            local ret = archive.archive(out_path.."/"..project_name..".7z", out_path.."/pack/*",options)
             if not ret then
                 print("pls install p7zip-full in linux/mac , or 7zip in windows.")
                 return
             end
-            os.mv(out_path.."/"..USER_PROJECT_NAME..".7z", out_path.."/"..USER_PROJECT_NAME.."_".. chip_target ..".soc")
+            os.mv(out_path.."/"..project_name..".7z", out_path.."/"..project_name.."_".. chip_target ..".soc")
             os.rm(out_path.."/pack")
         end
         -- 计算差分包大小, 需要把老的binpkg放在根目录,且命名为old.binpkg
         if os.exists("old.binpkg") then
             os.cp("./PLAT/tools/fcelf.exe", "tools/dtools/dep/fcelf.exe")
-            os.cp(out_path.."/"..USER_PROJECT_NAME..".binpkg", "tools/dtools/new.binpkg")
+            os.cp(out_path.."/"..project_name..".binpkg", "tools/dtools/new.binpkg")
             os.cp("old.binpkg", "tools/dtools/old.binpkg")
             os.exec("tools\\dtools\\run.bat BINPKG delta.par old.binpkg new.binpkg")
         end
