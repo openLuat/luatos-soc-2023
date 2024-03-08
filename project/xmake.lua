@@ -1,5 +1,4 @@
 local SDK_PATH = os.projectdir()
-local CHIP = CHIP
 local LIB_PS_PLAT = nil
 local LIB_FW
 
