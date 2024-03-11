@@ -41,6 +41,7 @@ typedef struct my_body {
 }my_body_t;
 
 static luat_rtos_task_handle g_s_task_handle;
+static luat_gpio_cfg_t key_fun_struct;
 
 enum
 {
@@ -262,27 +263,28 @@ static void luat_test_http_sync_task(void *param)
 	my_body_t my_resp = {0};
 	my_resp.data = bodyBuf;
 	my_resp.limit = BODY_BUFF_SIZE;
+	char imei[20] = {0};
+	luat_mobile_get_imei(0, imei, 20);
 
 	// 准备好要发送的数据
 	cJSON *root;
 	cJSON *fmt;
-	root = cJSON_CreateObject();
-	cJSON_AddStringToObject(root, "msg", "来电信息上传成功");
-	cJSON_AddNumberToObject(root, "code", 0);
-	cJSON_AddStringToObject(root, "data", "");
-	cJSON_AddStringToObject(root, "serverTime", "1710126839305");
-
-	my_req.data = cJSON_Print(root);
-	my_req.len = strlen(my_req.data);
-			
-	LUAT_DEBUG_PRINT("目标URL %s", url);
-	LUAT_DEBUG_PRINT("发送数据 %s", my_req.data);
 
 	while (1)
 	{
 		// 这里的逻辑是, 要么等60秒, 要么GPIO触发
 		rc = luat_rtos_event_recv(g_s_task_handle, 0, &event, NULL, 60*1000);
 		if (rc != 0 || event.id == TEST_GPIO_IRQ) {
+			
+			root = cJSON_CreateObject();
+			cJSON_AddStringToObject(root, "serialNumber", imei);
+			cJSON_AddNumberToObject(root, "hasElectric", rc == 0 ? luat_gpio_get(key_fun_struct.pin) : event.param1);
+
+			my_req.data = cJSON_Print(root);
+			my_req.len = strlen(my_req.data);
+			
+			LUAT_DEBUG_PRINT("目标URL %s", url);
+			LUAT_DEBUG_PRINT("发送数据 %s", my_req.data);
 			int result = luat_test_http_get_sync(url, &my_req, &my_resp);
 			if(!result)
 			{
@@ -292,6 +294,8 @@ static void luat_test_http_sync_task(void *param)
 			{
 				LUAT_DEBUG_PRINT("http sync get fail");
 			}
+			cJSON_free(root);
+			luat_heap_free(my_req.data);
 		}
 	}
 	luat_heap_free(bodyBuf);
@@ -309,19 +313,20 @@ void gpio_level_irq(void *data, void* args)
 	}
 	last_irq = now;
 	int pin = (int)data;
-	LUAT_DEBUG_PRINT("pin:%d, level:%d,", pin, luat_gpio_get(pin));
-	luat_rtos_event_send(g_s_task_handle, TEST_GPIO_IRQ, 0, 0, 0, 0);
+	int level = luat_gpio_get(pin);
+	LUAT_DEBUG_PRINT("pin:%d, level:%d,", pin, level);
+	luat_rtos_event_send(g_s_task_handle, TEST_GPIO_IRQ, level, 0, 0, 0);
 }
 
 void key_init(void)
 {
-    luat_gpio_cfg_t key_fun_struct;
+    
     luat_gpio_set_default_cfg(&key_fun_struct);
 	#ifdef CHIP_EC716
     key_fun_struct.pin=HAL_GPIO_8;
 	// key_fun_struct.alt_fun=4;
 	#else
-    key_fun_struct.pin=HAL_GPIO_18;
+    key_fun_struct.pin=HAL_GPIO_8;
 	#endif
     key_fun_struct.pull=Luat_GPIO_PULLUP;
     key_fun_struct.mode=Luat_GPIO_IRQ;
