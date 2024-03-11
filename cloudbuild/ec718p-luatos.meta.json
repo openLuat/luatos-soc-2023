@@ -166,6 +166,13 @@
                         "fsize": 289364,
                         "dft": true
                     },
+					{
+                        "name": "camera",
+                        "content": "摄像头(预览/拍照/扫码)",
+                        "rsize": 5528,
+                        "fsize": 131070,
+                        "dft": true
+                    },
                     {
                         "name": "pm",
                         "content": "电源功耗管理,休眠模式控制,定时唤醒",
