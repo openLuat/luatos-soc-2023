@@ -42,6 +42,7 @@ extern "C" {
  *----------------------------------------------------------------------------*/
 typedef void (*i2sToneCbFunc)(void*);
 typedef void (*i2sHangupCbFunc)(void*);
+typedef void (*i2sStopPlayCbFunc)(void*);
 
 /******************************************************************************
  *****************************************************************************
@@ -91,12 +92,18 @@ typedef struct
 
 typedef struct
 {
+    // internal use, not used by IMS/APP
     uint8_t  toneType;
-    uint16_t playDua;
-    uint16_t stopDua;
-    uint8_t  ptrOffset;
-    uint8_t  *ptr; // when use ptr, should use ptr+ptrOffset, it points to the current memory
-}AudioCombineTone_t;
+    uint8_t  toneTrunkIndex; // if toneSrc is not 20ms len, will use trunkIndex and trunkNum
+    uint8_t  toneTrunkNum;
+    uint8_t  *toneSrcAddr;
+}AudioCombineToneInter_t;
+
+typedef enum
+{
+    APP_DONE    = 0,
+    APP_WORKING = 1
+}AudioAppState_e;
 
 #define    CODEC_VAL_SET    (0)
 #define    CODEC_VAL_GET    (1)
@@ -115,7 +122,7 @@ int32_t audioDataOutputEx(uint8_t audioCid, DlPduBlock_t *dlpdu, void *extras);
 void audioFreeRecordBuf(void *ulpdu);
 
 /*----------------------------------------------------------------------------*
- *                    GLOBAL FUNCTIONS DECLEARATION                           *
+ *                    GLOBAL FUNCTIONS DECLEARATION : called by IMS                         *
  *----------------------------------------------------------------------------*/
 
 /**
@@ -180,17 +187,38 @@ void audioStartPlaySound(uint8_t type, uint8_t *pSpeechBuf, uint16_t speechBufSi
 */
 void audioStopPlaySound(uint8_t type);
 
+
+void audioGetToneDuration(uint8_t toneType, uint16_t *pPlayDuration, uint16_t *pStopDuration);
+
 /**
-  \fn          audioRegisterToneCb
-  \brief       This api should register cb in play tone in order to trigger app task to start decode mp3 or others
-  \             For example:
-  \                  startDecode = 1; // trigger app to decode
-  \                  status = osMessageQueuePut(gMsgqHandle, (const void*)&startDecode,  0, 0);
-  \                  EC_ASSERT(status == osOK, status, 0, 0);
-  \param[in]   i2sToneCbFunc cb, app ab 
-  \returns     null
+  \fn          audioAllocateToneMem
+  \brief       This api allocates tone mem, can be called by every 20ms. This mem will also by accessed by cp.
+  \param[in]      uint8_t toneType,        tone type.
+  \param[in]      uint8_t sampleRate,     samplerate. 1: 8k; 2: 16k.
+  \param[out]   uint8_t** pToneData,     outPtr, will points to the global val "gToneCombine.ptr".
+  \returns     int
 */
-void audioRegisterToneCb(i2sToneCbFunc cb);
+int32_t audioAllocateToneMem(uint8_t toneType, uint8_t sampleRate, uint8_t **pToneData);
+
+/**
+  \fn          audioFreeToneMem
+  \brief      free the malloced mem, and clear the global val "gToneCombine".
+  \returns     int
+*/
+int32_t audioFreeToneMem();
+
+
+
+/*----------------------------------------------------------------------------*
+ *                    GLOBAL FUNCTIONS DECLEARATION : called by app                         *
+ *----------------------------------------------------------------------------*/
+ 
+/**
+  \fn          audioFastInit
+  \brief      Just used for AT commands.
+*/
+void audioFastInit();
+
 
 /**
   \fn          audioAppStartPlaySound
@@ -216,7 +244,47 @@ int audioAppStartRecord(uint8_t codecType);
   \brief      This api is like audioStopRecordVoice in functional, but can only be used by app recoder.
 */
 int audioAppStopRecord(uint8_t codecType);
-void audioFastInit();
+
+
+/**
+  \fn          audioRegisterToneCb
+  \brief       This api should register cb in play tone in order to trigger app task to start decode mp3 or others
+  \             For example:
+  \                  startDecode = 1; // trigger app to decode
+  \                  status = osMessageQueuePut(gMsgqHandle, (const void*)&startDecode,  0, 0);
+  \                  EC_ASSERT(status == osOK, status, 0, 0);
+  \param[in]   i2sToneCbFunc cb, app ab 
+  \returns     null
+*/
+void audioRegisterToneCb(i2sToneCbFunc cb);
+
+
+/**
+  \fn          audioRegisterHangCb
+  \brief      Called by app, app send msg to ccio.
+  \param[in]      uint8_t state,        app state.
+  \returns     int
+*/
+void audioRegisterHangCb(i2sHangupCbFunc cb);
+
+
+/**
+  \fn          audioRegisterStopPlayCb
+  \brief      Called by app, app send msg to ccio.
+  \param[in]      uint8_t state,        app state.
+  \returns     int
+*/
+void audioRegisterStopPlayCb(i2sStopPlayCbFunc cb);
+
+
+/**
+  \fn          audioApp2Ccio
+  \brief      Called by app, app send msg to ccio.
+  \param[in]      uint8_t state,        app state.  0: done;   1: undone;
+  \returns     int
+*/
+int32_t audioMsgApp2Ccio(uint8_t state);
+
 
 
 #ifdef __cplusplus

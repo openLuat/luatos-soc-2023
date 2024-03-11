@@ -234,9 +234,11 @@ void halI2sConfig(I2sParamCtrl_t paramCtrl)
 
         case FRAME_SIZE_24_32:
             // I2S controller part
-            i2sDataFmt.slotSize     = 0x1f;
+            i2sDataFmt.slotSize     = 0x17;
             i2sDataFmt.wordSize     = 0x17;
-            i2sBclkFsCtrl.fsWidth   = 0x1f;
+            i2sBclkFsCtrl.fsWidth   = 0x17;
+            i2sDataFmt.txPack       = 0;
+            i2sDataFmt.rxPack       = 0;
 
             break;
 

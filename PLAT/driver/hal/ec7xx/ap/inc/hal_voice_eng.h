@@ -320,6 +320,9 @@ void halVoiceDecodeReq(HalVoiceDecodeReq *pDecReq);
 typedef void (*HalVoiceEngRetCallback)(UINT32 retMsgId, void *pRetMsg);
 void halSetVoiceEngRetCallback(HalVoiceEngRetCallback voiceEngRetCallback);
 
+BOOL halIsAppSetVoiceEngRetCallback(void);
+BOOL halIsImsSetVoiceEngRetCallback(void);
+
 /*
 * set/allocate voice call record memory for one frame, called by APP (voice record) task
 */

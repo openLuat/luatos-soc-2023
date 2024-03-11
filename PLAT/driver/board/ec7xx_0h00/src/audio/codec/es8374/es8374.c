@@ -125,8 +125,32 @@ static uint8_t es8374ReadReg(uint8_t regAddr)
     return codecI2cRead(ES8374_IICADDR, regAddr);
 }
 
+// enable pa power
+void es8374EnablePA(bool enable)
+{
+    DEBUG_PRINT(UNILOG_PLA_DRIVER, es8374EnablePA, P_DEBUG, "[ES8374] es8374EnablePA: enable=%d", enable);
+
+#if 0
+	if (enable)
+	{
+		es8374WriteReg(ES8374_REG_1E, 0x20);	// spk on
+		delay_us(1000);
+		es8374WriteReg(ES8374_REG_1E, 0xa0);	// spk on
+	}
+	else
+	{
+		es8374WriteReg(ES8374_REG_1E, 0x20);
+		delay_us(1000);
+		es8374WriteReg(ES8374_REG_1C, 0x10);
+		es8374WriteReg(ES8374_REG_1D, 0x10);
+		es8374WriteReg(ES8374_REG_1E, 0x40);	// spk off
+	}
+#endif
+}
+
+
 // set es8374 into suspend mode
-static void es8374Standby(uint8_t* dacVolB, uint8_t* adcVolB)//待机配置--搭配es8374AllResume(void)//恢复配置
+ void es8374Standby(uint8_t* dacVolB, uint8_t* adcVolB)//待机配置--搭配es8374AllResume(void)//恢复配置
 {
     *dacVolB = es8374ReadReg(ES8374_REG_38);
     *adcVolB = es8374ReadReg(ES8374_REG_25);
@@ -154,8 +178,9 @@ static void es8374Standby(uint8_t* dacVolB, uint8_t* adcVolB)//待机配置--搭
     DEBUG_PRINT(UNILOG_PLA_DRIVER, es8374Standby, P_DEBUG, "[ES8374] es8374Standby: dacVolB=%d, adcVolB=%d", *dacVolB, *adcVolB);
 }
 
+#if 1
 // set es8374 ADC into suspend mode
-static void es8374AdcStandby(uint8_t* adcVolB)//ADC待机配置--搭配es8374AdcResume
+ void es8374AdcStandby(uint8_t* adcVolB)//ADC待机配置--搭配es8374AdcResume
 {
     *adcVolB = es8374ReadReg(ES8374_REG_25);
 
@@ -169,11 +194,10 @@ static void es8374AdcStandby(uint8_t* adcVolB)//ADC待机配置--搭配es8374Adc
     es8374WriteReg(ES8374_REG_15, 0x0C);
     es8374WriteReg(ES8374_REG_01, 0x75);
 
-    DEBUG_PRINT(UNILOG_PLA_DRIVER, es8374AdcStandby, P_DEBUG, "[ES8374] es8374AdcStandby: adcVolB=%d", *adcVolB);
 }
 
 // set es8374 DAC into suspend mode
-static void es8374DacStandby(uint8_t* dacVolB)//DAC待机配置--搭配es8374DacResume
+ void es8374DacStandby(uint8_t* dacVolB)//DAC待机配置--搭配es8374DacResume
 {
     *dacVolB = es8374ReadReg(ES8374_REG_38);
 
@@ -184,46 +208,20 @@ static void es8374DacStandby(uint8_t* dacVolB)//DAC待机配置--搭配es8374Dac
     es8374WriteReg(ES8374_REG_6D, 0x00);
     es8374WriteReg(ES8374_REG_09, 0x80);
     es8374WriteReg(ES8374_REG_1A, 0x08);
-    es8374WriteReg(ES8374_REG_1C, 0x10);
-    es8374WriteReg(ES8374_REG_1D, 0x10);
+	es8374WriteReg(ES8374_REG_1E, 0x20);
+	delay_us(1000);
+	es8374WriteReg(ES8374_REG_1C, 0x10);
+	es8374WriteReg(ES8374_REG_1D, 0x10);
+	//es8374WriteReg(ES8374_REG_1E, 0x40);	// spk off
     es8374WriteReg(ES8374_REG_15, 0x62);
     es8374WriteReg(ES8374_REG_01, 0x7A);
 
-    DEBUG_PRINT(UNILOG_PLA_DRIVER, es8374DacStandby, P_DEBUG, "[ES8374] es8374DacStandby: dacVolB=%d", *dacVolB);
 }
-
-// set es8374 into resume mode
-static HalCodecSts_e es8374AllResume(void)//恢复配置(未下电)--搭配es8374Standby(void)
-{
-    DEBUG_PRINT(UNILOG_PLA_DRIVER, es8374AllResume, P_DEBUG, "[ES8374] es8374AllResume: dacVolBak=%d, adcVolBak=%d", dacVolBak, adcVolBak);
-
-    es8374WriteReg(ES8374_REG_01, 0x7F);
-    es8374WriteReg(ES8374_REG_14, 0x8A + (MICBIASOFF << 4));
-    es8374WriteReg(ES8374_REG_15, 0x00);
-    es8374WriteReg(ES8374_REG_21, 0x50);
-    es8374WriteReg(ES8374_REG_22, ADC_PGA_GAIN + (ADC_PGA_GAIN << 4));
-    es8374WriteReg(ES8374_REG_21, (adcInput << 4) + (ADC_PGA_DF2SE_15DB << 2));
-    es8374WriteReg(ES8374_REG_24, 0x08 + (DMIC_GAIN << 7) + DMIC_SELON);
-    es8374EnablePA(true);
-    es8374WriteReg(ES8374_REG_1D, VDDSPK_VOLTAGE);
-    es8374WriteReg(ES8374_REG_1C, 0x90);
-    es8374WriteReg(ES8374_REG_1A, 0xA0);
-    es8374WriteReg(ES8374_REG_09, 0x41);
-    es8374WriteReg(ES8374_REG_6D, 0x60);
-    es8374WriteReg(ES8374_REG_37, 0x00);
-    es8374WriteReg(ES8374_REG_36, (dacOutput << 6));
-    es8374WriteReg(ES8374_REG_28, 0x00);
-    es8374WriteReg(ES8374_REG_15, 0x40);
-    es8374WriteReg(ES8374_REG_38, dacVolBak);
-    es8374WriteReg(ES8374_REG_25, adcVolBak);
-
-    return CODEC_EOK;
-}
-
+#endif
+#if 1
 // set es8374 adc into resume mode
 static HalCodecSts_e es8374AdcResume(void)//ADC恢复配置--搭配es8374AdcStandby
 {
-    DEBUG_PRINT(UNILOG_PLA_DRIVER, es8374AdcResume, P_DEBUG, "[ES8374] es8374AdcResume: adcVolBak=%d", adcVolBak);
 
     es8374WriteReg(ES8374_REG_01, 0x7F);
     es8374WriteReg(ES8374_REG_15, 0x00);
@@ -240,11 +238,13 @@ static HalCodecSts_e es8374AdcResume(void)//ADC恢复配置--搭配es8374AdcStan
 // set es8374 dac into resume mode
 static HalCodecSts_e es8374DacResume(void)//DAC恢复配置--搭配es8374DacStandby
 {
-    DEBUG_PRINT(UNILOG_PLA_DRIVER, es8374DacResume, P_DEBUG, "[ES8374] es8374DacResume: dacVolBak=%d", dacVolBak);
 
     es8374WriteReg(ES8374_REG_01, 0x7F);
     es8374WriteReg(ES8374_REG_15, 0x00);
     es8374WriteReg(ES8374_REG_21, 0x50);
+	es8374WriteReg(ES8374_REG_1E, 0x20);	// spk on
+	delay_us(1000);
+	es8374WriteReg(ES8374_REG_1E, 0xa0);	// spk on
     es8374WriteReg(ES8374_REG_1D, VDDSPK_VOLTAGE);
     es8374WriteReg(ES8374_REG_1C, 0x90);
     es8374WriteReg(ES8374_REG_1A, 0xA0);
@@ -257,6 +257,40 @@ static HalCodecSts_e es8374DacResume(void)//DAC恢复配置--搭配es8374DacStan
 
     return CODEC_EOK;
 }
+#endif
+
+
+// set es8374 into resume mode
+static HalCodecSts_e es8374AllResume(void)//恢复配置(未下电)--搭配es8374Standby(void)
+{
+    DEBUG_PRINT(UNILOG_PLA_DRIVER, es8374AllResume, P_DEBUG, "[ES8374] es8374AllResume: dacVolBak=%d, adcVolBak=%d", dacVolBak, adcVolBak);
+
+    es8374WriteReg(ES8374_REG_01, 0x7F);
+    es8374WriteReg(ES8374_REG_14, 0x8A + (MICBIASOFF << 4));
+    es8374WriteReg(ES8374_REG_15, 0x00);
+    es8374WriteReg(ES8374_REG_21, 0x50);
+    es8374WriteReg(ES8374_REG_22, ADC_PGA_GAIN + (ADC_PGA_GAIN << 4));
+    es8374WriteReg(ES8374_REG_21, (adcInput << 4) + (ADC_PGA_DF2SE_15DB << 2));
+    es8374WriteReg(ES8374_REG_24, 0x08 + (DMIC_GAIN << 7) + DMIC_SELON);
+	es8374WriteReg(ES8374_REG_1E, 0x20);	// spk on
+	delay_us(1000);
+	es8374WriteReg(ES8374_REG_1E, 0xa0);	// spk on
+    es8374WriteReg(ES8374_REG_1D, VDDSPK_VOLTAGE);
+    es8374WriteReg(ES8374_REG_1C, 0x90);
+    es8374WriteReg(ES8374_REG_1A, 0xA0);
+    es8374WriteReg(ES8374_REG_09, 0x41);
+    es8374WriteReg(ES8374_REG_6D, 0x60);
+    es8374WriteReg(ES8374_REG_37, 0x00);
+    es8374WriteReg(ES8374_REG_36, (dacOutput << 6));
+    es8374WriteReg(ES8374_REG_28, 0x00);
+    es8374WriteReg(ES8374_REG_15, 0x40);
+    es8374WriteReg(ES8374_REG_38, dacVolBak);
+    es8374WriteReg(ES8374_REG_25, adcVolBak);
+
+    return CODEC_EOK;
+}
+
+
 
 // set es8374 into powerdown mode
 static HalCodecSts_e es8374PwrDown(HalCodecModule_e mode)
@@ -292,15 +326,7 @@ static HalCodecSts_e es8374PwrDown(HalCodecModule_e mode)
  *                      GLOBAL FUNCTIONS                                      *
  *----------------------------------------------------------------------------*/
  
-// enable pa power
-void es8374EnablePA(bool enable)
-{
-    DEBUG_PRINT(UNILOG_PLA_DRIVER, es8374EnablePA, P_DEBUG, "[ES8374] es8374EnablePA: enable=%d", enable);
 
-    es8374WriteReg(ES8374_REG_1E, 0x20);                                                    // spk on
-    delay_us(1000);
-    es8374WriteReg(ES8374_REG_1E, ((enable == true) ? (0xA0 | PA_VOLUME_DEFAULT) : 0x40));  // spk on
-}
 
 HalCodecSts_e es8374Init(HalCodecCfg_t *codecCfg)
 {
@@ -394,7 +420,9 @@ HalCodecSts_e es8374Init(HalCodecCfg_t *codecCfg)
     es8374WriteReg(ES8374_REG_1D, VDDSPK_VOLTAGE);      //5V 0DB 8R=>1W
     es8374WriteReg(ES8374_REG_1F, 0x00);                // spk set
     es8374WriteReg(ES8374_REG_20, 0x00);                // spk set
-    es8374EnablePA(false);                              // spk on
+	es8374WriteReg(ES8374_REG_1E, 0x20);	// spk on
+	delay_us(1000);
+	es8374WriteReg(ES8374_REG_1E, 0xa0);	// spk on
     es8374WriteReg(ES8374_REG_28, 0x00);                // alc set
     es8374WriteReg(ES8374_REG_25, ADC_VOLUME_DEFAULT);  // ADCVOLUME  on
     es8374WriteReg(ES8374_REG_38, DAC_VOLUME_DEFAULT);  // DACVOLUMEL on
@@ -518,7 +546,7 @@ HalCodecSts_e es8374StartStop(HalCodecMode_e mode, HalCodecCtrlState_e ctrlState
             ret |= es8374Start(mode);
             if (isHasPA)
             {
-                es8374EnablePA(true);
+                //es8374EnablePA(true);
             }
             break;
         case CODEC_CTRL_STOP:
@@ -561,7 +589,7 @@ HalCodecSts_e es8374Stop(HalCodecModule_e mode)
             if (isHasPA)
             {
                 delay_us(2000);
-                es8374EnablePA(false);
+                //es8374EnablePA(false);
             }
             break;
 
@@ -584,14 +612,18 @@ HalCodecSts_e es8374Resume(HalCodecMode_e mode)
     switch(mode)
     {
         case CODEC_MODE_ENCODE:
+			//es8374AllResume();
+
             es8374AdcResume();
             break;
 
         case CODEC_MODE_DECODE:
+			//es8374AllResume();
+
             es8374DacResume();
             if (isHasPA)
             {
-                es8374EnablePA(true);
+                //es8374EnablePA(true);
             }
             break;
 

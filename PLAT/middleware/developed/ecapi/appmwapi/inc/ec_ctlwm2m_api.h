@@ -102,7 +102,7 @@ uint16_t ctiot_set_idauth_pm(char* idAuthStr);
 void ctiot_init_sleep_handler(void);
 void ctiot_disable_sleepmode(void);
 void ctiot_enable_sleepmode(void);
-void ctiot_clear_session(BOOL saveToNV);
+void ctiot_clear_session(BOOL inMainThread);
 
 void ct_send_loop_callback(ctiot_context_t* pContext);
 

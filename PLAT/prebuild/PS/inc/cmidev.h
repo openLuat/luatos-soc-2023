@@ -2204,7 +2204,8 @@ typedef enum CmiDevGetBasicCellInfoMode_Enum
                                          * don't need to acquire neighber cell SIB */
     CMI_DEV_GET_BASIC_CELL_ID,          /* search cell, including measure cell and acquire cell SIB1 to get cellID, PLMN,
                                          * and tac info */
-    CMI_DEV_GET_SAVED_BASIC_CELL_INFO
+    CMI_DEV_GET_SAVED_BASIC_CELL_INFO,
+    CMI_DEV_GET_BASIC_CELL_ID_HIGH_PRO  /* same as CMI_DEV_GET_BASIC_CELL_ID, with higher priority than PLMN search */
 }CmiDevGetBasicCellInfoMode;
 
 typedef enum CmiDevGetBasicCellInfoRptMode_Enum

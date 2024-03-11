@@ -181,8 +181,8 @@ typedef struct CcioDevice
     uint32_t waitCleanUlpcb:1;
     uint32_t codecType     :1;
     uint32_t i2sOwner      :3;
-    uint32_t isCodecInit   :1;
-    uint32_t rsvBits       :10;
+    uint32_t rsvBits       :11;
+    void    *semaId;            /* for sync, via driver  */
     void    *chent;             /* for fast accessing, via monitor */
 
     chdevOutFunc         chdevOutFn;     /* via driver */

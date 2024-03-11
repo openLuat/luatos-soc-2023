@@ -285,6 +285,7 @@ typedef struct {
     UINT8 secret[ONENET_PSK_LEN];
     UINT32 closeHandle;
     BOOL bPSKPortConfilict;
+    BOOL bEngineInit;
 } onenetContext;
 
 #define CIS_NVM_FILE_VERSION_3   3
@@ -349,6 +350,7 @@ onenetContext *onenetCreateInstance(void);
 onenetContext *onenetSearchInstance(UINT32 onenetId);
 onenetContext *onenetSearchCisContext(void *cis_context);
 onenetContext *onenetSearchCisInstance(UINT32 onenetId);
+void onenetWaitEngineInit(void);
 
 UINT32 onenetHexToBin(UINT8 *dest, UINT8 *source, UINT32 max_dest_len);
 void onenetDeleteInstance(onenetContext *onenet);
@@ -390,7 +392,8 @@ INT16 createConfigBuf(UINT32 onenetId, UINT8* buf, BOOL* bPSKPortConfilict);
 void cis_lifeTimeStart(uint32_t timeout_second);
 void cis_lifeTimeStop(void);
 bool cis_DeepSlpTimerHasExp(void);
-void cis_lifeTimeExpCallback(void);
+void cis_lifeTimeExpCallback(uint8_t id);
+void cis_deepSleepTimerCbRegister(void);
 #endif
 
 

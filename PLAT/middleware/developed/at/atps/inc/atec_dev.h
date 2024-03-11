@@ -309,7 +309,7 @@
 
 /*AT+ECBCINFO*/
 #define ATC_ECBCINFO_0_VAL_MIN                  0
-#define ATC_ECBCINFO_0_VAL_MAX                  2
+#define ATC_ECBCINFO_0_VAL_MAX                  3
 #define ATC_ECBCINFO_0_VAL_DEFAULT              0
 
 #define ATC_ECBCINFO_1_VAL_MIN                  4

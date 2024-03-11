@@ -23,7 +23,9 @@
 #define CTLWM2M_AUTO_UPDATE_THD (4*3600)
 #define CTLWM2M_AUTO_UPDATE_IN_ADVANCE (CTLWM2M_AUTO_UPDATE_THD*1/10)
 #define CTLWM2M_LIFETIMEOUT_ID	DEEPSLP_TIMER_ID5
-void ctlwm2m_lifeTimeExpCallback(void);
+void ctlwm2m_lifeTimeStart(uint32_t timeout_second);
+void ctlwm2m_lifeTimeStop(void);
+void ctiot_deepSleepTimerCbRegister(void);
 #endif
 
 #endif

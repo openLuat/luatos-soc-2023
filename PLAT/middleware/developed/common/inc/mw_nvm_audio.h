@@ -103,15 +103,15 @@ typedef struct AudioParaCfgCodec_Tag
 {
     UINT16  isDmic;                
     UINT16  isExPa;              
-    UINT16  exPaGain;
-    UINT16  txDigGain;
-    UINT16  txAnaGain;
-    UINT16  rxDigGain0;
-    UINT16  rxAnaGain0;
-    UINT16  rxDigGain50;
-    UINT16  rxAnaGain50;
-    UINT16  rxDigGain100;
-    UINT16  rxAnaGain100;
+    INT16  exPaGain;
+    INT16  txDigGain;
+    INT16  txAnaGain;
+    INT16  rxDigGain0;
+    INT16  rxAnaGain0;
+    INT16  rxDigGain50;
+    INT16  rxAnaGain50;
+    INT16  rxDigGain100;
+    INT16  rxAnaGain100;
 }AudioParaCfgCodec_t;
 
 typedef struct AudioParaCfgCodecDev_Tag
@@ -230,10 +230,10 @@ typedef struct AudioParaCfgLogControl_Tag
 {
     UINT8   logCtrlTxBeforeCcio;
     UINT8   logCtrlTxAfterCcio;
-    UINT8   logCtrlTxBeforeVem;	
+    UINT8   logCtrlTxBeforeVem; 
     UINT8   logCtrlTxAfterVem;
     UINT8   logCtrlTxAfterEncoder;
-	
+    
     UINT8   logCtrlRxBeforeDecoder;
     UINT8   logCtrlRxBeforeVem;
     UINT8   logCtrlRxAfterVem;
@@ -507,16 +507,16 @@ typedef enum AtcAudioTypeMapping_Tag
     AUDIO_CFG_TLV_SPEECH_RX_EQ_FILT_VALUE3 = 0x100C07,
     AUDIO_CFG_TLV_SPEECH_RX_EQ_BIQUARD     = 0x100C08,
 
-    AUDIO_CFG_TLV_LOG_CTRL_TX_BEFORE_CCIO	     = 0x100D00,
-    AUDIO_CFG_TLV_LOG_CTRL_TX_AFTER_CCIO	     = 0x100D01,
-    AUDIO_CFG_TLV_LOG_CTRL_TX_BEFORE_VEM 	     = 0x100D02,
-    AUDIO_CFG_TLV_LOG_CTRL_TX_AFTER_VEM          = 0x100D03,
-    AUDIO_CFG_TLV_LOG_CTRL_TX_AFTER_ENCODER 	 = 0x100D04,
-    AUDIO_CFG_TLV_LOG_CTRL_RX_BEFORE_DECODER     = 0x100D05,
-    AUDIO_CFG_TLV_LOG_CTRL_RX_BEFORE_VEM         = 0x100D06,
-    AUDIO_CFG_TLV_LOG_CTRL_RX_AFTER_VEM          = 0x100D07,
-    AUDIO_CFG_TLV_LOG_CTRL_RX_BEFORE_CCIO	     = 0x100D08,
-    AUDIO_CFG_TLV_LOG_CTRL_RX_AFTER_CCIO         = 0x100D09,
+	AUDIO_CFG_TLV_LOG_CTRL_TX_BEFORE_CCIO	     = 0x100D00,
+	AUDIO_CFG_TLV_LOG_CTRL_TX_AFTER_CCIO	     = 0x100D01,
+	AUDIO_CFG_TLV_LOG_CTRL_TX_BEFORE_VEM 	     = 0x100D02,
+	AUDIO_CFG_TLV_LOG_CTRL_TX_AFTER_VEM          = 0x100D03,
+	AUDIO_CFG_TLV_LOG_CTRL_TX_AFTER_ENCODER 	 = 0x100D04,
+	AUDIO_CFG_TLV_LOG_CTRL_RX_BEFORE_DECODER     = 0x100D05,
+	AUDIO_CFG_TLV_LOG_CTRL_RX_BEFORE_VEM         = 0x100D06,
+	AUDIO_CFG_TLV_LOG_CTRL_RX_AFTER_VEM          = 0x100D07,
+	AUDIO_CFG_TLV_LOG_CTRL_RX_BEFORE_CCIO	     = 0x100D08,
+	AUDIO_CFG_TLV_LOG_CTRL_RX_AFTER_CCIO         = 0x100D09,
 
 }AtcAudioTypeMap_e;
 
@@ -712,7 +712,7 @@ typedef struct EcAudioCfgTlvSphRxEQ_Tag
 }EcAudioCfgTlvSphRxEQ_t;
 
 typedef struct EcAudioCfgTlvLogCtrl_Tag
-{	
+{   
     EcAudioCfgTlvUint8Item_t   logCtrlTxBeforeCcio;
     EcAudioCfgTlvUint8Item_t   logCtrlTxAfterCcio;
     EcAudioCfgTlvUint8Item_t   logCtrlTxBeforeVem;

@@ -129,6 +129,7 @@ typedef struct
 CmsRetId fileOPEN(const AtCmdInputContext *pAtCmdReq);
 CmsRetId fileREAD(const AtCmdInputContext *pAtCmdReq);
 CmsRetId fileWRITE(const AtCmdInputContext *pAtCmdReq);
+CmsRetId fileWRITEHEX(const AtCmdInputContext *pAtCmdReq);
 CmsRetId fileWriteInputData(UINT8 chanId, UINT8 *pData, INT16 dataLength);
 CmsRetId fileWriteCancel(void);
 CmsRetId fileSEEK(const AtCmdInputContext *pAtCmdReq);

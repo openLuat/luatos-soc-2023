@@ -19,11 +19,6 @@
 #include "bsp_lpusart.h"
 #include "slpman.h"
 
-#ifdef __USER_CODE__
-#undef PLAT_PA_RAMCODE
-#define PLAT_PA_RAMCODE PLAT_FM_RAMCODE
-#endif
-
 #ifdef PM_FEATURE_ENABLE
 
 #include DEBUG_LOG_HEADER_FILE
@@ -1095,7 +1090,7 @@ int32_t LPUSART_Control(uint32_t control, uint32_t arg, LPUSART_RESOURCES *lpusa
 
         case ARM_USART_CONTROL_PURGE_COMM:
 
-            if(lpusart->core_regs->RXSR == 1)
+            //if(lpusart->core_regs->RXSR == 1)
             {
                 GPR_swReset(RST_LPUA);
             }
@@ -1298,8 +1293,7 @@ ARM_USART_MODEM_STATUS LPUSART_GetModemStatus(LPUSART_RESOURCES *lpusart)
 
     return status;
 }
-#ifdef __USER_CODE__
-#else
+
 void LPUSART_WakeupIntHandler(void)
 {
     slpManExtIntPreProcess(LpuartWakeup_IRQn);
@@ -1313,7 +1307,7 @@ void LPUSART_WakeupIntHandler(void)
     ECPLAT_PRINTF(UNILOG_PLA_DRIVER, lpuart_wakeup_irq, P_SIG, "ISR:0x%x, LSR:0x%x, FSR:0x%x", LPUSART_CORE->ISR, LPUSART_CORE->LSR, LPUSART_CORE->FSR);
 #endif
 }
-#endif
+
 PLAT_PA_RAMCODE void LPUSART_IRQHandler(LPUSART_RESOURCES *lpusart)
 {
 
@@ -1415,7 +1409,7 @@ IRQ_HANDLE:
             // Clear RX busy flag and set receive transfer complete event
             event |= ARM_USART_EVENT_RECEIVE_COMPLETE;
 
-            lpusart->core_regs->IER &= ~(LPUSART_RX_COMMON_IRQ_ENABLE_MASK);
+            lpusart->core_regs->IER &= ~(LPUSART_RX_COMMON_IRQ_ENABLE_MASK | USART_IER_RXFIFO_WL_Msk);
 
             info->rx_status.rx_busy = 0U;
         }

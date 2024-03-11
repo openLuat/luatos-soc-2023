@@ -707,6 +707,8 @@ HalCodecSts_e es8311SetBitsPerSample(HalCodecIfaceBits_e bits)
             adc_iface |= 0x0c;
             break;
         case CODEC_BIT_LENGTH_24BITS:
+            dac_iface &= ~0x1c;
+            adc_iface &= ~0x1c;
             break;
         case CODEC_BIT_LENGTH_32BITS:
             dac_iface |= 0x10;

@@ -79,7 +79,7 @@ typedef struct
     uint16_t  freeSize;
     bool      needPlayTone;
     bool      needCodecInitAgain;
-    bool      needRecord;
+    uint8_t   needRecord;
     bool      isStopRec;
     bool      isToneOn;
     bool      isInitDone;
@@ -135,7 +135,7 @@ int32_t i2sCreate(I2sDevConf_t *i2sConf);
 int32_t i2sDevRecv(uint8_t type, uint8_t isCodecNeedInit);
 int32_t i2sDevDeInit(bool isHangup);
 int32_t i2sDevPlay(CcioDevice_t *chdev);
-int32_t i2sStopHandle(uint8_t stopType);
+int32_t i2sStopHandle(uint8_t stopType, uint8_t audioType);
 
 
 /**
