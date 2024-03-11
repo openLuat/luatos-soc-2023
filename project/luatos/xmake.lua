@@ -7,6 +7,7 @@ target(TARGET_NAME)
     set_targetdir(LIB_DIR)
     -- set_warnings("error")
     local chip_target = get_config("chip_target")
+    local denoise_force = get_config("denoise_force")
     add_linkdirs("$(projectdir)/lib","$(projectdir)/PLAT/core/lib",{public = true})
     add_linkgroups("mp3", {whole = true,public = true})
     
@@ -22,8 +23,8 @@ target(TARGET_NAME)
         
         local conf_data = io.readfile("$(projectdir)/project/luatos/inc/luat_conf_bsp.h")
         local ap_load_add
-        if chip_target == "ec718p" then ap_load_add = "0x0007e000"  -- ec718p AP_FLASH_LOAD_ADDR
-        elseif chip_target == "ec718pv" then ap_load_add = "0x000Ba000" -- ec718pv AP_FLASH_LOAD_ADDR
+        if chip_target == "ec718p" and denoise_force == "enable" or chip_target == "ec718pv" then ap_load_add = "0x000Ba000" -- ec718pv AP_FLASH_LOAD_ADDR
+        elseif chip_target == "ec718p" then ap_load_add = "0x0007e000"  -- ec718p AP_FLASH_LOAD_ADDR
         end
         local FLASH_FOTA_REGION_START = 0x340000 -- ec718p/ec718pv FLASH_FOTA_REGION_START
         -- print("FLASH_FOTA_REGION_START",FLASH_FOTA_REGION_START)
