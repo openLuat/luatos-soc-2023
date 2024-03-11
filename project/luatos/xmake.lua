@@ -185,6 +185,9 @@ target(TARGET_NAME)
     add_includedirs(LUATOS_ROOT.."/components/multimedia/amr_decode/oscl",{public = true})
     add_includedirs(LUATOS_ROOT.."/components/multimedia/amr_decode/amr_nb/enc/src",{public = true})
     add_files(LUATOS_ROOT.."/components/multimedia/**.c")
+	if chip_target == "ec718p" and denoise_force == "enable" or chip_target == "ec718pv" then
+		remove_files(LUATOS_ROOT .. "/components/multimedia/amr_decode/**.c")
+	end
     -- network
     add_includedirs(LUATOS_ROOT .. "/components/ethernet/w5500", {public = true})
     add_files(LUATOS_ROOT .. "/components/ethernet/**.c")

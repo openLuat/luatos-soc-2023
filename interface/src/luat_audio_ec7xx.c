@@ -959,6 +959,70 @@ int luat_audio_inter_amr_decode(uint16_t *pcm_buf, const uint8_t *amr_buf, uint8
 	eng->wait_flag = 0;
 	return 0;
 }
+#ifdef __LUATOS__
+void* Decoder_Interface_init(void) {
+	return luat_audio_inter_amr_coder_init(0,7);
+}
+
+void Decoder_Interface_exit(void* state) {
+	luat_audio_inter_amr_coder_deinit(state);
+}
+
+void Decoder_Interface_Decode(void* state, const unsigned char* in, short* out, int bfi) {
+	uint8_t amr_len;
+	luat_audio_inter_amr_coder_decode(state, out, in, &amr_len);
+}
+
+void* D_IF_init(void)
+{
+	return luat_audio_inter_amr_coder_init(1,8);
+}
+
+void D_IF_exit(void* s)
+{
+	luat_audio_inter_amr_coder_deinit(s);
+}
+
+void D_IF_decode(void* s, const unsigned char* in, short* out, int bfi)
+{
+	uint8_t amr_len;
+	luat_audio_inter_amr_coder_decode(s, out, in, &amr_len);
+}
+#endif
+
+#if 0	//csdk使用内部amr降噪编码的，可以用内部amr解码器，代替软件amr解码库
+void* Decoder_Interface_init(void) {
+	luat_audio_inter_amr_init(0, 7);
+	return prv_audio_config.hardware_data;
+}
+
+void Decoder_Interface_exit(void* state) {
+	luat_audio_inter_amr_deinit();
+}
+
+void Decoder_Interface_Decode(void* state, const unsigned char* in, short* out, int bfi) {
+	uint8_t amr_len;
+	luat_audio_inter_amr_decode(out, in, &amr_len);
+}
+
+void* D_IF_init(void)
+{
+	luat_audio_inter_amr_init(1, 8);
+	return prv_audio_config.hardware_data;
+}
+
+void D_IF_exit(void* s)
+{
+	luat_audio_inter_amr_deinit();
+}
+
+void D_IF_decode(void* s, const unsigned char* in, short* out, int bfi)
+{
+	uint8_t amr_len;
+	luat_audio_inter_amr_decode(out, in, &amr_len);
+}
+#endif
+
 #else
 void luat_audio_inter_amr_init(uint8_t is_wb, uint8_t quality) {;}
 void luat_audio_inter_amr_deinit(void) {;}
