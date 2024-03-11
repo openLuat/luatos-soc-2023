@@ -206,6 +206,12 @@
                 "dft": false
             },
             {
+                "name": "@denoise_force",
+                "content": "降噪功能",
+                "rsize": 0,
+                "dft": false
+            },
+            {
                 "icon": "zmdi-puzzle-piece",
                 "name": "@718PV",
                 "content": "语音通话(即VoLTE功能)",
