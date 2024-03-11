@@ -467,4 +467,10 @@
 #define LUAT_USE_LCD_SERVICE 1
 #endif
 
+#ifdef LUAT_SUPPORT_AMR
+#if defined (FEATURE_AMR_CP_ENABLE) || defined (FEATURE_VEM_CP_ENABLE)
+#define LUAT_USE_INTER_AMR	1
+#endif
+#endif
+
 #endif

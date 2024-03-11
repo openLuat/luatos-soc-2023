@@ -56,6 +56,7 @@ typedef struct
 	uint8_t *byte_table;
 	uint8_t max_frame_type;
 	uint8_t wait_flag;
+	uint8_t is_init;
 }ec7xx_voice_eng_ctrl_t;
 static __ALIGNED(4) PS_FM_VOICE_NOINIT uint8_t voice_pcm[640];
 static __ALIGNED(4) PS_FM_VOICE_NOINIT uint8_t voice_amr[64];
@@ -750,18 +751,31 @@ static uint8_t luat_audio_inter_amr_wait(ec7xx_voice_eng_ctrl_t *eng)
     return 0;
 }
 
+#ifdef __LUATOS__
+void *luat_audio_inter_amr_coder_init(uint8_t is_wb, uint8_t quality)
+#else
 void luat_audio_inter_amr_init(uint8_t is_wb, uint8_t quality)
+#endif
 {
 	ec7xx_voice_eng_ctrl_t *eng = NULL;
 	if (!prv_audio_config.hardware_data)
 	{
 		eng = luat_heap_zalloc(sizeof(ec7xx_voice_eng_ctrl_t));
 		prv_audio_config.hardware_data = eng;
-
+		eng->is_init = 1;
 	}
 	else
 	{
 		eng = (ec7xx_voice_eng_ctrl_t *)prv_audio_config.hardware_data;
+		if (eng->is_init)
+		{
+			DBG("already init!");
+#ifdef __LUATOS__
+			return prv_audio_config.hardware_data;
+#else
+			return;
+#endif
+		}
 	}
 	HalVoiceCodecConfigReq  codecCfg = {0};
     is_wb = is_wb?HAL_VC_AMR_WB:HAL_VC_AMR_NB;
@@ -814,18 +828,36 @@ void luat_audio_inter_amr_init(uint8_t is_wb, uint8_t quality)
     {
     	DBG("failed!");
     }
+#ifdef __LUATOS__
+	return prv_audio_config.hardware_data;
+#endif
 }
 
+#ifdef __LUATOS__
+void luat_audio_inter_amr_coder_deinit(void *handle)
+#else
 void luat_audio_inter_amr_deinit(void)
+#endif
 {
+#ifdef __LUATOS__
+	if (handle != prv_audio_config.hardware_data) return;
+#endif
 	ec7xx_voice_eng_ctrl_t *eng = (ec7xx_voice_eng_ctrl_t *)prv_audio_config.hardware_data;
 	eng->wait_flag = HAL_VOICE_ENG_STOP_CNF;
 	halVoiceEngStopReq();
 	luat_audio_inter_amr_wait(eng);
+	eng->is_init = 0;
 }
 
+#ifdef __LUATOS__
+int luat_audio_inter_amr_coder_encode(void *handle, const uint16_t *pcm_buf, uint8_t *amr_buf, uint8_t *amr_len)
+#else
 int luat_audio_inter_amr_encode(const uint16_t *pcm_buf, uint8_t *amr_buf, uint8_t *amr_len)
+#endif
 {
+#ifdef __LUATOS__
+	if (handle != prv_audio_config.hardware_data) return -1;
+#endif
 	uint8_t out_len = 0;
 	ec7xx_voice_eng_ctrl_t *eng = (ec7xx_voice_eng_ctrl_t *)prv_audio_config.hardware_data;
 	eng->encode_req.pPcmData = (uint8_t *)pcm_buf;
@@ -874,8 +906,15 @@ int luat_audio_inter_amr_encode(const uint16_t *pcm_buf, uint8_t *amr_buf, uint8
 	return 0;
 }
 
+#ifdef __LUATOS__
+int luat_audio_inter_amr_coder_decode(void *handle, uint16_t *pcm_buf, const uint8_t *amr_buf, uint8_t *amr_len)
+#else
 int luat_audio_inter_amr_decode(uint16_t *pcm_buf, const uint8_t *amr_buf, uint8_t *amr_len)
+#endif
 {
+#ifdef __LUATOS__
+	if (handle != prv_audio_config.hardware_data) return -1;
+#endif
 	ec7xx_voice_eng_ctrl_t *eng = (ec7xx_voice_eng_ctrl_t *)prv_audio_config.hardware_data;
 	uint8_t q = (amr_buf[0] >> 3);
 	if (q > eng->max_frame_type)
