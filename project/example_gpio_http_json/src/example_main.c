@@ -274,11 +274,11 @@ static void luat_test_http_sync_task(void *param)
 	{
 		// 这里的逻辑是, 要么等60秒, 要么GPIO触发
 		rc = luat_rtos_event_recv(g_s_task_handle, 0, &event, NULL, 60*1000);
-		if (rc != 0 || event.id == TEST_GPIO_IRQ) {
+		if (rc == 0 && event.id == TEST_GPIO_IRQ) {
 			
 			root = cJSON_CreateObject();
 			cJSON_AddStringToObject(root, "serialNumber", imei);
-			cJSON_AddNumberToObject(root, "hasElectric", rc == 0 ? luat_gpio_get(key_fun_struct.pin) : event.param1);
+			cJSON_AddNumberToObject(root, "hasElectric", event.param1);
 
 			my_req.data = cJSON_Print(root);
 			my_req.len = strlen(my_req.data);
