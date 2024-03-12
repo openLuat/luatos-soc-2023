@@ -262,7 +262,6 @@
 //<-- custom
 //------------------------------------------------------------------------------
 
-#define LUAT_SUPPORT_AMR  1
 // 以下选项仅开发人员可修改, 一般用户切勿自行修改
 //-----------------------------
 // 内存配置, 默认200k, 128 ~ 324k 可调. 324k属于极限值, 不可使用音频, 并限制TLS连接的数量不超过2个
@@ -359,7 +358,9 @@
 #define LUAT_USE_WLAN_SCANONLY 1
 //目前没用到的宏，但是得写在这里
 #define LUAT_USE_I2S
-
+#ifdef LUAT_USE_MEDIA
+#define LUAT_SUPPORT_AMR  1
+#endif
 #ifndef LUAT_USE_HMETA
 #define LUAT_USE_HMETA 1
 #endif
