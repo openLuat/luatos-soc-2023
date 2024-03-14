@@ -87,6 +87,9 @@ static HANDLE g_s_amr_encoder_handler;
 static uint32_t g_s_record_time;
 static Buffer_Struct g_s_amr_rom_file;
 static uint8_t g_s_test_only_record = 0;
+//如果amr编解码用内部编码，来电时暂停双向对讲测试，会有冲突
+static uint8_t g_s_speech_not_volte_test;
+static uint8_t g_s_speech_test_while_call_in;
 
 #if (TEST_USE_ES8311 == 1)
 
@@ -555,7 +558,7 @@ static void demo_task(void *arg)
 			cur_play_buf = 0;
 			cur_decode_buf = 0;
 			next_decode_buf = 0;
-
+			g_s_speech_not_volte_test = 1;
 			g_s_test_only_record = 0;
 			run_cnt = 0;
 			speech_test = 1;
@@ -571,6 +574,10 @@ static void demo_task(void *arg)
 				luat_rtos_event_recv(g_s_task_handle, 0, &event, NULL, LUAT_WAIT_FOREVER);
 				if (event.id == VOLTE_EVENT_RECORD_VOICE_UPLOAD)
 				{
+					if (g_s_speech_test_while_call_in)
+					{
+						continue;
+					}
 					org_data = (uint8_t *)event.param1;
 					start_tick = luat_mcu_tick64_ms();
 					done_len = 0;
@@ -625,6 +632,7 @@ static void demo_task(void *arg)
 					}
 				}
 			}
+			g_s_speech_not_volte_test = 0;
 #else
 			luat_audio_record_and_play(MULTIMEDIA_ID, 8000, buff, 320 * RECORD_ONCE_LEN, 4);
 			while (speech_test)
@@ -712,6 +720,19 @@ static void mobile_event_cb(uint8_t event, uint8_t index, uint8_t status)
 	char number[64];
 	switch (event)
 	{
+	case LUAT_MOBILE_EVENT_PDP:
+		if (7 == index && (LUAT_MOBILE_PDP_DEACTIVED == status))
+		{
+			//如果amr编解码用内部编码，来电时暂停双向对讲测试，会有冲突，这里才能恢复
+			if (g_s_speech_not_volte_test && g_s_speech_test_while_call_in)
+			{
+				g_s_speech_test_while_call_in = 0;
+				luat_audio_inter_amr_init(1, 8);
+				LUAT_DEBUG_PRINT("speech test go on");
+			}
+
+		}
+		break;
 	case LUAT_MOBILE_EVENT_IMS_REGISTER_STATUS:
 		LUAT_DEBUG_PRINT("ims reg state %d", status);
 		break;
@@ -765,6 +786,13 @@ static void mobile_event_cb(uint8_t event, uint8_t index, uint8_t status)
 			break;
 		case LUAT_MOBILE_CC_PLAY:
 			LUAT_DEBUG_PRINT("play %d", index);
+			//如果amr编解码用内部编码，来电时暂停双向对讲测试，会有冲突
+			if (index && g_s_speech_not_volte_test && !g_s_speech_test_while_call_in)
+			{
+				g_s_speech_test_while_call_in = 1;
+				luat_audio_inter_amr_deinit();
+				LUAT_DEBUG_PRINT("speech test pause");
+			}
 			if (!index)	//不对本地铃声做控制，只对关闭通话做控制
 			{
 				luat_rtos_event_send(g_s_task_handle, VOLTE_EVENT_PLAY_TONE, index, 0, 0, 0);
