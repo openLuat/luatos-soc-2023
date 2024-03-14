@@ -413,7 +413,7 @@ int luat_fs_init(void) {
 
 #ifdef __LUATOS__
     #define LUADB_ADDR ((uint32_t)LUA_SCRIPT_ADDR | AP_FLASH_XIP_ADDR)
-    luat_luadb_act_size = LUA_SCRIPT_ADDR - LUA_SCRIPT_OTA_ADDR;
+    luat_luadb_act_size = LUA_SCRIPT_OTA_ADDR - LUA_SCRIPT_ADDR;
     //DBG("luadb tmp addr %p", LUADB_ADDR);
 	luat_fs_conf_t conf2 = {
 		.busname = (char*)(const char*)LUADB_ADDR,
