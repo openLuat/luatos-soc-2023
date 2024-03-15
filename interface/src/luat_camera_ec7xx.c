@@ -403,6 +403,7 @@ static void luat_camera_task(void *param)
 		case LUAT_CAMERA_EVENT_FRAME_JPEG_ENCODE:
 			if (luat_camera_app.raw_mode)
 			{
+				luat_camera_app.capture_stage = 0;
 				luat_camera_app.raw_mode = 0;
 		        msg.handler = l_camera_handler;
 		        msg.ptr = NULL;
