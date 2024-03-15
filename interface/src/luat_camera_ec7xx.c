@@ -240,7 +240,14 @@ int luat_camera_setup(int id, luat_spi_camera_t *conf, void * callback, void *pa
 	luat_camera_app.config = *conf;
 	luat_camera_app.double_buffer_mode = ((conf->sensor_width * conf->sensor_height) <= 80000 );
 	luat_camera_app.p_cache[0] = luat_heap_opt_malloc(LUAT_HEAP_PSRAM, luat_camera_app.config.sensor_width * luat_camera_app.config.sensor_height * 2);
-	luat_camera_app.p_cache[1] = luat_heap_opt_malloc(LUAT_HEAP_PSRAM, luat_camera_app.config.sensor_width * luat_camera_app.config.sensor_height * 2);
+	if (luat_camera_app.double_buffer_mode)
+	{
+		luat_camera_app.p_cache[1] = luat_heap_opt_malloc(LUAT_HEAP_PSRAM, luat_camera_app.config.sensor_width * luat_camera_app.config.sensor_height * 2);
+	}
+	else
+	{
+		luat_camera_app.p_cache[1] = luat_heap_opt_malloc(LUAT_HEAP_PSRAM, luat_camera_app.config.sensor_width * luat_camera_app.config.sensor_height / 2);
+	}
 #endif
 	return id;
 }
@@ -493,9 +500,13 @@ static void luat_camera_task(void *param)
 				if (stack)
 				{
 					luat_camera_image_decode_init(0, stack, 250 * 1024, 10);
+					luat_camera_app.scan_pause = 0;
+				}
+				else
+				{
+					DBG("no mem stack, decode init failed");
 				}
 			}
-			luat_camera_app.scan_pause = 0;
 			break;
 		case LUAT_CAMERA_EVENT_STOP:
 			if (stack)
