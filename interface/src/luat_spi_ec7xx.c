@@ -91,6 +91,17 @@ int luat_spi_change_speed(int spi_id, uint32_t speed)
 	return 0;
 }
 
+int luat_spi_get_mode(int spi_id) {
+    if (!spi_exist(spi_id))
+        return -1;
+    return g_s_luat_spi_mode[spi_id];
+}
+
+int luat_spi_set_mode(int spi_id, uint8_t mode) {
+    if (!spi_exist(spi_id))
+        return -1;
+    g_s_luat_spi_mode[spi_id] = mode;
+}
 
 int luat_spi_setup(luat_spi_t* spi) {
     if (!spi_exist(spi->id))
