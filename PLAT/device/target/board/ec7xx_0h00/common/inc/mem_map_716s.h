@@ -490,7 +490,7 @@ flash xip address(from ap/cp view): 0x00800000---0x00a00000
 0x00002000          |---------------------------------|
                     |      fuse mirror 4KB            |
 0x00003000          |---------------------------------|
-                    |      BL 72KB                    |
+                    |      BL 68KB                    |
 0x00015000          |---------------------------------|
                     |      rel (factory) 20KB         |----compress
 #if (defined MID_FEATURE_MODE) || (defined GCF_FEATURE_MODE)
@@ -550,7 +550,7 @@ flash xip address(from ap/cp view): 0x00800000---0x00a00000
 
 //bl addr and size
 #define BOOTLOADER_FLASH_LOAD_ADDR              (0x00803000)
-#define BOOTLOADER_FLASH_LOAD_SIZE              (0x12000)//72kB, real region size, tool will check when zip TODO:ZIP
+#define BOOTLOADER_FLASH_LOAD_SIZE              (0x11000)//68kB, real region size, tool will check when zip TODO:ZIP
 #define BOOTLOADER_FLASH_LOAD_UNZIP_SIZE        (0x18000)//96KB ,for ld
 
 //ap image addr and size
