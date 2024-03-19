@@ -21,6 +21,7 @@
 
 #include "luat_mobile.h"
 #include "ps_lib_api.h"
+#include "pscfgnvm.h"
 #include "common_api.h"
 #include "cmimm.h"
 #include "cmidev.h"
@@ -896,6 +897,7 @@ int luat_mobile_config(uint8_t item, uint32_t value)
 	EcCfgSetParamsReq req = {0};
 	switch(item)
 	{
+
 	case MOBILE_CONF_RESELTOWEAKNCELL:
 		req.reselToWeakNcellOpt = value;
 		req.reselToWeakNcellOptPresent = 1;
@@ -935,6 +937,9 @@ int luat_mobile_config(uint8_t item, uint32_t value)
 		req.fakeCellBarTimerS = value;
 		req.enableFakeCellOptPresent = 1;
 		break;
+	case MOBILE_CONF_RESET_TO_FACTORY:
+		PsCfgResetAllUeConfig();
+		return 0;
 	default:
 		return -1;
 	}
