@@ -8,7 +8,7 @@
 #ifndef CHIP_EC716
 #define GPIO_LED_PIN HAL_GPIO_27
 #else
-#define GPIO_LED_PIN HAL_GPIO_20
+#define GPIO_LED_PIN HAL_GPIO_14
 #endif
 luat_rtos_timer_t pwrkey_timerHand;
 /********************************************GPIO 点亮led GPIO27 start*******************************************/
