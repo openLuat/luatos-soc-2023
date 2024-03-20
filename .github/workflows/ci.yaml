@@ -15,9 +15,7 @@ jobs:
           - example
         csdk_chip:
           - ec718p
-          - ec718s
           - ec716s
-          - ec718e
           - ec718pv
     steps:
       - name: 克隆 LuatOS 代码库
@@ -123,9 +121,7 @@ jobs:
           - example_otp
         csdk_chip:
           - ec718p
-          - ec718s
           - ec716s
-          - ec718e
           - ec718pv
     steps:
       - name: 克隆 LuatOS 代码库

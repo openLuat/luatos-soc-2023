@@ -352,15 +352,14 @@ static void demo_task(void *arg)
 	luat_audio_play_global_init_with_task_priority(audio_event_cb, audio_data_cb, luat_audio_play_file_default_fun, luat_audio_play_tts_default_fun, NULL, 50);
 	tts_config();
 #endif
-#if (TEST_USE_ES8311==1)
-	luat_i2c_setup(I2C_ID0, 1);
-	luat_i2c_setup(I2C_ID1, 1);
-#endif
+
 	luat_i2s_setup(i2s_conf);
 	
 	luat_audio_set_bus_type(MULTIMEDIA_ID,LUAT_MULTIMEDIA_AUDIO_BUS_I2S);	//设置音频总线类型
 	luat_audio_setup_codec(MULTIMEDIA_ID, codec_conf);					//设置音频codec
-
+#if (TEST_USE_ES8311==1)
+	luat_i2c_setup(I2C_ID0, 1);
+	luat_i2c_setup(I2C_ID1, 1);
 	uint8_t reg = 0xfd;
 	luat_gpio_set(CODEC_PWR_PIN, 1);
 	luat_rtos_task_sleep(10);
@@ -378,7 +377,7 @@ static void demo_task(void *arg)
 	{
 		LUAT_DEBUG_PRINT("NO ES8311!!!");
 	}
-
+#endif
 #ifdef PA_NO_CTRL
 	luat_audio_config_pa(MULTIMEDIA_ID, 0xff, PA_ON_LEVEL, PWR_SLEEP_DELAY, PA_DELAY);//配置音频pa
 #else
