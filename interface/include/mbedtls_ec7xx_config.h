@@ -3317,7 +3317,7 @@ extern uint32_t luat_get_utc(uint32_t *tamp);
  *
  * This module adds support for SHA-384 and SHA-512.
  */
-// #define MBEDTLS_SHA512_C
+#define MBEDTLS_SHA512_C
 
 /**
  * \def MBEDTLS_SSL_CACHE_C
@@ -3949,6 +3949,7 @@ extern uint32_t luat_get_utc(uint32_t *tamp);
 
 /* \} name SECTION: Customisation configuration options */
 
+#ifndef LUAT_SSL_USE_ECP
 #if defined(TYPE_EC716S) || defined(TYPE_EC718S)
 
 // 禁用全部椭圆算法, 节省10k
@@ -3970,11 +3971,8 @@ extern uint32_t luat_get_utc(uint32_t *tamp);
 #undef MBEDTLS_ECP_DP_BP512R1_ENABLED
 #undef MBEDTLS_ECP_DP_CURVE25519_ENABLED
 #undef MBEDTLS_ECP_DP_CURVE448_ENABLED
-
+#undef MBEDTLS_SHA512_C
 #endif
-
-#ifdef __LUATOS__
-#define MBEDTLS_SHA512_C
 #endif
 
 /* Target and application specific configurations
