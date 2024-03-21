@@ -2,6 +2,7 @@
 #include "platform_define.h"
 #include "luat_uart.h"
 #include "luat_mcu.h"
+#include "luat_rtos.h"
 #include "driver_gpio.h"
 #include "driver_uart.h"
 #include "cms_def.h"
@@ -14,6 +15,7 @@ static luat_uart_ctrl_param_t uart_cb[MAX_DEVICE_COUNT]={0};
 static Buffer_Struct g_s_vuart_rx_buffer;
 static uint32_t g_s_vuart_rx_base_len;
 static uint8_t g_s_vuart_tx_lock;
+static luat_rtos_mutex_t g_s_vuart_rx_mutex;
 typedef struct
 {
 	timer_t *rs485_timer;
@@ -177,6 +179,9 @@ int luat_uart_setup(luat_uart_t* uart) {
 	else if (buffsize > 16*1024)
 		buffsize = 16*1024;
     if (uart->id >= MAX_DEVICE_COUNT){
+		if (!g_s_vuart_rx_mutex){
+			g_s_vuart_rx_mutex = luat_mutex_create();
+		}
 		OS_ReInitBuffer(&g_s_vuart_rx_buffer, buffsize);
 		g_s_vuart_rx_base_len = g_s_vuart_rx_buffer.MaxLen;
         return 0;
@@ -326,27 +331,29 @@ int luat_uart_read(int uartid, void* buffer, size_t len) {
     int rcount = 0;
     if (luat_uart_exist(uartid)) {
 
-         if (uartid >= MAX_DEVICE_COUNT){
-         	if (!buffer)
-         	{
-         		return g_s_vuart_rx_buffer.Pos;
-         	}
-             rcount = (g_s_vuart_rx_buffer.Pos > len)?len:g_s_vuart_rx_buffer.Pos;
-             memcpy(buffer, g_s_vuart_rx_buffer.Data, rcount);
-             OS_BufferRemove(&g_s_vuart_rx_buffer, rcount);
-             if (!g_s_vuart_rx_buffer.Pos && g_s_vuart_rx_buffer.MaxLen > g_s_vuart_rx_base_len)
-             {
-             	OS_ReInitBuffer(&g_s_vuart_rx_buffer, g_s_vuart_rx_base_len);
-             }
-         }
-         else
-         {
-        	rcount = Uart_RxBufferRead(uartid, (uint8_t *)buffer, len);
-            if (rcount < len)
-        	{
-        		g_s_serials[uartid].luatos_rx_msg_cnt = 0;
-        	}
-         }
+    	if (uartid >= MAX_DEVICE_COUNT){
+			if (!buffer)
+			{
+				return g_s_vuart_rx_buffer.Pos;
+			}
+			luat_mutex_lock(g_s_vuart_rx_mutex);
+			rcount = (g_s_vuart_rx_buffer.Pos > len)?len:g_s_vuart_rx_buffer.Pos;
+			memcpy(buffer, g_s_vuart_rx_buffer.Data, rcount);
+			OS_BufferRemove(&g_s_vuart_rx_buffer, rcount);
+			if (!g_s_vuart_rx_buffer.Pos && g_s_vuart_rx_buffer.MaxLen > g_s_vuart_rx_base_len)
+			{
+				OS_ReInitBuffer(&g_s_vuart_rx_buffer, g_s_vuart_rx_base_len);
+			}
+			luat_mutex_unlock(g_s_vuart_rx_mutex);
+		}
+		else
+		{
+			rcount = Uart_RxBufferRead(uartid, (uint8_t *)buffer, len);
+			if (rcount < len)
+			{
+				g_s_serials[uartid].luatos_rx_msg_cnt = 0;
+			}
+		}
     }
     return rcount;
 }
@@ -382,7 +389,9 @@ static void luat_usb_recv_cb(uint8_t channel, uint8_t *input, uint32_t len){
 			DBG("usb serial not init,%d,%x,%d!", channel, input, len);
 			return;
 		}
+		luat_mutex_lock(g_s_vuart_rx_mutex);
         OS_BufferWrite(&g_s_vuart_rx_buffer, input, len);
+        luat_mutex_unlock(g_s_vuart_rx_mutex);
 #ifdef __LUATOS__
         rtos_msg_t msg;
         msg.handler = l_uart_handler;
