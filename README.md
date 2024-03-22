@@ -45,13 +45,19 @@ CSDK for ABCDEGF, 适用于所有基于ABCDEGF的合宙模组, 包括衍生型�
    **注意：如果网络无法下载github等地址，采用下面的本地地址下载，后续更新xmake也会同步更新下方地址！！！**
 
    本地下载地址: https://pan.air32.cn/s/DJTr?path=%2F%E5%B8%B8%E7%94%A8%E5%B7%A5%E5%85%B7
-   
+
    linux和macos安装请自行参考,但并不建议,因为macos无法打包,并且Luatools只支持windows
    安装教程: https://xmake.io/#/guide/installation
 
 2. 如果编译example的话在本代码库的根目录执行`build.bat example`进行编译，**注意：默认编译ec718p，如需编译*ec718s*或 *ec716s*需要自行修改build.bat中的*CHIP_TARGET*变量** 其他设置参考 `build.bat`中的注释说明
 
-4. 生成的binpkg位于`out`目录, 日志数据库文件位于`PLAT`目录
+   **不建议使用linux编译，Luatools不支持linux，下载调试依然需要windows !!!**
+
+   linux下编译参考 windows的build.bat脚本, 先使用环境变量`export PROJECT_NAME=example`设置项目，其他的使用 `xmake f --chip_target=xxx --lspd_mode=xxx --denoise_force=xxx` 进行统一配置，最后执行`xmake`编译即可
+
+   更多配置/编译自行参考 https://xmake.io 
+
+3. 生成的binpkg位于`out`目录, 日志数据库文件位于`PLAT`目录
 
 ## 加入入口函数
 
