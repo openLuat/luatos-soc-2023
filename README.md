@@ -53,7 +53,7 @@ CSDK for ABCDEGF, 适用于所有基于ABCDEGF的合宙模组, 包括衍生型�
 
    **不建议使用linux编译，Luatools不支持linux，下载调试依然需要windows !!!**
 
-   linux下编译参考 先使用环境变量`export PROJECT_NAME=example`设置项目，其他的使用 `xmake f --chip_target=xxx --lspd_mode=xxx --denoise_force=xxx` 进行统一配置，最后执行`xmake`编译即可
+   linux下编译参考 windows的build.bat脚本, 先使用环境变量`export PROJECT_NAME=example`设置项目，其他的使用 `xmake f --chip_target=xxx --lspd_mode=xxx --denoise_force=xxx` 进行统一配置，最后执行`xmake`编译即可
 
    更多配置/编译自行参考 https://xmake.io 
 
