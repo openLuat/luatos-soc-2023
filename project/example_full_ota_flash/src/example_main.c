@@ -223,12 +223,13 @@ static void luat_test_task(void *param)
         	OS_BufferRemove(&uart_data_buffer, len);
         	luat_mutex_unlock(fota_mutex);
         	luat_fota_write(temp, len);
-        	luat_rtos_task_sleep(10);
     		if (!luat_fota_done())
     		{
     			luat_meminfo_sys(&all, &used, &max_used);
     			LUAT_DEBUG_PRINT("meminfo %d,%d,%d", all, used, max_used);
     			LUAT_DEBUG_PRINT("OTA包写入完成，重启模块!");
+    			luat_rtos_task_sleep(10);
+    			luat_os_reboot(0);
     		}
     	}
     	else
@@ -249,7 +250,7 @@ static void luat_test_task(void *param)
 	luat_debug_set_fault_mode(LUAT_DEBUG_FAULT_HANG);
 	size_t all,now_free_block,min_free_block,done_len;
 	luat_http_ctrl_t *http = luat_http_client_create(luatos_http_cb, luat_rtos_get_current_handle(), -1);
-	luat_fota_init(0, 0, NULL, NULL, 0);
+	luat_fota_init(FULL_OTA_SAVE_ADDR,0,&sfud_spi_dev,NULL,0);
 	//自建服务器，就随意命名了
 #ifdef OTA_BY_HTTP
 	char remote_domain[] = "http://www.air32.cn/update.bin";
