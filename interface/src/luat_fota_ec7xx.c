@@ -147,8 +147,13 @@ static void luat_fota_finish(void)
 	Head.DataLen = g_s_fota.p_fota_file_head->CommonDataLen;
 	memcpy(Head.CommonMD5, g_s_fota.p_fota_file_head->CommonMD5, 16);
 	Head.CRC32 = CRC32_Cal(g_s_fota.crc32_table, (uint8_t *)&Head.Param1, sizeof(Head) - 8, 0xffffffff);
-	FLASH_eraseSafe(__SOC_OTA_INFO_DATA_SAVE_ADDRESS__, __FLASH_SECTOR_SIZE__);
-	FLASH_writeSafe((uint8_t *)&Head, __SOC_OTA_INFO_DATA_SAVE_ADDRESS__, sizeof(Head));
+
+	if (FULL_OTA_SAVE_ADDR)
+	{
+		FLASH_eraseSafe(__SOC_OTA_INFO_DATA_SAVE_ADDRESS__, __FLASH_SECTOR_SIZE__);
+		FLASH_writeSafe((uint8_t *)&Head, __SOC_OTA_INFO_DATA_SAVE_ADDRESS__, sizeof(Head));
+	}
+
 	g_s_fota.ota_state = OTA_STATE_OK;
 	luat_heap_free(g_s_fota.crc32_table);
 	g_s_fota.crc32_table = NULL;
@@ -311,9 +316,9 @@ static void luat_fota_cal_spi_flash_data_md5(unsigned char output[16])
 
 int luat_fota_init(uint32_t start_address, uint32_t len, luat_spi_device_t* spi_device, const char *path, uint32_t pathlen)
 {
-	if (start_address && spi_device)
+	if ((start_address >= 0xe0000000) && spi_device)
 	{
-		g_s_fota.start_address = (start_address >= 0xe0000000)?start_address:0;
+		g_s_fota.start_address = start_address;
 		g_s_fota.spi_id = spi_device->bus_id;
 		g_s_fota.cs_pin = spi_device->spi_config.cs;
 
@@ -354,8 +359,10 @@ int luat_fota_init(uint32_t start_address, uint32_t len, luat_spi_device_t* spi_
 	}
 	g_s_fota.ota_state = OTA_STATE_IDLE;
 	g_s_fota.ota_type = CORE_OTA_MODE_FULL;
-
-	FLASH_eraseSafe(__SOC_OTA_INFO_DATA_SAVE_ADDRESS__, __FLASH_SECTOR_SIZE__);
+	if (FULL_OTA_SAVE_ADDR)
+	{
+		FLASH_eraseSafe(__SOC_OTA_INFO_DATA_SAVE_ADDRESS__, __FLASH_SECTOR_SIZE__);
+	}
 	OS_ReInitBuffer(&g_s_fota.data_buffer, __FLASH_SECTOR_SIZE__ * 4);
 	return 0;
 }
@@ -585,7 +592,10 @@ int luat_fota_end(uint8_t is_ok)
 			g_s_fota.p_fota_file_head = NULL;
 		}
 		OS_DeInitBuffer(&g_s_fota.data_buffer);
-		FLASH_eraseSafe(__SOC_OTA_INFO_DATA_SAVE_ADDRESS__, __FLASH_SECTOR_SIZE__);
+		if (FULL_OTA_SAVE_ADDR)
+		{
+			FLASH_eraseSafe(__SOC_OTA_INFO_DATA_SAVE_ADDRESS__, __FLASH_SECTOR_SIZE__);
+		}
 		LLOGE("fota failed");
 		return -1;
 	}
