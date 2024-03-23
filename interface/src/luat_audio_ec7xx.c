@@ -363,12 +363,7 @@ uint8_t luat_audio_play_is_finish(uint8_t multimedia_id)
 
 int luat_audio_play_fast_stop(uint8_t multimedia_id)
 {
-	if (audio_play_fast_stop(prv_audio_config.codec_conf.i2s_id))
-	{
-		luat_audio_play_blank(multimedia_id, 1);
-		return -1;
-	}
-	return 0;
+	return audio_play_fast_stop(prv_audio_config.codec_conf.i2s_id);
 }
 
 int luat_audio_play_clear_stop_flag(uint8_t multimedia_id)
@@ -469,12 +464,7 @@ int luat_audio_play_tts_set_param(uint8_t multimedia_id, uint32_t param_id, uint
 
 int luat_audio_play_stop(uint8_t multimedia_id)
 {
-	if (audio_play_stop(prv_audio_config.codec_conf.i2s_id))
-	{
-		luat_audio_play_blank(multimedia_id, 1);
-		return -1;
-	}
-	return 0;
+	return audio_play_stop(prv_audio_config.codec_conf.i2s_id);
 }
 
 void luat_audio_play_debug_onoff(uint8_t multimedia_id, uint8_t onoff)
