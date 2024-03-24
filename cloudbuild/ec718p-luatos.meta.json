@@ -540,6 +540,13 @@
                         "fsize": 1024,
                         "dft": false
                     },
+					{
+                        "name": "LUAT_HEAP_SIZE_300K",
+                        "content": "Lua内存设置到300k字节, 需要限制TLS连接的数量在2个以内, 同时尽量使用zbuff来代替string",
+                        "rsize": 0,
+                        "fsize": 1024,
+                        "dft": false
+                    },
                     {
                         "name": "LUAT_USE_PSRAM_AS_LUAHEAP",
                         "content": "(测试阶段)使用PSRAM作为lua内存,1.25m字节. 勾选后,这个固件就不能使用休眠功能,连轻休眠都不支持,不支持任何低功耗模式,运行速度也下降",
