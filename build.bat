@@ -50,5 +50,6 @@ if "%3"=="-v" (
 
 :end
 echo end
+pause
 
 
