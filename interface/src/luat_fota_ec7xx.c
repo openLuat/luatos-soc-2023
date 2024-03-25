@@ -27,6 +27,7 @@
 #include "luat_fota.h"
 #include "common_api.h"
 #include "luat_rtos.h"
+#include "luat_gpio.h"
 #include "platform_define.h"
 
 #ifdef __LUATOS__
@@ -60,7 +61,8 @@ extern int win32_md5_finish_ret(win32_md5_context *ctx,
 #include "flash_rt.h"
 
 #ifdef __LUATOS__
-#ifndef FULL_OTA_SAVE_ADDR
+#if (FULL_OTA_SAVE_ADDR < 0xe0000000)
+#undef FULL_OTA_SAVE_ADDR
 #define FULL_OTA_SAVE_ADDR	LUA_SCRIPT_OTA_ADDR
 #endif
 #endif
@@ -236,7 +238,6 @@ static int luat_fota_erase_spi_flash(uint32_t address)
 
 static int luat_fota_write_spi_flash(uint32_t address, uint8_t *data, uint32_t len)
 {
-	int i;
 	uint64_t start_tick;
 	uint32_t finish_len = 0;
 	uint32_t write_len;
