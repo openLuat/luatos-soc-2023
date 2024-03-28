@@ -400,6 +400,10 @@
 
 #endif // LUAT_USE_TTS
 
+// 当前不支持软件UART, 自动禁用之
+#ifdef LUAT_USE_SOFT_UART
+#undef LUAT_USE_SOFT_UART
+#endif
 
 // #ifdef LUAT_USE_TTS_ONCHIP
 // #undef LUAT_SCRIPT_SIZE
