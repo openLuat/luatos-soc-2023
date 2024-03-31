@@ -91,6 +91,14 @@ static uint8_t g_s_test_only_record = 0;
 static uint8_t g_s_speech_not_volte_test;
 static uint8_t g_s_speech_test_while_call_in;
 
+typedef struct
+{
+	uint8_t data[61 * RECORD_ONCE_LEN];
+	uint16_t len;
+}amr_data_backup_struct;
+
+amr_data_backup_struct amr_play_data_backup[4];
+
 #if (TEST_USE_ES8311 == 1)
 
 static const luat_i2s_conf_t luat_i2s_conf_es8311 ={
@@ -332,10 +340,13 @@ static void demo_task(void *arg)
 	size_t total, alloc, peak;
 	uint64_t start_tick, end_tick;
 	uint32_t i, done_len, run_cnt, speech_test;
-	volatile uint32_t cur_play_buf, cur_decode_buf, next_decode_buf;
+	volatile uint32_t last_play_buf, cur_play_buf, cur_decode_buf, next_decode_buf;
 	uint8_t *org_data, *pcm_data;
 	uint8_t out_len;
-
+#if defined (FEATURE_AMR_CP_ENABLE) || defined (FEATURE_VEM_CP_ENABLE)
+	uint8_t dummy_data[640];
+	uint16_t dummy_decode_pos, dummy_encode_len;
+#endif
 	HANDLE amr_encoder_handler;
 	HANDLE amr_decoder_handler;
 #ifdef LOW_POWER_TEST
@@ -580,15 +591,30 @@ static void demo_task(void *arg)
 					org_data = (uint8_t *)event.param1;
 					start_tick = luat_mcu_tick64_ms();
 					done_len = 0;
+					last_play_buf = cur_play_buf;
 					cur_play_buf = (cur_play_buf + 1) & 3;
+					dummy_decode_pos = 0;
+					LUAT_DEBUG_PRINT("load play buf %d data len %d", last_play_buf, amr_play_data_backup[last_play_buf].len);
 					for(i = 0; i < (RECORD_ONCE_LEN); i++)
 					{
+						//用录音时间段内保存的放音数据作为回声消除的数据源
+						if (amr_play_data_backup[last_play_buf].len)
+						{
+							luat_audio_inter_amr_decode((uint16_t *)dummy_data, &amr_play_data_backup[last_play_buf].data[dummy_decode_pos], &out_len);
+							dummy_decode_pos += out_len;
+						}
 						luat_audio_inter_amr_encode((uint16_t *)&org_data[i * 640], &amr_buff[done_len], &out_len);
 						done_len += out_len;
 					}
-
+					amr_play_data_backup[last_play_buf].len = 0;
+					dummy_encode_len = done_len;
 					cur_decode_buf = (cur_play_buf + 1) & 3;
 					pcm_data = &buff[cur_decode_buf * 640 * (RECORD_ONCE_LEN)];
+
+					memcpy(amr_play_data_backup[cur_decode_buf].data, amr_buff, dummy_encode_len);
+					amr_play_data_backup[cur_decode_buf].len = dummy_encode_len;
+					LUAT_DEBUG_PRINT("save play buf %d data len %d", cur_decode_buf, amr_play_data_backup[cur_decode_buf].len);
+
 					done_len = 0;
 					for(i = 0; i < (RECORD_ONCE_LEN); i++)
 					{
